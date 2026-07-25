@@ -1,0 +1,16 @@
+node_modules
+vendor
+public/build
+Phermex
+.git
+.gitignore
+.env
+.env.*
+storage/*.key
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+phpunit.xml
+README.md
+Mtai.docx

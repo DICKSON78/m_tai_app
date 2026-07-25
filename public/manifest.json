@@ -1,0 +1,96 @@
+{
+    "name": "M-TAI - Smart Business Platform",
+    "short_name": "M-TAI",
+    "description": "Buy, sell, and manage your business from your phone. Shop from local businesses, track orders, and pay with M-Pesa.",
+    "start_url": "/customer/shops",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#ffffff",
+    "theme_color": "#00D4AA",
+    "lang": "sw",
+    "categories": ["shopping", "business", "finance"],
+    "icons": [
+        {
+            "src": "/icons/icon-72x72.png",
+            "sizes": "72x72",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/icon-96x96.png",
+            "sizes": "96x96",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/icon-128x128.png",
+            "sizes": "128x128",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/icon-144x144.png",
+            "sizes": "144x144",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/icon-152x152.png",
+            "sizes": "152x152",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-384x384.png",
+            "sizes": "384x384",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/icons/screenshot-wide.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/icons/screenshot-narrow.png",
+            "sizes": "720x1280",
+            "type": "image/png",
+            "form_factor": "narrow"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Shop",
+            "short_name": "Shop",
+            "url": "/customer/shops",
+            "description": "Browse local shops"
+        },
+        {
+            "name": "My Orders",
+            "short_name": "Orders",
+            "url": "/customer/orders",
+            "description": "View your order history"
+        },
+        {
+            "name": "My Cart",
+            "short_name": "Cart",
+            "url": "/customer/cart",
+            "description": "View your shopping cart"
+        },
+        {
+            "name": "Wishlist",
+            "short_name": "Wishlist",
+            "url": "/customer/wishlist",
+            "description": "View your saved items"
+        }
+    ]
+}
