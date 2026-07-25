@@ -17,7 +17,13 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev \
     freetype-dev \
     oniguruma-dev \
-    bash
+    bash \
+    curl \
+    ca-certificates
+
+# Install Cloud SQL Auth Proxy
+RUN curl -fsSL -o /cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.0/cloud-sql-proxy.linux.amd64 \
+    && chmod +x /cloud-sql-proxy
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
