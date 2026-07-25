@@ -6,22 +6,22 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 RUN npm run build
 
-# Stage 2: PHP 8.3 FPM + Nginx
-FROM php:8.3-fpm-alpine
+# Stage 2: PHP 8.3 FPM + Nginx (Debian-based for glibc compatibility with Cloud SQL Proxy)
+FROM php:8.3-fpm
 
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
-    icu-dev \
+    libicu-dev \
     libzip-dev \
     libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    oniguruma-dev \
-    bash \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libonig-dev \
+    unzip \
     curl \
-    ca-certificates
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Cloud SQL Auth Proxy
+# Install Cloud SQL Auth Proxy (glibc-compatible)
 RUN curl -fsSL -o /cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.0/cloud-sql-proxy.linux.amd64 \
     && chmod +x /cloud-sql-proxy
 
@@ -38,11 +38,10 @@ COPY --from=frontend /app/public/build /var/www/html/public/build
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
 
-# Generate APP_KEY if .env doesn't have one
 RUN php artisan key:generate --force 2>/dev/null || true
 
-# Replace nginx config
-RUN rm -f /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+# Remove default nginx configs, use our own
+RUN rm -f /etc/nginx/sites-enabled/default
 COPY docker/nginx-prod.conf /etc/nginx/nginx.conf
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
