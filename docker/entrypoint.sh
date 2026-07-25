@@ -35,7 +35,7 @@ php artisan view:clear 2>/dev/null || true
 
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "Running database migrations..."
-    php artisan migrate --force || true
+    php artisan migrate:fresh --force || true
     echo "Seeding database..."
     php artisan db:seed --force || true
 fi
