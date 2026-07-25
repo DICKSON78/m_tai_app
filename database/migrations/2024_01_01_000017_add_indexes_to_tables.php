@@ -24,10 +24,14 @@ return new class extends Migration
         foreach ($indexes as $table => $columns) {
             if (Schema::hasTable($table)) {
                 foreach ($columns as $column) {
-                    if (!Schema::hasIndex($table, $column)) {
-                        Schema::table($table, function (Blueprint $tableBlueprint) use ($column) {
-                            $tableBlueprint->index($column);
-                        });
+                    try {
+                        if (!Schema::hasIndex($table, [$column])) {
+                            Schema::table($table, function (Blueprint $tableBlueprint) use ($column) {
+                                $tableBlueprint->index($column);
+                            });
+                        }
+                    } catch (\Exception $e) {
+                        // Index already exists or column doesn't exist, skip
                     }
                 }
             }
@@ -53,7 +57,7 @@ return new class extends Migration
             if (Schema::hasTable($table)) {
                 foreach ($columns as $column) {
                     $indexName = "{$table}_{$column}_index";
-                    if (Schema::hasIndex($table, $column)) {
+                    if (Schema::hasIndex($table, [$column])) {
                         Schema::table($table, function (Blueprint $tableBlueprint) use ($indexName) {
                             $tableBlueprint->dropIndex($indexName);
                         });
