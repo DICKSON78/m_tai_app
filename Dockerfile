@@ -2,7 +2,7 @@
 FROM node:20-alpine AS frontend
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 COPY . .
 RUN npm run build
 
@@ -19,7 +19,6 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev \
     freetype-dev \
     oniguruma-dev \
-    sqlite-dev \
     bash
 
 # Install PHP extensions required by Laravel
@@ -27,7 +26,6 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         pdo \
         pdo_mysql \
-        pdo_sqlite \
         mbstring \
         zip \
         gd \
@@ -49,14 +47,17 @@ COPY --from=frontend /app/public/build /var/www/html/public/build
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
 
-# Set Nginx configuration template and entrypoint script
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf.template
+# Set Nginx configuration and entrypoint
+COPY docker/nginx.conf /etc/nginx/nginx.conf.template
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# Remove default nginx conf.d files that conflict
+RUN rm -f /etc/nginx/conf.d/default.conf
+
 # Set directory permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 8080
 
