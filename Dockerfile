@@ -32,6 +32,9 @@ COPY --from=frontend /app/public/build /var/www/html/public/build
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
 
+# Generate APP_KEY if .env doesn't have one
+RUN php artisan key:generate --force 2>/dev/null || true
+
 # Replace nginx config
 RUN rm -f /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker/nginx-prod.conf /etc/nginx/nginx.conf
