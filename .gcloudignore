@@ -9,10 +9,6 @@
 .zed
 node_modules
 vendor
-Dockerfile
-docker/
-cloudbuild.yaml
-app.yaml
 Phermex/
 Mtai.docx
 *.log
