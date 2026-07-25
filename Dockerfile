@@ -6,18 +6,19 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 RUN npm run build
 
-# Stage 2: PHP 8.3 FPM + Nginx (Alpine - no need for glibc since no bundled proxy)
-FROM php:8.3-fpm-alpine
+# Stage 2: PHP 8.3 FPM + Nginx (Debian, no bundled proxy needed)
+FROM php:8.3-fpm
 
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
+    libicu-dev \
     libzip-dev \
     libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    oniguruma-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libonig-dev \
     unzip \
-    curl
+    && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
