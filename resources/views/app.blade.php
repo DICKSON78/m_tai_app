@@ -7,6 +7,11 @@
 
     <title>M-TAI - Smart Business Platform</title>
 
+    <!-- Poppins Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#00D4AA">
     <meta name="apple-mobile-web-app-capable" content="yes">
