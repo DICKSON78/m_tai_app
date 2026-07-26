@@ -19,7 +19,7 @@
         }
     </script>
     <style>
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        body { font-family: 'Poppins', system-ui, sans-serif; }
     </style>
 </head>
 <body class="h-full bg-gray-50">

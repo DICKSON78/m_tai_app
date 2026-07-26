@@ -25,7 +25,7 @@ export default function ReceiptPage() {
         const printWindow = window.open('', '_blank');
         const content = document.getElementById('receipt-content');
         if (printWindow && content) {
-            printWindow.document.write(`<html><head><title>Receipt</title><style>body{font-family:sans-serif;padding:20px;}table{width:100%;border-collapse:collapse;}td,th{padding:8px;border-bottom:1px solid #eee;text-align:left;}</style></head><body>${content.innerHTML}</body></html>`);
+            printWindow.document.write(`<html><head><title>Receipt</title><style>body{font-family:'Poppins',sans-serif;padding:20px;}table{width:100%;border-collapse:collapse;}td,th{padding:8px;border-bottom:1px solid #eee;text-align:left;}</style></head><body>${content.innerHTML}</body></html>`);
             printWindow.document.close();
             printWindow.print();
         }
