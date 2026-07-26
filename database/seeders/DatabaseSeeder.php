@@ -947,14 +947,18 @@ class DatabaseSeeder extends Seeder
                 $paid = $ld['amount'] - $ld['balance'];
                 $numPayments = max(1, (int)($paid / 100000));
                 for ($p = 0; $p < $numPayments; $p++) {
+                    $amount = min(100000, max(0, $paid - ($p * 100000)));
+                    $payDate = date('Y-m-d', strtotime($ld['days'] . ' days +' . (($p + 1) * 14) . ' days'));
                     LoanPayment::firstOrCreate(
-                        ['loan_id' => $loan->id, 'amount' => min(100000, $paid - ($p * 100000)), 'created_at' => date('Y-m-d', strtotime($ld['days'] . ' days +' . ($p * 14) . ' days')],
+                        ['loan_id' => $loan->id, 'amount' => $amount],
                         [
                             'loan_id' => $loan->id,
                             'business_id' => $this->bid,
-                            'amount' => min(100000, max(0, $paid - ($p * 100000))),
+                            'amount' => $amount,
                             'notes' => 'Loan repayment #' . ($p + 1),
                             'recorded_by' => $this->processedById,
+                            'created_at' => $payDate,
+                            'updated_at' => $payDate,
                         ]
                     );
                 }
@@ -964,7 +968,7 @@ class DatabaseSeeder extends Seeder
 
     private function seedInvoices(): void
     {
-        $custs = Customer::where('business_id' => $this->bid)->take(5)->get();
+        $custs = Customer::where('business_id', $this->bid)->take(5)->get();
         $prods = Product::where('business_id', $this->bid)->take(10)->get();
         if ($custs->isEmpty() || $prods->isEmpty()) return;
 
