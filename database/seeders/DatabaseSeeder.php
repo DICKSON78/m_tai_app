@@ -2,49 +2,49 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\Account;
+use App\Models\Attendance;
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
+use App\Models\Bill;
+use App\Models\BillItem;
 use App\Models\Business;
 use App\Models\BusinessCapital;
 use App\Models\Category;
-use App\Models\Product;
+use App\Models\CostCenter;
+use App\Models\CreditSale;
+use App\Models\Currency;
 use App\Models\Customer;
+use App\Models\DepreciationEntry;
 use App\Models\Employee;
+use App\Models\ExchangeRate;
+use App\Models\Expense;
+use App\Models\FiscalPeriod;
+use App\Models\FiscalYear;
+use App\Models\FixedAsset;
+use App\Models\HrDepartment;
+use App\Models\HrEmployee;
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
+use App\Models\JournalEntry;
+use App\Models\JournalEntryLine;
+use App\Models\LeaveType;
+use App\Models\Loan;
+use App\Models\LoanPayment;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
-use App\Models\Expense;
-use App\Models\CreditSale;
-use App\Models\Loan;
-use App\Models\LoanPayment;
-use App\Models\StockMovement;
-use App\Models\Supplier;
-use App\Models\PurchaseOrder;
-use App\Models\PurchaseOrderItem;
-use App\Models\HrDepartment;
-use App\Models\HrEmployee;
-use App\Models\Attendance;
-use App\Models\LeaveType;
-use App\Models\LeaveRequest;
 use App\Models\Payroll;
 use App\Models\PayrollItem;
-use App\Models\Account;
-use App\Models\JournalEntry;
-use App\Models\JournalEntryLine;
-use App\Models\CostCenter;
-use App\Models\BankAccount;
-use App\Models\BankTransaction;
-use App\Models\Invoice;
-use App\Models\InvoiceItem;
-use App\Models\Bill;
-use App\Models\BillItem;
-use App\Models\Currency;
-use App\Models\ExchangeRate;
-use App\Models\FiscalYear;
-use App\Models\FiscalPeriod;
-use App\Models\FixedAsset;
-use App\Models\DepreciationEntry;
-use App\Models\TaxRate;
+use App\Models\Product;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
+use App\Models\StockBatch;
+use App\Models\StockCount;
+use App\Models\StockCountItem;
 use App\Models\Subscription;
+use App\Models\Supplier;
+use App\Models\User;
 use App\Models\UserNotification;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -53,8 +53,11 @@ use Illuminate\Support\Str;
 class DatabaseSeeder extends Seeder
 {
     private int $bid;
+
     private int $ownerId;
+
     private int $adminId;
+
     private int $processedById;
 
     public function run(): void
@@ -70,6 +73,7 @@ class DatabaseSeeder extends Seeder
         $this->seedEmployees();
         $this->seedHrModule();
         $this->seedSuppliers();
+        $this->seedInventoryModule();
         $this->seedPurchaseOrders();
         $this->seedOrders();
         $this->seedExpenses();
@@ -146,7 +150,7 @@ class DatabaseSeeder extends Seeder
                 'opening_capital' => 50000000,
                 'status' => 'active',
                 'is_published' => true,
-                'working_days' => ['monday','tuesday','wednesday','thursday','friday','saturday'],
+                'working_days' => ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'],
                 'working_hours' => ['open' => '07:00', 'close' => '21:00'],
             ]
         );
@@ -261,7 +265,7 @@ class DatabaseSeeder extends Seeder
                     'parent_id' => $parentId,
                     'is_active' => true,
                     'currency' => 'TZS',
-                    'sort_order' => (int)$acc['code'],
+                    'sort_order' => (int) $acc['code'],
                     'opening_balance' => $acc['opening_balance'] ?? 0,
                 ])
             );
@@ -422,24 +426,115 @@ class DatabaseSeeder extends Seeder
         foreach ($products as $p) {
             $catId = $catMap[$p['cat']] ?? null;
             $slug = Str::slug($p['name']);
-            Product::firstOrCreate(
+            $threshold = max(5, (int) round($p['qty'] * 0.1));
+            $reorderQty = max(10, (int) round($p['qty'] * 0.15));
+            Product::updateOrCreate(
                 ['business_id' => $this->bid, 'slug' => $slug],
                 [
                     'business_id' => $this->bid,
                     'category_id' => $catId,
                     'name' => $p['name'],
                     'slug' => $slug,
+                    'sku' => 'SKU-'.strtoupper(Str::random(6)).'-'.($p['qty'] > 100 ? 'B' : 'S'),
+                    'barcode' => (string) rand(6000000000000, 6999999999999),
                     'buying_price' => $p['buying'],
                     'selling_price' => $p['selling'],
                     'wholesale_price' => $p['buying'] * 0.9,
                     'retail_price' => $p['selling'],
                     'quantity' => $p['qty'],
                     'unit' => $p['unit'],
+                    'low_stock_threshold' => $threshold,
+                    'reorder_quantity' => $reorderQty,
+                    'is_track_stock' => true,
+                    'location' => ['Warehouse A', 'Warehouse B', 'Shelf C-12', 'Cold Storage'][array_rand(['Warehouse A', 'Warehouse B', 'Shelf C-12', 'Cold Storage'])],
                     'is_published' => true,
                     'is_draft' => false,
-                    'description' => $p['name'] . ' - Quality product available at Juma Supermarket',
+                    'description' => $p['name'].' - Quality product available at Juma Supermarket',
                 ]
             );
+        }
+    }
+
+    private function seedInventoryModule(): void
+    {
+        $prods = Product::where('business_id', $this->bid)->get();
+        if ($prods->isEmpty()) {
+            return;
+        }
+
+        // Simulate low / out of stock items so alerts fire
+        $lowStockNames = ['Kahawa ya Nescafe (200g)', 'Chocolate - Cadbury (100g)', 'Electric Kettle (1.5L)'];
+        foreach ($prods->whereIn('name', $lowStockNames)->take(3) as $p) {
+            $p->update(['quantity' => 2]);
+        }
+        $outOfStock = $prods->first();
+        if ($outOfStock) {
+            $outOfStock->update(['quantity' => 0]);
+        }
+
+        $supplierIds = Supplier::where('business_id', $this->bid)->pluck('id')->toArray();
+        $batches = [
+            ['Maji ya Bonite (1.5L)', 'BATCH-BON-001', 300, 60, 180],
+            ['Maji ya Bonite (1.5L)', 'BATCH-BON-002', 200, 90, 270],
+            ['Maziwa Freshi (500ml)', 'BATCH-FRSH-001', 80, 20, 30],
+            ['Maziwa Freshi (500ml)', 'BATCH-FRSH-002', 70, 35, 20],
+            ['Coca-Cola (1.5L)', 'BATCH-CC-001', 150, 40, 210],
+            ['Duka Maziwa UHT (1L)', 'BATCH-UHT-001', 120, 25, 60],
+        ];
+
+        foreach ($batches as [$name, $num, $qty, $manInDays, $expInDays]) {
+            $prod = $prods->first(fn ($p) => $p->name === $name);
+            if (! $prod) {
+                continue;
+            }
+            StockBatch::firstOrCreate(
+                ['business_id' => $this->bid, 'batch_number' => $num],
+                [
+                    'business_id' => $this->bid,
+                    'product_id' => $prod->id,
+                    'batch_number' => $num,
+                    'quantity' => $qty,
+                    'manufacturing_date' => now()->subDays($manInDays)->toDateString(),
+                    'expiry_date' => now()->addDays($expInDays)->toDateString(),
+                    'supplier_id' => $supplierIds[array_rand($supplierIds)] ?? null,
+                    'received_at' => now()->subDays($manInDays)->toDateString(),
+                    'received_by' => $this->ownerId,
+                    'warehouse_location' => 'Warehouse A',
+                ]
+            );
+        }
+
+        // Completed stock count for a subset
+        $count = StockCount::firstOrCreate(
+            ['business_id' => $this->bid, 'name' => 'Monthly Stock Count - July 2026'],
+            [
+                'business_id' => $this->bid,
+                'name' => 'Monthly Stock Count - July 2026',
+                'count_date' => now()->subDays(7)->toDateString(),
+                'status' => StockCount::STATUS_APPROVED,
+                'counted_by' => $this->ownerId,
+                'notes' => 'Monthly physical stock count.',
+            ]
+        );
+
+        if ($count->items()->count() === 0) {
+            $subset = $prods->take(12);
+            $count->update(['total_items' => $subset->count(), 'counted_items' => $subset->count()]);
+            $varianceTotal = 0;
+            foreach ($subset as $p) {
+                $delta = rand(-5, 5);
+                $counted = max(0, $p->quantity + $delta);
+                $variance = $counted - $p->quantity;
+                $varianceTotal += $variance * (float) $p->buying_price;
+                StockCountItem::create([
+                    'stock_count_id' => $count->id,
+                    'product_id' => $p->id,
+                    'expected_quantity' => (int) $p->quantity,
+                    'counted_quantity' => $counted,
+                    'variance' => $variance,
+                ]);
+            }
+            $count->update(['total_variance' => $varianceTotal]);
         }
     }
 
@@ -473,7 +568,7 @@ class DatabaseSeeder extends Seeder
                 ['business_id' => $this->bid, 'phone' => $c['phone']],
                 [
                     'business_id' => $this->bid,
-                    'customer_code' => 'CTM-' . str_pad($i + 1, 6, '0', STR_PAD_LEFT),
+                    'customer_code' => 'CTM-'.str_pad($i + 1, 6, '0', STR_PAD_LEFT),
                     'full_name' => $c['full_name'],
                     'phone' => $c['phone'],
                     'location' => $c['location'],
@@ -547,7 +642,7 @@ class DatabaseSeeder extends Seeder
                 [
                     'business_id' => $this->bid,
                     'department_id' => $deptIds[$e['dept']],
-                    'employee_number' => 'EMP-' . str_pad(count($empIds) + 1, 4, '0', STR_PAD_LEFT),
+                    'employee_number' => 'EMP-'.str_pad(count($empIds) + 1, 4, '0', STR_PAD_LEFT),
                     'first_name' => $e['first_name'],
                     'last_name' => $e['last_name'],
                     'email' => $e['email'],
@@ -558,7 +653,7 @@ class DatabaseSeeder extends Seeder
                     'base_salary' => $e['salary'],
                     'salary_type' => 'monthly',
                     'bank_name' => 'CRDB Bank',
-                    'bank_account_number' => '01' . str_pad(count($empIds) + 1, 10, '0', STR_PAD_LEFT),
+                    'bank_account_number' => '01'.str_pad(count($empIds) + 1, 10, '0', STR_PAD_LEFT),
                     'status' => 'active',
                 ]
             );
@@ -589,9 +684,11 @@ class DatabaseSeeder extends Seeder
         $statuses = ['present', 'present', 'present', 'present', 'late', 'present', 'present', 'half_day', 'present', 'present'];
         foreach ($empIds as $eid) {
             for ($day = 1; $day <= 25; $day++) {
-                $date = "2026-07-" . str_pad($day, 2, '0', STR_PAD_LEFT);
+                $date = '2026-07-'.str_pad($day, 2, '0', STR_PAD_LEFT);
                 $dow = date('w', strtotime($date));
-                if ($dow == 0 || $dow == 6) continue;
+                if ($dow == 0 || $dow == 6) {
+                    continue;
+                }
 
                 $status = $statuses[array_rand($statuses)];
                 $clockIn = $status === 'late' ? '08:30:00' : '07:50:00';
@@ -627,7 +724,9 @@ class DatabaseSeeder extends Seeder
 
         foreach ($empIds as $eid) {
             $emp = HrEmployee::find($eid);
-            if (!$emp) continue;
+            if (! $emp) {
+                continue;
+            }
             PayrollItem::firstOrCreate(
                 ['payroll_id' => $payroll->id, 'employee_id' => $eid],
                 [
@@ -660,9 +759,9 @@ class DatabaseSeeder extends Seeder
                 ['business_id' => $this->bid, 'name' => $s['name']],
                 [
                     'business_id' => $this->bid,
-                    'code' => 'SUP-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
+                    'code' => 'SUP-'.str_pad($i + 1, 4, '0', STR_PAD_LEFT),
                     'contact_person' => $s['contact'],
-                    'email' => strtolower(str_replace(' ', '.', $s['contact'])) . '@' . strtolower(str_replace([' ', '(', ')', '-'], ['', '', '', ''], $s['name'])) . '.co.tz',
+                    'email' => strtolower(str_replace(' ', '.', $s['contact'])).'@'.strtolower(str_replace([' ', '(', ')', '-'], ['', '', '', ''], $s['name'])).'.co.tz',
                     'phone' => $s['phone'],
                     'address' => 'Industrial Area',
                     'city' => $s['city'],
@@ -683,25 +782,27 @@ class DatabaseSeeder extends Seeder
     {
         $supIds = Supplier::where('business_id', $this->bid)->pluck('id')->toArray();
         $prods = Product::where('business_id', $this->bid)->get();
-        if (empty($supIds) || $prods->isEmpty()) return;
+        if (empty($supIds) || $prods->isEmpty()) {
+            return;
+        }
 
         $statuses = ['received', 'received', 'received', 'partially_received', 'confirmed', 'draft'];
 
         for ($i = 0; $i < 8; $i++) {
             $supId = $supIds[array_rand($supIds)];
             $status = $statuses[$i % count($statuses)];
-            $orderDate = '2026-' . str_pad(max(1, 7 - $i), 2, '0', STR_PAD_LEFT) . '-' . str_pad(mt_rand(1, 28), 2, '0', STR_PAD_LEFT);
+            $orderDate = '2026-'.str_pad(max(1, 7 - $i), 2, '0', STR_PAD_LEFT).'-'.str_pad(mt_rand(1, 28), 2, '0', STR_PAD_LEFT);
 
             $po = PurchaseOrder::firstOrCreate(
-                ['business_id' => $this->bid, 'po_number' => 'PO-2026-' . str_pad($i + 1, 5, '0', STR_PAD_LEFT)],
+                ['business_id' => $this->bid, 'po_number' => 'PO-2026-'.str_pad($i + 1, 5, '0', STR_PAD_LEFT)],
                 [
                     'business_id' => $this->bid,
                     'supplier_id' => $supId,
-                    'po_number' => 'PO-2026-' . str_pad($i + 1, 5, '0', STR_PAD_LEFT),
+                    'po_number' => 'PO-2026-'.str_pad($i + 1, 5, '0', STR_PAD_LEFT),
                     'status' => $status,
                     'approval_status' => in_array($status, ['received', 'partially_received', 'confirmed']) ? 'approved' : 'pending',
                     'order_date' => $orderDate,
-                    'expected_date' => date('Y-m-d', strtotime($orderDate . ' +7 days')),
+                    'expected_date' => date('Y-m-d', strtotime($orderDate.' +7 days')),
                     'subtotal' => 0,
                     'total' => 0,
                     'amount_paid' => $status === 'received' ? mt_rand(500000, 2000000) : 0,
@@ -716,7 +817,7 @@ class DatabaseSeeder extends Seeder
                 $qty = mt_rand(10, 100);
                 $unitPrice = $prod->buying_price;
                 $lineTotal = $qty * $unitPrice;
-                $received = $status === 'received' ? $qty : ($status === 'partially_received' ? (int)($qty * 0.6) : 0);
+                $received = $status === 'received' ? $qty : ($status === 'partially_received' ? (int) ($qty * 0.6) : 0);
 
                 PurchaseOrderItem::firstOrCreate(
                     ['purchase_order_id' => $po->id, 'product_id' => $prod->id],
@@ -746,7 +847,9 @@ class DatabaseSeeder extends Seeder
     {
         $customers = Customer::where('business_id', $this->bid)->get();
         $prods = Product::where('business_id', $this->bid)->get();
-        if ($customers->isEmpty() || $prods->isEmpty()) return;
+        if ($customers->isEmpty() || $prods->isEmpty()) {
+            return;
+        }
 
         $statuses = ['completed', 'completed', 'completed', 'completed', 'completed', 'pending', 'confirmed'];
         $payStatuses = ['paid', 'paid', 'paid', 'paid', 'partial', 'unpaid'];
@@ -756,7 +859,7 @@ class DatabaseSeeder extends Seeder
             $cust = $customers->random();
             $status = $statuses[array_rand($statuses)];
             $payStatus = $payStatuses[array_rand($payStatuses)];
-            $orderDate = '2026-' . str_pad(mt_rand(1, 7), 2, '0', STR_PAD_LEFT) . '-' . str_pad(mt_rand(1, 28), 2, '0', STR_PAD_LEFT);
+            $orderDate = '2026-'.str_pad(mt_rand(1, 7), 2, '0', STR_PAD_LEFT).'-'.str_pad(mt_rand(1, 28), 2, '0', STR_PAD_LEFT);
 
             $subtotal = 0;
             $items = $prods->random(mt_rand(1, 6));
@@ -778,11 +881,11 @@ class DatabaseSeeder extends Seeder
             $total = $subtotal - $discount + $tax;
 
             $order = Order::firstOrCreate(
-                ['business_id' => $this->bid, 'transaction_code' => 'TXN-2026' . str_pad($i + 1, 5, '0', STR_PAD_LEFT)],
+                ['business_id' => $this->bid, 'transaction_code' => 'TXN-2026'.str_pad($i + 1, 5, '0', STR_PAD_LEFT)],
                 [
                     'business_id' => $this->bid,
                     'customer_id' => $cust->id,
-                    'transaction_code' => 'TXN-2026' . str_pad($i + 1, 5, '0', STR_PAD_LEFT),
+                    'transaction_code' => 'TXN-2026'.str_pad($i + 1, 5, '0', STR_PAD_LEFT),
                     'subtotal' => $subtotal,
                     'discount' => $discount,
                     'tax' => $tax,
@@ -814,7 +917,7 @@ class DatabaseSeeder extends Seeder
                         'business_id' => $this->bid,
                         'amount' => $payStatus === 'paid' ? $total : $total * 0.5,
                         'method' => $payMethods[array_rand($payMethods)],
-                        'reference_number' => 'REF-' . strtoupper(Str::random(8)),
+                        'reference_number' => 'REF-'.strtoupper(Str::random(8)),
                         'status' => 'confirmed',
                         'received_by' => $this->processedById,
                     ]
@@ -867,14 +970,14 @@ class DatabaseSeeder extends Seeder
 
             if (mt_rand(0, 1)) {
                 Expense::firstOrCreate(
-                    ['business_id' => $this->bid, 'category' => 'transport', 'date' => "2026-$month-" . str_pad(mt_rand(5, 25), 2, '0', STR_PAD_LEFT)],
-                    ['business_id' => $this->bid, 'category' => 'transport', 'description' => 'Transport ya bidhaa kutoka market', 'amount' => mt_rand(50000, 200000), 'type' => 'daily', 'date' => "2026-$month-" . str_pad(mt_rand(5, 25), 2, '0', STR_PAD_LEFT), 'recorded_by' => $this->processedById]
+                    ['business_id' => $this->bid, 'category' => 'transport', 'date' => "2026-$month-".str_pad(mt_rand(5, 25), 2, '0', STR_PAD_LEFT)],
+                    ['business_id' => $this->bid, 'category' => 'transport', 'description' => 'Transport ya bidhaa kutoka market', 'amount' => mt_rand(50000, 200000), 'type' => 'daily', 'date' => "2026-$month-".str_pad(mt_rand(5, 25), 2, '0', STR_PAD_LEFT), 'recorded_by' => $this->processedById]
                 );
             }
             if (mt_rand(0, 1)) {
                 Expense::firstOrCreate(
-                    ['business_id' => $this->bid, 'category' => 'maintenance', 'date' => "2026-$month-" . str_pad(mt_rand(10, 20), 2, '0', STR_PAD_LEFT)],
-                    ['business_id' => $this->bid, 'category' => 'maintenance', 'description' => 'Matengenezo ya fridge/display shelf', 'amount' => mt_rand(30000, 150000), 'type' => 'daily', 'date' => "2026-$month-" . str_pad(mt_rand(10, 20), 2, '0', STR_PAD_LEFT), 'recorded_by' => $this->processedById]
+                    ['business_id' => $this->bid, 'category' => 'maintenance', 'date' => "2026-$month-".str_pad(mt_rand(10, 20), 2, '0', STR_PAD_LEFT)],
+                    ['business_id' => $this->bid, 'category' => 'maintenance', 'description' => 'Matengenezo ya fridge/display shelf', 'amount' => mt_rand(30000, 150000), 'type' => 'daily', 'date' => "2026-$month-".str_pad(mt_rand(10, 20), 2, '0', STR_PAD_LEFT), 'recorded_by' => $this->processedById]
                 );
             }
         }
@@ -905,8 +1008,8 @@ class DatabaseSeeder extends Seeder
                     'amount' => $c['amount'],
                     'amount_paid' => $c['paid'],
                     'status' => $c['status'],
-                    'due_date' => date('Y-m-d', strtotime($c['days'] . ' days')),
-                    'notes' => 'Credit sale to ' . $c['name'],
+                    'due_date' => date('Y-m-d', strtotime($c['days'].' days')),
+                    'notes' => 'Credit sale to '.$c['name'],
                 ]
             );
         }
@@ -915,7 +1018,9 @@ class DatabaseSeeder extends Seeder
     private function seedLoans(): void
     {
         $custs = Customer::where('business_id', $this->bid)->take(4)->get();
-        if ($custs->isEmpty()) return;
+        if ($custs->isEmpty()) {
+            return;
+        }
 
         $loanData = [
             ['amount' => 2000000, 'balance' => 800000, 'type' => 'go_pro_bank', 'rate' => 8.5, 'status' => 'active', 'days' => -90],
@@ -925,7 +1030,9 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($custs as $i => $cust) {
-            if (!isset($loanData[$i])) break;
+            if (! isset($loanData[$i])) {
+                break;
+            }
             $ld = $loanData[$i];
             $loan = Loan::firstOrCreate(
                 ['business_id' => $this->bid, 'customer_id' => $cust->id],
@@ -937,25 +1044,25 @@ class DatabaseSeeder extends Seeder
                     'loan_balance' => $ld['balance'],
                     'interest_rate' => $ld['rate'],
                     'status' => $ld['status'],
-                    'start_date' => date('Y-m-d', strtotime($ld['days'] . ' days')),
-                    'due_date' => date('Y-m-d', strtotime($ld['days'] . ' days +90 days')),
-                    'repayment_plan' => 'Monthly installments of TZS ' . number_format($ld['amount'] / 6),
+                    'start_date' => date('Y-m-d', strtotime($ld['days'].' days')),
+                    'due_date' => date('Y-m-d', strtotime($ld['days'].' days +90 days')),
+                    'repayment_plan' => 'Monthly installments of TZS '.number_format($ld['amount'] / 6),
                 ]
             );
 
             if ($ld['status'] === 'paid' || $ld['balance'] < $ld['amount']) {
                 $paid = $ld['amount'] - $ld['balance'];
-                $numPayments = max(1, (int)($paid / 100000));
+                $numPayments = max(1, (int) ($paid / 100000));
                 for ($p = 0; $p < $numPayments; $p++) {
                     $amount = min(100000, max(0, $paid - ($p * 100000)));
-                    $payDate = date('Y-m-d', strtotime($ld['days'] . ' days +' . (($p + 1) * 14) . ' days'));
+                    $payDate = date('Y-m-d', strtotime($ld['days'].' days +'.(($p + 1) * 14).' days'));
                     LoanPayment::firstOrCreate(
                         ['loan_id' => $loan->id, 'amount' => $amount],
                         [
                             'loan_id' => $loan->id,
                             'business_id' => $this->bid,
                             'amount' => $amount,
-                            'notes' => 'Loan repayment #' . ($p + 1),
+                            'notes' => 'Loan repayment #'.($p + 1),
                             'recorded_by' => $this->processedById,
                             'created_at' => $payDate,
                             'updated_at' => $payDate,
@@ -970,7 +1077,9 @@ class DatabaseSeeder extends Seeder
     {
         $custs = Customer::where('business_id', $this->bid)->take(5)->get();
         $prods = Product::where('business_id', $this->bid)->take(10)->get();
-        if ($custs->isEmpty() || $prods->isEmpty()) return;
+        if ($custs->isEmpty() || $prods->isEmpty()) {
+            return;
+        }
 
         foreach ($custs as $i => $cust) {
             $subtotal = 0;
@@ -985,13 +1094,13 @@ class DatabaseSeeder extends Seeder
             $tax = $subtotal * 0.18;
 
             $inv = Invoice::firstOrCreate(
-                ['business_id' => $this->bid, 'invoice_number' => 'INV-2026-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT)],
+                ['business_id' => $this->bid, 'invoice_number' => 'INV-2026-'.str_pad($i + 1, 4, '0', STR_PAD_LEFT)],
                 [
                     'business_id' => $this->bid,
                     'customer_id' => $cust->id,
-                    'invoice_number' => 'INV-2026-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
-                    'date' => '2026-' . str_pad(mt_rand(1, 6), 2, '0', STR_PAD_LEFT) . '-01',
-                    'due_date' => '2026-' . str_pad(mt_rand(2, 7), 2, '0', STR_PAD_LEFT) . '-15',
+                    'invoice_number' => 'INV-2026-'.str_pad($i + 1, 4, '0', STR_PAD_LEFT),
+                    'date' => '2026-'.str_pad(mt_rand(1, 6), 2, '0', STR_PAD_LEFT).'-01',
+                    'due_date' => '2026-'.str_pad(mt_rand(2, 7), 2, '0', STR_PAD_LEFT).'-15',
                     'subtotal' => $subtotal,
                     'tax_amount' => $tax,
                     'total' => $subtotal + $tax,
@@ -1018,20 +1127,22 @@ class DatabaseSeeder extends Seeder
     private function seedBills(): void
     {
         $sups = Supplier::where('business_id', $this->bid)->take(4)->get();
-        if ($sups->isEmpty()) return;
+        if ($sups->isEmpty()) {
+            return;
+        }
 
         foreach ($sups as $i => $sup) {
             $subtotal = mt_rand(500000, 5000000);
             $tax = $subtotal * 0.18;
 
             $bill = Bill::firstOrCreate(
-                ['business_id' => $this->bid, 'bill_number' => 'BILL-2026-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT)],
+                ['business_id' => $this->bid, 'bill_number' => 'BILL-2026-'.str_pad($i + 1, 4, '0', STR_PAD_LEFT)],
                 [
                     'business_id' => $this->bid,
                     'vendor_name' => $sup->name,
-                    'bill_number' => 'BILL-2026-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
-                    'date' => '2026-' . str_pad(mt_rand(1, 6), 2, '0', STR_PAD_LEFT) . '-15',
-                    'due_date' => '2026-' . str_pad(mt_rand(3, 7), 2, '0', STR_PAD_LEFT) . '-15',
+                    'bill_number' => 'BILL-2026-'.str_pad($i + 1, 4, '0', STR_PAD_LEFT),
+                    'date' => '2026-'.str_pad(mt_rand(1, 6), 2, '0', STR_PAD_LEFT).'-15',
+                    'due_date' => '2026-'.str_pad(mt_rand(3, 7), 2, '0', STR_PAD_LEFT).'-15',
                     'subtotal' => $subtotal,
                     'tax_amount' => $tax,
                     'total' => $subtotal + $tax,
@@ -1041,10 +1152,10 @@ class DatabaseSeeder extends Seeder
             );
 
             BillItem::firstOrCreate(
-                ['bill_id' => $bill->id, 'description' => 'Bulk goods order from ' . $sup->name],
+                ['bill_id' => $bill->id, 'description' => 'Bulk goods order from '.$sup->name],
                 [
                     'bill_id' => $bill->id,
-                    'description' => 'Bulk goods order from ' . $sup->name,
+                    'description' => 'Bulk goods order from '.$sup->name,
                     'quantity' => mt_rand(50, 500),
                     'unit_price' => $subtotal / 100,
                     'amount' => $subtotal,
@@ -1056,7 +1167,9 @@ class DatabaseSeeder extends Seeder
     private function seedBankAccounts(): void
     {
         $bankAccId = Account::where('business_id', $this->bid)->where('code', '1120')->first()?->id;
-        if (!$bankAccId) return;
+        if (! $bankAccId) {
+            return;
+        }
 
         $bank = BankAccount::firstOrCreate(
             ['business_id' => $this->bid, 'account_number' => '0123456789012'],
@@ -1088,10 +1201,10 @@ class DatabaseSeeder extends Seeder
         foreach ($txns as $t) {
             $balance += ($t['credit'] ?? 0) - ($t['debit'] ?? 0);
             BankTransaction::firstOrCreate(
-                ['bank_account_id' => $bank->id, 'date' => "2026-07-" . str_pad($t['day'], 2, '0', STR_PAD_LEFT)],
+                ['bank_account_id' => $bank->id, 'date' => '2026-07-'.str_pad($t['day'], 2, '0', STR_PAD_LEFT)],
                 [
                     'bank_account_id' => $bank->id,
-                    'date' => "2026-07-" . str_pad($t['day'], 2, '0', STR_PAD_LEFT),
+                    'date' => '2026-07-'.str_pad($t['day'], 2, '0', STR_PAD_LEFT),
                     'description' => $t['desc'],
                     'debit' => $t['debit'] ?? 0,
                     'credit' => $t['credit'] ?? 0,
@@ -1106,7 +1219,9 @@ class DatabaseSeeder extends Seeder
     {
         $assetAcc = Account::where('business_id', $this->bid)->where('code', '1310')->first()?->id;
         $depAcc = Account::where('business_id', $this->bid)->where('code', '1320')->first()?->id;
-        if (!$assetAcc || !$depAcc) return;
+        if (! $assetAcc || ! $depAcc) {
+            return;
+        }
 
         $assets = [
             ['code' => 'FA-001', 'name' => 'Display Refrigerator (3-door)', 'price' => 8500000, 'life' => 60, 'months_dep' => 18, 'purchase' => '2025-01-15'],
@@ -1128,7 +1243,7 @@ class DatabaseSeeder extends Seeder
                     'business_id' => $this->bid,
                     'asset_code' => $a['code'],
                     'name' => $a['name'],
-                    'description' => $a['name'] . ' for Juma Supermarket',
+                    'description' => $a['name'].' for Juma Supermarket',
                     'category_account_id' => $assetAcc,
                     'depreciation_account_id' => $depAcc,
                     'purchase_date' => $a['purchase'],
@@ -1144,8 +1259,10 @@ class DatabaseSeeder extends Seeder
             );
 
             for ($m = 1; $m <= min($a['months_dep'], 6); $m++) {
-                $depDate = date('Y-m-d', strtotime($a['purchase'] . " +{$m} months"));
-                if ($depDate > '2026-07-25') continue;
+                $depDate = date('Y-m-d', strtotime($a['purchase']." +{$m} months"));
+                if ($depDate > '2026-07-25') {
+                    continue;
+                }
                 DepreciationEntry::firstOrCreate(
                     ['business_id' => $this->bid, 'fixed_asset_id' => $asset->id, 'depreciation_date' => $depDate],
                     [
@@ -1154,7 +1271,7 @@ class DatabaseSeeder extends Seeder
                         'depreciation_date' => $depDate,
                         'amount' => round($monthly),
                         'accumulated_total' => round($monthly * $m),
-                        'notes' => 'Monthly depreciation for ' . $a['name'],
+                        'notes' => 'Monthly depreciation for '.$a['name'],
                     ]
                 );
             }
@@ -1166,7 +1283,9 @@ class DatabaseSeeder extends Seeder
         $accts = Account::where('business_id', $this->bid)->pluck('id', 'code')->toArray();
         $fiscalPeriod = FiscalPeriod::where('business_id', $this->bid)->where('name', 'Jul 2026')->first();
 
-        if (empty($accts)) return;
+        if (empty($accts)) {
+            return;
+        }
 
         $entries = [
             [
@@ -1274,7 +1393,9 @@ class DatabaseSeeder extends Seeder
 
             foreach ($e['lines'] as $line) {
                 $accountId = $accts[$line['code']] ?? null;
-                if (!$accountId) continue;
+                if (! $accountId) {
+                    continue;
+                }
                 JournalEntryLine::firstOrCreate(
                     ['journal_entry_id' => $je->id, 'account_id' => $accountId],
                     [

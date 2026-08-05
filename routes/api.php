@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\StockController;
+use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\CustomerController;
@@ -125,6 +126,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/businesses/{business}/stock/fast-moving', [StockController::class, 'fastMoving']);
         Route::post('/businesses/{business}/stock', [StockController::class, 'recordMovement']);
         Route::get('/products/{product}/movements', [StockController::class, 'productMovements']);
+
+        // Inventory Management
+        Route::get('/businesses/{business}/inventory/stock', [InventoryController::class, 'index']);
+        Route::get('/businesses/{business}/inventory/summary', [InventoryController::class, 'summary']);
+        Route::get('/businesses/{business}/inventory/alerts', [InventoryController::class, 'alerts']);
+        Route::get('/businesses/{business}/inventory/movements', [InventoryController::class, 'movements']);
+        Route::post('/businesses/{business}/inventory/movements', [InventoryController::class, 'storeMovement']);
+        Route::get('/businesses/{business}/inventory/batches', [InventoryController::class, 'batches']);
+        Route::post('/businesses/{business}/inventory/batches', [InventoryController::class, 'storeBatch']);
+        Route::get('/businesses/{business}/inventory/stock-counts', [InventoryController::class, 'stockCounts']);
+        Route::post('/businesses/{business}/inventory/stock-counts', [InventoryController::class, 'storeStockCount']);
+        Route::get('/businesses/{business}/inventory/stock-counts/{stockCount}', [InventoryController::class, 'showStockCount']);
+        Route::put('/businesses/{business}/inventory/stock-counts/{stockCount}/items', [InventoryController::class, 'updateStockCountItems']);
+        Route::post('/businesses/{business}/inventory/stock-counts/{stockCount}/approve', [InventoryController::class, 'approveStockCount']);
 
         // Expenses
         Route::get('/businesses/{business}/expenses', [ExpenseController::class, 'index']);

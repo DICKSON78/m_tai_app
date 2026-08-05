@@ -93,6 +93,16 @@ class Business extends Model
         return $this->hasMany(StockMovement::class);
     }
 
+    public function stockBatches()
+    {
+        return $this->hasMany(StockBatch::class);
+    }
+
+    public function stockCounts()
+    {
+        return $this->hasMany(StockCount::class);
+    }
+
     public function payments()
     {
         return $this->hasMany(Payment::class);
@@ -110,13 +120,13 @@ class Business extends Model
 
     public static function generateBusinessCode($district): string
     {
-        $prefix = $district . '-';
-        $last = static::where('business_code', 'like', $prefix . '%')
+        $prefix = $district.'-';
+        $last = static::where('business_code', 'like', $prefix.'%')
             ->latest('id')
             ->first();
 
         $number = $last ? intval(substr($last->business_code, -5)) + 1 : 1;
 
-        return $prefix . str_pad($number, 5, '0', STR_PAD_LEFT);
+        return $prefix.str_pad($number, 5, '0', STR_PAD_LEFT);
     }
 }

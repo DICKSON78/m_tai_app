@@ -8,10 +8,7 @@ use App\Models\Coupon;
 use App\Models\CouponUsage;
 use App\Models\Customer;
 use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Payment;
 use App\Models\Product;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -40,7 +37,7 @@ class OrderController extends Controller
         $grouped = [];
         foreach ($cart as $key => $item) {
             $product = $products->get($item['product_id']);
-            if (!$product || !$product->is_published || $product->quantity < $item['quantity']) {
+            if (! $product || ! $product->is_published || $product->quantity < $item['quantity']) {
                 return response()->json([
                     'message' => "Product '{$product?->name}' is unavailable or out of stock.",
                 ], 422);
@@ -73,6 +70,18 @@ class OrderController extends Controller
                     ];
 
                     $product->decrement('quantity', $item['quantity']);
+
+                    // Record stock movement for sale
+                    $product->stockMovements()->create([
+                        'business_id' => $businessId,
+                        'type' => 'sale',
+                        'quantity' => $item['quantity'],
+                        'balance_after' => (string) $product->fresh()->quantity,
+                        'reference_type' => 'order',
+                        'reference_id' => null,
+                        'notes' => 'Sale - order placed',
+                        'moved_by' => $request->user()?->id ?? 1,
+                    ]);
                 }
 
                 // Find or create customer per business
@@ -96,8 +105,8 @@ class OrderController extends Controller
                 // Apply coupon discount
                 $discount = 0;
                 $couponUsageId = null;
-                if (!empty($validated['coupon_code'])) {
-                    $coupon = \App\Models\Coupon::where('business_id', $businessId)
+                if (! empty($validated['coupon_code'])) {
+                    $coupon = Coupon::where('business_id', $businessId)
                         ->where('code', $validated['coupon_code'])
                         ->where('is_active', true)
                         ->first();
@@ -144,13 +153,13 @@ class OrderController extends Controller
 
                 // Record coupon usage
                 if ($couponUsageId) {
-                    \App\Models\CouponUsage::create([
+                    CouponUsage::create([
                         'coupon_id' => $couponUsageId,
                         'user_id' => $request->user()?->id,
                         'order_id' => $order->id,
                         'discount_amount' => $discount,
                     ]);
-                    \App\Models\Coupon::where('id', $couponUsageId)->increment('used_count');
+                    Coupon::where('id', $couponUsageId)->increment('used_count');
                 }
 
                 $orders[] = $order->load(['items.product', 'payments', 'customer']);
@@ -167,7 +176,8 @@ class OrderController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Checkout failed: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Checkout failed: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+
             return response()->json(['message' => 'An error occurred while placing the order. Please try again.'], 500);
         }
     }
@@ -177,8 +187,8 @@ class OrderController extends Controller
         $user = $request->user();
 
         $orders = Order::whereHas('customer', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })
+            $q->where('user_id', $user->id);
+        })
             ->with(['items.product', 'business', 'payments'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
@@ -194,7 +204,7 @@ class OrderController extends Controller
         $isEmployee = $user->employees()->where('business_id', $order->business_id)->exists();
         $isAdmin = $user->role === 'admin';
 
-        if (!$isCustomer && !$isOwner && !$isEmployee && !$isAdmin) {
+        if (! $isCustomer && ! $isOwner && ! $isEmployee && ! $isAdmin) {
             abort(403);
         }
 
@@ -236,7 +246,7 @@ class OrderController extends Controller
 
         $allowedIds = $businessIds->merge($employeeBusinessIds)->unique();
 
-        if (!$allowedIds->contains($order->business_id)) {
+        if (! $allowedIds->contains($order->business_id)) {
             return response()->json(['message' => 'Huna ruhusa ya kuthibitisha agizo hili.'], 403);
         }
 
@@ -246,7 +256,7 @@ class OrderController extends Controller
 
         if ((float) $validated['amount'] !== (float) $order->total) {
             return response()->json([
-                'message' => 'Kiasi hakilingani na jumla ya agizo. Ikilingani ni ' . number_format($order->total, 2),
+                'message' => 'Kiasi hakilingani na jumla ya agizo. Ikilingani ni '.number_format($order->total, 2),
                 'expected' => $order->total,
                 'provided' => $validated['amount'],
             ], 422);
@@ -276,7 +286,8 @@ class OrderController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Order verification failed: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Order verification failed: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+
             return response()->json(['message' => 'Hitilafu wakati wa kuthibitisha agizo.'], 500);
         }
     }
@@ -297,7 +308,7 @@ class OrderController extends Controller
 
         $allowedIds = $businessIds->merge($employeeBusinessIds)->unique();
 
-        if (!$allowedIds->contains($order->business_id)) {
+        if (! $allowedIds->contains($order->business_id)) {
             return response()->json(['message' => 'Huna ruhusa ya kubadilisha hali ya agizo hili.'], 403);
         }
 
@@ -312,6 +323,18 @@ class OrderController extends Controller
 
             foreach ($order->items as $item) {
                 $item->product()->increment('quantity', $item->quantity);
+                if ($item->product) {
+                    $item->product->stockMovements()->create([
+                        'business_id' => $order->business_id,
+                        'type' => 'sale_return',
+                        'quantity' => $item->quantity,
+                        'balance_after' => (string) $item->product->fresh()->quantity,
+                        'reference_type' => 'order',
+                        'reference_id' => $order->id,
+                        'notes' => 'Sale return - order cancelled',
+                        'moved_by' => $user->id,
+                    ]);
+                }
             }
 
             $order->payments()->update(['status' => 'failed']);
@@ -335,11 +358,11 @@ class OrderController extends Controller
         $user = $request->user();
         $isCustomer = $order->customer && $order->customer->user_id === $user->id;
 
-        if (!$isCustomer) {
+        if (! $isCustomer) {
             abort(403);
         }
 
-        if (!in_array($order->status, ['pending', 'confirmed'])) {
+        if (! in_array($order->status, ['pending', 'confirmed'])) {
             return response()->json(['message' => 'Order cannot be cancelled at this stage.'], 422);
         }
 
@@ -349,6 +372,18 @@ class OrderController extends Controller
 
             foreach ($order->items as $item) {
                 $item->product()->increment('quantity', $item->quantity);
+                if ($item->product) {
+                    $item->product->stockMovements()->create([
+                        'business_id' => $order->business_id,
+                        'type' => 'sale_return',
+                        'quantity' => $item->quantity,
+                        'balance_after' => (string) $item->product->fresh()->quantity,
+                        'reference_type' => 'order',
+                        'reference_id' => $order->id,
+                        'notes' => 'Sale return - order cancelled',
+                        'moved_by' => $user->id,
+                    ]);
+                }
             }
 
             $order->payments()->update(['status' => 'failed']);
@@ -358,6 +393,7 @@ class OrderController extends Controller
             return response()->json(['message' => 'Order cancelled successfully.']);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['message' => 'Failed to cancel order.'], 500);
         }
     }
@@ -367,7 +403,7 @@ class OrderController extends Controller
         $user = $request->user();
         $isCustomer = $order->customer && $order->customer->user_id === $user->id;
 
-        if (!$isCustomer) {
+        if (! $isCustomer) {
             abort(403);
         }
 
@@ -376,7 +412,7 @@ class OrderController extends Controller
 
         foreach ($order->items as $item) {
             if ($item->product && $item->product->is_published && $item->product->quantity >= $item->quantity) {
-                $key = 'reorder_' . $item->product_id . '_' . now()->timestamp;
+                $key = 'reorder_'.$item->product_id.'_'.now()->timestamp;
                 $cart[$key] = [
                     'product_id' => $item->product_id,
                     'quantity' => $item->quantity,

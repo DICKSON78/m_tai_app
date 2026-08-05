@@ -11,9 +11,10 @@ class Product extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'business_id', 'category_id', 'name', 'slug', 'description',
+        'business_id', 'category_id', 'name', 'slug', 'sku', 'barcode', 'description',
         'image', 'video', 'buying_price', 'selling_price', 'wholesale_price',
-        'retail_price', 'quantity', 'unit', 'is_published', 'is_draft',
+        'retail_price', 'quantity', 'unit', 'low_stock_threshold', 'reorder_quantity',
+        'is_track_stock', 'location', 'is_published', 'is_draft',
     ];
 
     protected function casts(): array
@@ -23,6 +24,10 @@ class Product extends Model
             'selling_price' => 'decimal:2',
             'wholesale_price' => 'decimal:2',
             'retail_price' => 'decimal:2',
+            'quantity' => 'integer',
+            'low_stock_threshold' => 'integer',
+            'reorder_quantity' => 'integer',
+            'is_track_stock' => 'boolean',
             'is_published' => 'boolean',
             'is_draft' => 'boolean',
         ];
@@ -46,6 +51,37 @@ class Product extends Model
     public function stockMovements()
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    public function stockBatches()
+    {
+        return $this->hasMany(StockBatch::class);
+    }
+
+    public function getStockLevelAttribute()
+    {
+        if ($this->quantity <= 0) {
+            return 'out_of_stock';
+        }
+        $threshold = max(1, (int) $this->low_stock_threshold);
+        if ($this->quantity <= $threshold) {
+            return 'low';
+        }
+        if ($this->quantity <= $threshold * 3) {
+            return 'medium';
+        }
+
+        return 'healthy';
+    }
+
+    public function getStockValueCostAttribute()
+    {
+        return $this->quantity * (float) $this->buying_price;
+    }
+
+    public function getStockValueRetailAttribute()
+    {
+        return $this->quantity * (float) $this->selling_price;
     }
 
     public function reviews()

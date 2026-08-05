@@ -92,9 +92,11 @@ export default function ProductDetailPage() {
     }
 
     const qty = Number(product.quantity || 0);
+    const threshold = Number(product.low_stock_threshold || 5);
     let stockBadgeColor = 'text-[#00D4AA]';
-    if (qty <= 5) stockBadgeColor = 'text-red-500';
-    else if (qty <= 20) stockBadgeColor = 'text-yellow-500';
+    if (qty <= 0) stockBadgeColor = 'text-red-500';
+    else if (qty <= threshold) stockBadgeColor = 'text-orange-500';
+    else if (qty <= threshold * 3) stockBadgeColor = 'text-yellow-500';
 
     const isPublished = product.status === 'published';
 
@@ -235,6 +237,35 @@ export default function ProductDetailPage() {
                                 value={`${qty} ${product.unit || 'pcs'}`}
                                 color={stockBadgeColor}
                             />
+
+                            <div className="mt-4 grid grid-cols-2 gap-3">
+                                <div className="bg-gray-50 rounded-lg p-3">
+                                    <p className="text-xs text-gray-500">Low Stock Threshold</p>
+                                    <p className="text-sm font-semibold text-gray-900">{threshold}</p>
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-3">
+                                    <p className="text-xs text-gray-500">Reorder Qty</p>
+                                    <p className="text-sm font-semibold text-gray-900">{product.reorder_quantity || 0}</p>
+                                </div>
+                                {product.sku && (
+                                    <div className="bg-gray-50 rounded-lg p-3">
+                                        <p className="text-xs text-gray-500">SKU</p>
+                                        <p className="text-sm font-semibold text-gray-900 font-mono">{product.sku}</p>
+                                    </div>
+                                )}
+                                {product.barcode && (
+                                    <div className="bg-gray-50 rounded-lg p-3">
+                                        <p className="text-xs text-gray-500">Barcode</p>
+                                        <p className="text-sm font-semibold text-gray-900 font-mono">{product.barcode}</p>
+                                    </div>
+                                )}
+                                {product.location && (
+                                    <div className="bg-gray-50 rounded-lg p-3 col-span-2">
+                                        <p className="text-xs text-gray-500">Location</p>
+                                        <p className="text-sm font-semibold text-gray-900">{product.location}</p>
+                                    </div>
+                                )}
+                            </div>
 
                             <div className="mt-4 space-y-3">
                                 <div className="flex rounded-lg border border-gray-200 overflow-hidden">

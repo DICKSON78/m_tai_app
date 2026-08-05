@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\PurchaseReception;
-use App\Models\PurchaseReceptionItem;
+use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
-use App\Models\Product;
+use App\Models\PurchaseReception;
+use App\Models\StockBatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -18,8 +18,8 @@ class PurchaseReceptionController extends Controller
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
         $receptions = PurchaseReception::where('business_id', $businessId)
             ->with(['supplier:id,name,code', 'purchaseOrder:id,po_number'])
-            ->when($request->status, fn($q, $v) => $q->where('status', $v))
-            ->when($request->supplier_id, fn($q, $v) => $q->where('supplier_id', $v))
+            ->when($request->status, fn ($q, $v) => $q->where('status', $v))
+            ->when($request->supplier_id, fn ($q, $v) => $q->where('supplier_id', $v))
             ->when($request->search, function ($q, $v) {
                 $q->where(function ($query) use ($v) {
                     $query->where('grn_number', 'like', "%{$v}%");
@@ -52,7 +52,9 @@ class PurchaseReceptionController extends Controller
 
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
         $po = PurchaseOrder::findOrFail($validated['purchase_order_id']);
-        if ($po->business_id !== $businessId) abort(403);
+        if ($po->business_id !== $businessId) {
+            abort(403);
+        }
 
         $reception = DB::transaction(function () use ($validated, $businessId, $po, $request) {
             $grn = PurchaseReception::create([
@@ -98,13 +100,43 @@ class PurchaseReceptionController extends Controller
                 $product = Product::find($item['product_id']);
                 $product->increment('quantity', $item['accepted_quantity']);
 
+                // Create batch if provided
+                $batchId = null;
+                if (! empty($item['batch_number']) && $item['accepted_quantity'] > 0) {
+                    $batch = StockBatch::where('business_id', $businessId)
+                        ->where('product_id', $product->id)
+                        ->where('batch_number', $item['batch_number'])
+                        ->first();
+                    if ($batch) {
+                        $batch->increment('quantity', $item['accepted_quantity']);
+                        $batchId = $batch->id;
+                    } else {
+                        $batch = StockBatch::create([
+                            'business_id' => $businessId,
+                            'product_id' => $product->id,
+                            'batch_number' => $item['batch_number'],
+                            'quantity' => $item['accepted_quantity'],
+                            'expiry_date' => $item['expiry_date'] ?? null,
+                            'received_at' => now()->toDateString(),
+                            'received_by' => $request->user()->id,
+                            'warehouse_location' => $item['warehouse_location'] ?? null,
+                        ]);
+                        $batchId = $batch->id;
+                    }
+                }
+
                 // Create stock movement
                 $product->stockMovements()->create([
                     'business_id' => $businessId,
-                    'type' => 'in',
+                    'batch_id' => $batchId,
+                    'type' => 'purchase_receipt',
                     'quantity' => $item['accepted_quantity'],
-                    'reference' => $grn->grn_number,
+                    'unit_cost' => $product->buying_price,
+                    'balance_after' => (string) $product->fresh()->quantity,
+                    'reference_type' => 'purchase_reception',
+                    'reference_id' => $grn->id,
                     'notes' => "PO Reception: {$po->po_number}",
+                    'moved_by' => $request->user()->id,
                 ]);
 
                 $totalQty += $item['received_quantity'];
@@ -130,7 +162,9 @@ class PurchaseReceptionController extends Controller
     public function show(Request $request, PurchaseReception $purchaseReception)
     {
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
-        if ($purchaseReception->business_id !== $businessId) abort(403);
+        if ($purchaseReception->business_id !== $businessId) {
+            abort(403);
+        }
 
         $purchaseReception->load([
             'items.product',
@@ -147,20 +181,25 @@ class PurchaseReceptionController extends Controller
     public function confirm(Request $request, PurchaseReception $purchaseReception)
     {
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
-        if ($purchaseReception->business_id !== $businessId) abort(403);
+        if ($purchaseReception->business_id !== $businessId) {
+            abort(403);
+        }
 
         if ($purchaseReception->status !== 'draft') {
             return response()->json(['message' => 'Only draft receptions can be confirmed'], 422);
         }
 
         $purchaseReception->update(['status' => 'confirmed']);
+
         return response()->json($purchaseReception);
     }
 
     public function destroy(Request $request, PurchaseReception $purchaseReception)
     {
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
-        if ($purchaseReception->business_id !== $businessId) abort(403);
+        if ($purchaseReception->business_id !== $businessId) {
+            abort(403);
+        }
 
         if ($purchaseReception->status !== 'draft') {
             return response()->json(['message' => 'Cannot delete confirmed reception'], 422);
@@ -174,10 +213,13 @@ class PurchaseReceptionController extends Controller
                     $product->decrement('quantity', $item->accepted_quantity);
                     $product->stockMovements()->create([
                         'business_id' => $purchaseReception->business_id,
-                        'type' => 'out',
+                        'type' => 'purchase_return',
                         'quantity' => $item->accepted_quantity,
-                        'reference' => $purchaseReception->grn_number,
-                        'notes' => "Reception reversal",
+                        'balance_after' => (string) $product->fresh()->quantity,
+                        'reference_type' => 'purchase_reception',
+                        'reference_id' => $purchaseReception->id,
+                        'notes' => 'Reception reversal',
+                        'moved_by' => $request->user()->id,
                     ]);
                 }
 
@@ -219,9 +261,10 @@ class PurchaseReceptionController extends Controller
             ->latest('id')
             ->value('grn_number');
         $number = 1;
-        if ($last && preg_match('/GRN-' . $year . '-(\d+)/', $last, $m)) {
-            $number = (int)$m[1] + 1;
+        if ($last && preg_match('/GRN-'.$year.'-(\d+)/', $last, $m)) {
+            $number = (int) $m[1] + 1;
         }
-        return 'GRN-' . $year . '-' . str_pad($number, 5, '0', STR_PAD_LEFT);
+
+        return 'GRN-'.$year.'-'.str_pad($number, 5, '0', STR_PAD_LEFT);
     }
 }

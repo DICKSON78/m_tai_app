@@ -5,7 +5,7 @@ import PageHeader from '../../components/casfeta/PageHeader';
 import SectionHeader from '../../components/casfeta/SectionHeader';
 import FormField from '../../components/casfeta/FormField';
 import ActionBar from '../../components/casfeta/ActionBar';
-import { Package, FileText, Image as ImageIcon, DollarSign, Hash, Tag, Video, Building2, Upload } from 'lucide-react';
+import { Package, FileText, Image as ImageIcon, DollarSign, Hash, Tag, Video, Building2, Upload, AlertTriangle, RotateCcw, ScanLine, MapPin } from 'lucide-react';
 
 export default function ProductFormPage() {
     const navigate = useNavigate();
@@ -30,6 +30,12 @@ export default function ProductFormPage() {
         retail_price: '',
         quantity: '',
         unit: 'pcs',
+        sku: '',
+        barcode: '',
+        low_stock_threshold: '5',
+        reorder_quantity: '10',
+        is_track_stock: true,
+        location: '',
     });
 
     const [imagePreview, setImagePreview] = useState(null);
@@ -81,6 +87,12 @@ export default function ProductFormPage() {
                         retail_price: p.retail_price || '',
                         quantity: p.quantity || '',
                         unit: p.unit || 'pcs',
+                        sku: p.sku || '',
+                        barcode: p.barcode || '',
+                        low_stock_threshold: p.low_stock_threshold || '5',
+                        reorder_quantity: p.reorder_quantity || '10',
+                        is_track_stock: p.is_track_stock !== false,
+                        location: p.location || '',
                     });
                     if (p.image_url || p.image) {
                         setImagePreview(p.image_url || `/storage/${p.image}`);
@@ -129,6 +141,12 @@ export default function ProductFormPage() {
         fd.append('retail_price', form.retail_price);
         fd.append('quantity', form.quantity);
         fd.append('unit', form.unit);
+        fd.append('sku', form.sku);
+        fd.append('barcode', form.barcode);
+        fd.append('low_stock_threshold', form.low_stock_threshold);
+        fd.append('reorder_quantity', form.reorder_quantity);
+        fd.append('is_track_stock', form.is_track_stock ? '1' : '0');
+        fd.append('location', form.location);
         fd.append('status', status);
         if (form.image) {
             fd.append('image', form.image);
@@ -425,8 +443,8 @@ export default function ProductFormPage() {
                     <div className="px-6 py-4 border-b border-gray-100">
                         <SectionHeader
                             icon={<Hash size={18} />}
-                            title="Stock"
-                            subtitle="Manage inventory quantity"
+                            title="Stock & Inventory"
+                            subtitle="Manage inventory quantity, reorder levels and tracking"
                         />
                     </div>
                     <div className="px-6 pb-6">
@@ -463,6 +481,99 @@ export default function ProductFormPage() {
                                     {units.map((u) => (
                                         <option key={u.value} value={u.value}>{u.label}</option>
                                     ))}
+                                </select>
+                            </FormField>
+
+                            <FormField
+                                label="Low Stock Threshold"
+                                icon={<AlertTriangle size={16} />}
+                                error={errors.low_stock_threshold?.[0]}
+                            >
+                                <input
+                                    type="number"
+                                    name="low_stock_threshold"
+                                    value={form.low_stock_threshold}
+                                    onChange={handleChange}
+                                    placeholder="5"
+                                    min="0"
+                                    className={`${inputClasses} ${errors.low_stock_threshold ? 'border-red-500' : ''}`}
+                                />
+                            </FormField>
+
+                            <FormField
+                                label="Reorder Quantity"
+                                icon={<RotateCcw size={16} />}
+                                error={errors.reorder_quantity?.[0]}
+                            >
+                                <input
+                                    type="number"
+                                    name="reorder_quantity"
+                                    value={form.reorder_quantity}
+                                    onChange={handleChange}
+                                    placeholder="10"
+                                    min="0"
+                                    className={`${inputClasses} ${errors.reorder_quantity ? 'border-red-500' : ''}`}
+                                />
+                            </FormField>
+
+                            <FormField
+                                label="SKU"
+                                icon={<Hash size={16} />}
+                                error={errors.sku?.[0]}
+                            >
+                                <input
+                                    type="text"
+                                    name="sku"
+                                    value={form.sku}
+                                    onChange={handleChange}
+                                    placeholder="e.g. SKU-ABC123"
+                                    className={`${inputClasses} ${errors.sku ? 'border-red-500' : ''}`}
+                                />
+                            </FormField>
+
+                            <FormField
+                                label="Barcode"
+                                icon={<ScanLine size={16} />}
+                                error={errors.barcode?.[0]}
+                            >
+                                <input
+                                    type="text"
+                                    name="barcode"
+                                    value={form.barcode}
+                                    onChange={handleChange}
+                                    placeholder="e.g. 6000000000000"
+                                    className={`${inputClasses} ${errors.barcode ? 'border-red-500' : ''}`}
+                                />
+                            </FormField>
+
+                            <FormField
+                                label="Storage Location"
+                                icon={<MapPin size={16} />}
+                                error={errors.location?.[0]}
+                            >
+                                <input
+                                    type="text"
+                                    name="location"
+                                    value={form.location}
+                                    onChange={handleChange}
+                                    placeholder="e.g. Warehouse A"
+                                    className={`${inputClasses} ${errors.location ? 'border-red-500' : ''}`}
+                                />
+                            </FormField>
+
+                            <FormField
+                                label="Track Stock"
+                                icon={<Package size={16} />}
+                                error={errors.is_track_stock?.[0]}
+                            >
+                                <select
+                                    name="is_track_stock"
+                                    value={form.is_track_stock}
+                                    onChange={(e) => setForm({ ...form, is_track_stock: e.target.value === 'true' })}
+                                    className={inputClasses}
+                                >
+                                    <option value="true">Yes — track inventory</option>
+                                    <option value="false">No — service / non-stock</option>
                                 </select>
                             </FormField>
                         </div>

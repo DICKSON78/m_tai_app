@@ -60,6 +60,12 @@ class ProductController extends Controller
             'retail_price' => 'nullable|numeric|min:0',
             'quantity' => 'required|integer|min:0',
             'unit' => 'nullable|string|max:50',
+            'sku' => 'nullable|string|max:255',
+            'barcode' => 'nullable|string|max:255',
+            'low_stock_threshold' => 'nullable|integer|min:0',
+            'reorder_quantity' => 'nullable|integer|min:0',
+            'is_track_stock' => 'nullable|boolean',
+            'location' => 'nullable|string|max:255',
         ]);
 
         $business = Business::findOrFail($validated['business_id']);
@@ -115,6 +121,12 @@ class ProductController extends Controller
             'retail_price' => 'nullable|numeric|min:0',
             'quantity' => 'sometimes|integer|min:0',
             'unit' => 'nullable|string|max:50',
+            'sku' => 'nullable|string|max:255',
+            'barcode' => 'nullable|string|max:255',
+            'low_stock_threshold' => 'nullable|integer|min:0',
+            'reorder_quantity' => 'nullable|integer|min:0',
+            'is_track_stock' => 'nullable|boolean',
+            'location' => 'nullable|string|max:255',
         ]);
 
         if ($request->hasFile('image')) {
