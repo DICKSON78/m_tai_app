@@ -18,7 +18,7 @@ steps:
           --cpu=1 \
           --min-instances=0 \
           --max-instances=5 \
-          --set-env-vars=APP_NAME=M-TAI,APP_ENV=production,APP_DEBUG=false,APP_URL=https://mtai-app-903291264005.africa-south1.run.app,APP_KEY=base64:E9A3w7BamTafIdrtuiF/HDg7oT3R+HmPOMaOtHXfvjA=,DB_CONNECTION=mysql,DB_HOST=127.0.0.1,DB_PORT=3306,DB_SOCKET=/cloudsql/project-83239cef-b08d-4558-b44:africa-south1:mtai-db,DB_DATABASE=mtai_production,DB_USERNAME=mtai_user,DB_PASSWORD=Mtai@2024Prod,RUN_MIGRATIONS=true,SESSION_DRIVER=database,SESSION_LIFETIME=120,CACHE_STORE=database,QUEUE_CONNECTION=database,SANCTUM_STATEFUL_DOMAINS=mtai-app-903291264005.africa-south1.run.app \
+          --set-env-vars=APP_NAME=M-TAI,APP_ENV=production,APP_DEBUG=false,APP_URL=https://mtai-app-903291264005.africa-south1.run.app,APP_KEY=base64:E9A3w7BamTafIdrtuiF/HDg7oT3R+HmPOMaOtHXfvjA=,DB_CONNECTION=mysql,DB_HOST=127.0.0.1,DB_PORT=3306,DB_SOCKET=/cloudsql/project-83239cef-b08d-4558-b44:africa-south1:mtai-db,DB_DATABASE=mtai_production,DB_USERNAME=mtai_user,DB_PASSWORD=Mtai@2024Prod,RUN_MIGRATIONS=false,SESSION_DRIVER=database,SESSION_LIFETIME=120,CACHE_STORE=database,QUEUE_CONNECTION=database,SANCTUM_STATEFUL_DOMAINS=mtai-app-903291264005.africa-south1.run.app \
           --add-cloudsql-instances=project-83239cef-b08d-4558-b44:africa-south1:mtai-db
 timeout: '1800s'
 options:
