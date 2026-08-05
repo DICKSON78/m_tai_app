@@ -144,7 +144,7 @@ class InventoryController extends Controller
         $this->authorizeBusiness($request, $business);
 
         $query = $business->stockMovements()
-            ->with(['product:id,name,image,unit', 'movedBy:id,first_name,last_name,name', 'batch:id,batch_number,expiry_date']);
+            ->with(['product:id,name,image,unit', 'movedBy:id,name', 'batch:id,batch_number,expiry_date']);
 
         if ($request->type) {
             $query->where('type', $request->type);
@@ -227,7 +227,7 @@ class InventoryController extends Controller
 
             return response()->json([
                 'message' => 'Hifadhi imesajiliwa.',
-                'movement' => $movement->load(['product:id,name', 'movedBy:id,first_name,last_name,name', 'batch:id,batch_number']),
+                'movement' => $movement->load(['product:id,name', 'movedBy:id,name', 'batch:id,batch_number']),
                 'new_quantity' => $product->quantity,
             ], 201);
         });
@@ -337,7 +337,7 @@ class InventoryController extends Controller
         $this->authorizeBusiness($request, $business);
 
         $counts = $business->stockCounts()
-            ->with('countedBy:id,first_name,last_name,name')
+            ->with('countedBy:id,name')
             ->when($request->status, fn ($q, $v) => $q->where('status', $v))
             ->orderBy('created_at', 'desc')
             ->paginate($request->per_page ?? 15);
@@ -395,7 +395,7 @@ class InventoryController extends Controller
 
         $stockCount->load([
             'items.product:id,name,sku,unit,image,buying_price,selling_price,low_stock_threshold',
-            'countedBy:id,first_name,last_name,name',
+            'countedBy:id,name',
         ]);
 
         return response()->json($stockCount);
