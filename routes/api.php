@@ -1,63 +1,67 @@
 <?php
 
-use App\Http\Controllers\Api\AuthApiController;
-use App\Http\Controllers\Api\DashboardApiController;
-use App\Http\Controllers\Api\BusinessController;
-use App\Http\Controllers\Api\ProductController;
-use App\Http\Controllers\Api\CategoryController;
-use App\Http\Controllers\Api\ShopController;
-use App\Http\Controllers\Api\CartController;
-use App\Http\Controllers\Api\OrderController;
-use App\Http\Controllers\Api\StockController;
-use App\Http\Controllers\Api\InventoryController;
-use App\Http\Controllers\Api\ExpenseController;
-use App\Http\Controllers\Api\ReportController;
-use App\Http\Controllers\Api\CustomerController;
-use App\Http\Controllers\Api\EmployeeController;
-use App\Http\Controllers\Api\LoanController;
-use App\Http\Controllers\Api\DeliveryController;
-use App\Http\Controllers\Api\TransporterController;
-use App\Http\Controllers\Api\NotificationController;
-use App\Http\Controllers\Api\ProfileController;
-use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\AdminController;
-use App\Http\Controllers\Api\ReviewController;
-use App\Http\Controllers\Api\CouponController;
-use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\AuditLogController;
-use App\Http\Controllers\Api\ReceiptController;
+use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\BarcodeController;
-use App\Http\Controllers\Api\ExportController;
-use App\Http\Controllers\Api\CreditSaleController;
-use App\Http\Controllers\Api\ImportGoodController;
-use App\Http\Controllers\Api\InvestmentController;
-use App\Http\Controllers\Api\FinanceAccountController;
-use App\Http\Controllers\Api\FinanceJournalController;
-use App\Http\Controllers\Api\FinanceInvoiceController;
-use App\Http\Controllers\Api\FinanceBillController;
-use App\Http\Controllers\Api\FinanceBankController;
-use App\Http\Controllers\Api\FinanceReportController;
-use App\Http\Controllers\Api\FinanceBudgetController;
-use App\Http\Controllers\Api\FinanceTaxController;
-use App\Http\Controllers\Api\GeneralLedgerController;
+use App\Http\Controllers\Api\BusinessController;
+use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CostCenterController;
-use App\Http\Controllers\Api\FixedAssetController;
+use App\Http\Controllers\Api\CouponController;
+use App\Http\Controllers\Api\CreditSaleController;
+use App\Http\Controllers\Api\CrmController;
 use App\Http\Controllers\Api\CurrencyController;
+use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\DashboardApiController;
+use App\Http\Controllers\Api\DeliveryController;
+use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\EmployeeDataController;
+use App\Http\Controllers\Api\ExpenseController;
+use App\Http\Controllers\Api\ExportController;
+use App\Http\Controllers\Api\FinanceAccountController;
+use App\Http\Controllers\Api\FinanceBankController;
+use App\Http\Controllers\Api\FinanceBillController;
+use App\Http\Controllers\Api\FinanceBudgetController;
+use App\Http\Controllers\Api\FinanceInvoiceController;
+use App\Http\Controllers\Api\FinanceJournalController;
+use App\Http\Controllers\Api\FinanceReportController;
+use App\Http\Controllers\Api\FinanceTaxController;
 use App\Http\Controllers\Api\FiscalPeriodController;
-use App\Http\Controllers\Api\SupplierController;
-use App\Http\Controllers\Api\PurchaseOrderController;
-use App\Http\Controllers\Api\PurchaseReceptionController;
-use App\Http\Controllers\Api\SupplierInvoiceController;
-use App\Http\Controllers\Api\SupplierPaymentController;
-use App\Http\Controllers\Api\HrEmployeeController;
+use App\Http\Controllers\Api\FixedAssetController;
+use App\Http\Controllers\Api\GeneralLedgerController;
 use App\Http\Controllers\Api\HrAttendanceController;
+use App\Http\Controllers\Api\HrBenefitController;
+use App\Http\Controllers\Api\HrDepartmentController;
+use App\Http\Controllers\Api\HrEmployeeController;
 use App\Http\Controllers\Api\HrLeaveController;
 use App\Http\Controllers\Api\HrPayrollController;
 use App\Http\Controllers\Api\HrPerformanceController;
-use App\Http\Controllers\Api\HrTrainingController;
 use App\Http\Controllers\Api\HrRecruitmentController;
-use App\Http\Controllers\Api\HrBenefitController;
-use App\Http\Controllers\Api\HrDepartmentController;
+use App\Http\Controllers\Api\HrTrainingController;
+use App\Http\Controllers\Api\ImportGoodController;
+use App\Http\Controllers\Api\InventoryController;
+use App\Http\Controllers\Api\InvestmentController;
+use App\Http\Controllers\Api\LoanController;
+use App\Http\Controllers\Api\ManufacturingController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\PurchaseOrderController;
+use App\Http\Controllers\Api\PurchaseReceptionController;
+use App\Http\Controllers\Api\ReceiptController;
+use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\SettingController;
+use App\Http\Controllers\Api\ShopController;
+use App\Http\Controllers\Api\StockController;
+use App\Http\Controllers\Api\SupplierController;
+use App\Http\Controllers\Api\SupplierInvoiceController;
+use App\Http\Controllers\Api\SupplierPaymentController;
+use App\Http\Controllers\Api\TransporterController;
+use App\Http\Controllers\Api\WarehouseController;
+use App\Http\Controllers\Api\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 // Public API routes
@@ -473,14 +477,70 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/benefits/{benefit}', [HrBenefitController::class, 'destroy']);
     });
 
+    // ── CRM ────────────────────────────────────────────
+    Route::middleware('role:business_owner,admin')->prefix('owner/crm')->group(function () {
+        Route::get('/summary', [CrmController::class, 'summary']);
+        Route::get('/leads', [CrmController::class, 'leads']);
+        Route::post('/leads', [CrmController::class, 'storeLead']);
+        Route::put('/leads/{lead}', [CrmController::class, 'updateLead']);
+        Route::delete('/leads/{lead}', [CrmController::class, 'destroyLead']);
+        Route::get('/deals', [CrmController::class, 'deals']);
+        Route::post('/deals', [CrmController::class, 'storeDeal']);
+        Route::put('/deals/{deal}', [CrmController::class, 'updateDeal']);
+        Route::delete('/deals/{deal}', [CrmController::class, 'destroyDeal']);
+        Route::get('/activities', [CrmController::class, 'activities']);
+        Route::post('/activities', [CrmController::class, 'storeActivity']);
+        Route::post('/activities/{activity}/complete', [CrmController::class, 'completeActivity']);
+        Route::delete('/activities/{activity}', [CrmController::class, 'destroyActivity']);
+        Route::get('/campaigns', [CrmController::class, 'campaigns']);
+        Route::post('/campaigns', [CrmController::class, 'storeCampaign']);
+        Route::put('/campaigns/{campaign}', [CrmController::class, 'updateCampaign']);
+        Route::delete('/campaigns/{campaign}', [CrmController::class, 'destroyCampaign']);
+    });
+
+    // ── Manufacturing ──────────────────────────────────
+    Route::middleware('role:business_owner,admin')->prefix('owner/manufacturing')->group(function () {
+        Route::get('/summary', [ManufacturingController::class, 'summary']);
+        Route::get('/boms', [ManufacturingController::class, 'boms']);
+        Route::post('/boms', [ManufacturingController::class, 'storeBom']);
+        Route::get('/boms/{bom}', [ManufacturingController::class, 'showBom']);
+        Route::put('/boms/{bom}', [ManufacturingController::class, 'updateBom']);
+        Route::delete('/boms/{bom}', [ManufacturingController::class, 'destroyBom']);
+        Route::get('/work-orders', [ManufacturingController::class, 'workOrders']);
+        Route::post('/work-orders', [ManufacturingController::class, 'storeWorkOrder']);
+        Route::get('/work-orders/{workOrder}', [ManufacturingController::class, 'showWorkOrder']);
+        Route::put('/work-orders/{workOrder}', [ManufacturingController::class, 'updateWorkOrder']);
+        Route::delete('/work-orders/{workOrder}', [ManufacturingController::class, 'destroyWorkOrder']);
+    });
+
+    // ── Warehouse Management ───────────────────────────
+    Route::middleware('role:business_owner,admin')->prefix('owner/warehouses')->group(function () {
+        Route::get('/summary', [WarehouseController::class, 'summary']);
+        Route::get('/', [WarehouseController::class, 'warehouses']);
+        Route::post('/', [WarehouseController::class, 'storeWarehouse']);
+        Route::get('/{warehouse}', [WarehouseController::class, 'showWarehouse']);
+        Route::put('/{warehouse}', [WarehouseController::class, 'updateWarehouse']);
+        Route::delete('/{warehouse}', [WarehouseController::class, 'destroyWarehouse']);
+        Route::post('/{warehouse}/zones', [WarehouseController::class, 'storeZone']);
+        Route::put('/zones/{zone}', [WarehouseController::class, 'updateZone']);
+        Route::delete('/zones/{zone}', [WarehouseController::class, 'destroyZone']);
+        Route::post('/zones/{zone}/bins', [WarehouseController::class, 'storeBinLocation']);
+        Route::delete('/bins/{bin}', [WarehouseController::class, 'destroyBinLocation']);
+        Route::get('/transfers/list', [WarehouseController::class, 'transfers']);
+        Route::post('/transfers', [WarehouseController::class, 'storeTransfer']);
+        Route::post('/transfers/{transfer}/confirm', [WarehouseController::class, 'confirmTransfer']);
+        Route::post('/transfers/{transfer}/cancel', [WarehouseController::class, 'cancelTransfer']);
+        Route::delete('/transfers/{transfer}', [WarehouseController::class, 'destroyTransfer']);
+    });
+
     // Employee
     Route::middleware('role:employee')->prefix('employee')->group(function () {
         Route::get('/dashboard', [DashboardApiController::class, 'employeeDashboard']);
-        Route::get('/inventory', [\App\Http\Controllers\Api\EmployeeDataController::class, 'inventory']);
-        Route::get('/customers', [\App\Http\Controllers\Api\EmployeeDataController::class, 'customers']);
-        Route::get('/deliveries', [\App\Http\Controllers\Api\EmployeeDataController::class, 'deliveries']);
-        Route::get('/expenses', [\App\Http\Controllers\Api\EmployeeDataController::class, 'expenses']);
-        Route::post('/expenses', [\App\Http\Controllers\Api\EmployeeDataController::class, 'storeExpense']);
+        Route::get('/inventory', [EmployeeDataController::class, 'inventory']);
+        Route::get('/customers', [EmployeeDataController::class, 'customers']);
+        Route::get('/deliveries', [EmployeeDataController::class, 'deliveries']);
+        Route::get('/expenses', [EmployeeDataController::class, 'expenses']);
+        Route::post('/expenses', [EmployeeDataController::class, 'storeExpense']);
     });
 
     // Customer

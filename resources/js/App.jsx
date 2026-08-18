@@ -94,6 +94,8 @@ import TaxSettingsPage from './pages/finance/TaxSettingsPage';
 import GeneralLedgerPage from './pages/finance/GeneralLedgerPage';
 import CostCentersPage from './pages/finance/CostCentersPage';
 import FixedAssetsPage from './pages/finance/FixedAssetsPage';
+import FiscalPeriodsPage from './pages/finance/FiscalPeriodsPage';
+import CurrencyPage from './pages/finance/CurrencyPage';
 
 // HR pages
 import EmployeeDirectoryPage from './pages/hr/EmployeeDirectoryPage';
@@ -102,11 +104,18 @@ import LeaveManagementPage from './pages/hr/LeaveManagementPage';
 import PayrollPage from './pages/hr/PayrollPage';
 import PerformancePage from './pages/hr/PerformancePage';
 import RecruitmentPage from './pages/hr/RecruitmentPage';
+import TrainingPage from './pages/hr/TrainingPage';
+import BenefitsPage from './pages/hr/BenefitsPage';
 
 // Purchase pages
 import SuppliersPage from './pages/purchases/SuppliersPage';
 import PurchaseOrdersPage from './pages/purchases/PurchaseOrdersPage';
 import SupplierPaymentsPage from './pages/purchases/SupplierPaymentsPage';
+
+// CRM, Manufacturing, Warehouse pages
+import CrmPage from './pages/owner/CrmPage';
+import ManufacturingPage from './pages/owner/ManufacturingPage';
+import WarehousePage from './pages/owner/WarehousePage';
 
 // Employee pages
 import EmployeeCustomersPage from './pages/employee/EmployeeCustomersPage';
@@ -283,6 +292,8 @@ function AppRoutes() {
             <Route path="/owner/finance/general-ledger" element={<ProtectedRoute roles={['business_owner', 'admin']}><GeneralLedgerPage /></ProtectedRoute>} />
             <Route path="/owner/finance/cost-centers" element={<ProtectedRoute roles={['business_owner', 'admin']}><CostCentersPage /></ProtectedRoute>} />
             <Route path="/owner/finance/fixed-assets" element={<ProtectedRoute roles={['business_owner', 'admin']}><FixedAssetsPage /></ProtectedRoute>} />
+            <Route path="/owner/finance/fiscal-periods" element={<ProtectedRoute roles={['business_owner', 'admin']}><FiscalPeriodsPage /></ProtectedRoute>} />
+            <Route path="/owner/finance/currencies" element={<ProtectedRoute roles={['business_owner', 'admin']}><CurrencyPage /></ProtectedRoute>} />
 
             {/* Owner - HR Routes */}
             <Route path="/owner/hr/employees" element={<ProtectedRoute roles={['business_owner', 'admin']}><EmployeeDirectoryPage /></ProtectedRoute>} />
@@ -291,6 +302,13 @@ function AppRoutes() {
             <Route path="/owner/hr/payroll" element={<ProtectedRoute roles={['business_owner', 'admin']}><PayrollPage /></ProtectedRoute>} />
             <Route path="/owner/hr/performance" element={<ProtectedRoute roles={['business_owner', 'admin']}><PerformancePage /></ProtectedRoute>} />
             <Route path="/owner/hr/recruitment" element={<ProtectedRoute roles={['business_owner', 'admin']}><RecruitmentPage /></ProtectedRoute>} />
+            <Route path="/owner/hr/training" element={<ProtectedRoute roles={['business_owner', 'admin']}><TrainingPage /></ProtectedRoute>} />
+            <Route path="/owner/hr/benefits" element={<ProtectedRoute roles={['business_owner', 'admin']}><BenefitsPage /></ProtectedRoute>} />
+
+            {/* Owner - CRM, Manufacturing, Warehouse Routes */}
+            <Route path="/owner/crm" element={<ProtectedRoute roles={['business_owner', 'admin']}><CrmPage /></ProtectedRoute>} />
+            <Route path="/owner/manufacturing" element={<ProtectedRoute roles={['business_owner', 'admin']}><ManufacturingPage /></ProtectedRoute>} />
+            <Route path="/owner/warehouses" element={<ProtectedRoute roles={['business_owner', 'admin']}><WarehousePage /></ProtectedRoute>} />
 
             {/* Owner - Purchase Routes */}
             <Route path="/owner/purchases/suppliers" element={<ProtectedRoute roles={['business_owner', 'admin']}><SuppliersPage /></ProtectedRoute>} />

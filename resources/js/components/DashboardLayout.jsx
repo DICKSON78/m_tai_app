@@ -35,6 +35,8 @@ const navConfig = {
             { to: '/owner/finance/general-ledger', label: 'General Ledger', icon: 'clipboard' },
             { to: '/owner/finance/cost-centers', label: 'Cost Centers', icon: 'collection' },
             { to: '/owner/finance/fixed-assets', label: 'Fixed Assets', icon: 'building' },
+            { to: '/owner/finance/fiscal-periods', label: 'Fiscal Periods', icon: 'calendar' },
+            { to: '/owner/finance/currencies', label: 'Currencies', icon: 'currency-dollar' },
         ]},
         { label: 'HR', items: [
             { to: '/admin/hr', label: 'HR Overview', icon: 'user-group' },
@@ -44,6 +46,11 @@ const navConfig = {
             { to: '/owner/hr/payroll', label: 'Payroll', icon: 'banknotes' },
             { to: '/owner/hr/performance', label: 'Performance', icon: 'trending-up' },
             { to: '/owner/hr/recruitment', label: 'Recruitment', icon: 'user-group' },
+            { to: '/owner/hr/training', label: 'Training', icon: 'clipboard' },
+            { to: '/owner/hr/benefits', label: 'Benefits', icon: 'heart' },
+        ]},
+        { label: 'CRM & Sales', items: [
+            { to: '/owner/crm', label: 'CRM', icon: 'users' },
         ]},
         { label: 'Purchases', items: [
             { to: '/owner/purchases/suppliers', label: 'Suppliers', icon: 'truck' },
@@ -52,6 +59,8 @@ const navConfig = {
         ]},
         { label: 'Operations', items: [
             { to: '/admin/deliveries', label: 'Deliveries', icon: 'truck' },
+            { to: '/owner/warehouses', label: 'Warehouses', icon: 'building' },
+            { to: '/owner/manufacturing', label: 'Manufacturing', icon: 'clipboard' },
         ]},
         { label: 'Marketing', items: [
             { to: '/admin/announcements', label: 'Announcements', icon: 'megaphone' },
@@ -108,6 +117,8 @@ const navConfig = {
             { to: '/owner/finance/general-ledger', label: 'General Ledger', icon: 'clipboard' },
             { to: '/owner/finance/cost-centers', label: 'Cost Centers', icon: 'collection' },
             { to: '/owner/finance/fixed-assets', label: 'Fixed Assets', icon: 'building' },
+            { to: '/owner/finance/fiscal-periods', label: 'Fiscal Periods', icon: 'calendar' },
+            { to: '/owner/finance/currencies', label: 'Currencies', icon: 'currency-dollar' },
         ]},
         { label: 'HR', items: [
             { to: '/owner/hr/employees', label: 'Employee Directory', icon: 'users' },
@@ -116,11 +127,20 @@ const navConfig = {
             { to: '/owner/hr/payroll', label: 'Payroll', icon: 'banknotes' },
             { to: '/owner/hr/performance', label: 'Performance', icon: 'trending-up' },
             { to: '/owner/hr/recruitment', label: 'Recruitment', icon: 'user-group' },
+            { to: '/owner/hr/training', label: 'Training', icon: 'clipboard' },
+            { to: '/owner/hr/benefits', label: 'Benefits', icon: 'heart' },
+        ]},
+        { label: 'CRM & Sales', items: [
+            { to: '/owner/crm', label: 'CRM', icon: 'users' },
         ]},
         { label: 'Purchases', items: [
             { to: '/owner/purchases/suppliers', label: 'Suppliers', icon: 'truck' },
             { to: '/owner/purchases/orders', label: 'Purchase Orders', icon: 'shopping-cart' },
             { to: '/owner/purchases/payments', label: 'Supplier Payments', icon: 'credit-card' },
+        ]},
+        { label: 'Operations', items: [
+            { to: '/owner/warehouses', label: 'Warehouses', icon: 'building' },
+            { to: '/owner/manufacturing', label: 'Manufacturing', icon: 'clipboard' },
         ]},
     ],
     employee: [
