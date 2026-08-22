@@ -50,6 +50,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PurchaseOrderController;
 use App\Http\Controllers\Api\PurchaseReceptionController;
+use App\Http\Controllers\Api\PushNotificationController;
 use App\Http\Controllers\Api\ReceiptController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ReviewController;
@@ -88,6 +89,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/notifications/read-all', [NotificationController::class, 'markAllRead']);
     Route::put('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
+
+    // Push Notifications
+    Route::post('/push/subscribe', [PushNotificationController::class, 'subscribe']);
+    Route::post('/push/unsubscribe', [PushNotificationController::class, 'unsubscribe']);
+    Route::post('/push/test', [PushNotificationController::class, 'testPush']);
 
     // Business Owner - Businesses
     Route::middleware('role:business_owner')->prefix('owner')->group(function () {

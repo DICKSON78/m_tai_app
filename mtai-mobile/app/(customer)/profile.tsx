@@ -6,6 +6,7 @@ import Card from '../../src/components/Card';
 import Button from '../../src/components/Button';
 import Avatar from '../../src/components/Avatar';
 import { useAuthStore } from '../../src/store/authStore';
+import usePushNotifications from '../../src/hooks/usePushNotifications';
 import { COLORS, SPACING, FONTS, RADIUS } from '../../src/constants/theme';
 import { User } from '../../src/api/types';
 
@@ -22,6 +23,8 @@ export default function ProfileScreen() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [enablingNotifications, setEnablingNotifications] = useState(false);
+  const { pushToken, requestPermission } = usePushNotifications();
 
   const handleLogout = () => {
     Alert.alert('Log Out', 'Are you sure you want to log out?', [
@@ -39,6 +42,20 @@ export default function ProfileScreen() {
       Alert.alert('Error', 'Failed to log out. Please try again.');
     } finally {
       setLoggingOut(false);
+    }
+  };
+
+  const handleEnableNotifications = async () => {
+    setEnablingNotifications(true);
+    try {
+      const token = await requestPermission();
+      if (!token) {
+        Alert.alert('Notifications', 'Push notifications are not available on this device.');
+      }
+    } catch {
+      Alert.alert('Error', 'Failed to enable push notifications. Please try again.');
+    } finally {
+      setEnablingNotifications(false);
     }
   };
 
@@ -74,6 +91,39 @@ export default function ProfileScreen() {
               </Text>
             </View>
           ))}
+        </Card>
+
+        {/* Notifications */}
+        <Card style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Notifications</Text>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Push Notifications</Text>
+            <View
+              style={[
+                styles.statusBadge,
+                pushToken ? styles.statusEnabled : styles.statusDisabled,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.statusText,
+                  pushToken ? styles.statusTextEnabled : styles.statusTextDisabled,
+                ]}
+              >
+                {pushToken ? 'Enabled' : 'Disabled'}
+              </Text>
+            </View>
+          </View>
+          {!pushToken && (
+            <Button
+              title="Enable Notifications"
+              variant="secondary"
+              onPress={handleEnableNotifications}
+              loading={enablingNotifications}
+              size="sm"
+              style={styles.notificationButton}
+            />
+          )}
         </Card>
 
         {/* Actions */}
@@ -157,6 +207,32 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.text,
     textAlign: 'right',
+  },
+  statusBadge: {
+    borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: SPACING.xs,
+  },
+  statusEnabled: {
+    backgroundColor: COLORS.green[100],
+  },
+  statusDisabled: {
+    backgroundColor: COLORS.gray[100],
+  },
+  statusText: {
+    fontSize: FONTS.size.xs,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  statusTextEnabled: {
+    color: COLORS.green[700],
+  },
+  statusTextDisabled: {
+    color: COLORS.gray[500],
+  },
+  notificationButton: {
+    marginTop: SPACING.md,
+    alignSelf: 'flex-start',
   },
   logoutButton: {
     marginHorizontal: SPACING.lg,

@@ -345,6 +345,23 @@ class OrderController extends Controller
             $order->payments()->update(['status' => 'confirmed', 'received_by' => $user->id]);
         }
 
+        $statusNotifications = [
+            'confirmed' => ['Order confirmed', "Agizo lako {$order->transaction_code} limethibitishwa."],
+            'shipped' => ['Order is on the way', "Agizo lako {$order->transaction_code} liko njiani kwenda kwako."],
+            'delivered' => ['Order delivered', "Agizo lako {$order->transaction_code} limefika salama."],
+        ];
+
+        if (isset($statusNotifications[$validated['status']]) && $order->customer && $order->customer->user) {
+            [$title, $body] = $statusNotifications[$validated['status']];
+
+            PushNotificationController::sendNotification($order->customer->user, $title, $body, [
+                'type' => 'order_status',
+                'order_id' => $order->id,
+                'transaction_code' => $order->transaction_code,
+                'status' => $validated['status'],
+            ]);
+        }
+
         $order->load(['items.product', 'payments']);
 
         return response()->json([

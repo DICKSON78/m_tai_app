@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Business;
+use App\Models\Customer;
 use App\Models\Delivery;
 use App\Models\Transporter;
 use Illuminate\Http\Request;
@@ -57,9 +58,9 @@ class DeliveryController extends Controller
             'is_negotiable' => 'sometimes|boolean',
         ]);
 
-        if (!empty($validated['order_id'])) {
+        if (! empty($validated['order_id'])) {
             $order = $business->orders()->find($validated['order_id']);
-            if (!$order) {
+            if (! $order) {
                 return response()->json(['message' => 'Agizo hilo halihusiani na biashara hii.'], 422);
             }
         }
@@ -165,13 +166,39 @@ class DeliveryController extends Controller
         ];
 
         $allowed = $validTransitions[$delivery->status] ?? [];
-        if (!in_array($newStatus, $allowed)) {
+        if (! in_array($newStatus, $allowed)) {
             return response()->json([
                 'message' => "Hali ya usafirishaji haiwezi kubadilishwa kutoka '{$delivery->status}' hadi '{$newStatus}'.",
             ], 422);
         }
 
         $delivery->update(['status' => $newStatus]);
+
+        if ($newStatus === 'in_transit' && $delivery->customer && $delivery->customer->user) {
+            PushNotificationController::sendNotification(
+                $delivery->customer->user,
+                'Delivery picked up',
+                "Bidhaa zako zimechukuliwa na ziko njiani kwenda {$delivery->destination}.",
+                [
+                    'type' => 'delivery_status',
+                    'delivery_id' => $delivery->id,
+                    'status' => $newStatus,
+                ]
+            );
+        }
+
+        if ($newStatus === 'delivered' && $delivery->customer && $delivery->customer->user) {
+            PushNotificationController::sendNotification(
+                $delivery->customer->user,
+                'Delivered',
+                "Usafirishaji umekamilika na umefika {$delivery->destination}.",
+                [
+                    'type' => 'delivery_status',
+                    'delivery_id' => $delivery->id,
+                    'status' => $newStatus,
+                ]
+            );
+        }
 
         return response()->json([
             'message' => 'Hali ya usafirishaji imesasishwa.',
@@ -203,7 +230,7 @@ class DeliveryController extends Controller
 
         $transporter = Transporter::findOrFail($validated['transporter_id']);
 
-        if (!$transporter->is_active) {
+        if (! $transporter->is_active) {
             return response()->json(['message' => 'Msafirishaji si hai.'], 422);
         }
 
@@ -211,6 +238,19 @@ class DeliveryController extends Controller
             'transporter_id' => $transporter->id,
             'status' => 'accepted',
         ]);
+
+        if ($transporter->user) {
+            PushNotificationController::sendNotification(
+                $transporter->user,
+                'Delivery assigned',
+                "Umepewa usafirishaji mpya kutoka {$delivery->pickup_location} kwenda {$delivery->destination}.",
+                [
+                    'type' => 'delivery_status',
+                    'delivery_id' => $delivery->id,
+                    'status' => 'accepted',
+                ]
+            );
+        }
 
         return response()->json([
             'message' => 'Msafirishaji ameajiriwa.',
@@ -239,9 +279,9 @@ class DeliveryController extends Controller
     public function customerDeliveries(Request $request)
     {
         $user = $request->user();
-        $customer = \App\Models\Customer::where('user_id', $user->id)->first();
+        $customer = Customer::where('user_id', $user->id)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             return response()->json(['data' => []]);
         }
 
