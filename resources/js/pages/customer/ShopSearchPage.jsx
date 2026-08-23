@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../services/api';
-import Layout from '../../components/Layout';
 import Pagination from '../../components/Pagination';
 import PageHeader from '../../components/casfeta/PageHeader';
 import { Store } from 'lucide-react';
@@ -73,7 +72,7 @@ export default function ShopSearchPage() {
     };
 
     return (
-        <Layout>
+        <div>
             <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-2">
                 <PageHeader title="Shops" subtitle="Browse and search available shops" icon={<Store size={20} />} />
             </div>
@@ -221,6 +220,6 @@ export default function ShopSearchPage() {
                     </>
                 )}
             </div>
-        </Layout>
+        </div>
     );
 }

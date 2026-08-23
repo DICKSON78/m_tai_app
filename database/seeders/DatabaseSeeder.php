@@ -1458,5 +1458,148 @@ class DatabaseSeeder extends Seeder
                 'is_read' => false,
             ]
         );
+
+        $this->seedCrm();
+        $this->seedManufacturing();
+        $this->seedWarehouses();
+    }
+
+    private function seedCrm(): void
+    {
+        if (\App\Models\Lead::count() > 0) return;
+
+        $leads = [
+            ['name' => 'Juma Kilonzo', 'email' => 'juma@kilolink.co.tz', 'phone' => '+255712345678', 'company' => 'KiloLink Ltd', 'status' => 'new', 'source' => 'website', 'estimated_value' => 5000000],
+            ['name' => 'Amina Bakari', 'email' => 'amina@dafahosi.co.tz', 'phone' => '+255723456789', 'company' => 'Dafa Hosi', 'status' => 'contacted', 'source' => 'referral', 'estimated_value' => 3500000],
+            ['name' => 'Peter Mwangi', 'email' => 'peter@mwangitraders.co.tz', 'phone' => '+255734567890', 'company' => 'Mwangi Traders', 'status' => 'qualified', 'source' => 'social_media', 'estimated_value' => 8000000],
+            ['name' => 'Fatima Omar', 'email' => 'fatima@zanzibarimports.co.tz', 'phone' => '+255745678901', 'company' => 'Zanzibar Imports', 'status' => 'proposal', 'source' => 'exhibition', 'estimated_value' => 12000000],
+        ];
+
+        foreach ($leads as $lead) {
+            \App\Models\Lead::create(array_merge($lead, ['business_id' => $this->businessId]));
+        }
+
+        $deals = [
+            ['title' => 'KiloLink ERP Setup', 'amount' => 5000000, 'stage' => 'proposal', 'expected_close_date' => now()->addDays(30)],
+            ['title' => 'Dafa Hosi Inventory', 'amount' => 3500000, 'stage' => 'negotiation', 'expected_close_date' => now()->addDays(14)],
+        ];
+        foreach ($deals as $deal) {
+            \App\Models\CrmDeal::create(array_merge($deal, ['business_id' => $this->businessId, 'lead_id' => \App\Models\Lead::first()->id]));
+        }
+
+        $activities = [
+            ['type' => 'call', 'subject' => 'Initial call with Juma', 'due_date' => now()->addDay(), 'completed' => false],
+            ['type' => 'email', 'subject' => 'Send proposal to Amina', 'due_date' => now()->addDays(3), 'completed' => false],
+            ['type' => 'meeting', 'subject' => 'Product demo for Peter', 'due_date' => now()->addWeek(), 'completed' => false],
+        ];
+        foreach ($activities as $activity) {
+            \App\Models\CrmActivity::create(array_merge($activity, ['business_id' => $this->businessId, 'lead_id' => \App\Models\Lead::first()->id]));
+        }
+    }
+
+    private function seedManufacturing(): void
+    {
+        if (\App\Models\BillOfMaterial::count() > 0) return;
+
+        $products = \App\Models\Product::where('business_id', $this->businessId)->take(3)->get();
+        if ($products->isEmpty()) return;
+
+        $bom = \App\Models\BillOfMaterial::create([
+            'business_id' => $this->businessId,
+            'name' => 'BOM - Product Bundle A',
+            'code' => 'BOM-001',
+            'product_id' => $products->first()->id,
+            'quantity' => 10,
+            'status' => 'active',
+        ]);
+
+        foreach ($products->slice(1) as $product) {
+            \App\Models\BillOfMaterialItem::create([
+                'bill_of_material_id' => $bom->id,
+                'product_id' => $product->id,
+                'quantity' => rand(1, 5),
+                'unit_cost' => $product->buying_price,
+            ]);
+        }
+
+        \App\Models\WorkOrder::create([
+            'business_id' => $this->businessId,
+            'order_number' => 'WO-' . strtoupper(\Illuminate\Support\Str::random(6)),
+            'bill_of_material_id' => $bom->id,
+            'product_name' => $products->first()->name,
+            'quantity_planned' => 10,
+            'status' => 'planned',
+            'estimated_cost' => 500000,
+            'planned_start' => now()->addDays(2),
+            'planned_end' => now()->addDays(5),
+        ]);
+
+        \App\Models\WorkOrder::create([
+            'business_id' => $this->businessId,
+            'order_number' => 'WO-' . strtoupper(\Illuminate\Support\Str::random(6)),
+            'bill_of_material_id' => $bom->id,
+            'product_name' => $products->first()->name,
+            'quantity_planned' => 20,
+            'quantity_completed' => 20,
+            'status' => 'completed',
+            'estimated_cost' => 1000000,
+            'planned_start' => now()->subWeek(),
+            'planned_end' => now()->subDays(2),
+            'actual_start' => now()->subWeek()->toDateString(),
+            'actual_end' => now()->subDays(2)->toDateString(),
+        ]);
+    }
+
+    private function seedWarehouses(): void
+    {
+        if (\App\Models\Warehouse::where('business_id', $this->businessId)->count() > 0) return;
+
+        $warehouse = \App\Models\Warehouse::create([
+            'business_id' => $this->businessId,
+            'name' => 'Maghala Mkuu',
+            'code' => 'WH-001',
+            'address' => 'Barabara ya Morogoro, Dar es Salaam',
+            'manager_name' => 'John Mwamba',
+            'manager_phone' => '+255756789012',
+            'status' => 'active',
+        ]);
+
+        $zone = \App\Models\WarehouseZone::create([
+            'warehouse_id' => $warehouse->id,
+            'name' => 'Zone A - Vyakula',
+            'code' => 'ZA',
+            'description' => 'Kwa ajili ya bidhaa za vyakula',
+            'temperature_controlled' => true,
+        ]);
+
+        \App\Models\BinLocation::create([
+            'warehouse_zone_id' => $zone->id,
+            'name' => 'Rack A1',
+            'code' => 'A1-01',
+            'aisle' => 'A',
+            'rack' => '1',
+            'shelf' => '1',
+            'max_capacity' => 100,
+            'status' => 'active',
+        ]);
+
+        \App\Models\BinLocation::create([
+            'warehouse_zone_id' => $zone->id,
+            'name' => 'Rack A2',
+            'code' => 'A2-01',
+            'aisle' => 'A',
+            'rack' => '2',
+            'shelf' => '1',
+            'max_capacity' => 100,
+            'status' => 'active',
+        ]);
+
+        $product = \App\Models\Product::where('business_id', $this->businessId)->first();
+        if ($product) {
+            $bin = \App\Models\BinLocation::first();
+            if ($bin) {
+                $bin->update(['product_id' => $product->id, 'current_quantity' => min(50, $product->quantity)]);
+            }
+        }
     }
 }

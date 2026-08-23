@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import Layout from '../../components/Layout';
 
 export default function CartPage() {
     const navigate = useNavigate();
@@ -68,16 +67,16 @@ export default function CartPage() {
 
     if (loading) {
         return (
-            <Layout>
+            <div>
                 <div className="flex items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
                 </div>
-            </Layout>
+            </div>
         );
     }
 
     return (
-        <Layout>
+        <div>
             <div style={{ background: 'linear-gradient(135deg, #12601f 0%, #133d29 50%, #0f2a1c 100%)' }} className="rounded-2xl p-8 overflow-hidden mx-4 mt-4">
                 <div className="py-2">
                     <h1 className="text-2xl font-bold text-white">My Cart</h1>
@@ -250,6 +249,6 @@ export default function CartPage() {
                     </div>
                 )}
             </div>
-        </Layout>
+        </div>
     );
 }

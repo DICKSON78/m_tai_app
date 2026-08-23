@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import Layout from '../../components/Layout';
 
 const PAYMENT_METHODS = [
     {
@@ -135,17 +134,17 @@ export default function CheckoutPage() {
 
     if (loading) {
         return (
-            <Layout>
+            <div>
                 <div className="flex items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
                 </div>
-            </Layout>
+            </div>
         );
     }
 
     if (orderSuccess) {
         return (
-            <Layout>
+            <div>
                 <div className="max-w-2xl mx-auto px-4 py-12">
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                         <div className="p-8 text-center" style={{ background: 'linear-gradient(135deg, #d0f4dd 0%, #b8f0cc 100%)' }}>
@@ -216,13 +215,13 @@ export default function CheckoutPage() {
                         </div>
                     </div>
                 </div>
-            </Layout>
+            </div>
         );
     }
 
     if (items.length === 0) {
         return (
-            <Layout>
+            <div>
                 <div className="max-w-2xl mx-auto px-4 py-16 text-center">
                     <h2 className="text-xl font-bold text-gray-800 mb-2">Cart is empty</h2>
                     <p className="text-gray-500 mb-6">Add items before checkout.</p>
@@ -233,12 +232,12 @@ export default function CheckoutPage() {
                         Browse Shop
                     </Link>
                 </div>
-            </Layout>
+            </div>
         );
     }
 
     return (
-        <Layout>
+        <div>
             <div style={{ background: 'linear-gradient(135deg, #12601f 0%, #133d29 50%, #0f2a1c 100%)' }} className="rounded-2xl p-8 overflow-hidden mx-4 mt-4">
                 <div className="py-2">
                     <div className="flex items-center space-x-2 text-sm text-white/70 mb-2">
@@ -450,6 +449,6 @@ export default function CheckoutPage() {
                     </div>
                 </div>
             </div>
-        </Layout>
+        </div>
     );
 }

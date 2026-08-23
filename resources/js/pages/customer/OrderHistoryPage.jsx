@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import Layout from '../../components/Layout';
 import Pagination from '../../components/Pagination';
 import PageHeader from '../../components/casfeta/PageHeader';
 import { ShoppingCart } from 'lucide-react';
@@ -84,7 +83,7 @@ export default function OrderHistoryPage() {
     const getPaymentStatusConfig = (status) => PAYMENT_STATUS_CONFIG[status] || { label: status, badge: 'badge badge-gray' };
 
     return (
-        <Layout>
+        <div>
             <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-2">
                 <PageHeader title="My Orders" subtitle="View your order history and track deliveries" icon={<ShoppingCart size={20} />} />
             </div>
@@ -215,6 +214,6 @@ export default function OrderHistoryPage() {
                     </>
                 )}
             </div>
-        </Layout>
+        </div>
     );
 }

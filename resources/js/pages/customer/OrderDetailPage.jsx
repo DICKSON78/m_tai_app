@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
-import Layout from '../../components/Layout';
 import { X, RotateCcw, CheckCircle } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -103,17 +102,17 @@ export default function OrderDetailPage() {
 
     if (loading) {
         return (
-            <Layout>
+            <div>
                 <div className="flex items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
                 </div>
-            </Layout>
+            </div>
         );
     }
 
     if (error) {
         return (
-            <Layout>
+            <div>
                 <div className="max-w-3xl mx-auto px-4 py-16 text-center">
                     <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl mb-6">
                         {error}
@@ -125,7 +124,7 @@ export default function OrderDetailPage() {
                         Back to Orders
                     </Link>
                 </div>
-            </Layout>
+            </div>
         );
     }
 
@@ -144,7 +143,7 @@ export default function OrderDetailPage() {
     const timeline = order.timeline || order.status_history || order.statuses || [];
 
     return (
-        <Layout>
+        <div>
             <div style={{ background: 'linear-gradient(135deg, #12601f 0%, #133d29 50%, #0f2a1c 100%)' }} className="rounded-2xl p-8 overflow-hidden mx-4 mt-4">
                 <div className="max-w-5xl mx-auto py-2">
                     <div className="flex items-center space-x-2 text-sm text-white/70 mb-2">
@@ -393,6 +392,6 @@ export default function OrderDetailPage() {
                     </div>
                 </div>
             </div>
-        </Layout>
+        </div>
     );
 }

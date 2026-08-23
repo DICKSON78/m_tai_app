@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import Layout from '../../components/Layout';
 
 export default function ReviewFormPage() {
     const { productId } = useParams();
@@ -53,7 +52,7 @@ export default function ReviewFormPage() {
 
     if (loading) {
         return (
-            <Layout>
+            <div>
                 <div className="max-w-2xl mx-auto px-4 py-8">
                     <div className="animate-pulse space-y-6">
                         <div className="h-8 bg-gray-200 rounded w-1/3" />
@@ -71,13 +70,13 @@ export default function ReviewFormPage() {
                         </div>
                     </div>
                 </div>
-            </Layout>
+            </div>
         );
     }
 
     if (success) {
         return (
-            <Layout>
+            <div>
                 <div className="max-w-2xl mx-auto px-4 py-8">
                     <div className="card empty-state">
                         <div className="w-20 h-20 bg-primary-light rounded-full flex items-center justify-center mx-auto mb-6">
@@ -89,12 +88,12 @@ export default function ReviewFormPage() {
                         <p className="text-gray-500">Thank you for your review. Redirecting to order history...</p>
                     </div>
                 </div>
-            </Layout>
+            </div>
         );
     }
 
     return (
-        <Layout>
+        <div>
             <div style={{ background: 'linear-gradient(135deg, #12601f 0%, #133d29 50%, #0f2a1c 100%)' }} className="rounded-2xl p-8 overflow-hidden mx-4 mt-4">
                 <div className="max-w-2xl mx-auto py-2">
                     <h1 className="text-2xl font-bold text-white">Write Review</h1>
@@ -240,6 +239,6 @@ export default function ReviewFormPage() {
                     </div>
                 )}
             </div>
-        </Layout>
+        </div>
     );
 }

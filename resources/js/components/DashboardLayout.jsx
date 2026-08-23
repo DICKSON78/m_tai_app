@@ -87,6 +87,8 @@ const navConfig = {
         ]},
         { label: 'Business', items: [
             { to: '/owner/inventory', label: 'Inventory', icon: 'clipboard' },
+            { to: '/owner/orders', label: 'Orders', icon: 'shopping-cart' },
+            { to: '/owner/notifications', label: 'Notifications', icon: 'home' },
             { to: '/owner/loans', label: 'Loans', icon: 'banknotes' },
             { to: '/owner/expenses', label: 'Expenses', icon: 'currency-dollar' },
             { to: '/owner/credit-sales', label: 'Credit Sales', icon: 'credit-card' },
@@ -151,6 +153,9 @@ const navConfig = {
             { to: '/employee/expenses', label: 'Expenses', icon: 'currency-dollar' },
             { to: '/employee/deliveries', label: 'Deliveries', icon: 'truck' },
         ]},
+        { label: 'Account', items: [
+            { to: '/employee/profile', label: 'Profile', icon: 'user' },
+        ]},
     ],
     customer: [
         { label: 'Shopping', items: [
@@ -168,6 +173,9 @@ const navConfig = {
         { label: 'Work', items: [
             { to: '/transporter/dashboard', label: 'Dashboard', icon: 'home' },
             { to: '/transporter/deliveries', label: 'Deliveries', icon: 'truck' },
+        ]},
+        { label: 'Account', items: [
+            { to: '/transporter/profile', label: 'Profile', icon: 'user' },
         ]},
     ],
 };
@@ -321,7 +329,10 @@ export default function DashboardLayout({ children }) {
     const userInitials = (user?.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
     const roleLabel = { business_owner: 'Business Owner', admin: 'Administrator', employee: 'Employee', customer: 'Customer', transporter: 'Transporter' }[role] || role;
 
-    const settingsPath = `/${role === 'business_owner' ? 'owner' : role}/settings`;
+    const rolePrefix = role === 'business_owner' ? 'owner' : role;
+    const profilePath = `/${rolePrefix}/profile`;
+    const hasSettings = role === 'business_owner' || role === 'admin';
+    const settingsPath = hasSettings ? `/${rolePrefix}/settings` : profilePath;
 
     const sidebarContent = (
         <>
@@ -537,7 +548,7 @@ export default function DashboardLayout({ children }) {
                                     </svg>
                                     Settings
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => navigate(settingsPath)} className="cursor-pointer">
+                                <DropdownMenuItem onClick={() => navigate(profilePath)} className="cursor-pointer">
                                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>

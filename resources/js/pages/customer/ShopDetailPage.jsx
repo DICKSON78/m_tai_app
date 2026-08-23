@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../../services/api';
-import Layout from '../../components/Layout';
 import Pagination from '../../components/Pagination';
 
 export default function ShopDetailPage() {
@@ -118,17 +117,17 @@ export default function ShopDetailPage() {
 
     if (loading) {
         return (
-            <Layout>
+            <div>
                 <div className="flex items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
                 </div>
-            </Layout>
+            </div>
         );
     }
 
     if (!shop) {
         return (
-            <Layout>
+            <div>
                 <div className="px-4 sm:px-6 lg:px-8 py-16 text-center">
                     <h2 className="text-xl font-bold text-gray-800 mb-2">Shop not found</h2>
                     <p className="text-gray-500 mb-6">The shop you are looking for could not be found.</p>
@@ -139,12 +138,12 @@ export default function ShopDetailPage() {
                         Back to Shop
                     </Link>
                 </div>
-            </Layout>
+            </div>
         );
     }
 
     return (
-        <Layout>
+        <div>
             {toast && (
                 <div className="fixed top-20 right-4 z-50 bg-primary text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 animate-fade-in">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -356,6 +355,6 @@ export default function ShopDetailPage() {
                     </div>
                 </div>
             </div>
-        </Layout>
+        </div>
     );
 }

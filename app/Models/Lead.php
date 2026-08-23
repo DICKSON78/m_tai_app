@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\BelongsTo;
-use Illuminate\Database\Eloquent\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 
 class Lead extends Model
 {
+    protected $table = 'crm_leads';
+
     protected $fillable = [
         'business_id', 'name', 'email', 'phone', 'company', 'status', 'source',
         'estimated_value', 'notes', 'assigned_to', 'customer_id', 'contacted_at',

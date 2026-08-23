@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-# Ensure storage directories exist and have correct permissions
 mkdir -p /var/www/html/storage/framework/{sessions,views,cache}
 mkdir -p /var/www/html/storage/logs
 mkdir -p /var/www/html/bootstrap/cache
@@ -13,7 +12,6 @@ chmod 664 /var/www/html/storage/logs/laravel.log
 
 echo "DB_HOST=$DB_HOST DB_SOCKET=$DB_SOCKET DB_CONNECTION=$DB_CONNECTION DB_PORT=$DB_PORT"
 
-# Wait for Cloud SQL socket if configured
 if [ -n "$DB_SOCKET" ] && [ -S "$DB_SOCKET" ]; then
     echo "Cloud SQL socket ready at $DB_SOCKET"
 elif [ -n "$DB_SOCKET" ]; then
@@ -28,7 +26,6 @@ elif [ -n "$DB_SOCKET" ]; then
     done
 fi
 
-# Clear old caches
 php artisan config:clear 2>/dev/null || true
 php artisan route:clear 2>/dev/null || true
 php artisan view:clear 2>/dev/null || true

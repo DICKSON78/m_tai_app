@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\BillOfMaterial;
+use App\Models\BillOfMaterialItem;
+use App\Models\Product;
+use App\Models\StockMovement;
 use App\Models\WorkOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -185,6 +188,28 @@ class ManufacturingController extends Controller
             if ($v['status'] === 'completed' && ! $workOrder->actual_end) {
                 $v['actual_end'] = now()->toDateString();
                 $v['quantity_completed'] = $v['quantity_completed'] ?? $workOrder->quantity_planned;
+
+                if ($workOrder->bill_of_material_id) {
+                    \DB::transaction(function () use ($workOrder, $v) {
+                        $items = BillOfMaterialItem::where('bill_of_material_id', $workOrder->bill_of_material_id)->get();
+                        foreach ($items as $item) {
+                            $needed = $item->quantity * $v['quantity_completed'];
+                            $product = Product::find($item->product_id);
+                            if ($product) {
+                                $product->decrement('quantity', $needed);
+                                StockMovement::create([
+                                    'business_id' => $workOrder->business_id,
+                                    'product_id' => $item->product_id,
+                                    'type' => 'out',
+                                    'quantity' => -$needed,
+                                    'unit_cost' => $item->unit_cost ?? $product->buying_price,
+                                    'balance_after' => $product->quantity,
+                                    'notes' => "BOM consumption for WO {$workOrder->order_number}",
+                                ]);
+                            }
+                        }
+                    });
+                }
             }
         }
 

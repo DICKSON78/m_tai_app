@@ -15,7 +15,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'email', 'password', 'phone', 'photo', 'role',
         'location', 'street', 'road', 'age', 'user_code',
-        'nida_number', 'is_active', 'is_verified',
+        'nida_number', 'is_active', 'is_verified', 'current_business_id',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -27,6 +27,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'is_verified' => 'boolean',
+            'current_business_id' => 'integer',
         ];
     }
 

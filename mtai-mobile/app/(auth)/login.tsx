@@ -131,7 +131,7 @@ export default function LoginScreen() {
 
             <View style={styles.footerRow}>
               <Text style={styles.footerText}>New to M-TAI? </Text>
-              <TouchableOpacity hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}>
+              <TouchableOpacity hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }} onPress={() => Alert.alert('Coming Soon', 'Customer registration will be available soon.')}>
                 <Text style={styles.registerText}>Create an account</Text>
               </TouchableOpacity>
             </View>

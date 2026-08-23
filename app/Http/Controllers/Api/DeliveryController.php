@@ -87,7 +87,7 @@ class DeliveryController extends Controller
         ], 201);
     }
 
-    public function show(Business $business, Delivery $delivery)
+    public function show(Request $request, Business $business, Delivery $delivery)
     {
         if ($business->user_id !== $request->user()->id) {
             abort(403);

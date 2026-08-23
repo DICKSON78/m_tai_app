@@ -29,7 +29,7 @@ return new class extends Migration
         Schema::create('crm_deals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('lead_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('lead_id')->nullable()->constrained('crm_leads')->nullOnDelete();
             $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete();
             $table->string('title');
             $table->decimal('amount', 15, 2)->default(0);
@@ -44,7 +44,7 @@ return new class extends Migration
         Schema::create('crm_activities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('lead_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('lead_id')->nullable()->constrained('crm_leads')->nullOnDelete();
             $table->foreignId('deal_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('type', ['call', 'email', 'meeting', 'task', 'note'])->default('note');

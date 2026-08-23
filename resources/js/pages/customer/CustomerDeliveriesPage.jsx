@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import Layout from '../../components/Layout';
 import Pagination from '../../components/Pagination';
 import PageHeader from '../../components/casfeta/PageHeader';
 import { Truck } from 'lucide-react';
@@ -51,7 +50,7 @@ export default function CustomerDeliveriesPage() {
     };
 
     return (
-        <Layout>
+        <div>
             <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-2">
                 <PageHeader title="Deliveries" subtitle="Track your delivery orders" icon={<Truck size={20} />} />
             </div>
@@ -140,6 +139,6 @@ export default function CustomerDeliveriesPage() {
                     </div>
                 )}
             </div>
-        </Layout>
+        </div>
     );
 }

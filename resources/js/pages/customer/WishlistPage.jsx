@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import Layout from '../../components/Layout';
 import Pagination from '../../components/Pagination';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import PageHeader from '../../components/casfeta/PageHeader';
@@ -62,7 +61,7 @@ export default function WishlistPage() {
     const formatPrice = (price) => `TZS ${Number(price || 0).toLocaleString()}`;
 
     return (
-        <Layout>
+        <div>
             <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-2">
                 <PageHeader title="Wishlist" subtitle="Your saved products" icon={<Heart size={20} />} />
             </div>
@@ -184,6 +183,6 @@ export default function WishlistPage() {
                 cancelText="Cancel"
                 variant="danger"
             />
-        </Layout>
+        </div>
     );
 }

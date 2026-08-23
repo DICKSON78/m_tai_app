@@ -19,12 +19,11 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundColor": "#00D4AA"
       },
       "package": "com.mtai.app",
-      "googleServicesFile": "./google-services.json",
-      "permissions": ["CAMERA", "POST_NOTIFICATIONS"]
+      "permissions": ["POST_NOTIFICATIONS"]
     },
     "plugins": [
       "expo-router",
@@ -37,19 +36,12 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification-icon.png",
           "color": "#00D4AA"
-        }
-      ],
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow M-TAI to access your camera to scan barcodes."
         }
       ]
     ],
     "extra": {
-      "eas": { "projectId": "your-project-id" },
+      "eas": { "projectId": "mtai-app" },
       "apiUrl": "https://mtai-app-903291264005.africa-south1.run.app"
     }
   }

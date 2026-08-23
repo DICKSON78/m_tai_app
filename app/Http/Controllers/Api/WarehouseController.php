@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\BinLocation;
+use App\Models\Product;
+use App\Models\StockMovement;
 use App\Models\Warehouse;
 use App\Models\WarehouseTransfer;
 use App\Models\WarehouseZone;
@@ -186,7 +188,46 @@ class WarehouseController extends Controller
 
     public function confirmTransfer(WarehouseTransfer $transfer)
     {
-        $transfer->update(['status' => 'received', 'received_date' => now()->toDateString()]);
+        \DB::transaction(function () use ($transfer) {
+            $product = Product::findOrFail($transfer->product_id);
+            $qty = (int) $transfer->quantity;
+
+            if ($transfer->from_warehouse_id && $product->quantity < $qty) {
+                abort(422, 'Stock haitoshi kwa transfer hii');
+            }
+
+            if ($transfer->from_warehouse_id) {
+                $product->decrement('quantity', $qty);
+                StockMovement::create([
+                    'business_id' => $transfer->business_id,
+                    'product_id' => $transfer->product_id,
+                    'type' => 'transfer',
+                    'quantity' => -$qty,
+                    'unit_cost' => $product->buying_price,
+                    'balance_after' => $product->quantity,
+                    'reference_type' => WarehouseTransfer::class,
+                    'reference_id' => $transfer->id,
+                    'notes' => "Transfer out to warehouse #{$transfer->to_warehouse_id}",
+                ]);
+            }
+
+            if ($transfer->to_warehouse_id) {
+                $product->increment('quantity', $qty);
+                StockMovement::create([
+                    'business_id' => $transfer->business_id,
+                    'product_id' => $transfer->product_id,
+                    'type' => 'transfer',
+                    'quantity' => $qty,
+                    'unit_cost' => $product->buying_price,
+                    'balance_after' => $product->quantity,
+                    'reference_type' => WarehouseTransfer::class,
+                    'reference_id' => $transfer->id,
+                    'notes' => "Transfer in from warehouse #{$transfer->from_warehouse_id}",
+                ]);
+            }
+
+            $transfer->update(['status' => 'received', 'received_date' => now()->toDateString()]);
+        });
 
         return response()->json($transfer);
     }
