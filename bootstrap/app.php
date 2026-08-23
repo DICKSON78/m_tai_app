@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'audit' => \App\Http\Middleware\AuditLogMiddleware::class,
             'security' => \App\Http\Middleware\SecurityHeadersMiddleware::class,
         ]);
+        $middleware->api(prepend: [
+            \Illuminate\Http\Middleware\HandleCors::class,
+        ]);
         $middleware->prepend([
             \App\Http\Middleware\SecurityHeadersMiddleware::class,
         ]);

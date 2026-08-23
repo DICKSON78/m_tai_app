@@ -1476,7 +1476,7 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($leads as $lead) {
-            \App\Models\Lead::create(array_merge($lead, ['business_id' => $this->businessId]));
+            \App\Models\Lead::create(array_merge($lead, ['business_id' => $this->bid]));
         }
 
         $deals = [
@@ -1484,7 +1484,7 @@ class DatabaseSeeder extends Seeder
             ['title' => 'Dafa Hosi Inventory', 'amount' => 3500000, 'stage' => 'negotiation', 'expected_close_date' => now()->addDays(14)],
         ];
         foreach ($deals as $deal) {
-            \App\Models\CrmDeal::create(array_merge($deal, ['business_id' => $this->businessId, 'lead_id' => \App\Models\Lead::first()->id]));
+            \App\Models\CrmDeal::create(array_merge($deal, ['business_id' => $this->bid, 'lead_id' => \App\Models\Lead::first()->id]));
         }
 
         $activities = [
@@ -1493,7 +1493,7 @@ class DatabaseSeeder extends Seeder
             ['type' => 'meeting', 'subject' => 'Product demo for Peter', 'due_date' => now()->addWeek(), 'completed' => false],
         ];
         foreach ($activities as $activity) {
-            \App\Models\CrmActivity::create(array_merge($activity, ['business_id' => $this->businessId, 'lead_id' => \App\Models\Lead::first()->id]));
+            \App\Models\CrmActivity::create(array_merge($activity, ['business_id' => $this->bid, 'lead_id' => \App\Models\Lead::first()->id]));
         }
     }
 
@@ -1501,11 +1501,11 @@ class DatabaseSeeder extends Seeder
     {
         if (\App\Models\BillOfMaterial::count() > 0) return;
 
-        $products = \App\Models\Product::where('business_id', $this->businessId)->take(3)->get();
+        $products = \App\Models\Product::where('business_id', $this->bid)->take(3)->get();
         if ($products->isEmpty()) return;
 
         $bom = \App\Models\BillOfMaterial::create([
-            'business_id' => $this->businessId,
+            'business_id' => $this->bid,
             'name' => 'BOM - Product Bundle A',
             'code' => 'BOM-001',
             'product_id' => $products->first()->id,
@@ -1523,7 +1523,7 @@ class DatabaseSeeder extends Seeder
         }
 
         \App\Models\WorkOrder::create([
-            'business_id' => $this->businessId,
+            'business_id' => $this->bid,
             'order_number' => 'WO-' . strtoupper(\Illuminate\Support\Str::random(6)),
             'bill_of_material_id' => $bom->id,
             'product_name' => $products->first()->name,
@@ -1535,7 +1535,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         \App\Models\WorkOrder::create([
-            'business_id' => $this->businessId,
+            'business_id' => $this->bid,
             'order_number' => 'WO-' . strtoupper(\Illuminate\Support\Str::random(6)),
             'bill_of_material_id' => $bom->id,
             'product_name' => $products->first()->name,
@@ -1552,10 +1552,10 @@ class DatabaseSeeder extends Seeder
 
     private function seedWarehouses(): void
     {
-        if (\App\Models\Warehouse::where('business_id', $this->businessId)->count() > 0) return;
+        if (\App\Models\Warehouse::where('business_id', $this->bid)->count() > 0) return;
 
         $warehouse = \App\Models\Warehouse::create([
-            'business_id' => $this->businessId,
+            'business_id' => $this->bid,
             'name' => 'Maghala Mkuu',
             'code' => 'WH-001',
             'address' => 'Barabara ya Morogoro, Dar es Salaam',
@@ -1594,7 +1594,7 @@ class DatabaseSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        $product = \App\Models\Product::where('business_id', $this->businessId)->first();
+        $product = \App\Models\Product::where('business_id', $this->bid)->first();
         if ($product) {
             $bin = \App\Models\BinLocation::first();
             if ($bin) {

@@ -56,33 +56,35 @@ export default function RegisterCustomerPage() {
             return;
         }
 
-        if (formData.password.length < 8) {
-            setError('Password must be at least 8 characters');
+        if (formData.password.length < 6) {
+            setError('Password must be at least 6 characters');
             setLoading(false);
             return;
         }
 
+        const fullName = [formData.firstName, formData.middleName, formData.lastName].filter(Boolean).join(' ');
+
         try {
             const result = await register({
-                ...formData,
-                role: 'customer',
-                business_type: userType,
-                phone: `${formData.countryCode}${formData.phone}`,
-                address: {
-                    location: formData.location,
-                    district: formData.district,
-                    ward: formData.ward,
-                    street: formData.street,
-                },
+                name: fullName,
+                email: formData.email,
+                phone: `${formData.countryCode}${formData.phone}`.replace(/\s/g, ''),
+                password: formData.password,
+                password_confirmation: formData.confirmPassword,
+                location: formData.location || null,
+                street: formData.street || null,
             }, 'customer');
 
-            if (result.success) {
+            if (result && result.id) {
                 window.location.href = '/login';
+            } else if (result && result.message) {
+                setError(result.message);
             } else {
-                setError(result.message || 'Registration failed');
+                window.location.href = '/login';
             }
         } catch (err) {
-            setError('Network error. Please try again.');
+            const msg = err?.response?.data?.message || err?.response?.data?.errors?.name?.[0] || 'Registration failed. Please try again.';
+            setError(msg);
         } finally {
             setLoading(false);
         }
@@ -233,7 +235,7 @@ export default function RegisterCustomerPage() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                         </svg>
                                     </div>
-                                    <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} className={`${inputClasses} pr-11`} placeholder="Min. 8 characters" required />
+                                    <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} className={`${inputClasses} pr-11`} placeholder="Min. 6 characters" required />
                                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors">
                                         {showPassword ? (
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878l4.242 4.242M21 21l-6.879-6.879" /></svg>

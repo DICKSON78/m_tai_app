@@ -116,11 +116,11 @@ class AuthApiController extends Controller
             'business_category' => $validated['business_category'],
             'region' => $validated['region'],
             'district' => $validated['district'],
-            'ward' => $validated['ward'] ?? null,
-            'street' => $validated['street'] ?? null,
-            'road' => $validated['road'] ?? null,
-            'payment_code' => $validated['payment_code'] ?? null,
-            'bank_account_number' => $validated['bank_account_number'] ?? null,
+            'ward' => $validated['ward'] ?? '-',
+            'street' => $validated['street'] ?? '-',
+            'road' => $validated['road'] ?? '-',
+            'payment_code' => $validated['payment_code'] ?? '-',
+            'bank_account_number' => $validated['bank_account_number'] ?? '-',
             'status' => 'pending',
         ]);
 

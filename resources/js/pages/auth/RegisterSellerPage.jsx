@@ -47,7 +47,10 @@ export default function RegisterSellerPage() {
         businessRegNo: '',
         industry: '',
         businessType: '',
-        businessAddress: '',
+        region: '',
+        district: '',
+        ward: '',
+        street: '',
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -75,27 +78,46 @@ export default function RegisterSellerPage() {
             return;
         }
 
-        if (formData.password.length < 8) {
-            setError('Password must be at least 8 characters');
+        if (formData.password.length < 6) {
+            setError('Password must be at least 6 characters');
             setLoading(false);
             return;
         }
 
+        if (!formData.region || !formData.district) {
+            setError('Region and District are required');
+            setLoading(false);
+            return;
+        }
+
+        const fullName = [formData.firstName, formData.middleName, formData.lastName].filter(Boolean).join(' ');
+
         try {
             const result = await register({
-                ...formData,
-                role: 'business_owner',
-                business_type: userType,
-                phone: `${formData.countryCode}${formData.phone}`,
+                name: fullName,
+                email: formData.email,
+                phone: `${formData.countryCode}${formData.phone}`.replace(/\s/g, ''),
+                password: formData.password,
+                password_confirmation: formData.confirmPassword,
+                business_name: formData.businessName || fullName + "'s Business",
+                business_type: formData.businessType || 'sole_proprietor',
+                business_category: formData.industry || 'retail',
+                region: formData.region,
+                district: formData.district,
+                ward: formData.ward || null,
+                street: formData.street || null,
             });
 
-            if (result.success) {
+            if (result && result.id) {
                 window.location.href = '/login';
+            } else if (result && result.message) {
+                setError(result.message);
             } else {
-                setError(result.message || 'Registration failed');
+                window.location.href = '/login';
             }
         } catch (err) {
-            setError('Network error. Please try again.');
+            const msg = err?.response?.data?.message || err?.response?.data?.errors?.name?.[0] || 'Registration failed. Please try again.';
+            setError(msg);
         } finally {
             setLoading(false);
         }
@@ -246,7 +268,7 @@ export default function RegisterSellerPage() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                         </svg>
                                     </div>
-                                    <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} className={`${inputClasses} pr-11`} placeholder="Min. 8 characters" required />
+                                    <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} className={`${inputClasses} pr-11`} placeholder="Min. 6 characters" required />
                                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors">
                                         {showPassword ? (
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878l4.242 4.242M21 21l-6.879-6.879" /></svg>
@@ -336,16 +358,54 @@ export default function RegisterSellerPage() {
                                 </div>
                             </>
                         )}
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-600 mb-1.5">Business Address</label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
+                        <div className="grid md:grid-cols-2 gap-5">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Region *</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                    <input type="text" name="region" value={formData.region} onChange={handleChange} className={inputClasses} placeholder="e.g. Dar es Salaam" required />
                                 </div>
-                                <input type="text" name="businessAddress" value={formData.businessAddress} onChange={handleChange} className={inputClasses} placeholder="City, Region" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">District *</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                        </svg>
+                                    </div>
+                                    <input type="text" name="district" value={formData.district} onChange={handleChange} className={inputClasses} placeholder="e.g. Kinondoni" required />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-5">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Ward</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                        </svg>
+                                    </div>
+                                    <input type="text" name="ward" value={formData.ward} onChange={handleChange} className={inputClasses} placeholder="Ward" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Street Address</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                    <input type="text" name="street" value={formData.street} onChange={handleChange} className={inputClasses} placeholder="Street address" />
+                                </div>
                             </div>
                         </div>
                         <div className="flex gap-3">

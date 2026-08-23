@@ -96,13 +96,20 @@ export function AuthProvider({ children }) {
 
     const register = async (data, type) => {
         const endpoint = type === 'customer' ? '/register/customer' : '/register/seller';
-        const response = await api.post(endpoint, data);
-        const { user: userData, token } = response.data;
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
-        resetIdleTimer();
-        return userData;
+        try {
+            const response = await api.post(endpoint, data);
+            const { user: userData, token } = response.data;
+            localStorage.setItem('auth_token', token);
+            localStorage.setItem('user', JSON.stringify(userData));
+            setUser(userData);
+            resetIdleTimer();
+            return userData;
+        } catch (err) {
+            const serverMsg = err?.response?.data?.message;
+            const serverErrors = err?.response?.data?.errors;
+            const firstError = serverErrors ? Object.values(serverErrors).flat()[0] : null;
+            return { message: serverMsg || firstError || 'Registration failed' };
+        }
     };
 
     const logout = async () => {
