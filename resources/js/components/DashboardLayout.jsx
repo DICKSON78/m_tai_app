@@ -29,6 +29,7 @@ const navConfig = {
             { to: '/owner/finance/invoices', label: 'Invoices', icon: 'credit-card' },
             { to: '/owner/finance/bills', label: 'Bills', icon: 'shopping-cart' },
             { to: '/owner/finance/bank-accounts', label: 'Bank Accounts', icon: 'banknotes' },
+            { to: '/owner/finance/bank-reconciliations', label: 'Bank Reconciliation', icon: 'check-circle' },
             { to: '/owner/finance/reports', label: 'Finance Reports', icon: 'chart-bar' },
             { to: '/owner/finance/budgets', label: 'Budgets', icon: 'currency-dollar' },
             { to: '/owner/finance/tax-settings', label: 'Tax Settings', icon: 'cog' },
@@ -55,6 +56,10 @@ const navConfig = {
         { label: 'Purchases', items: [
             { to: '/owner/purchases/suppliers', label: 'Suppliers', icon: 'truck' },
             { to: '/owner/purchases/orders', label: 'Purchase Orders', icon: 'shopping-cart' },
+            { to: '/owner/purchases/receptions', label: 'Goods Received', icon: 'package' },
+            { to: '/owner/purchases/invoices', label: 'Supplier Invoices', icon: 'file-text' },
+            { to: '/owner/purchases/returns', label: 'Purchase Returns', icon: 'rotate-ccw' },
+            { to: '/owner/purchases/price-lists', label: 'Price Lists', icon: 'tag' },
             { to: '/owner/purchases/payments', label: 'Supplier Payments', icon: 'credit-card' },
         ]},
         { label: 'Operations', items: [
@@ -113,6 +118,7 @@ const navConfig = {
             { to: '/owner/finance/invoices', label: 'Invoices', icon: 'credit-card' },
             { to: '/owner/finance/bills', label: 'Bills', icon: 'shopping-cart' },
             { to: '/owner/finance/bank-accounts', label: 'Bank Accounts', icon: 'banknotes' },
+            { to: '/owner/finance/bank-reconciliations', label: 'Bank Reconciliation', icon: 'check-circle' },
             { to: '/owner/finance/reports', label: 'Finance Reports', icon: 'chart-bar' },
             { to: '/owner/finance/budgets', label: 'Budgets', icon: 'currency-dollar' },
             { to: '/owner/finance/tax-settings', label: 'Tax Settings', icon: 'cog' },
@@ -138,6 +144,10 @@ const navConfig = {
         { label: 'Purchases', items: [
             { to: '/owner/purchases/suppliers', label: 'Suppliers', icon: 'truck' },
             { to: '/owner/purchases/orders', label: 'Purchase Orders', icon: 'shopping-cart' },
+            { to: '/owner/purchases/receptions', label: 'Goods Received', icon: 'package' },
+            { to: '/owner/purchases/invoices', label: 'Supplier Invoices', icon: 'file-text' },
+            { to: '/owner/purchases/returns', label: 'Purchase Returns', icon: 'rotate-ccw' },
+            { to: '/owner/purchases/price-lists', label: 'Price Lists', icon: 'tag' },
             { to: '/owner/purchases/payments', label: 'Supplier Payments', icon: 'credit-card' },
         ]},
         { label: 'Operations', items: [

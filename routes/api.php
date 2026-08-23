@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\FinanceReportController;
 use App\Http\Controllers\Api\FinanceTaxController;
 use App\Http\Controllers\Api\FiscalPeriodController;
 use App\Http\Controllers\Api\FixedAssetController;
+use App\Http\Controllers\Api\BankReconciliationController;
 use App\Http\Controllers\Api\GeneralLedgerController;
 use App\Http\Controllers\Api\HrAttendanceController;
 use App\Http\Controllers\Api\HrBenefitController;
@@ -50,7 +51,9 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PurchaseOrderController;
 use App\Http\Controllers\Api\PurchaseReceptionController;
+use App\Http\Controllers\Api\PurchaseReturnController;
 use App\Http\Controllers\Api\PushNotificationController;
+use App\Http\Controllers\Api\ProductImageController;
 use App\Http\Controllers\Api\ReceiptController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ReviewController;
@@ -60,6 +63,7 @@ use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\SupplierInvoiceController;
 use App\Http\Controllers\Api\SupplierPaymentController;
+use App\Http\Controllers\Api\SupplierPriceListController;
 use App\Http\Controllers\Api\TransporterController;
 use App\Http\Controllers\Api\WarehouseController;
 use App\Http\Controllers\Api\WishlistController;
@@ -120,6 +124,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/products/{product}', [ProductController::class, 'destroy']);
         Route::post('/products/{product}/publish', [ProductController::class, 'publish']);
         Route::post('/products/{product}/stock', [ProductController::class, 'stock']);
+
+        // Product Images
+        Route::get('/products/{product}/images', [ProductImageController::class, 'index']);
+        Route::post('/products/{product}/images', [ProductImageController::class, 'store']);
+        Route::put('/products/{product}/images/reorder', [ProductImageController::class, 'reorder']);
+        Route::delete('/products/{product}/images/{productImage}', [ProductImageController::class, 'destroy']);
 
         // Categories
         Route::get('/businesses/{business}/categories', [CategoryController::class, 'index']);
@@ -302,6 +312,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/bank-accounts/{bankAccount}/transactions', [FinanceBankController::class, 'addTransaction']);
         Route::delete('/bank-accounts/{bankAccount}', [FinanceBankController::class, 'destroy']);
 
+        // Bank Reconciliation
+        Route::get('/bank-reconciliations', [BankReconciliationController::class, 'index']);
+        Route::post('/bank-reconciliations', [BankReconciliationController::class, 'store']);
+        Route::get('/bank-reconciliations/{bankReconciliation}', [BankReconciliationController::class, 'show']);
+        Route::post('/bank-reconciliations/{bankReconciliation}/reconcile', [BankReconciliationController::class, 'reconcile']);
+        Route::delete('/bank-reconciliations/{bankReconciliation}', [BankReconciliationController::class, 'destroy']);
+
         // Financial Reports
         Route::get('/reports/profit-loss', [FinanceReportController::class, 'profitLoss']);
         Route::get('/reports/balance-sheet', [FinanceReportController::class, 'balanceSheet']);
@@ -404,6 +421,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/payments/{supplierPayment}/confirm', [SupplierPaymentController::class, 'confirm']);
         Route::post('/payments/{supplierPayment}/cancel', [SupplierPaymentController::class, 'cancel']);
         Route::delete('/payments/{supplierPayment}', [SupplierPaymentController::class, 'destroy']);
+
+        // Purchase Returns
+        Route::get('/returns', [PurchaseReturnController::class, 'index']);
+        Route::post('/returns', [PurchaseReturnController::class, 'store']);
+        Route::get('/returns/summary', [PurchaseReturnController::class, 'summary']);
+        Route::get('/returns/{purchaseReturn}', [PurchaseReturnController::class, 'show']);
+        Route::post('/returns/{purchaseReturn}/approve', [PurchaseReturnController::class, 'approve']);
+        Route::post('/returns/{purchaseReturn}/reject', [PurchaseReturnController::class, 'reject']);
+        Route::delete('/returns/{purchaseReturn}', [PurchaseReturnController::class, 'destroy']);
+
+        // Supplier Price Lists
+        Route::get('/price-lists', [SupplierPriceListController::class, 'index']);
+        Route::post('/price-lists', [SupplierPriceListController::class, 'store']);
+        Route::get('/price-lists/{supplierPriceList}', [SupplierPriceListController::class, 'show']);
+        Route::put('/price-lists/{supplierPriceList}', [SupplierPriceListController::class, 'update']);
+        Route::delete('/price-lists/{supplierPriceList}', [SupplierPriceListController::class, 'destroy']);
     });
 
     // ==================== HR MODULE (Business Owner + Admin) ====================

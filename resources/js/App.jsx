@@ -111,6 +111,13 @@ import BenefitsPage from './pages/hr/BenefitsPage';
 import SuppliersPage from './pages/purchases/SuppliersPage';
 import PurchaseOrdersPage from './pages/purchases/PurchaseOrdersPage';
 import SupplierPaymentsPage from './pages/purchases/SupplierPaymentsPage';
+import PurchaseReceptionsPage from './pages/purchases/PurchaseReceptionsPage';
+import SupplierInvoicesPage from './pages/purchases/SupplierInvoicesPage';
+import PurchaseReturnsPage from './pages/purchases/PurchaseReturnsPage';
+import SupplierPriceListsPage from './pages/purchases/SupplierPriceListsPage';
+
+// Finance standalone pages
+import BankReconciliationPage from './pages/finance/BankReconciliationPage';
 
 // CRM, Manufacturing, Warehouse pages
 import CrmPage from './pages/owner/CrmPage';
@@ -286,6 +293,7 @@ function AppRoutes() {
             <Route path="/owner/finance/invoices" element={<ProtectedRoute roles={['business_owner', 'admin']}><InvoicesPage /></ProtectedRoute>} />
             <Route path="/owner/finance/bills" element={<ProtectedRoute roles={['business_owner', 'admin']}><BillsPage /></ProtectedRoute>} />
             <Route path="/owner/finance/bank-accounts" element={<ProtectedRoute roles={['business_owner', 'admin']}><BankAccountsPage /></ProtectedRoute>} />
+            <Route path="/owner/finance/bank-reconciliations" element={<ProtectedRoute roles={['business_owner', 'admin']}><BankReconciliationPage /></ProtectedRoute>} />
             <Route path="/owner/finance/reports" element={<ProtectedRoute roles={['business_owner', 'admin']}><FinanceReportsPage /></ProtectedRoute>} />
             <Route path="/owner/finance/budgets" element={<ProtectedRoute roles={['business_owner', 'admin']}><BudgetsPage /></ProtectedRoute>} />
             <Route path="/owner/finance/tax-settings" element={<ProtectedRoute roles={['business_owner', 'admin']}><TaxSettingsPage /></ProtectedRoute>} />
@@ -314,6 +322,10 @@ function AppRoutes() {
             <Route path="/owner/purchases/suppliers" element={<ProtectedRoute roles={['business_owner', 'admin']}><SuppliersPage /></ProtectedRoute>} />
             <Route path="/owner/purchases/orders" element={<ProtectedRoute roles={['business_owner', 'admin']}><PurchaseOrdersPage /></ProtectedRoute>} />
             <Route path="/owner/purchases/payments" element={<ProtectedRoute roles={['business_owner', 'admin']}><SupplierPaymentsPage /></ProtectedRoute>} />
+            <Route path="/owner/purchases/receptions" element={<ProtectedRoute roles={['business_owner', 'admin']}><PurchaseReceptionsPage /></ProtectedRoute>} />
+            <Route path="/owner/purchases/invoices" element={<ProtectedRoute roles={['business_owner', 'admin']}><SupplierInvoicesPage /></ProtectedRoute>} />
+            <Route path="/owner/purchases/returns" element={<ProtectedRoute roles={['business_owner', 'admin']}><PurchaseReturnsPage /></ProtectedRoute>} />
+            <Route path="/owner/purchases/price-lists" element={<ProtectedRoute roles={['business_owner', 'admin']}><SupplierPriceListsPage /></ProtectedRoute>} />
 
             {/* Employee Routes */}
             <Route
