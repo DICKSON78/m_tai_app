@@ -38,11 +38,11 @@ export default function EmployeeDirectoryPage() {
     const [confirmOpen, setConfirmOpen] = useState(false);
 
     const fetchDepartments = useCallback(async () => {
-        try { const res = await api.get('/owner/hr/departments'); setDepartments(res.data?.data || res.data || []); } catch { setDepartments([]); }
+        try { const res = await api.get('/owner/hr/departments'); setDepartments(res.data?.data || res.data || []); } catch (error) { console.error('Failed to fetch departments:', error); setDepartments([]); }
     }, []);
 
     const fetchSummary = useCallback(async () => {
-        try { const res = await api.get('/owner/hr/employees/summary'); setStats(res.data || {}); } catch { setStats({ total: 0, active: 0, on_leave: 0, total_salary: 0 }); }
+        try { const res = await api.get('/owner/hr/employees/summary'); setStats(res.data || {}); } catch (error) { console.error('Failed to fetch employee summary:', error); setStats({ total: 0, active: 0, on_leave: 0, total_salary: 0 }); }
     }, []);
 
     const fetchEmployees = useCallback(async () => {
@@ -55,7 +55,7 @@ export default function EmployeeDirectoryPage() {
             setEmployees(res.data?.data || []);
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
-        } catch { setEmployees([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch employees:', error); setEmployees([]); } finally { setLoading(false); }
     }, [currentPage, search, filter]);
 
     useEffect(() => { fetchDepartments(); fetchSummary(); }, [fetchDepartments, fetchSummary]);
@@ -85,12 +85,12 @@ export default function EmployeeDirectoryPage() {
             if (editing) { await api.put(`/owner/hr/employees/${editing.id}`, payload); }
             else { await api.post('/owner/hr/employees', payload); }
             closeModal(); fetchEmployees(); fetchSummary();
-        } catch (err) { if (err.response?.status === 422) setErrors(err.response.data?.errors || {}); else alert(err.response?.data?.message || 'Failed'); } finally { setSubmitting(false); }
+        } catch (err) { console.error('Failed to save employee:', err); if (err.response?.status === 422) setErrors(err.response.data?.errors || {}); else alert(err.response?.data?.message || 'Failed'); } finally { setSubmitting(false); }
     };
 
     const handleDelete = async () => {
         if (!deleteId) return;
-        try { await api.delete(`/owner/hr/employees/${deleteId}`); setConfirmOpen(false); setDeleteId(null); setDeleteName(''); fetchEmployees(); fetchSummary(); } catch {}
+        try { await api.delete(`/owner/hr/employees/${deleteId}`); setConfirmOpen(false); setDeleteId(null); setDeleteName(''); fetchEmployees(); fetchSummary(); } catch (error) { console.error('Failed to delete employee:', error); alert(error?.response?.data?.message || 'Failed to delete employee. Please try again.'); }
     };
 
     const statusColor = (s) => ({ active: 'bg-green-100 text-green-700', inactive: 'bg-gray-100 text-gray-600', on_leave: 'bg-yellow-100 text-yellow-700', terminated: 'bg-red-100 text-red-700' }[s] || 'bg-gray-100 text-gray-600');

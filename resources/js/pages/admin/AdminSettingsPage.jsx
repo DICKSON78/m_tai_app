@@ -26,7 +26,7 @@ export default function AdminSettingsPage() {
             try {
                 const res = await api.get('/admin/settings');
                 setSettings(prev => ({ ...prev, ...res.data }));
-            } catch { /* use defaults */ } finally { setLoading(false); }
+            } catch (error) { console.error('Failed to fetch settings:', error); /* use defaults */ } finally { setLoading(false); }
         };
         fetchSettings();
     }, []);
@@ -37,7 +37,7 @@ export default function AdminSettingsPage() {
         try {
             await api.put('/admin/settings', settings);
             setMessage('Settings saved successfully');
-        } catch { setMessage('Failed to save settings'); } finally { setSaving(false); }
+        } catch (error) { console.error('Failed to save settings:', error); setMessage('Failed to save settings'); } finally { setSaving(false); }
     };
 
     if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]"></div></div>;

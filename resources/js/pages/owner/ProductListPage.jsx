@@ -32,7 +32,7 @@ export default function ProductListPage() {
             if (biz.length === 1) {
                 setSelectedBusiness(biz[0].id);
             }
-        }).catch(() => setBusinesses([]));
+        }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     const fetchProducts = useCallback(async () => {
@@ -55,7 +55,7 @@ export default function ProductListPage() {
             setProducts(res.data?.data || []);
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
-        } catch {
+        } catch (error) { console.error('Failed to fetch products:', error);
             setProducts([]);
         } finally {
             setLoading(false);
@@ -66,7 +66,7 @@ export default function ProductListPage() {
         if (selectedBusiness) {
             api.get(`/owner/businesses/${selectedBusiness}/categories`).then(res => {
                 setCategories(res.data?.data || res.data || []);
-            }).catch(() => setCategories([]));
+            }).catch((error) => { console.error('Failed to fetch categories:', error); setCategories([]); });
         }
     }, [selectedBusiness]);
 
@@ -83,10 +83,7 @@ export default function ProductListPage() {
         try {
             await api.delete(`/owner/products/${deleteId}`);
             fetchProducts();
-        } catch {
-        } finally {
-            setDeleteId(null);
-            setDeleteModalOpen(false);
+        } catch (error) { console.error('Failed to delete product:', error); alert(error?.response?.data?.message || 'Failed to delete product. Please try again.'); } finally {
         }
     };
 
@@ -96,9 +93,7 @@ export default function ProductListPage() {
         try {
             await api.post(`/owner/products/${product.id}/toggle-publish`);
             fetchProducts();
-        } catch {
-        } finally {
-            setTogglingId(null);
+        } catch (error) { console.error('Failed to toggle publish status:', error); alert(error?.response?.data?.message || 'Failed to update product. Please try again.'); } finally {
         }
     };
 

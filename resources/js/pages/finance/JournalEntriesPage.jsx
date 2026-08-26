@@ -25,7 +25,7 @@ export default function JournalEntriesPage() {
             setCurrentPage(entriesRes.data.current_page || 1);
             setLastPage(entriesRes.data.last_page || 1);
             setAccounts(accountsRes.data.data || []);
-        } catch { setEntries([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch journal entries:', error); setEntries([]); } finally { setLoading(false); }
     }, [search]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
@@ -46,10 +46,10 @@ export default function JournalEntriesPage() {
             await api.post('/owner/finance/journal', form);
             setShowForm(false); setForm({ date: new Date().toISOString().split('T')[0], description: '', reference: '', lines: [{ account_id: '', debit: 0, credit: 0, description: '' }, { account_id: '', debit: 0, credit: 0, description: '' }] });
             fetchData();
-        } catch (err) { alert(err.response?.data?.message || 'Failed'); } finally { setSaving(false); }
+        } catch (err) { console.error('Failed to create journal entry:', err); alert(err.response?.data?.message || 'Failed'); } finally { setSaving(false); }
     };
 
-    const handleDelete = async (id) => { if (!confirm('Delete?')) return; try { await api.delete(`/owner/finance/journal/${id}`); fetchData(); } catch (err) { alert(err.response?.data?.message || 'Cannot delete'); } };
+    const handleDelete = async (id) => { if (!confirm('Delete?')) return; try { await api.delete(`/owner/finance/journal/${id}`); fetchData(); } catch (err) { console.error('Failed to delete journal entry:', err); alert(err.response?.data?.message || 'Cannot delete'); } };
 
     return (
         <div className="space-y-6">

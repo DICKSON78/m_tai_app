@@ -59,14 +59,14 @@ export default function ProductFormPage() {
             if (!selectedBusiness && biz.length === 1) {
                 setSelectedBusiness(biz[0].id);
             }
-        }).catch(() => setBusinesses([]));
+        }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     useEffect(() => {
         if (selectedBusiness) {
             api.get(`/owner/businesses/${selectedBusiness}/categories`).then(res => {
                 setCategories(res.data?.data || res.data || []);
-            }).catch(() => setCategories([]));
+            }).catch((error) => { console.error('Failed to fetch categories:', error); setCategories([]); });
         }
     }, [selectedBusiness]);
 
@@ -101,7 +101,9 @@ export default function ProductFormPage() {
                         setSelectedBusiness(String(p.business_id));
                     }
                 }
-            }).catch(() => {
+            }).catch((error) => {
+                console.error('Failed to fetch product:', error);
+                navigate('/owner/products');
             }).finally(() => setLoading(false));
         }
     }, [isEdit, id]);
@@ -170,7 +172,7 @@ export default function ProductFormPage() {
                 });
             }
             navigate('/owner/products');
-        } catch (err) {
+        } catch (err) { console.error('Failed to save product:', err);
             if (err.response?.status === 422) {
                 setErrors(err.response.data?.errors || {});
             }

@@ -46,7 +46,7 @@ export default function CreditSalesPage() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
     useEffect(() => {
-        api.get('/owner/businesses').then(res => { const biz = res.data?.data || res.data || []; setBusinesses(biz); if (biz.length === 1) setSelectedBusiness(biz[0].id); }).catch(() => setBusinesses([]));
+        api.get('/owner/businesses').then(res => { const biz = res.data?.data || res.data || []; setBusinesses(biz); if (biz.length === 1) setSelectedBusiness(biz[0].id); }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     const fetchData = useCallback(async () => {
@@ -59,7 +59,7 @@ export default function CreditSalesPage() {
             const res = await api.get(`/owner/businesses/${selectedBusiness}/credit-sales`, { params });
             setCreditSales(res.data?.data || []); setCurrentPage(res.data?.current_page || 1); setLastPage(res.data?.last_page || 1);
             if (res.data?.stats) setStats(res.data.stats);
-        } catch { setCreditSales([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch credit sales:', error); setCreditSales([]); } finally { setLoading(false); }
     }, [selectedBusiness, currentPage, search, statusFilter]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
@@ -67,12 +67,12 @@ export default function CreditSalesPage() {
 
     const handleAdd = async (e) => {
         e.preventDefault(); setSubmitting(true);
-        try { await api.post(`/owner/businesses/${selectedBusiness}/credit-sales`, { ...form, quantity: Number(form.quantity), amount: Number(form.amount) }); setAddModalOpen(false); setForm(emptyForm); fetchData(); } catch {} finally { setSubmitting(false); }
+        try { await api.post(`/owner/businesses/${selectedBusiness}/credit-sales`, { ...form, quantity: Number(form.quantity), amount: Number(form.amount) }); setAddModalOpen(false); setForm(emptyForm); fetchData(); } catch (error) { console.error('Failed to add credit sale:', error); alert(error?.response?.data?.message || 'Failed to add credit sale. Please try again.'); } finally { setSubmitting(false); }
     };
 
     const handleEdit = async (e) => {
         e.preventDefault(); setSubmitting(true);
-        try { await api.put(`/owner/businesses/${selectedBusiness}/credit-sales/${editingItem.id}`, { ...form, quantity: Number(form.quantity), amount: Number(form.amount) }); setEditModalOpen(false); setEditingItem(null); setForm(emptyForm); fetchData(); } catch {} finally { setSubmitting(false); }
+        try { await api.put(`/owner/businesses/${selectedBusiness}/credit-sales/${editingItem.id}`, { ...form, quantity: Number(form.quantity), amount: Number(form.amount) }); setEditModalOpen(false); setEditingItem(null); setForm(emptyForm); fetchData(); } catch (error) { console.error('Failed to update credit sale:', error); alert(error?.response?.data?.message || 'Failed to update credit sale. Please try again.'); } finally { setSubmitting(false); }
     };
 
     const handlePay = async (e) => {
@@ -80,10 +80,10 @@ export default function CreditSalesPage() {
         const amount = Number(payAmount); const remaining = payItem.amount - payItem.amount_paid;
         if (!amount || amount <= 0) { setPayError('Enter a valid amount.'); return; }
         if (amount > remaining) { setPayError(`Amount cannot exceed remaining balance of TZS ${remaining.toLocaleString()}.`); return; }
-        try { await api.post(`/owner/businesses/${selectedBusiness}/credit-sales/${payItem.id}/pay`, { amount }); setPayModalOpen(false); setPayItem(null); setPayAmount(''); setPayError(''); fetchData(); } catch (err) { setPayError(err.response?.data?.message || 'Payment failed.'); }
+        try { await api.post(`/owner/businesses/${selectedBusiness}/credit-sales/${payItem.id}/pay`, { amount }); setPayModalOpen(false); setPayItem(null); setPayAmount(''); setPayError(''); fetchData(); } catch (err) { console.error('Failed to process payment:', err); setPayError(err.response?.data?.message || 'Payment failed.'); }
     };
 
-    const handleDelete = async () => { if (!deleteId) return; try { await api.delete(`/owner/businesses/${selectedBusiness}/credit-sales/${deleteId}`); fetchData(); } catch {} finally { setDeleteId(null); setDeleteModalOpen(false); } };
+    const handleDelete = async () => { if (!deleteId) return; try { await api.delete(`/owner/businesses/${selectedBusiness}/credit-sales/${deleteId}`); fetchData(); } catch (error) { console.error('Failed to delete credit sale:', error); alert(error?.response?.data?.message || 'Failed to delete credit sale. Please try again.'); } finally { setDeleteId(null); setDeleteModalOpen(false); } };
     const openEdit = (item) => { setEditingItem(item); setForm({ customer_name: item.customer_name || '', customer_phone: item.customer_phone || '', product_name: item.product_name || '', quantity: item.quantity || '', amount: item.amount || '', due_date: item.due_date || '', notes: item.notes || '' }); setEditModalOpen(true); };
     const handleReset = () => { setSearch(''); setStatusFilter(''); };
     const formatCurrency = (val) => `TZS ${Number(val || 0).toLocaleString()}`;

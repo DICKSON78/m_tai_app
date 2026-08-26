@@ -40,7 +40,7 @@ export default function CouponListPage() {
 
     useEffect(() => {
         setBusinessesLoading(true);
-        api.get('/owner/businesses').then(res => { const list = res.data?.data || res.data || []; setBusinesses(list); if (list.length === 1) setBusinessId(String(list[0].id)); }).catch(() => setBusinesses([])).finally(() => setBusinessesLoading(false));
+        api.get('/owner/businesses').then(res => { const list = res.data?.data || res.data || []; setBusinesses(list); if (list.length === 1) setBusinessId(String(list[0].id)); }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); }).finally(() => setBusinessesLoading(false));
     }, []);
 
     const fetchCoupons = useCallback(async () => {
@@ -54,7 +54,7 @@ export default function CouponListPage() {
             setCoupons(data.data || []); setCurrentPage(data.current_page || 1); setLastPage(data.last_page || 1);
             if (data.stats) setStats(data.stats);
             else { const allCoupons = data.data || []; setStats({ total: data.total || allCoupons.length, active: allCoupons.filter(c => c.status === 'active').length, expired: allCoupons.filter(c => c.status === 'expired').length, used: allCoupons.filter(c => c.status === 'used_up').length }); }
-        } catch { setCoupons([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch coupons:', error); setCoupons([]); } finally { setLoading(false); }
     }, [businessId, currentPage, statusFilter]);
 
     useEffect(() => { fetchCoupons(); }, [fetchCoupons]);
@@ -68,11 +68,11 @@ export default function CouponListPage() {
     const handleSubmit = async (e) => {
         e.preventDefault(); setSubmitting(true); setErrors({});
         const payload = { code: form.code, type: form.type, value: Number(form.value), min_order_amount: form.min_order_amount ? Number(form.min_order_amount) : null, max_discount: form.max_discount ? Number(form.max_discount) : null, usage_limit: form.usage_limit ? Number(form.usage_limit) : null, starts_at: form.starts_at || null, expires_at: form.expires_at || null };
-        try { if (editing) await api.put(`/owner/businesses/${businessId}/coupons/${editing.id}`, payload); else await api.post(`/owner/businesses/${businessId}/coupons`, payload); closeModal(); fetchCoupons(); } catch (err) { if (err.response?.status === 422) setErrors(err.response.data?.errors || {}); } finally { setSubmitting(false); }
+        try { if (editing) await api.put(`/owner/businesses/${businessId}/coupons/${editing.id}`, payload); else await api.post(`/owner/businesses/${businessId}/coupons`, payload); closeModal(); fetchCoupons(); } catch (err) { console.error('Failed to save coupon:', err); if (err.response?.status === 422) setErrors(err.response.data?.errors || {}); } finally { setSubmitting(false); }
     };
 
     const confirmDelete = (coupon) => { setDeleting(coupon); setConfirmOpen(true); };
-    const handleDelete = async () => { if (!deleting) return; try { await api.delete(`/owner/businesses/${businessId}/coupons/${deleting.id}`); setConfirmOpen(false); setDeleting(null); fetchCoupons(); } catch {} };
+    const handleDelete = async () => { if (!deleting) return; try { await api.delete(`/owner/businesses/${businessId}/coupons/${deleting.id}`); setConfirmOpen(false); setDeleting(null); fetchCoupons(); } catch (error) { console.error('Failed to delete coupon:', error); alert(error?.response?.data?.message || 'Failed to delete coupon. Please try again.'); } };
 
     const formatPrice = (val) => `TZS ${Number(val || 0).toLocaleString()}`;
 

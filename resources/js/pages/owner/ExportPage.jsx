@@ -19,7 +19,7 @@ export default function ExportPage() {
     useEffect(() => {
         api.get('/owner/businesses', { params: { per_page: 200 } })
             .then(res => setBusinesses(res.data?.data || res.data || []))
-            .catch(() => setBusinesses([]));
+            .catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     const handleExport = async (type) => {
@@ -34,7 +34,7 @@ export default function ExportPage() {
             document.body.appendChild(link);
             link.click();
             link.remove();
-        } catch {
+        } catch (error) { console.error('Failed to export data:', error);
             alert('Failed to export data');
         } finally {
             setLoading('');

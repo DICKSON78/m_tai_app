@@ -128,12 +128,12 @@ export default function StockPage() {
             const biz = res.data?.data || res.data || [];
             setBusinesses(biz);
             if (biz.length === 1) setSelectedBusiness(biz[0].id);
-        }).catch(() => setBusinesses([]));
+        }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     useEffect(() => {
         if (!selectedBusiness) return;
-        api.get(`/owner/businesses/${selectedBusiness}/categories`).then(res => setCategories(res.data?.data || res.data || [])).catch(() => setCategories([]));
+        api.get(`/owner/businesses/${selectedBusiness}/categories`).then(res => setCategories(res.data?.data || res.data || [])).catch((error) => { console.error('Failed to fetch categories:', error); setCategories([]); });
     }, [selectedBusiness]);
 
     const fetchSummary = useCallback(async () => {
@@ -141,7 +141,7 @@ export default function StockPage() {
         try {
             const res = await api.get(`/owner/businesses/${selectedBusiness}/inventory/summary`);
             setSummary(res.data || {});
-        } catch { setSummary({}); }
+        } catch (error) { console.error('Failed to fetch inventory summary:', error); setSummary({}); }
     }, [selectedBusiness]);
 
     const fetchStock = useCallback(async () => {
@@ -156,14 +156,14 @@ export default function StockPage() {
             setProducts(res.data?.data || []);
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
-        } catch { setProducts([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch stock:', error); setProducts([]); } finally { setLoading(false); }
     }, [selectedBusiness, currentPage, search, stockLevel, categoryId]);
 
     const fetchAlerts = useCallback(async () => {
         if (!selectedBusiness) return;
         setAlertsLoading(true);
         try { const res = await api.get(`/owner/businesses/${selectedBusiness}/inventory/alerts`); setAlerts(res.data || null); }
-        catch { setAlerts(null); } finally { setAlertsLoading(false); }
+        catch (error) { console.error('Failed to fetch alerts:', error); setAlerts(null); } finally { setAlertsLoading(false); }
     }, [selectedBusiness]);
 
     const fetchMovements = useCallback(async () => {
@@ -178,7 +178,7 @@ export default function StockPage() {
             setMovements(res.data?.data || []);
             setHistoryPage(res.data?.current_page || 1);
             setHistoryLastPage(res.data?.last_page || 1);
-        } catch { setMovements([]); } finally { setHistoryLoading(false); }
+        } catch (error) { console.error('Failed to fetch movements:', error); setMovements([]); } finally { setHistoryLoading(false); }
     }, [selectedBusiness, historyPage, movementType, dateFrom, dateTo]);
 
     const fetchBatches = useCallback(async () => {
@@ -189,7 +189,7 @@ export default function StockPage() {
             setBatches(res.data?.data || []);
             setBatchPage(res.data?.current_page || 1);
             setBatchLastPage(res.data?.last_page || 1);
-        } catch { setBatches([]); } finally { setBatchesLoading(false); }
+        } catch (error) { console.error('Failed to fetch batches:', error); setBatches([]); } finally { setBatchesLoading(false); }
     }, [selectedBusiness, batchPage]);
 
     const fetchCounts = useCallback(async () => {
@@ -200,7 +200,7 @@ export default function StockPage() {
             setCounts(res.data?.data || []);
             setCountsPage(res.data?.current_page || 1);
             setCountsLastPage(res.data?.last_page || 1);
-        } catch { setCounts([]); } finally { setCountsLoading(false); }
+        } catch (error) { console.error('Failed to fetch stock counts:', error); setCounts([]); } finally { setCountsLoading(false); }
     }, [selectedBusiness, countsPage]);
 
     useEffect(() => {
@@ -222,12 +222,12 @@ export default function StockPage() {
         if (selectedBusiness && (movementModalOpen || batchModalOpen)) {
             api.get(`/owner/businesses/${selectedBusiness}/products`, { params: { per_page: 200 } })
                 .then(res => setMovementProducts(res.data?.data || res.data || []))
-                .catch(() => setMovementProducts([]));
+                .catch((error) => { console.error('Failed to fetch products:', error); setMovementProducts([]); });
         }
         if (selectedBusiness && batchModalOpen) {
             api.get(`/owner/businesses/${selectedBusiness}/suppliers`, { params: { per_page: 200 } })
                 .then(res => setSuppliers(res.data?.data || res.data || []))
-                .catch(() => setSuppliers([]));
+                .catch((error) => { console.error('Failed to fetch suppliers:', error); setSuppliers([]); });
         }
     }, [selectedBusiness, movementModalOpen, batchModalOpen]);
 
@@ -235,7 +235,7 @@ export default function StockPage() {
         if (selectedBusiness && movementForm.product_id) {
             api.get(`/owner/businesses/${selectedBusiness}/inventory/batches`, { params: { product_id: movementForm.product_id, per_page: 200 } })
                 .then(res => setSelectedProductBatches((res.data?.data || []).filter(b => b.quantity > 0)))
-                .catch(() => setSelectedProductBatches([]));
+                .catch((error) => { console.error('Failed to fetch batches:', error); setSelectedProductBatches([]); });
         } else {
             setSelectedProductBatches([]);
         }
@@ -245,7 +245,7 @@ export default function StockPage() {
         if (selectedBusiness) {
             api.get(`/owner/businesses/${selectedBusiness}/products`, { params: { per_page: 200 } })
                 .then(res => setMovementProducts(res.data?.data || res.data || []))
-                .catch(() => setMovementProducts([]));
+                .catch((error) => { console.error('Failed to fetch products:', error); setMovementProducts([]); });
         }
     }, [selectedBusiness]);
 
@@ -267,9 +267,7 @@ export default function StockPage() {
             setMovementForm({ product_id: '', type: 'in', quantity: '', batch_id: '', batch_number: '', expiry_date: '', notes: '' });
             flash('Movement recorded successfully.');
             if (activeTab === 'stock') { fetchStock(); fetchSummary(); } else if (activeTab === 'movements') fetchMovements(); else if (activeTab === 'batches') fetchBatches();
-        } catch (err) {
-            flash(err.response?.data?.message || 'Failed to record movement.', false);
-        } finally { setMovementSubmitting(false); }
+        } catch (err) { console.error('Failed to record movement:', err); flash(err.response?.data?.message || 'Failed to record movement.', false); } finally { setMovementSubmitting(false); }
     };
 
     const handleAdjust = (product) => {
@@ -292,7 +290,7 @@ export default function StockPage() {
             setBatchForm({ product_id: '', batch_number: '', quantity: '', manufacturing_date: '', expiry_date: '', supplier_id: '', warehouse_location: '', notes: '' });
             flash('Batch received and stock updated.');
             if (activeTab === 'batches') fetchBatches(); else if (activeTab === 'stock') { fetchStock(); fetchSummary(); }
-        } catch (err) {
+        } catch (err) { console.error('Failed to receive batch:', err);
             flash(err.response?.data?.message || 'Failed to receive batch.', false);
         } finally { setBatchSubmitting(false); }
     };
@@ -308,7 +306,7 @@ export default function StockPage() {
             flash('Stock count created.');
             fetchCounts();
             openCountDetail(res.data);
-        } catch (err) {
+        } catch (err) { console.error('Failed to create stock count:', err);
             flash(err.response?.data?.message || 'Failed to create stock count.', false);
         } finally { setCountSubmitting(false); }
     };
@@ -320,7 +318,7 @@ export default function StockPage() {
             const detail = res.data?.data || res.data;
             setCountDetail(detail);
             setCountItemsForm((detail.items || []).map(i => ({ id: i.id, product_id: i.product_id, product_name: i.product?.name, expected: i.expected_quantity, counted: i.counted_quantity === null ? '' : i.counted_quantity, variance: i.variance })));
-        } catch { flash('Failed to load stock count.', false); } finally { setCountDetailLoading(false); }
+        } catch (error) { console.error('Failed to load stock count:', error); flash('Failed to load stock count.', false); } finally { setCountDetailLoading(false); }
     };
 
     const updateCountItem = (id, value) => {
@@ -340,7 +338,7 @@ export default function StockPage() {
             setCountDetail(res.data?.data || res.data);
             setCountItemsForm((res.data?.data || res.data).items.map(i => ({ id: i.id, product_id: i.product_id, product_name: i.product?.name, expected: i.expected_quantity, counted: i.counted_quantity === null ? '' : i.counted_quantity, variance: i.variance })));
             flash('Count quantities saved.');
-        } catch (err) { flash(err.response?.data?.message || 'Failed to save counts.', false); } finally { setCountSaving(false); }
+        } catch (err) { console.error('Failed to save counts:', err); flash(err.response?.data?.message || 'Failed to save counts.', false); } finally { setCountSaving(false); }
     };
 
     const approveCount = async () => {
@@ -350,7 +348,7 @@ export default function StockPage() {
             flash('Stock count approved and stock adjusted.');
             fetchCounts();
             setCountDetail(null);
-        } catch (err) { flash(err.response?.data?.message || 'Failed to approve count.', false); } finally { setCountApproving(false); }
+        } catch (err) { console.error('Failed to approve count:', err); flash(err.response?.data?.message || 'Failed to approve count.', false); } finally { setCountApproving(false); }
     };
 
     const fmtTZS = (n) => 'TZS ' + Number(n || 0).toLocaleString();

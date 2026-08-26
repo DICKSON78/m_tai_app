@@ -23,7 +23,7 @@ export default function LoginPage() {
             else if (role === 'employee') window.location.href = '/employee/dashboard';
             else if (role === 'transporter') window.location.href = '/transporter/dashboard';
             else window.location.href = '/customer/dashboard';
-        } catch (err) {
+        } catch (err) { console.error('Login failed:', err);
             const msg = err.response?.data?.message
                 || err.response?.data?.errors?.login?.[0]
                 || 'Network error. Please try again.';

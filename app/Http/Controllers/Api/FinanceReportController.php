@@ -16,6 +16,15 @@ class FinanceReportController extends Controller
 {
     public function profitLoss(Request $request)
     {
+        $request->validate([
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
+        ], [
+            'date_from.date' => 'Tarehe ya kuanza si sahihi.',
+            'date_to.date' => 'Tarehe ya mwisho si sahihi.',
+            'date_to.after_or_equal' => 'Tarehe ya mwisho lazima iwe sawa au baada ya tarehe ya kuanza.',
+        ]);
+
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
         $dateFrom = $request->date_from ?? now()->startOfYear()->toDateString();
         $dateTo = $request->date_to ?? now()->toDateString();
@@ -79,6 +88,15 @@ class FinanceReportController extends Controller
 
     public function cashFlow(Request $request)
     {
+        $request->validate([
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
+        ], [
+            'date_from.date' => 'Tarehe ya kuanza si sahihi.',
+            'date_to.date' => 'Tarehe ya mwisho si sahihi.',
+            'date_to.after_or_equal' => 'Tarehe ya mwisho lazima iwe sawa au baada ya tarehe ya kuanza.',
+        ]);
+
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
         $dateFrom = $request->date_from ?? now()->startOfMonth()->toDateString();
         $dateTo = $request->date_to ?? now()->toDateString();
@@ -200,6 +218,15 @@ class FinanceReportController extends Controller
 
     public function budgetVsActual(Request $request)
     {
+        $request->validate([
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
+        ], [
+            'date_from.date' => 'Tarehe ya kuanza si sahihi.',
+            'date_to.date' => 'Tarehe ya mwisho si sahihi.',
+            'date_to.after_or_equal' => 'Tarehe ya mwisho lazima iwe sawa au baada ya tarehe ya kuanza.',
+        ]);
+
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
         $dateFrom = $request->date_from ?? now()->startOfYear()->toDateString();
         $dateTo = $request->date_to ?? now()->toDateString();

@@ -26,7 +26,7 @@ export default function AdminAnnouncementShowPage() {
     const [successModal, setSuccessModal] = useState(false);
 
     useEffect(() => {
-        api.get(`/admin/announcements/${id}`).then(res => setItem(res.data)).catch(() => navigate('/admin/announcements')).finally(() => setLoading(false));
+        api.get(`/admin/announcements/${id}`).then(res => setItem(res.data)).catch((error) => { console.error('Failed to fetch announcement:', error); navigate('/admin/announcements'); }).finally(() => setLoading(false));
     }, [id, navigate]);
 
     const handleDelete = async () => {
@@ -34,7 +34,7 @@ export default function AdminAnnouncementShowPage() {
             await api.delete(`/admin/announcements/${id}`);
             setSuccessModal(true);
             setTimeout(() => navigate('/admin/announcements'), 1500);
-        } catch { setConfirmOpen(false); }
+        } catch (error) { console.error('Failed to delete announcement:', error); setConfirmOpen(false); alert(error?.response?.data?.message || 'Failed to delete announcement. Please try again.'); }
     };
 
     if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]"></div></div>;

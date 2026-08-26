@@ -24,7 +24,7 @@ export default function ResetPasswordPage() {
         try {
             const res = await api.post('/reset-password', { token, password, password_confirmation: passwordConfirmation });
             setMessage(res.data.message || 'Password has been reset successfully.');
-        } catch (err) {
+        } catch (err) { console.error('Password reset failed:', err);
             setError(err.response?.data?.message || 'Failed to reset password. The token may be invalid or expired.');
         } finally {
             setLoading(false);

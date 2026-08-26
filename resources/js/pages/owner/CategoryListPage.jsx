@@ -32,7 +32,7 @@ export default function CategoryListPage() {
                     setBusinessId(String(list[0].id));
                 }
             })
-            .catch(() => setBusinesses([]))
+            .catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); })
             .finally(() => setBusinessesLoading(false));
     }, []);
 
@@ -47,7 +47,7 @@ export default function CategoryListPage() {
             .then(res => {
                 setCategories(res.data?.data || res.data || []);
             })
-            .catch(() => setCategories([]))
+            .catch((error) => { console.error('Failed to fetch categories:', error); setCategories([]); })
             .finally(() => setLoading(false));
     }, [businessId]);
 
@@ -120,7 +120,7 @@ export default function CategoryListPage() {
             }
             closeModal();
             fetchCategories();
-        } catch (err) {
+        } catch (err) { console.error('Failed to save category:', err);
             if (err.response?.status === 422) {
                 setErrors(err.response.data?.errors || {});
             }
@@ -141,7 +141,7 @@ export default function CategoryListPage() {
             setConfirmOpen(false);
             setDeleting(null);
             fetchCategories();
-        } catch {}
+        } catch (error) { console.error('Failed to delete category:', error); alert(error?.response?.data?.message || 'Failed to delete category. Please try again.'); }
     };
 
     const productCount = (cat) => cat.products_count ?? cat.products?.length ?? 0;

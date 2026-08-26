@@ -36,7 +36,7 @@ export default function PayrollPage() {
             setPayrolls(res.data?.data || []);
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
-        } catch { setPayrolls([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch payrolls:', error); setPayrolls([]); } finally { setLoading(false); }
     }, [currentPage, filter]);
 
     useEffect(() => { fetchPayrolls(); }, [fetchPayrolls]);
@@ -45,14 +45,14 @@ export default function PayrollPage() {
     const handleGenerate = async (e) => {
         e.preventDefault(); setGenerating(true); setGenerateErrors({});
         try { await api.post('/owner/hr/payrolls/generate', generateForm); setGenerateModalOpen(false); setGenerateForm(emptyGenerateForm); fetchPayrolls(); }
-        catch (err) { if (err.response?.status === 422) setGenerateErrors(err.response.data?.errors || {}); else alert(err.response?.data?.message || 'Failed'); } finally { setGenerating(false); }
+        catch (err) { console.error('Failed to generate payroll:', err); if (err.response?.status === 422) setGenerateErrors(err.response.data?.errors || {}); else alert(err.response?.data?.message || 'Failed'); } finally { setGenerating(false); }
     };
 
-    const handleProcess = async (id) => { try { await api.post(`/owner/hr/payrolls/${id}/process`); fetchPayrolls(); } catch {} };
-    const handlePay = async (id) => { try { await api.post(`/owner/hr/payrolls/${id}/pay`); fetchPayrolls(); } catch {} };
+    const handleProcess = async (id) => { try { await api.post(`/owner/hr/payrolls/${id}/process`); fetchPayrolls(); } catch (error) { console.error('Failed to process payroll:', error); alert(error?.response?.data?.message || 'Failed to process payroll. Please try again.'); } };
+    const handlePay = async (id) => { try { await api.post(`/owner/hr/payrolls/${id}/pay`); fetchPayrolls(); } catch (error) { console.error('Failed to pay payroll:', error); alert(error?.response?.data?.message || 'Failed to mark payroll as paid. Please try again.'); } };
     const openDetail = async (p) => {
         try { const res = await api.get(`/owner/hr/payrolls/${p.id}`); setDetailModal({ open: true, data: res.data }); }
-        catch { setDetailModal({ open: true, data: p }); }
+        catch (error) { console.error('Failed to fetch payroll detail:', error); setDetailModal({ open: true, data: p }); }
     };
 
     const totalStats = payrolls.reduce((acc, p) => ({ gross: acc.gross + Number(p.total_gross || 0), net: acc.net + Number(p.total_net || 0) }), { gross: 0, net: 0 });

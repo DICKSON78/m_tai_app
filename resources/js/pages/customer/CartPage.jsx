@@ -15,7 +15,8 @@ export default function CartPage() {
             const res = await api.get('/cart');
             const data = res.data;
             setItems(data.items || data.data || data || []);
-        } catch {
+        } catch (error) {
+            console.error('Failed to fetch cart:', error);
             setItems([]);
         } finally {
             setLoading(false);
@@ -38,7 +39,9 @@ export default function CartPage() {
                         : item
                 )
             );
-        } catch {
+        } catch (error) {
+            console.error('Failed to update cart quantity:', error);
+            alert(error?.response?.data?.message || 'Failed to update quantity. Please try again.');
         } finally {
             setUpdatingKey(null);
         }
@@ -49,7 +52,9 @@ export default function CartPage() {
         try {
             await api.delete(`/cart/${key}`);
             setItems((prev) => prev.filter((item) => (item.key || item.id) !== key));
-        } catch {
+        } catch (error) {
+            console.error('Failed to remove cart item:', error);
+            alert(error?.response?.data?.message || 'Failed to remove item. Please try again.');
         } finally {
             setUpdatingKey(null);
         }

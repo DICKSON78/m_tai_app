@@ -25,7 +25,7 @@ export default function SettingsPage() {
             const biz = res.data?.data || res.data || [];
             setBusinesses(biz);
             if (biz.length === 1) setSelectedBusiness(biz[0].id);
-        }).catch(() => setBusinesses([]));
+        }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     useEffect(() => {
@@ -40,7 +40,7 @@ export default function SettingsPage() {
                 low_stock_threshold: settings.low_stock_threshold ?? 10, auto_accept_orders: !!settings.auto_accept_orders,
                 enable_delivery: !!settings.enable_delivery, enable_loans: !!settings.enable_loans,
             }));
-        }).catch(() => {}).finally(() => setLoading(false));
+        }).catch((error) => { console.error('Failed to fetch settings:', error); }).finally(() => setLoading(false));
     }, [selectedBusiness]);
 
     const showToast = useCallback((msg) => { setToast(msg); setTimeout(() => setToast(null), 3000); }, []);
@@ -53,7 +53,7 @@ export default function SettingsPage() {
     const handleSave = async () => {
         if (!selectedBusiness) return;
         setSaving(true);
-        try { await api.put(`/owner/businesses/${selectedBusiness}/settings`, form); showToast('Settings saved successfully'); } catch { showToast('Failed to save settings'); } finally { setSaving(false); }
+        try { await api.put(`/owner/businesses/${selectedBusiness}/settings`, form); showToast('Settings saved successfully'); } catch (error) { console.error('Failed to save settings:', error); showToast('Failed to save settings'); } finally { setSaving(false); }
     };
 
     const Toggle = ({ label, field }) => (

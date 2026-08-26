@@ -51,21 +51,21 @@ export default function PurchaseReceptionsPage() {
       setReceptions(res.data.data || []);
       setCurrentPage(res.data.current_page || 1);
       setLastPage(res.data.last_page || 1);
-    } catch { setReceptions([]); } finally { setLoading(false); }
+    } catch (error) { console.error('Failed to fetch receptions:', error); setReceptions([]); } finally { setLoading(false); }
   }, [search, statusFilter]);
 
   const fetchOrders = useCallback(async () => {
     try {
       const res = await api.get('/owner/purchases/orders', { params: { per_page: 100, status: 'confirmed' } });
       setOrders(res.data.data || []);
-    } catch { setOrders([]); }
+    } catch (error) { console.error('Failed to fetch purchase orders:', error); setOrders([]); }
   }, []);
 
   const fetchSummary = useCallback(async () => {
     try {
       const res = await api.get('/owner/purchases/receptions/summary');
       setSummary(res.data);
-    } catch {}
+    } catch (error) { console.error('Failed to fetch reception summary:', error); }
   }, []);
 
   useEffect(() => { fetchReceptions(); fetchSummary(); }, [fetchReceptions, fetchSummary]);
@@ -103,7 +103,7 @@ export default function PurchaseReceptionsPage() {
           warehouse_location: '',
         };
       }));
-    } catch { setItems([]); } finally { setItemsLoading(false); }
+    } catch (error) { console.error('Failed to fetch PO details:', error); setItems([]); } finally { setItemsLoading(false); }
   };
 
   const updateItem = (i, field, val) => {
@@ -148,7 +148,7 @@ export default function PurchaseReceptionsPage() {
     setDetailLoading(true);
     setShowDetail({ id: reception.id });
     try { const res = await api.get(`/owner/purchases/receptions/${reception.id}`); setShowDetail(res.data); }
-    catch { setShowDetail(null); }
+    catch { setShowDetail(null); console.error('Failed to load reception detail'); }
     finally { setDetailLoading(false); }
   };
 

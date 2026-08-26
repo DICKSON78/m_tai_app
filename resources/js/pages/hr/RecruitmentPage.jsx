@@ -56,7 +56,7 @@ export default function RecruitmentPage() {
     const [jobDetailModal, setJobDetailModal] = useState({ open: false, data: null });
 
     const fetchDepartments = useCallback(async () => {
-        try { const res = await api.get('/owner/hr/departments'); setDepartments(res.data?.data || res.data || []); } catch { setDepartments([]); }
+        try { const res = await api.get('/owner/hr/departments'); setDepartments(res.data?.data || res.data || []); } catch (error) { console.error('Failed to fetch departments:', error); setDepartments([]); }
     }, []);
 
     const fetchJobs = useCallback(async () => {
@@ -67,7 +67,7 @@ export default function RecruitmentPage() {
             setJobs(res.data?.data || []);
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
-        } catch { setJobs([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch jobs:', error); setJobs([]); } finally { setLoading(false); }
     }, [currentPage]);
 
     const fetchApplications = useCallback(async () => {
@@ -87,7 +87,7 @@ export default function RecruitmentPage() {
                 });
                 setApplications(allApps);
             }
-        } catch { setApplications([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch applications:', error); setApplications([]); } finally { setLoading(false); }
     }, [currentPage, selectedJob, jobs]);
 
     useEffect(() => { fetchDepartments(); }, [fetchDepartments]);
@@ -110,21 +110,21 @@ export default function RecruitmentPage() {
             if (editingJob) { await api.put(`/owner/hr/jobs/${editingJob.id}`, payload); }
             else { await api.post('/owner/hr/jobs', payload); }
             setJobModalOpen(false); fetchJobs();
-        } catch (err) { if (err.response?.status === 422) setJobErrors(err.response.data?.errors || {}); else alert(err.response?.data?.message || 'Failed'); } finally { setJobSubmitting(false); }
+        } catch (err) { console.error('Failed to create job:', err); if (err.response?.status === 422) setJobErrors(err.response.data?.errors || {}); else alert(err.response?.data?.message || 'Failed'); } finally { setJobSubmitting(false); }
     };
 
     const handleDeleteJob = async () => {
         if (!deleteId) return;
-        try { await api.delete(`/owner/hr/jobs/${deleteId}`); setConfirmOpen(false); setDeleteId(null); fetchJobs(); } catch {}
+        try { await api.delete(`/owner/hr/jobs/${deleteId}`); setConfirmOpen(false); setDeleteId(null); fetchJobs(); } catch (error) { console.error('Failed to delete job:', error); alert(error?.response?.data?.message || 'Failed to delete job. Please try again.'); }
     };
 
     const openJobDetail = async (job) => {
         try { const res = await api.get(`/owner/hr/jobs/${job.id}`); setJobDetailModal({ open: true, data: res.data }); }
-        catch { setJobDetailModal({ open: true, data: job }); }
+        catch (error) { console.error('Failed to fetch job detail:', error); setJobDetailModal({ open: true, data: job }); }
     };
 
     const updateApplicationStatus = async (id, status) => {
-        try { await api.put(`/owner/hr/applications/${id}`, { status }); fetchApplications(); } catch {}
+        try { await api.put(`/owner/hr/applications/${id}`, { status }); fetchApplications(); } catch (error) { console.error('Failed to update application status:', error); alert(error?.response?.data?.message || 'Failed to update status. Please try again.'); }
     };
 
     const inputClasses = "w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00D4AA] focus:border-[#00D4AA] text-sm";

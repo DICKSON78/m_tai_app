@@ -47,7 +47,7 @@ export default function EmployeeListPage() {
             const biz = res.data?.data || res.data || [];
             setBusinesses(biz);
             if (biz.length === 1) setSelectedBusiness(biz[0].id);
-        }).catch(() => setBusinesses([]));
+        }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     const fetchEmployees = useCallback(async () => {
@@ -67,7 +67,7 @@ export default function EmployeeListPage() {
                 const active = data.filter(e => e.is_active).length;
                 setStats({ total, active, retired: total - active });
             }
-        } catch { setEmployees([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch employees:', error); setEmployees([]); } finally { setLoading(false); }
     }, [selectedBusiness, currentPage, search, roleFilter]);
 
     useEffect(() => { fetchEmployees(); }, [fetchEmployees]);
@@ -89,12 +89,12 @@ export default function EmployeeListPage() {
             if (editing) { await api.put(`/owner/employees/${editing.id}`, payload); }
             else { await api.post(`/owner/businesses/${selectedBusiness}/employees`, payload); }
             closeModal(); fetchEmployees();
-        } catch (err) { if (err.response?.status === 422) setErrors(err.response.data?.errors || {}); } finally { setSubmitting(false); }
+        } catch (err) { console.error('Failed to save employee:', err); if (err.response?.status === 422) setErrors(err.response.data?.errors || {}); } finally { setSubmitting(false); }
     };
 
     const handleDelete = async () => {
         if (!deleteId) return;
-        try { await api.delete(`/owner/employees/${deleteId}`); setConfirmOpen(false); setDeleteId(null); setDeleteName(''); fetchEmployees(); } catch {}
+        try { await api.delete(`/owner/employees/${deleteId}`); setConfirmOpen(false); setDeleteId(null); setDeleteName(''); fetchEmployees(); } catch (error) { console.error('Failed to delete employee:', error); alert(error?.response?.data?.message || 'Failed to delete employee. Please try again.'); }
     };
 
     const handleReset = () => { setSearch(''); setRoleFilter(''); };

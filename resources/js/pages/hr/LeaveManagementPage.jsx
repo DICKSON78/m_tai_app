@@ -42,11 +42,11 @@ export default function LeaveManagementPage() {
     const [confirmOpen, setConfirmOpen] = useState(false);
 
     const fetchEmployees = useCallback(async () => {
-        try { const res = await api.get('/owner/hr/employees', { params: { per_page: 200, status: 'active' } }); setEmployees(res.data?.data || []); } catch { setEmployees([]); }
+        try { const res = await api.get('/owner/hr/employees', { params: { per_page: 200, status: 'active' } }); setEmployees(res.data?.data || []); } catch (error) { console.error('Failed to fetch employees:', error); setEmployees([]); }
     }, []);
 
     const fetchLeaveTypes = useCallback(async () => {
-        try { const res = await api.get('/owner/hr/leave-types'); setLeaveTypes(res.data?.data || res.data || []); } catch { setLeaveTypes([]); }
+        try { const res = await api.get('/owner/hr/leave-types'); setLeaveTypes(res.data?.data || res.data || []); } catch (error) { console.error('Failed to fetch leave types:', error); setLeaveTypes([]); }
     }, []);
 
     const fetchLeaveRequests = useCallback(async () => {
@@ -58,7 +58,7 @@ export default function LeaveManagementPage() {
             setLeaveRequests(res.data?.data || []);
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
-        } catch { setLeaveRequests([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch leave requests:', error); setLeaveRequests([]); } finally { setLoading(false); }
     }, [currentPage, search]);
 
     useEffect(() => { fetchEmployees(); fetchLeaveTypes(); }, [fetchEmployees, fetchLeaveTypes]);
@@ -75,12 +75,12 @@ export default function LeaveManagementPage() {
             if (editingType) { await api.put(`/owner/hr/leave-types/${editingType.id}`, typeForm); }
             else { await api.post('/owner/hr/leave-types', typeForm); }
             closeTypeModal(); fetchLeaveTypes();
-        } catch (err) { if (err.response?.status === 422) setTypeErrors(err.response.data?.errors || {}); else alert(err.response?.data?.message || 'Failed'); } finally { setTypeSubmitting(false); }
+        } catch (err) { console.error('Failed to save leave type:', err); if (err.response?.status === 422) setTypeErrors(err.response.data?.errors || {}); else alert(err.response?.data?.message || 'Failed'); } finally { setTypeSubmitting(false); }
     };
 
     const handleDeleteType = async () => {
         if (!deleteId) return;
-        try { await api.delete(`/owner/hr/leave-types/${deleteId}`); setConfirmOpen(false); setDeleteId(null); fetchLeaveTypes(); } catch {}
+        try { await api.delete(`/owner/hr/leave-types/${deleteId}`); setConfirmOpen(false); setDeleteId(null); fetchLeaveTypes(); } catch (error) { console.error('Failed to delete leave type:', error); alert(error?.response?.data?.message || 'Failed to delete leave type. Please try again.'); }
     };
 
     const openRequestModal = () => { setRequestForm(emptyLeaveRequest); setRequestErrors({}); setRequestModalOpen(true); };
@@ -89,11 +89,11 @@ export default function LeaveManagementPage() {
     const handleRequestSubmit = async (e) => {
         e.preventDefault(); setRequestSubmitting(true); setRequestErrors({});
         try { await api.post('/owner/hr/leave-requests', requestForm); closeRequestModal(); fetchLeaveRequests(); }
-        catch (err) { if (err.response?.status === 422) setRequestErrors(err.response.data?.errors || {}); else alert(err.response?.data?.message || 'Failed'); } finally { setRequestSubmitting(false); }
+        catch (err) { console.error('Failed to submit leave request:', err); if (err.response?.status === 422) setRequestErrors(err.response.data?.errors || {}); else alert(err.response?.data?.message || 'Failed'); } finally { setRequestSubmitting(false); }
     };
 
-    const handleApprove = async (id) => { try { await api.post(`/owner/hr/leave-requests/${id}/approve`); fetchLeaveRequests(); } catch {} };
-    const handleReject = async (id) => { try { await api.post(`/owner/hr/leave-requests/${id}/reject`); fetchLeaveRequests(); } catch {} };
+    const handleApprove = async (id) => { try { await api.post(`/owner/hr/leave-requests/${id}/approve`); fetchLeaveRequests(); } catch (error) { console.error('Failed to approve leave request:', error); alert(error?.response?.data?.message || 'Failed to approve leave request. Please try again.'); } };
+    const handleReject = async (id) => { try { await api.post(`/owner/hr/leave-requests/${id}/reject`); fetchLeaveRequests(); } catch (error) { console.error('Failed to reject leave request:', error); alert(error?.response?.data?.message || 'Failed to reject leave request. Please try again.'); } };
 
     const inputClasses = "w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00D4AA] focus:border-[#00D4AA] text-sm";
 

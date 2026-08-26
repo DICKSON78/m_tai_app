@@ -21,11 +21,11 @@ export default function TrainingPage() {
             if (statusFilter) params.status = statusFilter;
             const res = await api.get('/owner/hr/training', { params });
             setPrograms(res.data.data || res.data || []);
-        } catch { setPrograms([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch training programs:', error); setPrograms([]); } finally { setLoading(false); }
     }, [statusFilter]);
 
     const fetchEmployees = useCallback(async () => {
-        try { const res = await api.get('/owner/hr/employees', { params: { per_page: 200 } }); setEmployees(res.data.data || res.data || []); } catch { setEmployees([]); }
+        try { const res = await api.get('/owner/hr/employees', { params: { per_page: 200 } }); setEmployees(res.data.data || res.data || []); } catch (error) { console.error('Failed to fetch employees:', error); setEmployees([]); }
     }, []);
 
     useEffect(() => { fetchPrograms(); fetchEmployees(); }, [fetchPrograms, fetchEmployees]);
@@ -45,23 +45,23 @@ export default function TrainingPage() {
                 await api.post('/owner/hr/training', payload);
             }
             setShowForm(false); resetForm(); fetchPrograms();
-        } catch (err) { alert(err.response?.data?.message || 'Failed to save'); } finally { setSaving(false); }
+        } catch (err) { console.error('Failed to save training program:', err); alert(err.response?.data?.message || 'Failed to save'); } finally { setSaving(false); }
     };
 
     const handleStatusChange = async (program, status) => {
-        try { await api.put(`/owner/hr/training/${program.id}`, { status }); fetchPrograms(); } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+        try { await api.put(`/owner/hr/training/${program.id}`, { status }); fetchPrograms(); } catch (err) { console.error('Failed to update training status:', err); alert(err.response?.data?.message || 'Failed'); }
     };
 
     const handleEnroll = async (program, employeeId) => {
         try {
             await api.post(`/owner/hr/training/${program.id}/enroll`, { employee_id: employeeId });
             setEnrolling(null); fetchPrograms();
-        } catch (err) { alert(err.response?.data?.message || 'Failed to enroll'); }
+        } catch (err) { console.error('Failed to enroll in training:', err); alert(err.response?.data?.message || 'Failed to enroll'); }
     };
 
     const handleDelete = async (id) => {
         if (!confirm('Delete this training program?')) return;
-        try { await api.delete(`/owner/hr/training/${id}`); fetchPrograms(); } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+        try { await api.delete(`/owner/hr/training/${id}`); fetchPrograms(); } catch (err) { console.error('Failed to delete training program:', err); alert(err.response?.data?.message || 'Failed'); }
     };
 
     const openEdit = (p) => {

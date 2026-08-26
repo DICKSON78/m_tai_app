@@ -37,7 +37,7 @@ export default function CustomerListPage() {
             const biz = res.data?.data || res.data || [];
             setBusinesses(biz);
             if (biz.length === 1) setSelectedBusiness(biz[0].id);
-        }).catch(() => setBusinesses([]));
+        }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     const fetchCustomers = useCallback(async () => {
@@ -62,7 +62,7 @@ export default function CustomerListPage() {
             } else {
                 setStats({ total: res.data?.total || data.length, new_this_month: 0, repeat: 0 });
             }
-        } catch {
+        } catch (error) { console.error('Failed to fetch customers:', error);
             setCustomers([]);
             setTotalCustomers(0);
         } finally {
@@ -124,7 +124,7 @@ export default function CustomerListPage() {
             }
             closeModal();
             fetchCustomers();
-        } catch (err) {
+        } catch (err) { console.error('Failed to save customer:', err);
             if (err.response?.status === 422) {
                 setErrors(err.response.data?.errors || {});
             }
@@ -141,7 +141,7 @@ export default function CustomerListPage() {
             setDeleteId(null);
             setDeleteName('');
             fetchCustomers();
-        } catch {}
+        } catch (error) { console.error('Failed to delete customer:', error); alert(error?.response?.data?.message || 'Failed to delete customer. Please try again.'); }
     };
 
     const confirmDeleteCustomer = (customer) => {

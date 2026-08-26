@@ -46,14 +46,14 @@ export default function BankReconciliationPage() {
             setReconciliations(res.data.data || []);
             setCurrentPage(res.data.current_page || 1);
             setLastPage(res.data.last_page || 1);
-        } catch { setReconciliations([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch reconciliations:', error); setReconciliations([]); } finally { setLoading(false); }
     }, [statusFilter, accountFilter, currentPage]);
 
     const fetchAccounts = useCallback(async () => {
         try {
             const res = await api.get('/owner/finance/bank-accounts');
             setAccounts(Array.isArray(res.data) ? res.data : res.data.data || []);
-        } catch { setAccounts([]); }
+        } catch (error) { console.error('Failed to fetch bank accounts:', error); setAccounts([]); }
     }, []);
 
     useEffect(() => { fetchReconciliations(); }, [fetchReconciliations]);

@@ -46,7 +46,7 @@ export default function LoanListPage() {
             const biz = res.data?.data || res.data || [];
             setBusinesses(biz);
             if (biz.length === 1) setSelectedBusiness(biz[0].id);
-        }).catch(() => setBusinesses([]));
+        }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     const fetchLoans = useCallback(async () => {
@@ -69,7 +69,7 @@ export default function LoanListPage() {
                 const outstanding_balance = data.reduce((sum, l) => sum + Number(l.balance || l.remaining || 0), 0);
                 setStats({ total, paid, pending, outstanding_balance });
             }
-        } catch { setLoans([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch loans:', error); setLoans([]); } finally { setLoading(false); }
     }, [selectedBusiness, currentPage, search, statusFilter]);
 
     useEffect(() => { fetchLoans(); }, [fetchLoans]);
@@ -77,7 +77,7 @@ export default function LoanListPage() {
 
     useEffect(() => {
         if (selectedBusiness && addModalOpen) {
-            api.get(`/owner/businesses/${selectedBusiness}/customers`, { params: { per_page: 200 } }).then(res => setCustomers(res.data?.data || res.data || [])).catch(() => setCustomers([]));
+            api.get(`/owner/businesses/${selectedBusiness}/customers`, { params: { per_page: 200 } }).then(res => setCustomers(res.data?.data || res.data || [])).catch((error) => { console.error('Failed to fetch customers:', error); setCustomers([]); });
         }
     }, [selectedBusiness, addModalOpen]);
 
@@ -87,7 +87,7 @@ export default function LoanListPage() {
         try {
             await api.post(`/owner/businesses/${selectedBusiness}/loans`, { customer_id: loanForm.customer_id, amount: Number(loanForm.amount), due_date: loanForm.due_date || null, notes: loanForm.notes });
             setAddModalOpen(false); setLoanForm({ customer_id: '', amount: '', due_date: '', notes: '' }); fetchLoans();
-        } catch (err) { if (err.response?.status === 422) setLoanErrors(err.response.data?.errors || {}); } finally { setLoanSubmitting(false); }
+        } catch (error) { if (error.response?.status === 422) setLoanErrors(error.response.data?.errors || {}); else { console.error('Failed to create loan:', error); alert(error?.response?.data?.message || 'Failed to create loan. Please try again.'); } } finally { setLoanSubmitting(false); }
     };
 
     const openPayModal = (loan) => { setPayLoan(loan); setPayAmount(''); setPayError(''); setPayModalOpen(true); };
@@ -100,7 +100,7 @@ export default function LoanListPage() {
         if (!amount || amount <= 0) { setPayError('Enter a valid amount.'); return; }
         if (amount > remaining) { setPayError(`Amount cannot exceed outstanding balance of TZS ${remaining.toLocaleString()}.`); return; }
         setPaySubmitting(true); setPayError('');
-        try { await api.post(`/owner/loans/${payLoan.id}/pay`, { amount }); setPayModalOpen(false); setPayLoan(null); setPayAmount(''); fetchLoans(); } catch (err) { setPayError(err.response?.data?.message || 'Failed to process payment.'); } finally { setPaySubmitting(false); }
+        try { await api.post(`/owner/loans/${payLoan.id}/pay`, { amount }); setPayModalOpen(false); setPayLoan(null); setPayAmount(''); fetchLoans(); } catch (err) { console.error('Failed to process loan payment:', err); setPayError(err.response?.data?.message || 'Failed to process payment.'); } finally { setPaySubmitting(false); }
     };
 
     const handleLoanChange = (e) => {

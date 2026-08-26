@@ -83,14 +83,12 @@ export default function PurchaseReturnsPage() {
       ]);
       setSuppliers(supRes.data.data || []);
       setProducts(prodRes.data.data || []);
-    } catch {}
-  }, []);
-
-  const fetchSummary = useCallback(async () => {
+    } catch (error) { console.error('Failed to fetch dropdown data:', error); }
+  }, []); = useCallback(async () => {
     try {
       const res = await api.get('/owner/purchases/returns/summary');
       setSummary(res.data || {});
-    } catch { setSummary({}); }
+    } catch (error) { console.error('Failed to fetch return summary:', error); setSummary({}); }
   }, []);
 
   useEffect(() => { fetchReturns(); }, [fetchReturns]);
@@ -105,7 +103,7 @@ export default function PurchaseReturnsPage() {
     try {
       const res = await api.get('/owner/purchases/orders', { params: { supplier_id: supplierId, per_page: 100 } });
       setPurchaseOrders(res.data.data || []);
-    } catch { setPurchaseOrders([]); }
+    } catch (error) { console.error('Failed to fetch purchase orders:', error); setPurchaseOrders([]); }
   };
 
   const updateItem = (i, field, val) => {
@@ -161,7 +159,7 @@ export default function PurchaseReturnsPage() {
     try {
       const res = await api.get(`/owner/purchases/returns/${id}`);
       setShowDetail(res.data);
-    } catch {}
+    } catch (error) { console.error('Failed to refresh return detail:', error); }
   };
 
   const handleViewDetail = async (ret) => {

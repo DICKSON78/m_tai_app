@@ -14,7 +14,16 @@ class ExportController extends Controller
             abort(403);
         }
 
-        $products = $business->products()->with('category:id,name')->get();
+        $request->validate([
+            'format' => 'nullable|string|in:csv',
+            'limit' => 'nullable|integer|min:1|max:10000',
+        ], [
+            'format.in' => 'Muundo haujulikani. Tumia csv.',
+            'limit.max' => 'Wingi wa juu ni nyuzi 10,000 tu.',
+        ]);
+
+        $limit = min((int) $request->input('limit', 10000), 10000);
+        $products = $business->products()->with('category:id,name')->limit($limit)->get();
 
         $csv = "Name,Category,Buying Price,Selling Price,Quantity,Value\n";
         foreach ($products as $p) {
@@ -35,7 +44,16 @@ class ExportController extends Controller
             abort(403);
         }
 
-        $orders = $business->orders()->with('customer:id,full_name,phone')->get();
+        $request->validate([
+            'format' => 'nullable|string|in:csv',
+            'limit' => 'nullable|integer|min:1|max:10000',
+        ], [
+            'format.in' => 'Muundo haujulikani. Tumia csv.',
+            'limit.max' => 'Wingi wa juu ni nyuzi 10,000 tu.',
+        ]);
+
+        $limit = min((int) $request->input('limit', 10000), 10000);
+        $orders = $business->orders()->with('customer:id,full_name,phone')->limit($limit)->get();
 
         $csv = "Transaction Code,Date,Customer,Total,Status\n";
         foreach ($orders as $o) {
@@ -55,7 +73,16 @@ class ExportController extends Controller
             abort(403);
         }
 
-        $expenses = $business->expenses()->get();
+        $request->validate([
+            'format' => 'nullable|string|in:csv',
+            'limit' => 'nullable|integer|min:1|max:10000',
+        ], [
+            'format.in' => 'Muundo haujulikani. Tumia csv.',
+            'limit.max' => 'Wingi wa juu ni nyuzi 10,000 tu.',
+        ]);
+
+        $limit = min((int) $request->input('limit', 10000), 10000);
+        $expenses = $business->expenses()->limit($limit)->get();
 
         $csv = "Date,Category,Description,Type,Amount\n";
         foreach ($expenses as $e) {

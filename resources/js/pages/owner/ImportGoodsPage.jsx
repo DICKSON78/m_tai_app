@@ -53,7 +53,7 @@ export default function ImportGoodsPage() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
     useEffect(() => {
-        api.get('/owner/businesses').then(res => { const biz = res.data?.data || res.data || []; setBusinesses(biz); if (biz.length === 1) setSelectedBusiness(biz[0].id); }).catch(() => setBusinesses([]));
+        api.get('/owner/businesses').then(res => { const biz = res.data?.data || res.data || []; setBusinesses(biz); if (biz.length === 1) setSelectedBusiness(biz[0].id); }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     const fetchData = useCallback(async () => {
@@ -66,7 +66,7 @@ export default function ImportGoodsPage() {
             const res = await api.get(`/owner/businesses/${selectedBusiness}/imports`, { params });
             setImports(res.data?.data || []); setCurrentPage(res.data?.current_page || 1); setLastPage(res.data?.last_page || 1);
             if (res.data?.stats) setStats(res.data.stats);
-        } catch { setImports([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch imports:', error); setImports([]); } finally { setLoading(false); }
     }, [selectedBusiness, currentPage, search, statusFilter]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
@@ -74,16 +74,16 @@ export default function ImportGoodsPage() {
 
     const handleAdd = async (e) => {
         e.preventDefault(); setSubmitting(true);
-        try { await api.post(`/owner/businesses/${selectedBusiness}/imports`, { ...form, quantity: Number(form.quantity), buying_price: Number(form.buying_price), selling_price: Number(form.selling_price), distance_km: form.distance_km ? Number(form.distance_km) : null, transport_cost: form.transport_cost ? Number(form.transport_cost) : 0 }); setAddModalOpen(false); setForm(emptyForm); fetchData(); } catch {} finally { setSubmitting(false); }
+        try { await api.post(`/owner/businesses/${selectedBusiness}/imports`, { ...form, quantity: Number(form.quantity), buying_price: Number(form.buying_price), selling_price: Number(form.selling_price), distance_km: form.distance_km ? Number(form.distance_km) : null, transport_cost: form.transport_cost ? Number(form.transport_cost) : 0 }); setAddModalOpen(false); setForm(emptyForm); fetchData(); } catch (error) { console.error('Failed to add import:', error); alert(error?.response?.data?.message || 'Failed to add import. Please try again.'); } finally { setSubmitting(false); }
     };
 
     const handleEdit = async (e) => {
         e.preventDefault(); setSubmitting(true);
-        try { await api.put(`/owner/businesses/${selectedBusiness}/imports/${editingItem.id}`, { ...form, quantity: Number(form.quantity), buying_price: Number(form.buying_price), selling_price: Number(form.selling_price), distance_km: form.distance_km ? Number(form.distance_km) : null, transport_cost: form.transport_cost ? Number(form.transport_cost) : 0 }); setEditModalOpen(false); setEditingItem(null); fetchData(); } catch {} finally { setSubmitting(false); }
+        try { await api.put(`/owner/businesses/${selectedBusiness}/imports/${editingItem.id}`, { ...form, quantity: Number(form.quantity), buying_price: Number(form.buying_price), selling_price: Number(form.selling_price), distance_km: form.distance_km ? Number(form.distance_km) : null, transport_cost: form.transport_cost ? Number(form.transport_cost) : 0 }); setEditModalOpen(false); setEditingItem(null); fetchData(); } catch (error) { console.error('Failed to edit import:', error); alert(error?.response?.data?.message || 'Failed to edit import. Please try again.'); } finally { setSubmitting(false); }
     };
 
-    const handleStatusChange = async (item, newStatus) => { try { await api.put(`/owner/businesses/${selectedBusiness}/imports/${item.id}/status`, { status: newStatus }); fetchData(); } catch {} };
-    const handleDelete = async () => { if (!deleteId) return; try { await api.delete(`/owner/businesses/${selectedBusiness}/imports/${deleteId}`); fetchData(); } catch {} finally { setDeleteId(null); setDeleteModalOpen(false); } };
+    const handleStatusChange = async (item, newStatus) => { try { await api.put(`/owner/businesses/${selectedBusiness}/imports/${item.id}/status`, { status: newStatus }); fetchData(); } catch (error) { console.error('Failed to update import status:', error); alert(error?.response?.data?.message || 'Failed to update status. Please try again.'); } };
+    const handleDelete = async () => { if (!deleteId) return; try { await api.delete(`/owner/businesses/${selectedBusiness}/imports/${deleteId}`); fetchData(); } catch (error) { console.error('Failed to delete import:', error); alert(error?.response?.data?.message || 'Failed to delete import. Please try again.'); } finally { setDeleteId(null); setDeleteModalOpen(false); } };
     const openEdit = (item) => { setEditingItem(item); setForm({ item_name: item.item_name || '', quantity: item.quantity || '', buying_price: item.buying_price || '', selling_price: item.selling_price || '', distance_km: item.distance_km || '', transport_cost: item.transport_cost || '', payment_method: item.payment_method || 'cash' }); setEditModalOpen(true); };
     const formatCurrency = (val) => `TZS ${Number(val || 0).toLocaleString()}`;
 

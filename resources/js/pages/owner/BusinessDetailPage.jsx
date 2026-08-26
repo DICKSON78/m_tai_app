@@ -54,12 +54,12 @@ export default function BusinessDetailPage() {
 
     const fetchBusiness = async () => {
         try { const res = await api.get(`/owner/businesses/${id}`); setBusiness(res.data.data || res.data); }
-        catch (err) { alert('Failed to fetch business details.'); navigate('/owner/businesses'); }
+        catch (err) { console.error('Failed to fetch business details:', err); alert('Failed to fetch business details.'); navigate('/owner/businesses'); }
     };
 
     const fetchCapitals = async () => {
         try { const res = await api.get(`/owner/businesses/${id}/capitals`); setCapitals(res.data.data || res.data || []); }
-        catch { setCapitals([]); } finally { setLoading(false); }
+        catch (error) { console.error('Failed to fetch capitals:', error); setCapitals([]); } finally { setLoading(false); }
     };
 
     const handleCapitalChange = (e) => {
@@ -71,7 +71,7 @@ export default function BusinessDetailPage() {
     const handleCapitalSubmit = async (e) => {
         e.preventDefault(); setCapitalLoading(true); setCapitalErrors({});
         try { await api.post(`/owner/businesses/${id}/capitals`, capitalForm); setCapitalModalOpen(false); setCapitalForm(initialCapitalForm); fetchCapitals(); }
-        catch (err) { if (err.response?.status === 422) setCapitalErrors(err.response.data.errors || {}); else alert('An error occurred. Please try again.'); }
+        catch (err) { console.error('Failed to save capital:', err); if (err.response?.status === 422) setCapitalErrors(err.response.data.errors || {}); else alert('An error occurred. Please try again.'); }
         finally { setCapitalLoading(false); }
     };
 

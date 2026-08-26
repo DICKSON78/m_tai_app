@@ -46,7 +46,7 @@ export default function AdminSubscriptionsPage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             if (res.data?.summary) setSummary(res.data.summary);
-        } catch { setSubscriptions([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch subscriptions:', error); setSubscriptions([]); } finally { setLoading(false); }
     }, [currentPage, search, statusFilter, planFilter]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
@@ -54,7 +54,7 @@ export default function AdminSubscriptionsPage() {
 
     const handleDelete = async () => {
         if (!deleteId) return;
-        try { await api.delete(`/admin/subscriptions/${deleteId}`); setSuccessModal(true); setTimeout(() => setSuccessModal(false), 2000); fetchData(); } catch { /* silent */ } finally { setDeleteId(null); setConfirmOpen(false); }
+        try { await api.delete(`/admin/subscriptions/${deleteId}`); setSuccessModal(true); setTimeout(() => setSuccessModal(false), 2000); fetchData(); } catch (error) { console.error('Failed to delete subscription:', error); alert(error?.response?.data?.message || 'Failed to delete subscription. Please try again.'); } finally { setDeleteId(null); setConfirmOpen(false); }
     };
 
     return (

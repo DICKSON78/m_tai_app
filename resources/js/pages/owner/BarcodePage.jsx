@@ -20,21 +20,21 @@ export default function BarcodePage() {
     useEffect(() => {
         api.get('/owner/businesses', { params: { per_page: 200 } })
             .then(res => setBusinesses(res.data?.data || res.data || []))
-            .catch(() => setBusinesses([]));
+            .catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     useEffect(() => {
         if (!selectedBusiness) return;
         api.get(`/owner/businesses/${selectedBusiness}/products`, { params: { per_page: 200 } })
             .then(res => setProducts(res.data?.data || res.data || []))
-            .catch(() => setProducts([]));
+            .catch((error) => { console.error('Failed to fetch products:', error); setProducts([]); });
     }, [selectedBusiness]);
 
     const handleGenerateProductBarcode = async () => {
         if (!selectedBusiness || !selectedProduct) return;
         setLoading(true); setError(''); setBarcode(null);
         try { const res = await api.get(`/owner/businesses/${selectedBusiness}/products/${selectedProduct}/barcode`); setBarcode(res.data); }
-        catch { setError('Failed to generate barcode'); }
+        catch (error) { console.error('Failed to generate barcode:', error); setError('Failed to generate barcode'); }
         finally { setLoading(false); }
     };
 
@@ -42,7 +42,7 @@ export default function BarcodePage() {
         if (!orderId) return;
         setLoading(true); setError(''); setBarcode(null);
         try { const res = await api.post('/owner/barcodes/order', { order_id: orderId }); setBarcode(res.data); }
-        catch { setError('Failed to generate order barcodes'); }
+        catch (error) { console.error('Failed to generate order barcodes:', error); setError('Failed to generate order barcodes'); }
         finally { setLoading(false); }
     };
 

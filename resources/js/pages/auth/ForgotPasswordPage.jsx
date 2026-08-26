@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
             if (res.data.token) {
                 setToken(res.data.token);
             }
-        } catch (err) {
+        } catch (err) { console.error('Forgot password failed:', err);
             setError(err.response?.data?.message || 'Failed to process request. Please try again.');
         } finally {
             setLoading(false);

@@ -30,7 +30,7 @@ export default function AdminSubscriptionShowPage() {
     const [successModal, setSuccessModal] = useState(false);
 
     useEffect(() => {
-        api.get(`/admin/subscriptions/${id}`).then(res => setSub(res.data)).catch(() => navigate('/admin/subscriptions')).finally(() => setLoading(false));
+        api.get(`/admin/subscriptions/${id}`).then(res => setSub(res.data)).catch((error) => { console.error('Failed to fetch subscription:', error); navigate('/admin/subscriptions'); }).finally(() => setLoading(false));
     }, [id, navigate]);
 
     const handleDelete = async () => {
@@ -38,7 +38,7 @@ export default function AdminSubscriptionShowPage() {
             await api.delete(`/admin/subscriptions/${id}`);
             setSuccessModal(true);
             setTimeout(() => navigate('/admin/subscriptions'), 1500);
-        } catch { setConfirmOpen(false); }
+        } catch (error) { console.error('Failed to delete subscription:', error); setConfirmOpen(false); alert(error?.response?.data?.message || 'Failed to delete subscription. Please try again.'); }
     };
 
     if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]"></div></div>;

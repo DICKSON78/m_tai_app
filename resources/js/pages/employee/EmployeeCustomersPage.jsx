@@ -23,10 +23,7 @@ export default function EmployeeCustomersPage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             setTotal(res.data?.total || data.length);
-        } catch {
-            setCustomers([]);
-            setTotal(0);
-        } finally {
+        } catch (error) { console.error('Failed to fetch customers:', error); setCustomers([]); setTotal(0); } finally {
             setLoading(false);
         }
     }, [currentPage, search]);

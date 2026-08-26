@@ -13,7 +13,7 @@ export default function TaxSettingsPage() {
 
     const fetchRates = useCallback(async () => {
         setLoading(true);
-        try { const res = await api.get('/owner/finance/tax-rates'); setRates(res.data.data || res.data || []); } catch { setRates([]); } finally { setLoading(false); }
+        try { const res = await api.get('/owner/finance/tax-rates'); setRates(res.data.data || res.data || []); } catch (error) { console.error('Failed to fetch tax rates:', error); setRates([]); } finally { setLoading(false); }
     }, []);
 
     useEffect(() => { fetchRates(); }, [fetchRates]);
@@ -41,19 +41,19 @@ export default function TaxSettingsPage() {
                 await api.post('/owner/finance/tax-rates', form);
             }
             setShowForm(false); resetForm(); fetchRates();
-        } catch (err) { alert(err.response?.data?.message || 'Failed to save tax rate'); } finally { setSaving(false); }
+        } catch (err) { console.error('Failed to save tax rate:', err); alert(err.response?.data?.message || 'Failed to save tax rate'); } finally { setSaving(false); }
     };
 
     const handleDelete = async (id) => {
         if (!confirm('Are you sure you want to delete this tax rate?')) return;
-        try { await api.delete(`/owner/finance/tax-rates/${id}`); fetchRates(); } catch (err) { alert(err.response?.data?.message || 'Failed to delete'); }
+        try { await api.delete(`/owner/finance/tax-rates/${id}`); fetchRates(); } catch (err) { console.error('Failed to delete tax rate:', err); alert(err.response?.data?.message || 'Failed to delete'); }
     };
 
     const handleToggleActive = async (rate) => {
         try {
             await api.put(`/owner/finance/tax-rates/${rate.id}`, { ...rate, is_active: !rate.is_active });
             fetchRates();
-        } catch (err) { alert(err.response?.data?.message || 'Failed to toggle'); }
+        } catch (err) { console.error('Failed to toggle tax rate:', err); alert(err.response?.data?.message || 'Failed to toggle'); }
     };
 
     const activeRates = rates.filter(r => r.is_active);

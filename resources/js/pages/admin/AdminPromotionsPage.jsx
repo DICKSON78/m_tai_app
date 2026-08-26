@@ -21,7 +21,7 @@ export default function AdminPromotionsPage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             setTotal(res.data?.total || 0);
-        } catch { setCoupons([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch coupons:', error); setCoupons([]); } finally { setLoading(false); }
     }, [currentPage, search]);
 
     useEffect(() => { fetchCoupons(); }, [fetchCoupons]);

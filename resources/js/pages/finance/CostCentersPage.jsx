@@ -21,7 +21,7 @@ export default function CostCentersPage() {
       if (search) params.search = search;
       const res = await api.get('/owner/finance/cost-centers', { params });
       setCenters(res.data || []);
-    } catch { setCenters([]); } finally { setLoading(false); }
+    } catch (error) { console.error('Failed to fetch cost centers:', error); setCenters([]); } finally { setLoading(false); }
   }, [search]);
 
   useEffect(() => { fetchCenters(); }, [fetchCenters]);

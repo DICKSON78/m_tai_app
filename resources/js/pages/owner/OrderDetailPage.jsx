@@ -52,7 +52,8 @@ export default function OrderDetailPage() {
         try {
             const res = await api.get(`/orders/${id}`);
             setOrder(res.data?.data || res.data);
-        } catch {
+        } catch (error) {
+            console.error('Failed to fetch order:', error);
         } finally {
             setLoading(false);
         }
@@ -68,7 +69,9 @@ export default function OrderDetailPage() {
             await api.post(`/owner/orders/${id}/verify`);
             setVerifyModalOpen(false);
             fetchOrder();
-        } catch {
+        } catch (error) {
+            console.error('Failed to verify order:', error);
+            alert(error?.response?.data?.message || 'Failed to verify order. Please try again.');
         } finally {
             setVerifying(false);
         }
@@ -87,7 +90,9 @@ export default function OrderDetailPage() {
             setStatusModalOpen(false);
             setStatusAction('');
             fetchOrder();
-        } catch {
+        } catch (error) {
+            console.error('Failed to update order status:', error);
+            alert(error?.response?.data?.message || 'Failed to update order status. Please try again.');
         } finally {
             setStatusUpdating(false);
         }
@@ -99,7 +104,9 @@ export default function OrderDetailPage() {
             await api.post(`/owner/orders/${id}/status`, { status: 'cancelled' });
             setCancelModalOpen(false);
             fetchOrder();
-        } catch {
+        } catch (error) {
+            console.error('Failed to cancel order:', error);
+            alert(error?.response?.data?.message || 'Failed to cancel order. Please try again.');
         } finally {
             setCancelling(false);
         }

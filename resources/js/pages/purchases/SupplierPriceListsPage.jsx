@@ -46,7 +46,7 @@ export default function SupplierPriceListsPage() {
           expiring_soon_count: rows.filter((r) => r.expiring_soon).length,
         });
       }
-    } catch {
+    } catch (error) { console.error('Failed to fetch price lists:', error);
       setItems([]);
     } finally {
       setLoading(false);
@@ -58,7 +58,7 @@ export default function SupplierPriceListsPage() {
       const res = await api.get('/owner/purchases/price-lists', { params: { per_page: 1 } });
       const s = res.data.summary || res.data.meta?.summary;
       if (s) setSummary(s);
-    } catch {}
+    } catch (error) { console.error('Failed to fetch price list summary:', error); }
   }, []);
 
   const fetchDropdowns = useCallback(async () => {
@@ -69,7 +69,7 @@ export default function SupplierPriceListsPage() {
       ]);
       setSuppliers(supRes.data.data || []);
       setProducts(prodRes.data.data || []);
-    } catch {}
+    } catch (error) { console.error('Failed to fetch dropdown data:', error); }
   }, []);
 
   useEffect(() => { fetchItems(1); }, [fetchItems]);
@@ -112,7 +112,7 @@ export default function SupplierPriceListsPage() {
         is_active: !!d.is_active,
       });
       setShowForm(true);
-    } catch {
+    } catch (error) { console.error('Failed to load price details:', error);
       alert('Failed to load price details');
     }
   };

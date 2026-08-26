@@ -27,9 +27,7 @@ export default function CustomerDeliveriesPage() {
             setDeliveries(data);
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
-        } catch {
-            setDeliveries([]);
-        } finally {
+        } catch (error) { console.error('Failed to fetch deliveries:', error); setDeliveries([]); } finally {
             setLoading(false);
         }
     }, [currentPage]);

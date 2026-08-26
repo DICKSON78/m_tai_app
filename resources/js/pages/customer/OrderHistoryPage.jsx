@@ -44,9 +44,7 @@ export default function OrderHistoryPage() {
             setCurrentPage(data.current_page || 1);
             setLastPage(data.last_page || 1);
             setTotalOrders(data.total || 0);
-        } catch {
-            setOrders([]);
-        } finally {
+        } catch (error) { console.error('Failed to fetch orders:', error); setOrders([]); } finally {
             setLoading(false);
         }
     }, [filterStatus]);

@@ -25,7 +25,8 @@ export default function WishlistPage() {
             setCurrentPage(data.current_page || 1);
             setLastPage(data.last_page || 1);
             setTotalItems(data.total || 0);
-        } catch {
+        } catch (error) {
+            console.error('Failed to fetch wishlist:', error);
             setItems([]);
         } finally {
             setLoading(false);
@@ -53,8 +54,9 @@ export default function WishlistPage() {
             setConfirmOpen(false);
             setRemoving(null);
             fetchWishlist(currentPage);
-        } catch {
-            // silent
+        } catch (error) {
+            console.error('Failed to remove from wishlist:', error);
+            alert(error?.response?.data?.message || 'Failed to remove from wishlist. Please try again.');
         }
     };
 

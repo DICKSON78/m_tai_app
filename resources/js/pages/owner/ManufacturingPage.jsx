@@ -24,23 +24,23 @@ export default function ManufacturingPage() {
         api.get('/owner/businesses').then(res => {
             const biz = res.data?.data || res.data || [];
             if (biz.length === 1) setSelectedBusiness(biz[0].id);
-        }).catch(() => {});
+        }).catch((error) => { console.error('Failed to fetch businesses:', error); });
     }, []);
 
-    const fetchSummary = useCallback(async () => { try { const r = await api.get('/owner/manufacturing/summary'); setSummary(r.data); } catch {} }, []);
+    const fetchSummary = useCallback(async () => { try { const r = await api.get('/owner/manufacturing/summary'); setSummary(r.data); } catch (error) { console.error('Failed to fetch manufacturing summary:', error); } }, []);
     const fetchProducts = useCallback(async () => {
         if (!selectedBusiness) return;
-        try { const r = await api.get(`/owner/businesses/${selectedBusiness}/products`, { params: { per_page: 200 } }); setProducts(r.data.data || r.data || []); } catch { setProducts([]); }
+        try { const r = await api.get(`/owner/businesses/${selectedBusiness}/products`, { params: { per_page: 200 } }); setProducts(r.data.data || r.data || []); } catch (error) { console.error('Failed to fetch products:', error); setProducts([]); }
     }, [selectedBusiness]);
 
     const fetchBoms = useCallback(async () => {
         setLoading(true);
-        try { const p = {}; if (filter) p.status = filter; const r = await api.get('/owner/manufacturing/boms', { params: p }); setBoms(r.data.data || []); } catch { setBoms([]); } finally { setLoading(false); }
+        try { const p = {}; if (filter) p.status = filter; const r = await api.get('/owner/manufacturing/boms', { params: p }); setBoms(r.data.data || []); } catch (error) { console.error('Failed to fetch BOMs:', error); setBoms([]); } finally { setLoading(false); }
     }, [filter]);
 
     const fetchWorkOrders = useCallback(async () => {
         setLoading(true);
-        try { const p = {}; if (filter) p.status = filter; const r = await api.get('/owner/manufacturing/work-orders', { params: p }); setWorkOrders(r.data.data || []); } catch { setWorkOrders([]); } finally { setLoading(false); }
+        try { const p = {}; if (filter) p.status = filter; const r = await api.get('/owner/manufacturing/work-orders', { params: p }); setWorkOrders(r.data.data || []); } catch (error) { console.error('Failed to fetch work orders:', error); setWorkOrders([]); } finally { setLoading(false); }
     }, [filter]);
 
     useEffect(() => { fetchSummary(); fetchProducts(); }, [fetchSummary, fetchProducts, selectedBusiness]);
@@ -87,16 +87,16 @@ export default function ManufacturingPage() {
             }
             setShowForm(false); resetForm(); fetchSummary();
             if (tab === 'boms') fetchBoms(); else fetchWorkOrders();
-        } catch (err) { alert(err.response?.data?.message || 'Failed to save'); } finally { setSaving(false); }
+        } catch (err) { console.error('Failed to save:', err); alert(err.response?.data?.message || 'Failed to save'); } finally { setSaving(false); }
     };
 
     const handleDelete = async (item) => {
         if (!confirm('Delete this item?')) return;
-        try { await api.delete(`/owner/manufacturing/${tab}/${item.id}`); fetchSummary(); if (tab === 'boms') fetchBoms(); else fetchWorkOrders(); } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+        try { await api.delete(`/owner/manufacturing/${tab}/${item.id}`); fetchSummary(); if (tab === 'boms') fetchBoms(); else fetchWorkOrders(); } catch (err) { console.error('Failed to delete:', err); alert(err.response?.data?.message || 'Failed'); }
     };
 
     const handleStatusChange = async (item, status) => {
-        try { await api.put(`/owner/manufacturing/${tab}/${item.id}`, { status }); if (tab === 'boms') fetchBoms(); else fetchWorkOrders(); } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+        try { await api.put(`/owner/manufacturing/${tab}/${item.id}`, { status }); if (tab === 'boms') fetchBoms(); else fetchWorkOrders(); } catch (err) { console.error('Failed to update status:', err); alert(err.response?.data?.message || 'Failed'); }
     };
 
     const fmt = (n) => new Intl.NumberFormat('en-TZ').format(n || 0);

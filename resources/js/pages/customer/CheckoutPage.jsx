@@ -58,9 +58,7 @@ export default function CheckoutPage() {
             const res = await api.get('/cart');
             const data = res.data;
             setItems(data.items || data.data || data || []);
-        } catch {
-            setItems([]);
-        } finally {
+        } catch (error) { console.error('Failed to fetch cart:', error); setItems([]); } finally {
             setLoading(false);
         }
     }, []);

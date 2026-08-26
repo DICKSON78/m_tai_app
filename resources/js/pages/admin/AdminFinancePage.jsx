@@ -17,7 +17,7 @@ export default function AdminFinancePage() {
             try {
                 const res = await api.get('/admin/finance', { params: { period } });
                 setData(res.data);
-            } catch {
+            } catch (error) { console.error('Failed to fetch finance data:', error);
                 try {
                     const dashRes = await api.get('/admin/dashboard');
                     setData({
@@ -29,7 +29,7 @@ export default function AdminFinancePage() {
                         revenue_by_payment: [],
                         recent_payments: [],
                     });
-                } catch { /* silent */ }
+                } catch (error2) { console.error('Failed to fetch dashboard fallback:', error2); }
             } finally { setLoading(false); }
         };
         fetchFinance();

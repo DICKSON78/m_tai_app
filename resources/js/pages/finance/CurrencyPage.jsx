@@ -19,11 +19,11 @@ export default function CurrencyPage() {
 
     const fetchCurrencies = useCallback(async () => {
         setLoading(true);
-        try { const res = await api.get('/owner/finance/currencies'); setCurrencies(res.data.data || res.data || []); } catch { setCurrencies([]); } finally { setLoading(false); }
+        try { const res = await api.get('/owner/finance/currencies'); setCurrencies(res.data.data || res.data || []); } catch (error) { console.error('Failed to fetch currencies:', error); setCurrencies([]); } finally { setLoading(false); }
     }, []);
 
     const fetchRates = useCallback(async () => {
-        try { const res = await api.get('/owner/finance/exchange-rates'); setRates(res.data.data || res.data || []); } catch { setRates([]); }
+        try { const res = await api.get('/owner/finance/exchange-rates'); setRates(res.data.data || res.data || []); } catch (error) { console.error('Failed to fetch exchange rates:', error); setRates([]); }
     }, []);
 
     useEffect(() => { fetchCurrencies(); fetchRates(); }, [fetchCurrencies, fetchRates]);

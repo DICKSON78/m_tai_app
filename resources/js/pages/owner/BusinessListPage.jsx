@@ -21,13 +21,13 @@ export default function BusinessListPage() {
     const fetchBusinesses = async () => {
         setLoading(true); setError(null);
         try { const res = await api.get('/owner/businesses'); setBusinesses(res.data.data || res.data); }
-        catch (err) { setError('Failed to load businesses. Please try again.'); }
+        catch (err) { console.error('Failed to load businesses:', err); setError('Failed to load businesses. Please try again.'); }
         finally { setLoading(false); }
     };
 
     const handleSwitch = async (business) => {
         try { await api.post(`/owner/businesses/${business.id}/switch`); localStorage.setItem('active_business_id', business.id); window.location.reload(); }
-        catch (err) { alert('Failed to switch business.'); }
+        catch (err) { console.error('Failed to switch business:', err); alert('Failed to switch business.'); }
     };
 
     if (loading) {

@@ -31,9 +31,7 @@ export default function ShopDetailPage() {
         try {
             const res = await api.get(`/shops/${id}`);
             setShop(res.data.data || res.data);
-        } catch {
-            setShop(null);
-        } finally {
+        } catch (error) { console.error('Failed to fetch shop:', error); setShop(null); } finally {
             setLoading(false);
         }
     };
@@ -54,9 +52,7 @@ export default function ShopDetailPage() {
             if (!categories.length) {
                 setCategories(data.categories || []);
             }
-        } catch {
-            setProducts([]);
-        } finally {
+        } catch (error) { console.error('Failed to fetch products:', error); setProducts([]); } finally {
             setProductsLoading(false);
         }
     }, [id, search, selectedCategory, categories.length]);

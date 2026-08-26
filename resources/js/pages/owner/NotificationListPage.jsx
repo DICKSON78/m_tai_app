@@ -37,7 +37,7 @@ export default function NotificationListPage() {
             setNotifications(res.data?.data || []);
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
-        } catch { setNotifications([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch notifications:', error); setNotifications([]); } finally { setLoading(false); }
     }, [activeTab, currentPage]);
 
     useEffect(() => { fetchNotifications(); }, [fetchNotifications]);
@@ -46,19 +46,19 @@ export default function NotificationListPage() {
     const markAsRead = async (id) => {
         if (processingIds.has(id)) return;
         setProcessingIds(prev => new Set(prev).add(id));
-        try { await api.put(`/notifications/${id}/read`); setNotifications(prev => prev.map(n => n.id === id ? { ...n, read_at: n.read_at || new Date().toISOString(), is_read: true } : n)); } catch {} finally { setProcessingIds(prev => { const next = new Set(prev); next.delete(id); return next; }); }
+        try { await api.put(`/notifications/${id}/read`); setNotifications(prev => prev.map(n => n.id === id ? { ...n, read_at: n.read_at || new Date().toISOString(), is_read: true } : n)); } catch (error) { console.error('Failed to mark notification as read:', error); alert(error?.response?.data?.message || 'Failed to mark as read.'); } finally { setProcessingIds(prev => { const next = new Set(prev); next.delete(id); return next; }); }
     };
 
     const markAllRead = async () => {
         if (processingIds.has('*all*')) return;
         setProcessingIds(prev => new Set(prev).add('*all*'));
-        try { await api.put('/notifications/read-all'); setNotifications(prev => prev.map(n => ({ ...n, read_at: n.read_at || new Date().toISOString(), is_read: true }))); } catch {} finally { setProcessingIds(prev => { const next = new Set(prev); next.delete('*all*'); return next; }); }
+        try { await api.put('/notifications/read-all'); setNotifications(prev => prev.map(n => ({ ...n, read_at: n.read_at || new Date().toISOString(), is_read: true }))); } catch (error) { console.error('Failed to mark all as read:', error); alert(error?.response?.data?.message || 'Failed to mark all as read.'); } finally { setProcessingIds(prev => { const next = new Set(prev); next.delete('*all*'); return next; }); }
     };
 
     const handleDelete = async (id) => {
         if (processingIds.has(id)) return;
         setProcessingIds(prev => new Set(prev).add(id));
-        try { await api.delete(`/notifications/${id}`); setNotifications(prev => prev.filter(n => n.id !== id)); } catch {} finally { setProcessingIds(prev => { const next = new Set(prev); next.delete(id); return next; }); }
+        try { await api.delete(`/notifications/${id}`); setNotifications(prev => prev.filter(n => n.id !== id)); } catch (error) { console.error('Failed to delete notification:', error); alert(error?.response?.data?.message || 'Failed to delete notification.'); } finally { setProcessingIds(prev => { const next = new Set(prev); next.delete(id); return next; }); }
     };
 
     const getTimeAgo = (date) => {

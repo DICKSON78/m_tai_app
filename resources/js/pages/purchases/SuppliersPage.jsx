@@ -39,17 +39,15 @@ export default function SuppliersPage() {
       setSuppliers(res.data.data || []);
       setCurrentPage(res.data.current_page || 1);
       setLastPage(res.data.last_page || 1);
-    } catch { setSuppliers([]); } finally { setLoading(false); }
+    } catch (error) { console.error('Failed to fetch suppliers:', error); setSuppliers([]); } finally { setLoading(false); }
   }, [search, statusFilter]);
 
   const fetchSummary = useCallback(async () => {
     try {
       const res = await api.get('/owner/purchases/suppliers/summary');
       setSummary(res.data);
-    } catch {}
-  }, []);
-
-  useEffect(() => { fetchSuppliers(); fetchSummary(); }, [fetchSuppliers, fetchSummary]);
+    } catch (error) { console.error('Failed to fetch supplier summary:', error); }
+  }, []);(() => { fetchSuppliers(); fetchSummary(); }, [fetchSuppliers, fetchSummary]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

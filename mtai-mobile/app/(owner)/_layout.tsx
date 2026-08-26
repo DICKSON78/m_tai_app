@@ -73,6 +73,39 @@ export default function OwnerLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="inventory"
+        options={{
+          title: 'Inventory',
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="finance"
+        options={{
+          title: 'Finance',
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="inventory"
+        options={{
+          title: 'Inventory',
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="manufacturing"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="crm"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="warehouse"
+        options={{ href: null }}
+      />
     </Tabs>
   );
 }

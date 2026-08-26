@@ -27,11 +27,11 @@ export default function BudgetsPage() {
 
     const fetchBudgets = useCallback(async () => {
         setLoading(true);
-        try { const res = await api.get('/owner/finance/budgets'); setBudgets(res.data.data || res.data || []); } catch { setBudgets([]); } finally { setLoading(false); }
+        try { const res = await api.get('/owner/finance/budgets'); setBudgets(res.data.data || res.data || []); } catch (error) { console.error('Failed to fetch budgets:', error); setBudgets([]); } finally { setLoading(false); }
     }, []);
 
     const fetchCoa = useCallback(async () => {
-        try { const res = await api.get('/owner/finance/accounts', { params: { per_page: 200 } }); setCoa(res.data.data || []); } catch { setCoa([]); }
+        try { const res = await api.get('/owner/finance/accounts', { params: { per_page: 200 } }); setCoa(res.data.data || []); } catch (error) { console.error('Failed to fetch chart of accounts:', error); setCoa([]); }
     }, []);
 
     useEffect(() => { fetchBudgets(); fetchCoa(); }, [fetchBudgets, fetchCoa]);
@@ -61,12 +61,12 @@ export default function BudgetsPage() {
                 await api.post('/owner/finance/budgets', form);
             }
             setShowForm(false); resetForm(); fetchBudgets();
-        } catch (err) { alert(err.response?.data?.message || 'Failed to save budget'); } finally { setSaving(false); }
+        } catch (err) { console.error('Failed to save budget:', err); alert(err.response?.data?.message || 'Failed to save budget'); } finally { setSaving(false); }
     };
 
     const handleDelete = async (id) => {
         if (!confirm('Are you sure you want to delete this budget?')) return;
-        try { await api.delete(`/owner/finance/budgets/${id}`); fetchBudgets(); } catch (err) { alert(err.response?.data?.message || 'Failed to delete'); }
+        try { await api.delete(`/owner/finance/budgets/${id}`); fetchBudgets(); } catch (err) { console.error('Failed to delete budget:', err); alert(err.response?.data?.message || 'Failed to delete'); }
     };
 
     const totalBudgeted = budgets.reduce((s, b) => s + Number(b.budget_amount || 0), 0);

@@ -10,6 +10,23 @@ class AuditLogController extends Controller
 {
     public function index(Request $request)
     {
+        $request->validate([
+            'user_id' => 'nullable|integer|exists:users,id',
+            'action' => 'nullable|string|max:255',
+            'model_type' => 'nullable|string|max:255',
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
+            'search' => 'nullable|string|max:255',
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'page' => 'nullable|integer|min:1',
+        ], [
+            'user_id.exists' => 'Mtumiaji huyu haipatikani.',
+            'date_from.date' => 'Tarehe ya kuanza si sahihi.',
+            'date_to.date' => 'Tarehe ya mwisho si sahihi.',
+            'date_to.after_or_equal' => 'Tarehe ya mwisho lazima iwe sawa au baada ya tarehe ya kuanza.',
+            'per_page.max' => 'Idadi ya kurasa kwa ukurasa haizidi 100.',
+        ]);
+
         $query = AuditLog::with('user:id,name,email');
 
         if ($request->has('user_id')) {

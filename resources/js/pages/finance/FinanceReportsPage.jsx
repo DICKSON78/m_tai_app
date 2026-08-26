@@ -58,7 +58,7 @@ export default function FinanceReportsPage() {
                 res = await api.get('/owner/finance/reports/trial-balance');
             }
             setReportData(res?.data || {});
-        } catch { setReportData(null); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch finance report:', error); setReportData(null); } finally { setLoading(false); }
     }, [activeTab, dateFrom, dateTo]);
 
     useEffect(() => { fetchReport(); }, [fetchReport]);

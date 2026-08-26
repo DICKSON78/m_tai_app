@@ -115,7 +115,7 @@ export default function RegisterSellerPage() {
             } else {
                 window.location.href = '/login';
             }
-        } catch (err) {
+        } catch (err) { console.error('Registration failed:', err);
             const msg = err?.response?.data?.message || err?.response?.data?.errors?.name?.[0] || 'Registration failed. Please try again.';
             setError(msg);
         } finally {

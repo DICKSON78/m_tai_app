@@ -29,7 +29,7 @@ export default function AdminOrderShowPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        api.get(`/admin/orders/${id}`).then(res => setOrder(res.data)).catch(() => navigate('/admin/orders')).finally(() => setLoading(false));
+        api.get(`/admin/orders/${id}`).then(res => setOrder(res.data)).catch((error) => { console.error('Failed to fetch order:', error); navigate('/admin/orders'); }).finally(() => setLoading(false));
     }, [id, navigate]);
 
     if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]"></div></div>;

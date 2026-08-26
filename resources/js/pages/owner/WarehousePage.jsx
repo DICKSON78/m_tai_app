@@ -26,23 +26,23 @@ export default function WarehousePage() {
         api.get('/owner/businesses').then(res => {
             const biz = res.data?.data || res.data || [];
             if (biz.length === 1) setSelectedBusiness(biz[0].id);
-        }).catch(() => {});
+        }).catch((error) => { console.error('Failed to fetch businesses:', error); });
     }, []);
 
-    const fetchSummary = useCallback(async () => { try { const r = await api.get('/owner/warehouses/summary'); setSummary(r.data); } catch {} }, []);
+    const fetchSummary = useCallback(async () => { try { const r = await api.get('/owner/warehouses/summary'); setSummary(r.data); } catch (error) { console.error('Failed to fetch warehouse summary:', error); } }, []);
     const fetchProducts = useCallback(async () => {
         if (!selectedBusiness) return;
-        try { const r = await api.get(`/owner/businesses/${selectedBusiness}/products`, { params: { per_page: 200 } }); setProducts(r.data.data || r.data || []); } catch { setProducts([]); }
+        try { const r = await api.get(`/owner/businesses/${selectedBusiness}/products`, { params: { per_page: 200 } }); setProducts(r.data.data || r.data || []); } catch (error) { console.error('Failed to fetch products:', error); setProducts([]); }
     }, [selectedBusiness]);
 
     const fetchWarehouses = useCallback(async () => {
         setLoading(true);
-        try { const p = {}; if (filter) p.status = filter; const r = await api.get('/owner/warehouses/', { params: p }); setWarehouses(r.data.data || []); } catch { setWarehouses([]); } finally { setLoading(false); }
+        try { const p = {}; if (filter) p.status = filter; const r = await api.get('/owner/warehouses/', { params: p }); setWarehouses(r.data.data || []); } catch (error) { console.error('Failed to fetch warehouses:', error); setWarehouses([]); } finally { setLoading(false); }
     }, [filter]);
 
     const fetchTransfers = useCallback(async () => {
         setLoading(true);
-        try { const p = {}; if (filter) p.status = filter; const r = await api.get('/owner/warehouses/transfers/list', { params: p }); setTransfers(r.data.data || []); } catch { setTransfers([]); } finally { setLoading(false); }
+        try { const p = {}; if (filter) p.status = filter; const r = await api.get('/owner/warehouses/transfers/list', { params: p }); setTransfers(r.data.data || []); } catch (error) { console.error('Failed to fetch transfers:', error); setTransfers([]); } finally { setLoading(false); }
     }, [filter]);
 
     useEffect(() => { fetchSummary(); fetchProducts(); }, [fetchSummary, fetchProducts, selectedBusiness]);
@@ -50,7 +50,7 @@ export default function WarehousePage() {
     useEffect(() => { if (tab === 'warehouses') fetchWarehouses(); else fetchTransfers(); }, [tab, fetchWarehouses, fetchTransfers]);
 
     const fetchDetail = async (id) => {
-        try { const r = await api.get(`/owner/warehouses/${id}`); setWhDetail(r.data); } catch {}
+        try { const r = await api.get(`/owner/warehouses/${id}`); setWhDetail(r.data); } catch (error) { console.error('Failed to fetch warehouse detail:', error); }
     };
 
     const resetForm = () => { setForm({}); setEditing(null); };
@@ -85,7 +85,7 @@ export default function WarehousePage() {
             }
             setShowForm(false); resetForm(); fetchSummary();
             if (tab === 'warehouses') fetchWarehouses(); else fetchTransfers();
-        } catch (err) { alert(err.response?.data?.message || 'Failed to save'); } finally { setSaving(false); }
+        } catch (err) { console.error('Failed to save:', err); alert(err.response?.data?.message || 'Failed to save'); } finally { setSaving(false); }
     };
 
     const handleDelete = async (item) => {
@@ -94,23 +94,23 @@ export default function WarehousePage() {
             if (tab === 'warehouses') await api.delete(`/owner/warehouses/${item.id}`);
             else await api.delete(`/owner/warehouses/transfers/${item.id}`);
             fetchSummary(); if (tab === 'warehouses') fetchWarehouses(); else fetchTransfers();
-        } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+        } catch (err) { console.error('Failed to delete:', err); alert(err.response?.data?.message || 'Failed'); }
     };
 
     const handleTransferAction = async (transfer, action) => {
-        try { await api.post(`/owner/warehouses/transfers/${transfer.id}/${action}`); fetchTransfers(); fetchSummary(); } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+        try { await api.post(`/owner/warehouses/transfers/${transfer.id}/${action}`); fetchTransfers(); fetchSummary(); } catch (err) { console.error('Failed to process transfer action:', err); alert(err.response?.data?.message || 'Failed'); }
     };
 
     const addZone = async (warehouseId) => {
         const name = prompt('Zone name:');
         if (!name) return;
-        try { await api.post(`/owner/warehouses/${warehouseId}/zones`, { name }); fetchDetail(warehouseId); fetchWarehouses(); } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+        try { await api.post(`/owner/warehouses/${warehouseId}/zones`, { name }); fetchDetail(warehouseId); fetchWarehouses(); } catch (err) { console.error('Failed to add zone:', err); alert(err.response?.data?.message || 'Failed'); }
     };
 
     const addBin = async (zoneId) => {
         const code = prompt('Bin code (e.g. A-01):');
         if (!code) return;
-        try { await api.post(`/owner/warehouses/zones/${zoneId}/bins`, { code }); if (whDetail) fetchDetail(whDetail.id); } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+        try { await api.post(`/owner/warehouses/zones/${zoneId}/bins`, { code }); if (whDetail) fetchDetail(whDetail.id); } catch (err) { console.error('Failed to add bin:', err); alert(err.response?.data?.message || 'Failed'); }
     };
 
     const fmt = (n) => new Intl.NumberFormat('en-TZ').format(n || 0);

@@ -97,15 +97,13 @@ export default function SupplierInvoicesPage() {
       setSuppliers(supRes.data.data || []);
       setPurchaseOrders(poRes.data.data || []);
       setProducts(prodRes.data.data || []);
-    } catch {}
-  }, []);
-
-  const fetchSummary = useCallback(async () => {
-    try { const res = await api.get('/owner/purchases/invoices', { params: { per_page: 1, summary: 1 } }); setSummary(res.data.summary || {}); } catch {}
+    } catch (error) { console.error('Failed to fetch dropdown data:', error); }
+  }, []); = useCallback(async () => {
+    try { const res = await api.get('/owner/purchases/invoices', { params: { per_page: 1, summary: 1 } }); setSummary(res.data.summary || {}); } catch (error) { console.error('Failed to fetch invoice summary:', error); }
     try {
       const res = await api.get('/owner/purchases/invoices/aging');
       setAging(res.data?.data || res.data);
-    } catch { setAging(null); }
+    } catch (error) { console.error('Failed to fetch aging data:', error); setAging(null); }
   }, []);
 
   useEffect(() => { fetchInvoices(); fetchDropdowns(); fetchSummary(); }, [fetchInvoices, fetchDropdowns, fetchSummary]);
@@ -185,7 +183,7 @@ export default function SupplierInvoicesPage() {
           tax_rate: it.tax_rate ?? 0,
         })),
       });
-    } catch { alert('Failed to load invoice for editing'); }
+    } catch (error) { console.error('Failed to load invoice for editing:', error); alert('Failed to load invoice for editing'); }
   };
 
   const handleDelete = async (inv) => {
@@ -210,7 +208,7 @@ export default function SupplierInvoicesPage() {
     try {
       const res = await api.get(`/owner/purchases/invoices/${inv.id}`);
       setShowDetail(res.data?.data || res.data);
-    } catch { alert('Failed to load invoice details'); }
+    } catch (error) { console.error('Failed to load invoice details:', error); alert('Failed to load invoice details'); }
     finally { setDetailLoading(false); }
   };
 

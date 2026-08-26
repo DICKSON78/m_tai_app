@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class AuthApiController extends Controller
@@ -152,7 +153,10 @@ class AuthApiController extends Controller
         $user = User::where('email', $request->email)->first();
         $token = strtoupper(bin2hex(random_bytes(16)));
 
-        cache()->put('password_reset_' . $user->id, $token, now()->addMinutes(30));
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $user->email],
+            ['token' => Hash::make($token), 'created_at' => now()]
+        );
 
         return response()->json([
             'message' => 'Reset token has been generated. Check your email.',
@@ -163,32 +167,34 @@ class AuthApiController extends Controller
     public function resetPassword(Request $request)
     {
         $request->validate([
+            'email' => 'required|email|exists:users,email',
             'token' => 'required|string',
             'password' => ['required', 'confirmed', Password::min(6)],
+        ], [
+            'email.exists' => 'Barua pepe hii haijpatikani.',
+            'token.required' => 'Tokeni inahitajika.',
+            'password.confirmed' => 'Nenosiri hazifanani.',
         ]);
 
-        $userId = null;
-        foreach (cache()->getMetas() ?? [] as $meta) {
-            // Search all cache entries for matching token
+        $resetRecord = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$resetRecord || !Hash::check($request->token, $resetRecord->token)) {
+            return response()->json(['message' => 'Tokeni hii si sahihi au imeisha muda.'], 422);
         }
 
-        // Find user by token in cache
-        $foundUser = null;
-        $allUsers = User::all();
-        foreach ($allUsers as $u) {
-            if (cache()->get('password_reset_' . $u->id) === $request->token) {
-                $foundUser = $u;
-                break;
-            }
+        $tokenAge = now()->diffInMinutes($resetRecord->created_at);
+        if ($tokenAge > 60) {
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            return response()->json(['message' => 'Tokeni hii imeisha muda. Tafadhali omba tokeni mpya.'], 422);
         }
 
-        if (!$foundUser) {
-            return response()->json(['message' => 'Invalid or expired reset token.'], 422);
-        }
+        $user = User::where('email', $request->email)->first();
+        $user->update(['password' => Hash::make($request->password)]);
 
-        $foundUser->update(['password' => Hash::make($request->password)]);
-        cache()->forget('password_reset_' . $foundUser->id);
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-        return response()->json(['message' => 'Password has been reset successfully. You can now login.']);
+        return response()->json(['message' => 'Nenosari limefanikiwa kubadilishwa. Sasa unaweza kuingia.']);
     }
 }

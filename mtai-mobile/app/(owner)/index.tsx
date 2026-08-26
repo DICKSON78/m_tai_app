@@ -280,6 +280,14 @@ export default function OwnerDashboardScreen() {
     router.push('/(owner)/reports');
   }, []);
 
+  const goToFinance = useCallback(() => {
+    router.push('/(owner)/finance');
+  }, []);
+
+  const goToHR = useCallback(() => {
+    router.push('/(owner)/hr');
+  }, []);
+
   const goToProfile = useCallback(() => {
     router.push('/(owner)/profile');
   }, []);
@@ -294,6 +302,22 @@ export default function OwnerDashboardScreen() {
   const handleInventory = useCallback(() => {
     router.push('/(owner)/inventory');
   }, [router]);
+
+  const handleManufacturing = useCallback(() => {
+    router.push('/(owner)/manufacturing');
+  }, [router]);
+
+  const handleCRM = useCallback(() => {
+    router.push('/(owner)/crm');
+  }, [router]);
+
+  const handleWarehouse = useCallback(() => {
+    router.push('/(owner)/warehouse');
+  }, [router]);
+
+  const handlePurchases = useCallback(() => {
+    router.push('/(owner)/purchases');
+  }, []);
 
   const renderRecentOrder = (order: Order) => {
     const meta = getStatusMeta(order.status);
@@ -385,8 +409,13 @@ export default function OwnerDashboardScreen() {
 
         <View style={styles.quickActions}>
           <QuickAction icon="🛒" label="New Order" onPress={goToOrders} />
-          <QuickAction icon="📊" label="View Reports" onPress={goToReports} />
+          <QuickAction icon="📊" label="Reports" onPress={goToReports} />
           <QuickAction icon="🏷️" label="Inventory" onPress={handleInventory} />
+          <QuickAction icon="🏭" label="Manufacturing" onPress={handleManufacturing} />
+          <QuickAction icon="🤝" label="CRM" onPress={handleCRM} />
+          <QuickAction icon="🏢" label="Warehouse" onPress={handleWarehouse} />
+          <QuickAction icon="💰" label="Finance" onPress={goToFinance} />
+          <QuickAction icon="👥" label="HR" onPress={goToHR} />
         </View>
 
         <View style={styles.sectionHeader}>

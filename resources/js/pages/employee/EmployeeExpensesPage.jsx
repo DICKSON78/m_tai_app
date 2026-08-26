@@ -35,10 +35,7 @@ export default function EmployeeExpensesPage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             setTotal(res.data?.total || data.length);
-        } catch {
-            setExpenses([]);
-            setTotal(0);
-        } finally {
+        } catch (error) { console.error('Failed to fetch expenses:', error); setExpenses([]); setTotal(0); } finally {
             setLoading(false);
         }
     }, [currentPage, dateFrom, dateTo]);

@@ -65,7 +65,7 @@ export default function DeliveryListPage() {
             const biz = res.data?.data || res.data || [];
             setBusinesses(biz);
             if (biz.length === 1) setSelectedBusiness(biz[0].id);
-        }).catch(() => setBusinesses([]));
+        }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     const fetchDeliveries = useCallback(async () => {
@@ -88,7 +88,7 @@ export default function DeliveryListPage() {
                 const delivered = data.filter(d => d.status === 'delivered').length;
                 setStats({ total, pending, in_transit, delivered });
             }
-        } catch { setDeliveries([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch deliveries:', error); setDeliveries([]); } finally { setLoading(false); }
     }, [selectedBusiness, currentPage, search, statusFilter]);
 
     useEffect(() => { fetchDeliveries(); }, [fetchDeliveries]);
@@ -96,7 +96,7 @@ export default function DeliveryListPage() {
 
     useEffect(() => {
         if (selectedBusiness && (createModalOpen || assignModalOpen)) {
-            api.get(`/owner/businesses/${selectedBusiness}/customers`, { params: { per_page: 200 } }).then(res => setCustomers(res.data?.data || res.data || [])).catch(() => setCustomers([]));
+            api.get(`/owner/businesses/${selectedBusiness}/customers`, { params: { per_page: 200 } }).then(res => setCustomers(res.data?.data || res.data || [])).catch((error) => { console.error('Failed to fetch customers:', error); setCustomers([]); });
         }
     }, [selectedBusiness, createModalOpen, assignModalOpen]);
 
@@ -114,7 +114,7 @@ export default function DeliveryListPage() {
             setCreateModalOpen(false);
             setCreateForm({ customer_id: '', goods_category: '', item_description: '', quantity: '', pickup_location: '', destination: '', offered_price: '', is_negotiable: false });
             fetchDeliveries();
-        } catch (err) { if (err.response?.status === 422) setCreateErrors(err.response.data?.errors || {}); } finally { setCreateSubmitting(false); }
+        } catch (err) { console.error('Failed to create delivery:', err); if (err.response?.status === 422) setCreateErrors(err.response.data?.errors || {}); } finally { setCreateSubmitting(false); }
     };
 
     const openAssignModal = (delivery) => { setAssignDelivery(delivery); setTransporterId(''); setAssignModalOpen(true); };
@@ -123,7 +123,7 @@ export default function DeliveryListPage() {
         e.preventDefault();
         if (!assignDelivery || !transporterId.trim()) return;
         setAssignSubmitting(true);
-        try { await api.post(`/owner/businesses/${selectedBusiness}/deliveries/${assignDelivery.id}/assign`, { transporter_id: transporterId.trim() }); setAssignModalOpen(false); setAssignDelivery(null); setTransporterId(''); fetchDeliveries(); } catch { } finally { setAssignSubmitting(false); }
+        try { await api.post(`/owner/businesses/${selectedBusiness}/deliveries/${assignDelivery.id}/assign`, { transporter_id: transporterId.trim() }); setAssignModalOpen(false); setAssignDelivery(null); setTransporterId(''); fetchDeliveries(); } catch (error) { console.error('Failed to assign transporter:', error); alert(error?.response?.data?.message || 'Failed to assign transporter. Please try again.'); } finally { setAssignSubmitting(false); }
     };
 
     const openStatusModal = (delivery, newStatus) => { setStatusDelivery(delivery); setStatusAction(newStatus); setStatusModalOpen(true); };
@@ -131,7 +131,7 @@ export default function DeliveryListPage() {
     const handleStatusChange = async () => {
         if (!statusDelivery || !statusAction) return;
         setStatusUpdating(true);
-        try { await api.put(`/owner/businesses/${selectedBusiness}/deliveries/${statusDelivery.id}`, { status: statusAction }); setStatusModalOpen(false); setStatusDelivery(null); setStatusAction(''); fetchDeliveries(); } catch { } finally { setStatusUpdating(false); }
+        try { await api.put(`/owner/businesses/${selectedBusiness}/deliveries/${statusDelivery.id}`, { status: statusAction }); setStatusModalOpen(false); setStatusDelivery(null); setStatusAction(''); fetchDeliveries(); } catch (error) { console.error('Failed to update delivery status:', error); alert(error?.response?.data?.message || 'Failed to update delivery status. Please try again.'); } finally { setStatusUpdating(false); }
     };
 
     const handleReset = () => { setSearch(''); setStatusFilter(''); };

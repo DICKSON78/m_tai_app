@@ -29,10 +29,7 @@ export default function ShopSearchPage() {
             setCurrentPage(data.current_page || 1);
             setLastPage(data.last_page || 1);
             setTotalResults(data.total || 0);
-        } catch {
-            setShops([]);
-            setLastPage(1);
-        } finally {
+        } catch (error) { console.error('Failed to search shops:', error); setShops([]); setLastPage(1); } finally {
             setLoading(false);
         }
     }, []);

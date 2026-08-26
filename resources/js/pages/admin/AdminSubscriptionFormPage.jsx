@@ -20,7 +20,7 @@ export default function AdminSubscriptionFormPage() {
     const [successModal, setSuccessModal] = useState(false);
 
     useEffect(() => {
-        api.get('/admin/businesses', { params: { per_page: 200 } }).then(res => setBusinesses(res.data?.data || res.data || [])).catch(() => {});
+        api.get('/admin/businesses', { params: { per_page: 200 } }).then(res => setBusinesses(res.data?.data || res.data || [])).catch((error) => { console.error('Failed to fetch businesses:', error); });
     }, []);
 
     useEffect(() => {
@@ -28,7 +28,7 @@ export default function AdminSubscriptionFormPage() {
             api.get(`/admin/subscriptions/${id}`).then(res => {
                 const s = res.data;
                 setForm({ business_id: s.business_id || '', plan: s.plan || 'monthly', amount: s.amount || '', status: s.status || 'active' });
-            }).catch(() => navigate('/admin/subscriptions')).finally(() => setLoading(false));
+            }).catch((error) => { console.error('Failed to fetch subscription:', error); navigate('/admin/subscriptions'); }).finally(() => setLoading(false));
         }
     }, [id, isEdit, navigate]);
 

@@ -28,7 +28,7 @@ export default function AdminUserShowPage() {
     const [successMsg, setSuccessMsg] = useState('');
 
     useEffect(() => {
-        api.get(`/admin/users/${id}`).then(res => setUser(res.data)).catch(() => navigate('/admin/customers')).finally(() => setLoading(false));
+        api.get(`/admin/users/${id}`).then(res => setUser(res.data)).catch((error) => { console.error('Failed to fetch user:', error); navigate('/admin/customers'); }).finally(() => setLoading(false));
     }, [id]);
 
     const handleDelete = async () => {
@@ -37,7 +37,7 @@ export default function AdminUserShowPage() {
             setSuccessMsg('User deleted successfully');
             setSuccessModal(true);
             setTimeout(() => navigate('/admin/customers'), 1500);
-        } catch { setConfirmOpen(false); }
+        } catch (error) { console.error('Failed to delete user:', error); setConfirmOpen(false); alert(error?.response?.data?.message || 'Failed to delete user. Please try again.'); }
     };
 
     if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]"></div></div>;

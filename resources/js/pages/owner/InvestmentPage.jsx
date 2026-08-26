@@ -42,13 +42,13 @@ export default function InvestmentPage() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
     useEffect(() => {
-        api.get('/owner/businesses').then(res => { const biz = res.data?.data || res.data || []; setBusinesses(biz); if (biz.length === 1) setSelectedBusiness(biz[0].id); }).catch(() => setBusinesses([]));
+        api.get('/owner/businesses').then(res => { const biz = res.data?.data || res.data || []; setBusinesses(biz); if (biz.length === 1) setSelectedBusiness(biz[0].id); }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     const fetchData = useCallback(async () => {
         if (!selectedBusiness) { setInvestments([]); return; }
         setLoading(true);
-        try { const res = await api.get(`/owner/businesses/${selectedBusiness}/investments`, { params: { page: currentPage, per_page: 15 } }); setInvestments(res.data?.data || []); setCurrentPage(res.data?.current_page || 1); setLastPage(res.data?.last_page || 1); setTotals(res.data?.totals || {}); setGrandTotal(res.data?.grand_total || 0); } catch { setInvestments([]); } finally { setLoading(false); }
+        try { const res = await api.get(`/owner/businesses/${selectedBusiness}/investments`, { params: { page: currentPage, per_page: 15 } }); setInvestments(res.data?.data || []); setCurrentPage(res.data?.current_page || 1); setLastPage(res.data?.last_page || 1); setTotals(res.data?.totals || {}); setGrandTotal(res.data?.grand_total || 0); } catch (error) { console.error('Failed to fetch investments:', error); setInvestments([]); } finally { setLoading(false); }
     }, [selectedBusiness, currentPage]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
@@ -56,15 +56,15 @@ export default function InvestmentPage() {
 
     const handleAllocate = async (e) => {
         e.preventDefault(); if (!allocAmount || Number(allocAmount) <= 0) return; setAllocating(true);
-        try { await api.post(`/owner/businesses/${selectedBusiness}/investments/allocate`, { amount: Number(allocAmount), date: allocDate || undefined, description: allocDesc || undefined }); setAllocModalOpen(false); setAllocAmount(''); setAllocDate(''); setAllocDesc(''); fetchData(); } catch {} finally { setAllocating(false); }
+        try { await api.post(`/owner/businesses/${selectedBusiness}/investments/allocate`, { amount: Number(allocAmount), date: allocDate || undefined, description: allocDesc || undefined }); setAllocModalOpen(false); setAllocAmount(''); setAllocDate(''); setAllocDesc(''); fetchData(); } catch (error) { console.error('Failed to allocate income:', error); alert(error?.response?.data?.message || 'Failed to allocate income. Please try again.'); } finally { setAllocating(false); }
     };
 
     const handleAdd = async (e) => {
         e.preventDefault(); setSubmitting(true);
-        try { await api.post(`/owner/businesses/${selectedBusiness}/investments`, { amount: Number(form.amount), type: form.type, description: form.description, date: form.date || undefined }); setAddModalOpen(false); setForm({ amount: '', type: 'investment_account', description: '', date: '' }); fetchData(); } catch {} finally { setSubmitting(false); }
+        try { await api.post(`/owner/businesses/${selectedBusiness}/investments`, { amount: Number(form.amount), type: form.type, description: form.description, date: form.date || undefined }); setAddModalOpen(false); setForm({ amount: '', type: 'investment_account', description: '', date: '' }); fetchData(); } catch (error) { console.error('Failed to add investment:', error); alert(error?.response?.data?.message || 'Failed to add investment. Please try again.'); } finally { setSubmitting(false); }
     };
 
-    const handleDelete = async () => { if (!deleteId) return; try { await api.delete(`/owner/businesses/${selectedBusiness}/investments/${deleteId}`); fetchData(); } catch {} finally { setDeleteId(null); setDeleteModalOpen(false); } };
+    const handleDelete = async () => { if (!deleteId) return; try { await api.delete(`/owner/businesses/${selectedBusiness}/investments/${deleteId}`); fetchData(); } catch (error) { console.error('Failed to delete investment:', error); alert(error?.response?.data?.message || 'Failed to delete investment. Please try again.'); } finally { setDeleteId(null); setDeleteModalOpen(false); } };
     const formatCurrency = (val) => `TZS ${Number(val || 0).toLocaleString()}`;
 
     return (

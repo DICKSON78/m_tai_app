@@ -34,7 +34,7 @@ export default function ProfilePage() {
                 phone: data.phone || '',
                 email: data.email || '',
             });
-        }).catch(() => {
+        }).catch((error) => { console.error('Failed to fetch profile:', error);
             if (user) {
                 setProfile(user);
                 setEditForm({ name: user.name || '', phone: user.phone || '', email: user.email || '' });
@@ -54,7 +54,7 @@ export default function ProfilePage() {
             const updated = res.data?.data || res.data;
             setProfile(updated);
             showToast('Profaili imesasishwa');
-        } catch (err) {
+        } catch (err) { console.error('Failed to update profile:', err);
             setError(err.response?.data?.message || 'Imeshindwa kusasisha profaili');
         } finally {
             setSavingProfile(false);
@@ -76,7 +76,7 @@ export default function ProfilePage() {
             await api.put('/profile/password', passwordForm);
             setPasswordForm({ current_password: '', new_password: '', new_password_confirmation: '' });
             showToast('Nyuzi imebadilishwa');
-        } catch (err) {
+        } catch (err) { console.error('Failed to change password:', err);
             setError(err.response?.data?.message || 'Imeshindwa kubadilisha nyuzi');
         } finally {
             setSavingPassword(false);

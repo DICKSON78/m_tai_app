@@ -17,7 +17,7 @@ export default function ReceiptPage() {
         if (!orderId) return;
         setLoading(true); setError(''); setReceipt(null);
         try { const res = await api.get(`/orders/${orderId}/receipt`); setReceipt(res.data); }
-        catch { setError('Failed to generate receipt. Please check the order number.'); }
+        catch (error) { console.error('Failed to generate receipt:', error); setError('Failed to generate receipt. Please check the order number.'); }
         finally { setLoading(false); }
     };
 

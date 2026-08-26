@@ -28,7 +28,7 @@ export default function ReportPage() {
             const biz = res.data?.data || res.data || [];
             setBusinesses(biz);
             if (biz.length === 1) setSelectedBusiness(biz[0].id);
-        }).catch(() => setBusinesses([]));
+        }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     const fetchReport = useCallback(async () => {
@@ -40,7 +40,7 @@ export default function ReportPage() {
             if (dateTo) params.date_to = dateTo;
             const res = await api.get(`/owner/businesses/${selectedBusiness}/reports/${activeTab}`, { params });
             setReportData(res.data?.data || res.data || null);
-        } catch { setReportData(null); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch report:', error); setReportData(null); } finally { setLoading(false); }
     }, [selectedBusiness, activeTab, dateFrom, dateTo]);
 
     useEffect(() => { fetchReport(); }, [fetchReport]);

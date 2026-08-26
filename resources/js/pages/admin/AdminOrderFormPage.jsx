@@ -23,7 +23,7 @@ export default function AdminOrderFormPage() {
             const o = res.data;
             setForm({ status: o.status || 'pending', payment_status: o.payment_status || 'pending' });
             setOrderCode(o.transaction_code || o.code || '');
-        }).catch(() => navigate('/admin/orders')).finally(() => setLoading(false));
+        }).catch((error) => { console.error('Failed to fetch order:', error); navigate('/admin/orders'); }).finally(() => setLoading(false));
     }, [id, navigate]);
 
     const handleChange = (e) => {

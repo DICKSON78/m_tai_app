@@ -58,7 +58,7 @@ export default function DeliveryListPage() {
                 const delivered = data.filter(d => d.status === 'delivered').length;
                 setStats({ total, pending, in_transit, delivered });
             }
-        } catch { setDeliveries([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch deliveries:', error); setDeliveries([]); } finally { setLoading(false); }
     }, [currentPage, statusFilter]);
 
     useEffect(() => { fetchDeliveries(); }, [fetchDeliveries]);
@@ -73,7 +73,7 @@ export default function DeliveryListPage() {
             await api.put(`/transporter/deliveries/${statusDelivery.id}/status`, { status: statusAction });
             setStatusModalOpen(false); setStatusDelivery(null); setStatusAction('');
             fetchDeliveries();
-        } catch {} finally { setStatusUpdating(false); }
+        } catch (error) { console.error('Failed to update delivery status:', error); alert(error?.response?.data?.message || 'Failed to update delivery status. Please try again.'); } finally { setStatusUpdating(false); }
     };
 
     return (

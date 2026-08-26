@@ -16,11 +16,11 @@ export default function BenefitsPage() {
 
     const fetchBenefits = useCallback(async () => {
         setLoading(true);
-        try { const res = await api.get('/owner/hr/benefits'); setBenefits(res.data.data || res.data || []); } catch { setBenefits([]); } finally { setLoading(false); }
+        try { const res = await api.get('/owner/hr/benefits'); setBenefits(res.data.data || res.data || []); } catch (error) { console.error('Failed to fetch benefits:', error); setBenefits([]); } finally { setLoading(false); }
     }, []);
 
     const fetchEmployees = useCallback(async () => {
-        try { const res = await api.get('/owner/hr/employees', { params: { per_page: 200 } }); setEmployees(res.data.data || res.data || []); } catch { setEmployees([]); }
+        try { const res = await api.get('/owner/hr/employees', { params: { per_page: 200 } }); setEmployees(res.data.data || res.data || []); } catch (error) { console.error('Failed to fetch employees:', error); setEmployees([]); }
     }, []);
 
     useEffect(() => { fetchBenefits(); fetchEmployees(); }, [fetchBenefits, fetchEmployees]);
@@ -38,24 +38,24 @@ export default function BenefitsPage() {
                 await api.post('/owner/hr/benefits', payload);
             }
             setShowForm(false); resetForm(); fetchBenefits();
-        } catch (err) { alert(err.response?.data?.message || 'Failed to save'); } finally { setSaving(false); }
+        } catch (err) { console.error('Failed to save benefit:', err); alert(err.response?.data?.message || 'Failed to save'); } finally { setSaving(false); }
     };
 
     const handleAssign = async (benefit, employeeId) => {
         try {
             await api.post(`/owner/hr/benefits/${benefit.id}/assign`, { employee_id: employeeId, enrollment_date: enrollDate });
             setAssigning(null); fetchBenefits();
-        } catch (err) { alert(err.response?.data?.message || 'Failed to assign'); }
+        } catch (err) { console.error('Failed to assign benefit:', err); alert(err.response?.data?.message || 'Failed to assign'); }
     };
 
     const handleUnassign = async (assignmentId) => {
         if (!confirm('Remove this employee from the benefit?')) return;
-        try { await api.delete(`/owner/hr/benefits/assignments/${assignmentId}`); fetchBenefits(); } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+        try { await api.delete(`/owner/hr/benefits/assignments/${assignmentId}`); fetchBenefits(); } catch (err) { console.error('Failed to unassign benefit:', err); alert(err.response?.data?.message || 'Failed'); }
     };
 
     const handleDelete = async (id) => {
         if (!confirm('Delete this benefit? All assignments will be removed.')) return;
-        try { await api.delete(`/owner/hr/benefits/${id}`); fetchBenefits(); } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+        try { await api.delete(`/owner/hr/benefits/${id}`); fetchBenefits(); } catch (err) { console.error('Failed to delete benefit:', err); alert(err.response?.data?.message || 'Failed'); }
     };
 
     const openEdit = (b) => {

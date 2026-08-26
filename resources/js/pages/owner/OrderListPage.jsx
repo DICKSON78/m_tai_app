@@ -73,7 +73,7 @@ export default function OrderListPage() {
             if (biz.length === 1) {
                 setSelectedBusiness(biz[0].id);
             }
-        }).catch(() => setBusinesses([]));
+        }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     const fetchOrders = useCallback(async () => {
@@ -99,7 +99,7 @@ export default function OrderListPage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             setTotalOrders(res.data?.total || data.length);
-        } catch {
+        } catch (error) { console.error('Failed to fetch orders:', error);
             setOrders([]);
             setTotalOrders(0);
         } finally {
@@ -128,9 +128,7 @@ export default function OrderListPage() {
             setVerifyModalOpen(false);
             setVerifyOrder(null);
             fetchOrders();
-        } catch {
-        } finally {
-            setVerifying(false);
+        } catch (error) { console.error('Failed to verify order:', error); alert(error?.response?.data?.message || 'Failed to verify order. Please try again.'); } finally {
         }
     };
 
@@ -151,9 +149,7 @@ export default function OrderListPage() {
             setStatusModalOrder(null);
             setStatusAction('');
             fetchOrders();
-        } catch {
-        } finally {
-            setStatusUpdating(false);
+        } catch (error) { console.error('Failed to update order status:', error); alert(error?.response?.data?.message || 'Failed to update order status. Please try again.'); } finally {
         }
     };
 

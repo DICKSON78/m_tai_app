@@ -84,7 +84,7 @@ export default function BusinessFormPage() {
                         bank_account_number: biz.bank_account_number || '',
                     });
                 })
-                .catch(() => { alert('Failed to load business information.'); navigate('/owner/businesses'); })
+                .catch((error) => { console.error('Failed to fetch business:', error); alert('Failed to load business information.'); navigate('/owner/businesses'); })
                 .finally(() => setFetching(false));
         }
     }, [id, isEditing, navigate]);
@@ -110,7 +110,7 @@ export default function BusinessFormPage() {
             if (isEditing) { await api.put(`/owner/businesses/${id}`, form); }
             else { await api.post('/owner/businesses', form); }
             navigate('/owner/businesses');
-        } catch (err) {
+        } catch (err) { console.error('Failed to save business:', err);
             if (err.response?.status === 422) setErrors(err.response.data.errors || {});
             else alert('An error occurred. Please try again.');
         } finally { setLoading(false); }

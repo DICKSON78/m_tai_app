@@ -51,7 +51,7 @@ export default function AdminUsersPage() {
             setLastPage(res.data?.last_page || 1);
             setTotal(res.data?.total || data.length);
             if (res.data?.summary) setSummary(res.data.summary);
-        } catch { setUsers([]); setTotal(0); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch users:', error); setUsers([]); setTotal(0); } finally { setLoading(false); }
     }, [currentPage, search, role]);
 
     useEffect(() => { fetchUsers(); }, [fetchUsers]);
@@ -59,7 +59,7 @@ export default function AdminUsersPage() {
 
     const handleDelete = async () => {
         if (!deleteId) return;
-        try { await api.delete(`/admin/users/${deleteId}`); setSuccessModal(true); setTimeout(() => setSuccessModal(false), 2000); fetchUsers(); } catch { /* silent */ }
+        try { await api.delete(`/admin/users/${deleteId}`); setSuccessModal(true); setTimeout(() => setSuccessModal(false), 2000); fetchUsers(); } catch (error) { console.error('Failed to delete user:', error); alert(error?.response?.data?.message || 'Failed to delete user. Please try again.'); }
         setDeleteId(null); setConfirmOpen(false);
     };
 

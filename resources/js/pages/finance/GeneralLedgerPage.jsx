@@ -30,8 +30,7 @@ export default function GeneralLedgerPage() {
       ]);
       setSummary(sumRes.data);
       setAccounts(accRes.data.data || []);
-    } catch {}
-  }, []);
+    } catch (error) { console.error('Failed to fetch ledger summary:', error); }
 
   const fetchTransactions = useCallback(async () => {
     setTxLoading(true);
@@ -43,7 +42,7 @@ export default function GeneralLedgerPage() {
       setTransactions(res.data.data || []);
       setCurrentPage(res.data.current_page || 1);
       setLastPage(res.data.last_page || 1);
-    } catch { setTransactions([]); } finally { setTxLoading(false); }
+    } catch (error) { console.error('Failed to fetch transactions:', error); setTransactions([]); } finally { setTxLoading(false); }
   }, [dateFrom, dateTo, search, typeFilter]);
 
   const fetchAccountLedger = useCallback(async (accountId) => {
@@ -52,7 +51,7 @@ export default function GeneralLedgerPage() {
     try {
       const res = await api.get(`/owner/finance/ledger/account/${accountId}`, { params: { date_from: dateFrom, date_to: dateTo } });
       setAccountLedger(res.data);
-    } catch { setAccountLedger(null); } finally { setLoading(false); }
+    } catch (error) { console.error('Failed to fetch account ledger:', error); setAccountLedger(null); } finally { setLoading(false); }
   }, [dateFrom, dateTo]);
 
   useEffect(() => { fetchSummary(); fetchTransactions(); }, [fetchSummary, fetchTransactions]);

@@ -34,7 +34,7 @@ export default function AdminAuditLogsPage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             if (res.data?.summary) setSummary(res.data.summary);
-        } catch { setLogs([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch audit logs:', error); setLogs([]); } finally { setLoading(false); }
     }, [currentPage, search, action]);
 
     useEffect(() => { fetchLogs(); }, [fetchLogs]);

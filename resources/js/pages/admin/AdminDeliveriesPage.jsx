@@ -33,7 +33,7 @@ export default function AdminDeliveriesPage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             if (res.data?.summary) setSummary(res.data.summary);
-        } catch { setDeliveries([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch deliveries:', error); setDeliveries([]); } finally { setLoading(false); }
     }, [currentPage, search, statusFilter]);
 
     useEffect(() => { fetchDeliveries(); }, [fetchDeliveries]);

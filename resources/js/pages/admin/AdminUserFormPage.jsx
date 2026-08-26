@@ -31,7 +31,7 @@ export default function AdminUserFormPage() {
             api.get(`/admin/users/${id}`).then(res => {
                 const u = res.data;
                 setForm({ name: u.name || '', email: u.email || '', phone: u.phone || '', role: u.role || 'customer', password: '' });
-            }).catch(() => navigate('/admin/customers')).finally(() => setLoading(false));
+            }).catch((error) => { console.error('Failed to fetch user:', error); navigate('/admin/customers'); }).finally(() => setLoading(false));
         }
     }, [id, isEdit, navigate]);
 

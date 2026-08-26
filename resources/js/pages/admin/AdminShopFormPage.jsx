@@ -21,7 +21,7 @@ export default function AdminShopFormPage() {
         api.get(`/admin/businesses/${id}`).then(res => {
             const s = res.data;
             setForm({ name: s.name || s.business_name || '', business_type: s.business_type || s.type || '', description: s.description || '', phone: s.phone || '', location: s.location || '' });
-        }).catch(() => navigate('/admin/shops')).finally(() => setLoading(false));
+        }).catch((error) => { console.error('Failed to fetch shop:', error); navigate('/admin/shops'); }).finally(() => setLoading(false));
     }, [id, navigate]);
 
     const handleChange = (e) => {

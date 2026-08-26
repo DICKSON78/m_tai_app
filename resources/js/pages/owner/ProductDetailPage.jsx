@@ -26,9 +26,7 @@ export default function ProductDetailPage() {
         try {
             const res = await api.get(`/owner/products/${id}`);
             setProduct(res.data?.data || res.data);
-        } catch {
-        } finally {
-            setLoading(false);
+        } catch (error) { console.error('Failed to fetch product:', error); } finally {
         }
     };
 
@@ -40,9 +38,7 @@ export default function ProductDetailPage() {
         try {
             await api.delete(`/owner/products/${id}`);
             navigate('/owner/products');
-        } catch {
-        }
-    };
+        } catch (error) { console.error('Failed to delete product:', error); alert(error?.response?.data?.message || 'Failed to delete product. Please try again.'); }
 
     const handleTogglePublish = async () => {
         if (toggling) return;
@@ -50,9 +46,7 @@ export default function ProductDetailPage() {
         try {
             await api.post(`/owner/products/${id}/toggle-publish`);
             fetchProduct();
-        } catch {
-        } finally {
-            setToggling(false);
+        } catch (error) { console.error('Failed to toggle publish:', error); alert(error?.response?.data?.message || 'Failed to update product. Please try again.'); } finally {
         }
     };
 
@@ -66,9 +60,7 @@ export default function ProductDetailPage() {
             });
             setStockQty('');
             fetchProduct();
-        } catch {
-        } finally {
-            setStockLoading(false);
+        } catch (error) { console.error('Failed to adjust stock:', error); alert(error?.response?.data?.message || 'Failed to adjust stock. Please try again.'); } finally {
         }
     };
 

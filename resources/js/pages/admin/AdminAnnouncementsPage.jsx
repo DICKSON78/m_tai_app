@@ -52,7 +52,7 @@ export default function AdminAnnouncementsPage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             if (res.data?.summary) setSummary(res.data.summary);
-        } catch { setAnnouncements([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch announcements:', error); setAnnouncements([]); } finally { setLoading(false); }
     }, [currentPage, search, targetFilter, activeFilter]);
 
     useEffect(() => { fetchAnnouncements(); }, [fetchAnnouncements]);
@@ -66,7 +66,7 @@ export default function AdminAnnouncementsPage() {
             setConfirmOpen(false); setDeleteId(null); setDeleteTitle('');
             setSuccessModal(true); setTimeout(() => setSuccessModal(false), 2000);
             fetchAnnouncements();
-        } catch { /* silent */ }
+        } catch (error) { console.error('Failed to delete announcement:', error); alert(error?.response?.data?.message || 'Failed to delete announcement. Please try again.'); }
     };
 
     return (

@@ -30,7 +30,7 @@ export default function AdminReportsPage() {
                     new_customers_month: d.new_customers_month ?? 0,
                 });
                 setMonthlyData(d.monthly_data || []);
-            } catch {
+            } catch (error) { console.error('Failed to fetch reports:', error);
                 try {
                     const dashRes = await api.get('/admin/dashboard');
                     const d = dashRes.data;
@@ -39,7 +39,7 @@ export default function AdminReportsPage() {
                         total_users: d.total_users ?? 0, total_orders: d.total_orders ?? 0,
                         total_revenue: d.total_revenue ?? 0, new_customers_month: d.new_customers_month ?? 0,
                     });
-                } catch { /* silent */ }
+                } catch (error2) { console.error('Failed to fetch dashboard fallback:', error2); }
             } finally { setLoading(false); }
         };
         fetchData();

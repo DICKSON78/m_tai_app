@@ -22,7 +22,7 @@ export default function ReviewFormPage() {
             .then(res => {
                 setProduct(res.data?.data || res.data);
             })
-            .catch(() => setProduct(null))
+            .catch((error) => { console.error('Failed to fetch product:', error); setProduct(null); })
             .finally(() => setLoading(false));
     }, [productId]);
 

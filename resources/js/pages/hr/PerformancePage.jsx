@@ -50,7 +50,7 @@ export default function PerformancePage() {
     const [detailModal, setDetailModal] = useState({ open: false, data: null });
 
     const fetchEmployees = useCallback(async () => {
-        try { const res = await api.get('/owner/hr/employees', { params: { per_page: 200 } }); setEmployees(res.data?.data || []); } catch { setEmployees([]); }
+        try { const res = await api.get('/owner/hr/employees', { params: { per_page: 200 } }); setEmployees(res.data?.data || []); } catch (error) { console.error('Failed to fetch employees:', error); setEmployees([]); }
     }, []);
 
     const fetchReviews = useCallback(async () => {
@@ -62,7 +62,7 @@ export default function PerformancePage() {
             setReviews(res.data?.data || []);
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
-        } catch { setReviews([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch performance reviews:', error); setReviews([]); } finally { setLoading(false); }
     }, [currentPage, filter]);
 
     useEffect(() => { fetchEmployees(); }, [fetchEmployees]);
@@ -90,12 +90,12 @@ export default function PerformancePage() {
             if (editing) { await api.put(`/owner/hr/performance/${editing.id}`, payload); }
             else { await api.post('/owner/hr/performance', payload); }
             closeModal(); fetchReviews();
-        } catch (err) { if (err.response?.status === 422) setErrors(err.response.data?.errors || {}); else alert(err.response?.data?.message || 'Failed'); } finally { setSubmitting(false); }
+        } catch (err) { console.error('Failed to save performance review:', err); if (err.response?.status === 422) setErrors(err.response.data?.errors || {}); else alert(err.response?.data?.message || 'Failed'); } finally { setSubmitting(false); }
     };
 
     const handleDelete = async () => {
         if (!deleteId) return;
-        try { await api.delete(`/owner/hr/performance/${deleteId}`); setConfirmOpen(false); setDeleteId(null); fetchReviews(); } catch {}
+        try { await api.delete(`/owner/hr/performance/${deleteId}`); setConfirmOpen(false); setDeleteId(null); fetchReviews(); } catch (error) { console.error('Failed to delete performance review:', error); alert(error?.response?.data?.message || 'Failed to delete review. Please try again.'); }
     };
 
     const inputClasses = "w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00D4AA] focus:border-[#00D4AA] text-sm";

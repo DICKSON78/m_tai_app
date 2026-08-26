@@ -49,7 +49,7 @@ export default function AdminOrdersPage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             if (res.data?.summary) setSummary(res.data.summary);
-        } catch { setOrders([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch orders:', error); setOrders([]); } finally { setLoading(false); }
     }, [currentPage, search, status, paymentStatus]);
 
     useEffect(() => { fetchOrders(); }, [fetchOrders]);
@@ -57,7 +57,7 @@ export default function AdminOrdersPage() {
 
     const handleDelete = async () => {
         if (!deleteId) return;
-        try { await api.delete(`/admin/orders/${deleteId}`); setSuccessModal(true); setTimeout(() => setSuccessModal(false), 2000); fetchOrders(); } catch { /* silent */ }
+        try { await api.delete(`/admin/orders/${deleteId}`); setSuccessModal(true); setTimeout(() => setSuccessModal(false), 2000); fetchOrders(); } catch (error) { console.error('Failed to delete order:', error); alert(error?.response?.data?.message || 'Failed to delete order. Please try again.'); }
         setDeleteId(null); setConfirmOpen(false);
     };
 

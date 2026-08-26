@@ -42,18 +42,18 @@ export default function SupplierPaymentsPage() {
       setPayments(res.data.data || []);
       setCurrentPage(res.data.current_page || 1);
       setLastPage(res.data.last_page || 1);
-    } catch { setPayments([]); } finally { setLoading(false); }
+    } catch (error) { console.error('Failed to fetch payments:', error); setPayments([]); } finally { setLoading(false); }
   }, [search, methodFilter]);
 
   const fetchDropdowns = useCallback(async () => {
     try {
       const supRes = await api.get('/owner/purchases/suppliers', { params: { per_page: 100 } });
       setSuppliers(supRes.data.data || []);
-    } catch {}
+    } catch (error) { console.error('Failed to fetch suppliers:', error); }
   }, []);
 
   const fetchSummary = useCallback(async () => {
-    try { const res = await api.get('/owner/purchases/payments/summary'); setSummary(res.data); } catch {}
+    try { const res = await api.get('/owner/purchases/payments/summary'); setSummary(res.data); } catch (error) { console.error('Failed to fetch payment summary:', error); }
   }, []);
 
   useEffect(() => { fetchPayments(); fetchDropdowns(); fetchSummary(); }, [fetchPayments, fetchDropdowns, fetchSummary]);
@@ -63,7 +63,7 @@ export default function SupplierPaymentsPage() {
     try {
       const res = await api.get('/owner/purchases/invoices', { params: { supplier_id: supplierId, status: 'validated', per_page: 100 } });
       setInvoices(res.data.data || []);
-    } catch { setInvoices([]); }
+    } catch (error) { console.error('Failed to fetch supplier invoices:', error); setInvoices([]); }
   };
 
   const handleSubmit = async (e) => {

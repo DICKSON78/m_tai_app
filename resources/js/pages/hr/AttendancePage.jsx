@@ -45,7 +45,7 @@ export default function AttendancePage() {
             setRecords(res.data?.data || []);
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
-        } catch { setRecords([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch attendance:', error); setRecords([]); } finally { setLoading(false); }
     }, [currentPage, search, statusFilter, dateFrom, dateTo]);
 
     useEffect(() => { fetchAttendance(); }, [fetchAttendance]);

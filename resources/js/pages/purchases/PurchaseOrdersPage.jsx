@@ -42,7 +42,7 @@ export default function PurchaseOrdersPage() {
       setOrders(res.data.data || []);
       setCurrentPage(res.data.current_page || 1);
       setLastPage(res.data.last_page || 1);
-    } catch { setOrders([]); } finally { setLoading(false); }
+    } catch (error) { console.error('Failed to fetch purchase orders:', error); setOrders([]); } finally { setLoading(false); }
   }, [search, statusFilter]);
 
   const fetchDropdowns = useCallback(async () => {
@@ -53,11 +53,9 @@ export default function PurchaseOrdersPage() {
       ]);
       setSuppliers(supRes.data.data || []);
       setProducts(prodRes.data.data || []);
-    } catch {}
-  }, []);
-
-  const fetchSummary = useCallback(async () => {
-    try { const res = await api.get('/owner/purchases/orders/summary'); setSummary(res.data); } catch {}
+    } catch (error) { console.error('Failed to fetch dropdown data:', error); }
+  }, []); = useCallback(async () => {
+    try { const res = await api.get('/owner/purchases/orders/summary'); setSummary(res.data); } catch (error) { console.error('Failed to fetch PO summary:', error); }
   }, []);
 
   useEffect(() => { fetchOrders(); fetchDropdowns(); fetchSummary(); }, [fetchOrders, fetchDropdowns, fetchSummary]);
@@ -102,7 +100,7 @@ export default function PurchaseOrdersPage() {
   };
 
   const handleViewDetail = async (order) => {
-    try { const res = await api.get(`/owner/purchases/orders/${order.id}`); setShowDetail(res.data); } catch {}
+    try { const res = await api.get(`/owner/purchases/orders/${order.id}`); setShowDetail(res.data); } catch (error) { console.error('Failed to fetch PO detail:', error); }
   };
 
   const fmt = (n) => new Intl.NumberFormat('en-TZ', { minimumFractionDigits: 0 }).format(n || 0);

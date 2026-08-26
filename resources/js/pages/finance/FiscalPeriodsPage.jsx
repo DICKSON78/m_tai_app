@@ -20,7 +20,7 @@ export default function FiscalPeriodsPage() {
             if (statusFilter) params.status = statusFilter;
             const res = await api.get('/owner/finance/fiscal-periods', { params });
             setPeriods(res.data.data || res.data || []);
-        } catch { setPeriods([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch fiscal periods:', error); setPeriods([]); } finally { setLoading(false); }
     }, [statusFilter]);
 
     useEffect(() => { fetchPeriods(); }, [fetchPeriods]);
@@ -57,8 +57,7 @@ export default function FiscalPeriodsPage() {
         try {
             const res = await api.get(`/owner/finance/fiscal-periods/${id}`);
             setDetailPeriod(res.data);
-        } catch {}
-    };
+        } catch (error) { console.error('Failed to fetch fiscal period detail:', error); }
 
     const openEdit = (p) => {
         setEditing(p);

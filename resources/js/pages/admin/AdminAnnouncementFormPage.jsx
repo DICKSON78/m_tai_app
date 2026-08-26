@@ -33,7 +33,7 @@ export default function AdminAnnouncementFormPage() {
             api.get(`/admin/announcements/${id}`).then(res => {
                 const a = res.data;
                 setForm({ title: a.title || '', message: a.message || '', target_role: a.target_role || 'all', is_active: a.is_active ?? true });
-            }).catch(() => navigate('/admin/announcements')).finally(() => setLoading(false));
+            }).catch((error) => { console.error('Failed to fetch announcement:', error); navigate('/admin/announcements'); }).finally(() => setLoading(false));
         }
     }, [id, isEdit, navigate]);
 

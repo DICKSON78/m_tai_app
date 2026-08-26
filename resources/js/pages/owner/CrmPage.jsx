@@ -29,26 +29,26 @@ export default function CrmPage() {
     const [filter, setFilter] = useState('');
     const [search, setSearch] = useState('');
 
-    const fetchSummary = useCallback(async () => { try { const r = await api.get('/owner/crm/summary'); setSummary(r.data); } catch {} }, []);
+    const fetchSummary = useCallback(async () => { try { const r = await api.get('/owner/crm/summary'); setSummary(r.data); } catch (error) { console.error('Failed to fetch CRM summary:', error); } }, []);
 
     const fetchLeads = useCallback(async () => {
         setLoading(true);
-        try { const p = {}; if (filter) p.status = filter; if (search) p.search = search; const r = await api.get('/owner/crm/leads', { params: p }); setLeads(r.data.data || []); } catch { setLeads([]); } finally { setLoading(false); }
+        try { const p = {}; if (filter) p.status = filter; if (search) p.search = search; const r = await api.get('/owner/crm/leads', { params: p }); setLeads(r.data.data || []); } catch (error) { console.error('Failed to fetch leads:', error); setLeads([]); } finally { setLoading(false); }
     }, [filter, search]);
 
     const fetchDeals = useCallback(async () => {
         setLoading(true);
-        try { const p = {}; if (filter) p.stage = filter; const r = await api.get('/owner/crm/deals', { params: p }); setDeals(r.data.data || []); } catch { setDeals([]); } finally { setLoading(false); }
+        try { const p = {}; if (filter) p.stage = filter; const r = await api.get('/owner/crm/deals', { params: p }); setDeals(r.data.data || []); } catch (error) { console.error('Failed to fetch deals:', error); setDeals([]); } finally { setLoading(false); }
     }, [filter]);
 
     const fetchActivities = useCallback(async () => {
         setLoading(true);
-        try { const p = {}; if (filter) p.type = filter; const r = await api.get('/owner/crm/activities', { params: p }); setActivities(r.data.data || []); } catch { setActivities([]); } finally { setLoading(false); }
+        try { const p = {}; if (filter) p.type = filter; const r = await api.get('/owner/crm/activities', { params: p }); setActivities(r.data.data || []); } catch (error) { console.error('Failed to fetch activities:', error); setActivities([]); } finally { setLoading(false); }
     }, [filter]);
 
     const fetchCampaigns = useCallback(async () => {
         setLoading(true);
-        try { const p = {}; if (filter) p.status = filter; const r = await api.get('/owner/crm/campaigns', { params: p }); setCampaigns(r.data.data || []); } catch { setCampaigns([]); } finally { setLoading(false); }
+        try { const p = {}; if (filter) p.status = filter; const r = await api.get('/owner/crm/campaigns', { params: p }); setCampaigns(r.data.data || []); } catch (error) { console.error('Failed to fetch campaigns:', error); setCampaigns([]); } finally { setLoading(false); }
     }, [filter]);
 
     useEffect(() => { fetchSummary(); }, [fetchSummary]);
@@ -78,7 +78,7 @@ export default function CrmPage() {
             else { await api.post(`${prefix}/${ep}`, form); }
             setShowForm(false); resetForm(); fetchSummary();
             if (tab === 'leads') fetchLeads(); else if (tab === 'deals') fetchDeals(); else if (tab === 'activities') fetchActivities(); else fetchCampaigns();
-        } catch (err) { alert(err.response?.data?.message || 'Failed to save'); } finally { setSaving(false); }
+        } catch (err) { console.error('Failed to save CRM entity:', err); alert(err.response?.data?.message || 'Failed to save'); } finally { setSaving(false); }
     };
 
     const handleDelete = async (item) => {
@@ -88,11 +88,11 @@ export default function CrmPage() {
             await api.delete(`/owner/crm/${endpoints[tab]}/${item.id}`);
             fetchSummary();
             if (tab === 'leads') fetchLeads(); else if (tab === 'deals') fetchDeals(); else if (tab === 'activities') fetchActivities(); else fetchCampaigns();
-        } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+        } catch (err) { console.error('Failed to delete:', err); alert(err.response?.data?.message || 'Failed'); }
     };
 
     const handleComplete = async (activity) => {
-        try { await api.post(`/owner/crm/activities/${activity.id}/complete`); fetchActivities(); } catch (err) { alert(err.response?.data?.message); }
+        try { await api.post(`/owner/crm/activities/${activity.id}/complete`); fetchActivities(); } catch (err) { console.error('Failed to complete activity:', err); alert(err.response?.data?.message); }
     };
 
     const fmt = (n) => new Intl.NumberFormat('en-TZ').format(n || 0);

@@ -10,7 +10,7 @@ export default function EmployeeDashboard() {
     useEffect(() => {
         api.get('/employee/dashboard').then(res => {
             setData(res.data);
-        }).catch(() => {
+        }).catch((error) => { console.error('Failed to fetch employee dashboard:', error);
             setData({ todayOrders: 0, todaySales: 0 });
         }).finally(() => setLoading(false));
     }, []);

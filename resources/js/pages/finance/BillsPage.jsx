@@ -29,7 +29,7 @@ export default function BillsPage() {
             setBills(res.data.data || []);
             setCurrentPage(res.data.current_page || 1);
             setLastPage(res.data.last_page || 1);
-        } catch { setBills([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch bills:', error); setBills([]); } finally { setLoading(false); }
     }, [statusFilter, search]);
 
     useEffect(() => { fetchBills(); }, [fetchBills]);
@@ -45,12 +45,12 @@ export default function BillsPage() {
             await api.post('/owner/finance/bills', form);
             setShowForm(false); setForm({ vendor_name: '', bill_number: '', date: new Date().toISOString().split('T')[0], due_date: '', notes: '', discount_amount: 0, items: [{ description: '', quantity: 1, unit_price: 0, tax_rate: 0 }] });
             fetchBills();
-        } catch (err) { alert(err.response?.data?.message || 'Failed'); } finally { setSaving(false); }
+        } catch (err) { console.error('Failed to create bill:', err); alert(err.response?.data?.message || 'Failed'); } finally { setSaving(false); }
     };
 
     const handlePay = async () => {
         if (!payAmount || Number(payAmount) <= 0) return;
-        try { await api.post(`/owner/finance/bills/${showPayModal.id}/pay`, { amount: Number(payAmount) }); setShowPayModal(null); setPayAmount(''); fetchBills(); } catch (err) { alert(err.response?.data?.message || 'Failed'); }
+        try { await api.post(`/owner/finance/bills/${showPayModal.id}/pay`, { amount: Number(payAmount) }); setShowPayModal(null); setPayAmount(''); fetchBills(); } catch (err) { console.error('Failed to pay bill:', err); alert(err.response?.data?.message || 'Failed'); }
     };
 
     const totalOutstanding = bills.filter(b => b.status !== 'paid' && b.status !== 'cancelled').reduce((s, b) => s + Number(b.total || 0) - Number(b.amount_paid || 0), 0);

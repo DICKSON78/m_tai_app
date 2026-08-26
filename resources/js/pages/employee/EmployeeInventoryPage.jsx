@@ -30,10 +30,7 @@ export default function EmployeeInventoryPage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             setTotal(res.data?.total || data.length);
-        } catch {
-            setProducts([]);
-            setTotal(0);
-        } finally {
+        } catch (error) { console.error('Failed to fetch inventory:', error); setProducts([]); setTotal(0); } finally {
             setLoading(false);
         }
     }, [currentPage, search]);

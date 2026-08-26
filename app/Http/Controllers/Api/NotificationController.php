@@ -25,6 +25,12 @@ class NotificationController extends Controller
             abort(404);
         }
 
+        $request->validate([
+            'is_read' => 'nullable|boolean',
+        ], [
+            'is_read.boolean' => 'Thamani ya usomaji si sahihi.',
+        ]);
+
         $notification->update(['is_read' => true, 'read_at' => now()]);
 
         return response()->json(['message' => 'Taarifa imesomwa.']);

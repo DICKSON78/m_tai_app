@@ -42,7 +42,7 @@ export default function AdminShopsPage() {
             setLastPage(res.data?.last_page || 1);
             setTotal(res.data?.total || data.length);
             if (res.data?.summary) setSummary(res.data.summary);
-        } catch { setShops([]); setTotal(0); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch shops:', error); setShops([]); setTotal(0); } finally { setLoading(false); }
     }, [currentPage, search, businessType]);
 
     useEffect(() => { fetchShops(); }, [fetchShops]);
@@ -50,7 +50,7 @@ export default function AdminShopsPage() {
 
     const handleDelete = async () => {
         if (!deleteId) return;
-        try { await api.delete(`/admin/businesses/${deleteId}`); setSuccessModal(true); setTimeout(() => setSuccessModal(false), 2000); fetchShops(); } catch { /* silent */ }
+        try { await api.delete(`/admin/businesses/${deleteId}`); setSuccessModal(true); setTimeout(() => setSuccessModal(false), 2000); fetchShops();         } catch (error) { console.error('Failed to delete shop:', error); alert(error?.response?.data?.message || 'Failed to delete shop. Please try again.'); }
         setDeleteId(null); setConfirmOpen(false);
     };
 

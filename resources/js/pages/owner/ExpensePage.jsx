@@ -63,7 +63,7 @@ export default function ExpensePage() {
             const biz = res.data?.data || res.data || [];
             setBusinesses(biz);
             if (biz.length === 1) setSelectedBusiness(biz[0].id);
-        }).catch(() => setBusinesses([]));
+        }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
     const fetchExpenses = useCallback(async () => {
@@ -80,7 +80,7 @@ export default function ExpensePage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             if (res.data?.summary) setSummary(res.data.summary);
-        } catch { setExpenses([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch expenses:', error); setExpenses([]); } finally { setLoading(false); }
     }, [selectedBusiness, currentPage, filterCategory, filterType, dateFrom, dateTo]);
 
     useEffect(() => { fetchExpenses(); }, [fetchExpenses]);
@@ -106,12 +106,12 @@ export default function ExpensePage() {
                 await api.post(`/owner/businesses/${selectedBusiness}/expenses`, payload);
             }
             setModalOpen(false); setEditingId(null); setForm(emptyForm); fetchExpenses();
-        } catch { } finally { setSubmitting(false); }
+        } catch (error) { console.error('Failed to save expense:', error); alert(error?.response?.data?.message || 'Failed to save expense. Please try again.'); } finally { setSubmitting(false); }
     };
 
     const handleDelete = async () => {
         if (!deleteId || !selectedBusiness) return;
-        try { await api.delete(`/owner/businesses/${selectedBusiness}/expenses/${deleteId}`); fetchExpenses(); } catch { } finally { setDeleteId(null); setDeleteModalOpen(false); }
+        try { await api.delete(`/owner/businesses/${selectedBusiness}/expenses/${deleteId}`); fetchExpenses(); } catch (error) { console.error('Failed to delete expense:', error); alert(error?.response?.data?.message || 'Failed to delete expense. Please try again.'); } finally { setDeleteId(null); setDeleteModalOpen(false); }
     };
 
     const handleReset = () => { setFilterCategory(''); setFilterType(''); setDateFrom(''); setDateTo(''); };

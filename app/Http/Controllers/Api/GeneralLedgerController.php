@@ -11,6 +11,20 @@ class GeneralLedgerController extends Controller
 {
     public function index(Request $request)
     {
+        $request->validate([
+            'account_id' => 'nullable|integer|exists:accounts,id',
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
+            'search' => 'nullable|string|max:255',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ], [
+            'account_id.exists' => 'Akaunti hiyo haipatikani.',
+            'date_from.date' => 'Tarehe ya kuanza si sahihi.',
+            'date_to.date' => 'Tarehe ya mwisho si sahihi.',
+            'date_to.after_or_equal' => 'Tarehe ya mwisho lazima iwe sawa au baada ya tarehe ya kuanza.',
+            'per_page.max' => 'Idadi ya kurasa kwa ukurasa haizidi 100.',
+        ]);
+
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
 
         $query = JournalEntryLine::whereHas('journalEntry', function ($q) use ($businessId) {
@@ -31,6 +45,15 @@ class GeneralLedgerController extends Controller
 
     public function accountLedger(Request $request, Account $account)
     {
+        $request->validate([
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
+        ], [
+            'date_from.date' => 'Tarehe ya kuanza si sahihi.',
+            'date_to.date' => 'Tarehe ya mwisho si sahihi.',
+            'date_to.after_or_equal' => 'Tarehe ya mwisho lazima iwe sawa au baada ya tarehe ya kuanza.',
+        ]);
+
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
         if ($account->business_id !== $businessId) abort(403);
 

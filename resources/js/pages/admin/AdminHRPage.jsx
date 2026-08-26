@@ -35,7 +35,7 @@ export default function AdminHRPage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             if (res.data?.summary) setSummary(res.data.summary);
-        } catch { setUsers([]); } finally { setLoading(false); }
+        } catch (error) { console.error('Failed to fetch staff:', error); setUsers([]); } finally { setLoading(false); }
     };
 
     const fetchLogs = async () => {
@@ -43,7 +43,7 @@ export default function AdminHRPage() {
         try {
             const res = await api.get('/admin/audit-logs', { params: { per_page: 50 } });
             setAuditLogs(res.data?.data || res.data || []);
-        } catch { setAuditLogs([]); } finally { setLogsLoading(false); }
+        } catch (error) { console.error('Failed to fetch audit logs:', error); setAuditLogs([]); } finally { setLogsLoading(false); }
     };
 
     useEffect(() => {

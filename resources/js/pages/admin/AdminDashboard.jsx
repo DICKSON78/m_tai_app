@@ -53,7 +53,7 @@ export default function AdminDashboard() {
                 setRecentOrders(d.recent_orders || []);
                 setRevenueData(d.monthly_revenue || []);
                 setOrdersData(d.monthly_orders || []);
-            } catch {
+            } catch (error) { console.error('Failed to fetch dashboard:', error);
             } finally {
                 setLoading(false);
             }
