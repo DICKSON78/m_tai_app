@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\FinanceJournalController;
 use App\Http\Controllers\Api\FinanceReportController;
 use App\Http\Controllers\Api\FinanceTaxController;
 use App\Http\Controllers\Api\FiscalPeriodController;
+use App\Http\Controllers\Api\FiscalYearController;
 use App\Http\Controllers\Api\FixedAssetController;
 use App\Http\Controllers\Api\BankReconciliationController;
 use App\Http\Controllers\Api\GeneralLedgerController;
@@ -54,6 +55,7 @@ use App\Http\Controllers\Api\PurchaseReceptionController;
 use App\Http\Controllers\Api\PurchaseReturnController;
 use App\Http\Controllers\Api\PushNotificationController;
 use App\Http\Controllers\Api\ProductImageController;
+use App\Http\Controllers\Api\ProductVariantController;
 use App\Http\Controllers\Api\ReceiptController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ReviewController;
@@ -70,10 +72,10 @@ use App\Http\Controllers\Api\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 // Public API routes
-Route::post('/register/customer', [AuthApiController::class, 'registerCustomer']);
-Route::post('/register/seller', [AuthApiController::class, 'registerSeller']);
-Route::post('/login', [AuthApiController::class, 'login']);
-Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword']);
+Route::post('/register/customer', [AuthApiController::class, 'registerCustomer'])->middleware('throttle:register');
+Route::post('/register/seller', [AuthApiController::class, 'registerSeller'])->middleware('throttle:register');
+Route::post('/login', [AuthApiController::class, 'login'])->middleware('throttle:login');
+Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword'])->middleware('throttle:login');
 Route::post('/reset-password', [AuthApiController::class, 'resetPassword']);
 
 // Protected API routes
@@ -130,6 +132,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/products/{product}/images', [ProductImageController::class, 'store']);
         Route::put('/products/{product}/images/reorder', [ProductImageController::class, 'reorder']);
         Route::delete('/products/{product}/images/{productImage}', [ProductImageController::class, 'destroy']);
+
+        // Product Variants
+        Route::get('/product-variants', [ProductVariantController::class, 'index']);
+        Route::post('/product-variants', [ProductVariantController::class, 'store']);
+        Route::get('/product-variants/{variant}', [ProductVariantController::class, 'show']);
+        Route::put('/product-variants/{variant}', [ProductVariantController::class, 'update']);
+        Route::delete('/product-variants/{variant}', [ProductVariantController::class, 'destroy']);
 
         // Categories
         Route::get('/businesses/{business}/categories', [CategoryController::class, 'index']);
@@ -383,6 +392,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/fiscal-periods/{fiscalPeriod}', [FiscalPeriodController::class, 'show']);
         Route::post('/fiscal-periods/{fiscalPeriod}/close', [FiscalPeriodController::class, 'close']);
         Route::delete('/fiscal-periods/{fiscalPeriod}', [FiscalPeriodController::class, 'destroy']);
+
+        // Fiscal Years
+        Route::get('/fiscal-years', [FiscalYearController::class, 'index']);
+        Route::post('/fiscal-years', [FiscalYearController::class, 'store']);
+        Route::get('/fiscal-years/{fiscalYear}', [FiscalYearController::class, 'show']);
+        Route::put('/fiscal-years/{fiscalYear}', [FiscalYearController::class, 'update']);
+        Route::delete('/fiscal-years/{fiscalYear}', [FiscalYearController::class, 'destroy']);
+        Route::post('/fiscal-years/{fiscalYear}/close', [FiscalYearController::class, 'close']);
     });
 
     // ==================== PURCHASE MODULE (Business Owner + Admin) ====================
