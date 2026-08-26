@@ -70,7 +70,7 @@ export default function LoginPage() {
                                 value={credentials}
                                 onChange={(e) => setCredentials(e.target.value)}
                                 className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:ring-2 focus:ring-[#00D4AA] focus:border-[#00D4AA]"
-                                placeholder="admin@m-tai.com"
+                                placeholder="Email, phone, or user code"
                                 required
                             />
                         </div>

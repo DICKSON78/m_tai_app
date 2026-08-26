@@ -53,7 +53,7 @@ class ExportController extends Controller
         ]);
 
         $limit = min((int) $request->input('limit', 10000), 10000);
-        $orders = $business->orders()->with('customer:id,full_name,phone')->limit($limit)->get();
+        $orders = $business->orders()->with('customer:id,full_name,phone', 'items.product:id,name')->limit($limit)->get();
 
         $csv = "Transaction Code,Date,Customer,Total,Status\n";
         foreach ($orders as $o) {

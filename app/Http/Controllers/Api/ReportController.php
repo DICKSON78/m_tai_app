@@ -454,7 +454,7 @@ class ReportController extends Controller
         $overdueLoans = (clone $loans)
             ->where('status', 'active')
             ->where('due_date', '<', now())
-            ->get(['id', 'loan_type', 'loan_amount', 'loan_balance', 'due_date']);
+            ->paginate($request->input('per_page', 50));
 
         return response()->json([
             'summary' => [
@@ -462,7 +462,7 @@ class ReportController extends Controller
                 'total_loan_amount' => round($totalLoanAmount, 2),
                 'total_paid' => round($totalPaid, 2),
                 'total_balance' => round($totalLoanBalance, 2),
-                'overdue_count' => $overdueLoans->count(),
+                'overdue_count' => $overdueLoans->total(),
             ],
             'by_status' => $byStatus,
             'by_type' => $byType,
