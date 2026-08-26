@@ -67,6 +67,12 @@ export default function CustomerLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="deliveries" options={{ title: 'Deliveries', href: null }} />
+      <Tabs.Screen name="delivery-detail" options={{ title: 'Delivery Detail', href: null }} />
+      <Tabs.Screen name="wishlist" options={{ title: 'Wishlist', href: null }} />
+      <Tabs.Screen name="order-detail" options={{ title: 'Order Detail', href: null }} />
+      <Tabs.Screen name="product-detail" options={{ title: 'Product Detail', href: null }} />
+      <Tabs.Screen name="checkout" options={{ title: 'Checkout', href: null }} />
     </Tabs>
   );
 }

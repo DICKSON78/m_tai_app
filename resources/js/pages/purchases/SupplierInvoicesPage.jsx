@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import { FileText, Plus, Search, Eye, CheckCircle, X, Clock, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 
 const STATUS_CLASSES = {
@@ -60,6 +61,9 @@ export default function SupplierInvoicesPage() {
 
   const [showDetail, setShowDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteInvoice, setDeleteInvoice] = useState(null);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 400);
@@ -186,13 +190,14 @@ export default function SupplierInvoicesPage() {
     } catch (error) { console.error('Failed to load invoice for editing:', error); alert('Failed to load invoice for editing'); }
   };
 
-  const handleDelete = async (inv) => {
-    if (!window.confirm(`Delete invoice ${inv.invoice_number}? This cannot be undone.`)) return;
+  const handleDelete = async () => {
+    if (!deleteInvoice) return;
     try {
-      await api.delete(`/owner/purchases/invoices/${inv.id}`);
-      if (showDetail?.id === inv.id) setShowDetail(null);
+      await api.delete(`/owner/purchases/invoices/${deleteInvoice.id}`);
+      if (showDetail?.id === deleteInvoice.id) setShowDetail(null);
       refreshAll();
     } catch (err) { alert(err.response?.data?.message || 'Failed to delete invoice'); }
+    finally { setConfirmOpen(false); setDeleteInvoice(null); }
   };
 
   const handleValidate = async (id) => {
@@ -359,9 +364,19 @@ export default function SupplierInvoicesPage() {
                             )}
                             <button onClick={() => openDetail(inv)} title="View"
                               className="p-1.5 text-gray-400 hover:text-[#00D4AA] rounded-lg hover:bg-teal-50"><Eye size={15} /></button>
-                            <button onClick={() => handleDelete(inv)} title="Delete"
+                            <button onClick={() => { setDeleteInvoice(inv); setConfirmOpen(true); }} title="Delete"
                               className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50"><Trash2 size={15} /></button>
-                          </div>
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setDeleteInvoice(null); }}
+        onConfirm={handleDelete}
+        title="Delete Invoice"
+        message={`Are you sure you want to delete invoice "${deleteInvoice?.invoice_number}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
+    </div>
                         </td>
                       </tr>
                     );
@@ -516,7 +531,7 @@ export default function SupplierInvoicesPage() {
                   <button onClick={() => { setShowDetail(null); handleEdit(showDetail); }}
                     className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><Edit2 size={12} /> Edit</button>
                 )}
-                <button onClick={() => handleDelete(showDetail)}
+                <button onClick={() => { setDeleteInvoice(showDetail); setConfirmOpen(true); }}
                   className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><Trash2 size={12} /> Delete</button>
                 <button onClick={() => setShowDetail(null)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
               </div>

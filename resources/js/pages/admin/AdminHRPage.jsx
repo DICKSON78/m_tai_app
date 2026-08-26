@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
-import { Users, Shield, Activity, Search } from 'lucide-react';
+import { Users, Shield, Activity, Search, Loader2, AlertCircle } from 'lucide-react';
 import PageHeader from '../../components/casfeta/PageHeader';
 
 const ROLE_COLORS = {
@@ -16,6 +16,7 @@ export default function AdminHRPage() {
     const [activeTab, setActiveTab] = useState('staff');
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const [search, setSearch] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -23,9 +24,11 @@ export default function AdminHRPage() {
     const [summary, setSummary] = useState({});
     const [auditLogs, setAuditLogs] = useState([]);
     const [logsLoading, setLogsLoading] = useState(false);
+    const [logsError, setLogsError] = useState('');
 
     const fetchStaff = async () => {
         setLoading(true);
+        setError('');
         try {
             const params = { page: currentPage, per_page: 15 };
             if (search) params.search = search;
@@ -35,15 +38,24 @@ export default function AdminHRPage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             if (res.data?.summary) setSummary(res.data.summary);
-        } catch (error) { console.error('Failed to fetch staff:', error); setUsers([]); } finally { setLoading(false); }
+        } catch (error) {
+            console.error('Failed to fetch staff:', error);
+            setUsers([]);
+            setError('Failed to load staff data. Please try again.');
+        } finally { setLoading(false); }
     };
 
     const fetchLogs = async () => {
         setLogsLoading(true);
+        setLogsError('');
         try {
             const res = await api.get('/admin/audit-logs', { params: { per_page: 50 } });
             setAuditLogs(res.data?.data || res.data || []);
-        } catch (error) { console.error('Failed to fetch audit logs:', error); setAuditLogs([]); } finally { setLogsLoading(false); }
+        } catch (error) {
+            console.error('Failed to fetch audit logs:', error);
+            setAuditLogs([]);
+            setLogsError('Failed to load activity logs. Please try again.');
+        } finally { setLogsLoading(false); }
     };
 
     useEffect(() => {
@@ -114,7 +126,13 @@ export default function AdminHRPage() {
                         </div>
 
                         {loading ? (
-                            <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]"></div></div>
+                            <div className="flex items-center justify-center py-20"><Loader2 className="animate-spin h-8 w-8 text-[#00D4AA]" /></div>
+                        ) : error ? (
+                            <div className="flex flex-col items-center justify-center py-20">
+                                <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
+                                <p className="text-red-500 mb-4">{error}</p>
+                                <button onClick={fetchStaff} className="px-4 py-2 bg-[#00D4AA] text-white rounded-lg">Retry</button>
+                            </div>
                         ) : users.length === 0 ? (
                             <div className="p-12 text-center text-gray-500 text-sm">No users found. Try adjusting your filters.</div>
                         ) : (
@@ -189,7 +207,13 @@ export default function AdminHRPage() {
                         </div>
                     </div>
                     {logsLoading ? (
-                        <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]"></div></div>
+                        <div className="flex items-center justify-center py-20"><Loader2 className="animate-spin h-8 w-8 text-[#00D4AA]" /></div>
+                    ) : logsError ? (
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
+                            <p className="text-red-500 mb-4">{logsError}</p>
+                            <button onClick={fetchLogs} className="px-4 py-2 bg-[#00D4AA] text-white rounded-lg">Retry</button>
+                        </div>
                     ) : auditLogs.length === 0 ? (
                         <div className="p-12 text-center text-gray-500 text-sm">No activity logs yet.</div>
                     ) : (

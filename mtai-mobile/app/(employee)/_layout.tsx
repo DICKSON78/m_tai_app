@@ -66,6 +66,13 @@ export default function EmployeeLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="expense"
+        options={{
+          title: 'Expenses',
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

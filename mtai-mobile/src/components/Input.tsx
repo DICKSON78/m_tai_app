@@ -21,6 +21,7 @@ interface Props {
   icon?: React.ReactNode;
   multiline?: boolean;
   keyboardType?: KeyboardTypeOptions;
+  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   style?: ViewStyle;
 }
 
@@ -34,6 +35,7 @@ export default function Input({
   icon,
   multiline,
   keyboardType,
+  autoCapitalize,
   style,
 }: Props) {
   const [focused, setFocused] = useState(false);
@@ -46,6 +48,7 @@ export default function Input({
     secureTextEntry,
     multiline,
     keyboardType,
+    autoCapitalize,
     onFocus: () => setFocused(true),
     onBlur: () => setFocused(false),
   };

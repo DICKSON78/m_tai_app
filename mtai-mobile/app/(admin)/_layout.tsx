@@ -33,7 +33,7 @@ export default function AdminLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Overview',
+          title: 'Dashboard',
           tabBarIcon: ({ focused }) => (
             <TabIcon icon="🧭" focused={focused} />
           ),
@@ -61,7 +61,9 @@ export default function AdminLayout() {
         name="announcements"
         options={{
           title: 'Announcements',
-          tabBarButton: () => null,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="📣" focused={focused} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -71,6 +73,13 @@ export default function AdminLayout() {
           tabBarIcon: ({ focused }) => (
             <TabIcon icon="👤" focused={focused} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="orders"
+        options={{
+          title: 'Orders',
+          tabBarButton: () => null,
         }}
       />
     </Tabs>

@@ -13,7 +13,7 @@ class Order extends Model
     protected $fillable = [
         'business_id', 'customer_id', 'transaction_code', 'subtotal',
         'discount', 'tax', 'total', 'status', 'payment_status',
-        'notes', 'processed_by',
+        'notes', 'processed_by', 'currency_id', 'currency_code', 'exchange_rate',
     ];
 
     protected function casts(): array
@@ -29,6 +29,11 @@ class Order extends Model
     public function business()
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     public function customer()

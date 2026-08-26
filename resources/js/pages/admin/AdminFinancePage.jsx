@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { Banknote, TrendingUp, ShoppingCart, CreditCard, ArrowUpRight } from 'lucide-react';
+import { Banknote, TrendingUp, ShoppingCart, CreditCard, ArrowUpRight, Loader2, AlertCircle } from 'lucide-react';
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import PageHeader from '../../components/casfeta/PageHeader';
 
@@ -9,33 +9,45 @@ const COLORS = ['#00D4AA', '#0ea5e9', '#f59e0b', '#ef4444', '#8b5cf6'];
 export default function AdminFinancePage() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const [period, setPeriod] = useState('this_month');
 
-    useEffect(() => {
-        const fetchFinance = async () => {
-            setLoading(true);
+    const fetchFinance = async () => {
+        setLoading(true);
+        setError('');
+        try {
+            const res = await api.get('/admin/finance', { params: { period } });
+            setData(res.data);
+        } catch (err) {
+            console.error('Failed to fetch finance data:', err);
             try {
-                const res = await api.get('/admin/finance', { params: { period } });
-                setData(res.data);
-            } catch (error) { console.error('Failed to fetch finance data:', error);
-                try {
-                    const dashRes = await api.get('/admin/dashboard');
-                    setData({
-                        total_revenue: dashRes.data.total_revenue || 0,
-                        total_orders: dashRes.data.total_orders || 0,
-                        avg_order_value: dashRes.data.avg_order_value || 0,
-                        total_subscriptions_revenue: 0,
-                        monthly_revenue: dashRes.data.monthly_revenue || [],
-                        revenue_by_payment: [],
-                        recent_payments: [],
-                    });
-                } catch (error2) { console.error('Failed to fetch dashboard fallback:', error2); }
-            } finally { setLoading(false); }
-        };
-        fetchFinance();
-    }, [period]);
+                const dashRes = await api.get('/admin/dashboard');
+                setData({
+                    total_revenue: dashRes.data.total_revenue || 0,
+                    total_orders: dashRes.data.total_orders || 0,
+                    avg_order_value: dashRes.data.avg_order_value || 0,
+                    total_subscriptions_revenue: 0,
+                    monthly_revenue: dashRes.data.monthly_revenue || [],
+                    revenue_by_payment: [],
+                    recent_payments: [],
+                });
+            } catch (error2) {
+                console.error('Failed to fetch dashboard fallback:', error2);
+                setError('Failed to load finance data. Please try again.');
+            }
+        } finally { setLoading(false); }
+    };
 
-    if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]"></div></div>;
+    useEffect(() => { fetchFinance(); }, [period]);
+
+    if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="animate-spin h-8 w-8 text-[#00D4AA]" /></div>;
+    if (error) return (
+        <div className="flex flex-col items-center justify-center py-20">
+            <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
+            <p className="text-red-500 mb-4">{error}</p>
+            <button onClick={fetchFinance} className="px-4 py-2 bg-[#00D4AA] text-white rounded-lg">Retry</button>
+        </div>
+    );
 
     const d = data || {};
 

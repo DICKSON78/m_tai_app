@@ -7,8 +7,10 @@ use App\Models\Business;
 use App\Models\Coupon;
 use App\Models\CouponUsage;
 use App\Models\Customer;
+use App\Models\Currency;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\TaxRate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -24,7 +26,34 @@ class OrderController extends Controller
             'notes' => 'nullable|string|max:1000',
             'price_type' => 'sometimes|in:selling,wholesale,retail',
             'coupon_code' => 'nullable|string|max:50',
+            'currency_code' => 'nullable|string|size:3',
+            'exchange_rate' => 'nullable|numeric|min:0',
         ]);
+
+        $currencyCode = strtoupper($validated['currency_code'] ?? 'TZS');
+        $exchangeRate = (float) ($validated['exchange_rate'] ?? 1);
+        $currencyId = null;
+
+        if ($currencyCode !== 'TZS') {
+            $currency = Currency::where('code', $currencyCode)->where('is_active', true)->first();
+            if (! $currency) {
+                return response()->json(['message' => "Currency '{$currencyCode}' is not supported."], 422);
+            }
+            $currencyId = $currency->id;
+
+            if (! isset($validated['exchange_rate'])) {
+                $baseCurrency = Currency::where('is_base', true)->first();
+                $rate = $baseCurrency
+                    ? \App\Models\ExchangeRate::where('business_id', auth()->user()?->businesses()->first()?->id ?? 0)
+                        ->where('from_currency', $baseCurrency->code)
+                        ->where('to_currency', $currencyCode)
+                        ->where('is_active', true)
+                        ->latest('effective_date')
+                        ->first()
+                    : null;
+                $exchangeRate = $rate ? (float) $rate->rate : 1;
+            }
+        }
 
         $cart = $request->session()->get('cart', []);
 
@@ -117,13 +146,19 @@ class OrderController extends Controller
                     }
                 }
 
-                // Apply tax from business settings
-                $taxRate = 0;
-                if ($business && is_array($business->settings)) {
-                    $taxRate = (float) ($business->settings['tax_rate'] ?? 0);
+                // Apply tax from active TaxRate records for this business
+                $activeTaxRates = TaxRate::where('business_id', $businessId)
+                    ->where('is_active', true)
+                    ->get();
+                $combinedTaxRate = $activeTaxRates->sum('rate');
+
+                // Fallback to business settings if no TaxRate records exist
+                if ($combinedTaxRate === 0 && $business && is_array($business->settings)) {
+                    $combinedTaxRate = (float) ($business->settings['tax_rate'] ?? 0);
                 }
+
                 $taxableAmount = max(0, $subtotal - $discount);
-                $tax = round($taxableAmount * ($taxRate / 100), 2);
+                $tax = round($taxableAmount * ($combinedTaxRate / 100), 2);
                 $total = round($taxableAmount + $tax, 2);
 
                 $order = Order::create([
@@ -137,6 +172,9 @@ class OrderController extends Controller
                     'status' => 'pending',
                     'payment_status' => $total > 0 ? 'unpaid' : 'paid',
                     'notes' => $validated['notes'] ?? null,
+                    'currency_id' => $currencyId,
+                    'currency_code' => $currencyCode,
+                    'exchange_rate' => $exchangeRate,
                 ]);
 
                 foreach ($orderItemsData as $itemData) {

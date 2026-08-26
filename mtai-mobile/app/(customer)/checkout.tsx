@@ -52,8 +52,10 @@ export default function CheckoutScreen() {
   const getTotal = useCartStore((s) => s.getTotal);
 
   const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [phone, setPhone] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [addressError, setAddressError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [placingOrder, setPlacingOrder] = useState(false);
   const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
 
@@ -64,11 +66,23 @@ export default function CheckoutScreen() {
   );
 
   const placeOrder = async () => {
+    let hasError = false;
     if (!deliveryAddress.trim()) {
       setAddressError('Please enter your delivery address.');
-      return;
+      hasError = true;
+    } else {
+      setAddressError(null);
     }
-    setAddressError(null);
+
+    const trimmedPhone = phone.trim();
+    if (!trimmedPhone || trimmedPhone.length < 10) {
+      setPhoneError('Please enter a valid phone number (at least 10 digits).');
+      hasError = true;
+    } else {
+      setPhoneError(null);
+    }
+
+    if (hasError) return;
 
     setPlacingOrder(true);
     try {
@@ -173,6 +187,18 @@ export default function CheckoutScreen() {
             placeholder="Street, house number, area, landmark…"
             multiline
             error={addressError ?? undefined}
+          />
+
+          <Input
+            label="Phone Number"
+            value={phone}
+            onChangeText={(text) => {
+              setPhone(text);
+              if (phoneError && text.trim().length >= 10) setPhoneError(null);
+            }}
+            placeholder="+255 7XX XXX XXX"
+            keyboardType="phone-pad"
+            error={phoneError ?? undefined}
           />
 
           <Text style={styles.sectionTitle}>Payment Method</Text>

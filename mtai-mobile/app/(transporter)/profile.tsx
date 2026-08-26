@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
+  Modal,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -18,6 +19,7 @@ import Badge from '../../src/components/Badge';
 import Button from '../../src/components/Button';
 import Card from '../../src/components/Card';
 import Header from '../../src/components/Header';
+import Input from '../../src/components/Input';
 import LoadingScreen from '../../src/components/LoadingScreen';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
 
@@ -59,6 +61,13 @@ export default function TransporterProfileScreen() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isAvailable, setIsAvailable] = useState(false);
   const [savingAvailability, setSavingAvailability] = useState(false);
+  const [editVisible, setEditVisible] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editVehicleType, setEditVehicleType] = useState('');
+  const [editVehiclePlate, setEditVehiclePlate] = useState('');
+  const [editErrors, setEditErrors] = useState<Record<string, string>>({});
+  const [savingProfile, setSavingProfile] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoadError(null);
@@ -125,6 +134,45 @@ export default function TransporterProfileScreen() {
       },
     ]);
   }, [logout]);
+
+  const openEditModal = useCallback(() => {
+    setEditName(profile.name ?? user?.name ?? '');
+    setEditPhone(profile.phone ?? user?.phone ?? '');
+    setEditVehicleType(profile.vehicle_type ?? '');
+    setEditVehiclePlate(profile.vehicle_plate ?? '');
+    setEditErrors({});
+    setEditVisible(true);
+  }, [profile, user]);
+
+  const handleSaveProfile = useCallback(async () => {
+    const nextErrors: Record<string, string> = {};
+    if (!editName.trim()) nextErrors.name = 'Name is required';
+    if (!editPhone.trim()) nextErrors.phone = 'Phone is required';
+    if (Object.keys(nextErrors).length > 0) {
+      setEditErrors(nextErrors);
+      return;
+    }
+    setEditErrors({});
+    setSavingProfile(true);
+    try {
+      await api.put('/transporter/profile', {
+        name: editName.trim(),
+        phone: editPhone.trim(),
+        vehicle_type: editVehicleType.trim() || null,
+        vehicle_plate: editVehiclePlate.trim() || null,
+      });
+      setEditVisible(false);
+      Alert.alert('Profile updated', 'Your profile has been saved successfully.');
+      loadData();
+    } catch (err: any) {
+      Alert.alert(
+        'Update failed',
+        err?.response?.data?.message || err?.message || 'Could not update profile. Please try again.'
+      );
+    } finally {
+      setSavingProfile(false);
+    }
+  }, [editName, editPhone, editVehicleType, editVehiclePlate, loadData]);
 
   if (initialLoading) {
     return <LoadingScreen />;
@@ -245,6 +293,14 @@ export default function TransporterProfileScreen() {
           </Card>
         ) : null}
 
+        <Button
+          title="Edit Profile"
+          variant="outline"
+          size="md"
+          onPress={openEditModal}
+          style={styles.editButton}
+        />
+
         <Card style={[styles.section, styles.linksCard]}>
           <TouchableOpacity
             style={styles.linkRow}
@@ -273,6 +329,53 @@ export default function TransporterProfileScreen() {
           style={styles.logoutButton}
         />
       </ScrollView>
+
+      <Modal visible={editVisible} transparent animationType="fade" onRequestClose={() => setEditVisible(false)}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setEditVisible(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalCard} onPress={() => {}}>
+            <Text style={styles.modalTitle}>Edit Profile</Text>
+            <Text style={styles.modalSubtitle}>Update your personal and vehicle information.</Text>
+
+            <Input
+              label="Name"
+              value={editName}
+              onChangeText={(t) => { setEditName(t); if (editErrors.name) setEditErrors((p) => ({ ...p, name: '' })); }}
+              placeholder="Your full name"
+              error={editErrors.name}
+              style={styles.fieldSpacing}
+            />
+            <Input
+              label="Phone"
+              value={editPhone}
+              onChangeText={(t) => { setEditPhone(t); if (editErrors.phone) setEditErrors((p) => ({ ...p, phone: '' })); }}
+              placeholder="+255 7XX XXX XXX"
+              keyboardType="phone-pad"
+              error={editErrors.phone}
+              style={styles.fieldSpacing}
+            />
+            <Input
+              label="Vehicle Type"
+              value={editVehicleType}
+              onChangeText={setEditVehicleType}
+              placeholder="e.g. Motorcycle, Van"
+              style={styles.fieldSpacing}
+            />
+            <Input
+              label="Vehicle Plate"
+              value={editVehiclePlate}
+              onChangeText={setEditVehiclePlate}
+              placeholder="e.g. T123ABC"
+              autoCapitalize="characters"
+              style={styles.fieldSpacing}
+            />
+
+            <View style={styles.modalActions}>
+              <Button title="Cancel" variant="secondary" onPress={() => setEditVisible(false)} style={styles.modalActionBtn} />
+              <Button title="Save" onPress={handleSaveProfile} loading={savingProfile} style={styles.modalActionBtn} />
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -413,5 +516,42 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     marginTop: SPACING.sm,
+  },
+  editButton: {
+    marginBottom: SPACING.md,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: COLORS.overlay,
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.lg,
+  },
+  modalCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg,
+  },
+  modalTitle: {
+    fontSize: FONTS.size.xl,
+    fontWeight: '800',
+    color: COLORS.text,
+  },
+  modalSubtitle: {
+    fontSize: FONTS.size.sm,
+    color: COLORS.textLight,
+    marginTop: SPACING.xs + 2,
+    marginBottom: SPACING.md,
+    lineHeight: 19,
+  },
+  fieldSpacing: {
+    marginBottom: SPACING.md,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: SPACING.sm + 2,
+    marginTop: SPACING.sm,
+  },
+  modalActionBtn: {
+    flex: 1,
   },
 });

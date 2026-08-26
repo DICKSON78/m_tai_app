@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use App\Mail\PasswordResetMail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class AuthApiController extends Controller
@@ -157,6 +159,12 @@ class AuthApiController extends Controller
             ['email' => $user->email],
             ['token' => Hash::make($token), 'created_at' => now()]
         );
+
+        try {
+            Mail::to($user->email)->send(new PasswordResetMail($user->email, $token));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send password reset email: ' . $e->getMessage());
+        }
 
         return response()->json([
             'message' => 'Reset token has been generated. Check your email.',

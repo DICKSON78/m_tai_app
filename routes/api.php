@@ -69,6 +69,8 @@ use App\Http\Controllers\Api\SupplierPriceListController;
 use App\Http\Controllers\Api\TransporterController;
 use App\Http\Controllers\Api\WarehouseController;
 use App\Http\Controllers\Api\WishlistController;
+use App\Http\Controllers\Api\RestoreController;
+use App\Http\Controllers\Api\BulkController;
 use Illuminate\Support\Facades\Route;
 
 // Public API routes
@@ -90,6 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar']);
 
     // Notifications
+    Route::post('/notifications', [NotificationController::class, 'store']);
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
     Route::put('/notifications/read-all', [NotificationController::class, 'markAllRead']);
@@ -313,6 +316,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/invoices/{invoice}', [FinanceInvoiceController::class, 'update']);
         Route::post('/invoices/{invoice}/pay', [FinanceInvoiceController::class, 'recordPayment']);
         Route::delete('/invoices/{invoice}', [FinanceInvoiceController::class, 'destroy']);
+        Route::get('/invoices/{invoice}/pdf', [FinanceInvoiceController::class, 'generatePdf']);
+        Route::get('/invoices/{invoice}/print', [FinanceInvoiceController::class, 'printInvoice']);
 
         // Bills (Accounts Payable)
         Route::get('/bills', [FinanceBillController::class, 'index']);
@@ -400,6 +405,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/fiscal-years/{fiscalYear}', [FiscalYearController::class, 'update']);
         Route::delete('/fiscal-years/{fiscalYear}', [FiscalYearController::class, 'destroy']);
         Route::post('/fiscal-years/{fiscalYear}/close', [FiscalYearController::class, 'close']);
+    });
+
+    // ==================== SOFT-DELETE RESTORE (Business Owner + Admin) ====================
+    Route::middleware('role:business_owner,admin')->group(function () {
+        Route::get('/{model}/trashed', [RestoreController::class, 'trashed']);
+        Route::post('/{model}/{id}/restore', [RestoreController::class, 'restore']);
+        Route::delete('/{model}/{id}/force-delete', [RestoreController::class, 'forceDelete']);
+    });
+
+    // ==================== BULK OPERATIONS (Business Owner + Admin) ====================
+    Route::middleware('role:business_owner,admin')->group(function () {
+        Route::post('/products/bulk-update-prices', [BulkController::class, 'updateProductPrices']);
+        Route::post('/orders/bulk-update-status', [BulkController::class, 'updateOrderStatus']);
+        Route::post('/expenses/bulk-delete', [BulkController::class, 'deleteExpenses']);
     });
 
     // ==================== PURCHASE MODULE (Business Owner + Admin) ====================
@@ -709,6 +728,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Receipt
     Route::get('/orders/{order}/receipt', [ReceiptController::class, 'generate']);
+    Route::get('/orders/{order}/receipt/pdf', [ReceiptController::class, 'generatePdf']);
+    Route::get('/orders/{order}/receipt/print', [ReceiptController::class, 'printReceipt']);
 
     // Barcode
     Route::get('/products/{product}/barcode', [BarcodeController::class, 'generate']);

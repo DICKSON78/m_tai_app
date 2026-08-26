@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Barryvdh\Dompdf\Facade\Pdf;
 
 class ReceiptController extends Controller
 {
@@ -26,45 +27,7 @@ class ReceiptController extends Controller
             abort(403);
         }
 
-        $order->load(['items.product', 'business', 'customer', 'payments']);
-
-        $firstPayment = $order->payments->first();
-        $paymentMethod = $firstPayment?->method ?? 'cash';
-        $amountPaid = $order->payments->where('status', 'confirmed')->sum('amount')
-            ?: $order->payments->sum('amount')
-            ?: $order->total;
-
-        $receipt = [
-            'business' => [
-                'name' => $order->business->name,
-                'code' => $order->business->business_code,
-                'address' => $order->business->street
-                    ? $order->business->street . ', ' . ($order->business->ward ?? '') . ', ' . ($order->business->district ?? '')
-                    : ($order->business->district ?? ''),
-                'phone' => $order->business->user->phone ?? '',
-            ],
-            'order' => [
-                'transaction_code' => $order->transaction_code,
-                'date' => $order->created_at->format('d/m/Y H:i'),
-                'status' => $order->status,
-                'payment_method' => $paymentMethod,
-            ],
-            'items' => $order->items->map(function ($item) {
-                return [
-                    'name' => $item->product->name ?? 'Product',
-                    'quantity' => $item->quantity,
-                    'price' => number_format($item->unit_price, 2),
-                    'total' => number_format($item->total_price, 2),
-                ];
-            }),
-            'subtotal' => number_format($order->subtotal, 2),
-            'discount' => number_format($order->discount ?? 0, 2),
-            'tax' => number_format($order->tax ?? 0, 2),
-            'total' => number_format($order->total, 2),
-            'amount_paid' => number_format($amountPaid, 2),
-            'change' => number_format(max(0, $amountPaid - $order->total), 2),
-            'footer' => $order->business->settings['receipt_footer'] ?? 'Thank you for your purchase!',
-        ];
+        $receipt = $this->buildReceiptData($order);
 
         return response()->json([
             'receipt' => $receipt,
@@ -152,5 +115,68 @@ class ReceiptController extends Controller
 </body>
 </html>
 HTML;
+    }
+
+    public function generatePdf(Order $order)
+    {
+        $receipt = $this->buildReceiptData($order);
+        $html = $this->buildReceiptHtml($receipt);
+
+        $pdf = Pdf::loadHtml($html)
+            ->setPaper('a5', 'portrait')
+            ->setOption('isRemoteEnabled', true);
+
+        return $pdf->download("receipt-{$order->transaction_code}.pdf");
+    }
+
+    public function printReceipt(Order $order)
+    {
+        $receipt = $this->buildReceiptData($order);
+        $html = $this->buildReceiptHtml($receipt);
+
+        return response($html)->header('Content-Type', 'text/html');
+    }
+
+    private function buildReceiptData(Order $order)
+    {
+        $order->load(['items.product', 'business', 'customer', 'payments']);
+
+        $firstPayment = $order->payments->first();
+        $paymentMethod = $firstPayment?->method ?? 'cash';
+        $amountPaid = $order->payments->where('status', 'confirmed')->sum('amount')
+            ?: $order->payments->sum('amount')
+            ?: $order->total;
+
+        return [
+            'business' => [
+                'name' => $order->business->name,
+                'code' => $order->business->business_code,
+                'address' => $order->business->street
+                    ? $order->business->street . ', ' . ($order->business->ward ?? '') . ', ' . ($order->business->district ?? '')
+                    : ($order->business->district ?? ''),
+                'phone' => $order->business->user->phone ?? '',
+            ],
+            'order' => [
+                'transaction_code' => $order->transaction_code,
+                'date' => $order->created_at->format('d/m/Y H:i'),
+                'status' => $order->status,
+                'payment_method' => $paymentMethod,
+            ],
+            'items' => $order->items->map(function ($item) {
+                return [
+                    'name' => $item->product->name ?? 'Product',
+                    'quantity' => $item->quantity,
+                    'price' => number_format($item->unit_price, 2),
+                    'total' => number_format($item->total_price, 2),
+                ];
+            }),
+            'subtotal' => number_format($order->subtotal, 2),
+            'discount' => number_format($order->discount ?? 0, 2),
+            'tax' => number_format($order->tax ?? 0, 2),
+            'total' => number_format($order->total, 2),
+            'amount_paid' => number_format($amountPaid, 2),
+            'change' => number_format(max(0, $amountPaid - $order->total), 2),
+            'footer' => $order->business->settings['receipt_footer'] ?? 'Thank you for your purchase!',
+        ];
     }
 }

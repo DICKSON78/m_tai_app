@@ -4,7 +4,7 @@ import api from '../../services/api';
 import Pagination from '../../components/Pagination';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import Modal from '../../components/Modal';
-import { CreditCard, CheckCircle, Clock, XCircle, Plus, Trash2, Store, Tag, DollarSign, Activity, Calendar, Search, Eye, Edit, SlidersHorizontal, X } from 'lucide-react';
+import { CreditCard, CheckCircle, Clock, XCircle, Plus, Trash2, Store, Tag, DollarSign, Activity, Calendar, Search, Eye, Edit, SlidersHorizontal, X, Loader2, AlertCircle } from 'lucide-react';
 import PageHeader from '../../components/casfeta/PageHeader';
 
 const STATUS_MAP = {
@@ -24,6 +24,7 @@ export default function AdminSubscriptionsPage() {
     document.title = 'Subscriptions - M-Tai Admin';
     const [subscriptions, setSubscriptions] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [planFilter, setPlanFilter] = useState('');
@@ -36,6 +37,7 @@ export default function AdminSubscriptionsPage() {
 
     const fetchData = useCallback(async () => {
         setLoading(true);
+        setError('');
         try {
             const params = { page: currentPage, per_page: 15 };
             if (search) params.search = search;
@@ -46,7 +48,11 @@ export default function AdminSubscriptionsPage() {
             setCurrentPage(res.data?.current_page || 1);
             setLastPage(res.data?.last_page || 1);
             if (res.data?.summary) setSummary(res.data.summary);
-        } catch (error) { console.error('Failed to fetch subscriptions:', error); setSubscriptions([]); } finally { setLoading(false); }
+        } catch (error) {
+            console.error('Failed to fetch subscriptions:', error);
+            setSubscriptions([]);
+            setError('Failed to load subscriptions. Please try again.');
+        } finally { setLoading(false); }
     }, [currentPage, search, statusFilter, planFilter]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
@@ -150,7 +156,13 @@ export default function AdminSubscriptionsPage() {
                         <h3 className="text-lg font-semibold text-gray-900">All Subscriptions</h3>
                     </div>
                     {loading ? (
-                        <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]"></div></div>
+                        <div className="flex items-center justify-center py-20"><Loader2 className="animate-spin h-8 w-8 text-[#00D4AA]" /></div>
+                    ) : error ? (
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
+                            <p className="text-red-500 mb-4">{error}</p>
+                            <button onClick={fetchData} className="px-4 py-2 bg-[#00D4AA] text-white rounded-lg">Retry</button>
+                        </div>
                     ) : subscriptions.length === 0 ? (
                         <div className="px-6 py-12 text-center">
                             <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">

@@ -193,6 +193,11 @@ export default function AdminOverviewScreen() {
         onPress: () => router.push('/(admin)/users'),
       },
       {
+        icon: '🛒',
+        label: 'Orders',
+        onPress: () => router.push('/(admin)/orders'),
+      },
+      {
         icon: '📣',
         label: 'Announcements',
         onPress: () => router.push('/(admin)/announcements'),
