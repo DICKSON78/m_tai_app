@@ -58,6 +58,13 @@ export default function AdminLayout() {
         }}
       />
       <Tabs.Screen
+        name="announcements"
+        options={{
+          title: 'Announcements',
+          tabBarButton: () => null,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',

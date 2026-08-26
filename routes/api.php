@@ -238,6 +238,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/businesses/{business}/settings', [SettingController::class, 'updateSettings']);
     });
 
+    // Mobile app alias routes
+    Route::get('/dashboard/owner', [DashboardApiController::class, 'ownerDashboard'])->middleware('role:business_owner');
+    Route::get('/business/profile', [BusinessController::class, 'profile']);
+    Route::get('/business/stats', [BusinessController::class, 'stats']);
+    Route::get('/reports/sales', [ReportController::class, 'sales']);
+    Route::get('/reports/profit', [ReportController::class, 'profit']);
+
     // Admin
     Route::middleware('role:admin')->prefix('admin')->group(function () {
         Route::get('/dashboard', [DashboardApiController::class, 'adminDashboard']);
@@ -272,6 +279,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/settings', [AdminController::class, 'getSettings']);
         Route::put('/settings', [AdminController::class, 'updateSettings']);
     });
+
+    Route::get('/admin/stats', [DashboardApiController::class, 'adminDashboard'])->middleware('role:admin');
 
     // ==================== FINANCE MODULE (Business Owner + Admin) ====================
     Route::middleware('role:business_owner,admin')->prefix('owner/finance')->group(function () {
@@ -582,6 +591,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/expenses', [EmployeeDataController::class, 'storeExpense']);
     });
 
+    // Attendance alias for mobile app
+    Route::get('/hr/attendance', [HrAttendanceController::class, 'index']);
+    Route::post('/hr/attendance', [HrAttendanceController::class, 'store']);
+
+    // Shop products listing
+    Route::get('/shop/products', [ShopController::class, 'products']);
+
     // Customer
     Route::middleware('role:customer')->prefix('customer')->group(function () {
         Route::get('/dashboard', [DashboardApiController::class, 'customerDashboard']);
@@ -592,6 +608,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/deliveries', [DeliveryController::class, 'customerDeliveries']);
     });
 
+    Route::get('/orders/my', [OrderController::class, 'myOrders']);
+
     // Transporter
     Route::middleware('role:transporter')->prefix('transporter')->group(function () {
         Route::get('/dashboard', [DashboardApiController::class, 'transporterDashboard']);
@@ -601,6 +619,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/profile', [TransporterController::class, 'profile']);
         Route::put('/profile', [TransporterController::class, 'updateProfile']);
     });
+
+    // Mobile app delivery/transporter aliases
+    Route::get('/transporter/profile', [TransporterController::class, 'profile']);
+    Route::get('/transporter/stats', [TransporterController::class, 'stats']);
+    Route::get('/deliveries/available', [DeliveryController::class, 'availableDeliveries']);
+    Route::get('/deliveries/my', [DeliveryController::class, 'myDeliveries']);
+    Route::get('/deliveries/{delivery}', [DeliveryController::class, 'show']);
+    Route::put('/deliveries/{delivery}/status', [DeliveryController::class, 'updateStatus']);
+    Route::post('/deliveries/{delivery}/accept', [DeliveryController::class, 'acceptDelivery']);
 
     // Shop browsing (public to authenticated users)
     Route::get('/shops/search', [ShopController::class, 'searchShops']);

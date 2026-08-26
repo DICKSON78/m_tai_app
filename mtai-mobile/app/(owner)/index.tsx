@@ -227,7 +227,7 @@ export default function OwnerDashboardScreen() {
   const loadDashboard = useCallback(async () => {
     setLoadError(null);
     try {
-      const res = await api.get('/dashboard/owner');
+      const res = await api.get('/owner/dashboard');
       const data = normalizeObject(res.data);
       setTodaySales(
         pickNumber(data, ['today_sales', 'todaySales', 'todays_sales', 'sales_today'])
@@ -292,11 +292,8 @@ export default function OwnerDashboardScreen() {
   }, []);
 
   const handleInventory = useCallback(() => {
-    Alert.alert(
-      'Inventory',
-      'Full inventory management is coming soon. Low-stock alerts are shown on your dashboard.'
-    );
-  }, []);
+    router.push('/(owner)/inventory');
+  }, [router]);
 
   const renderRecentOrder = (order: Order) => {
     const meta = getStatusMeta(order.status);

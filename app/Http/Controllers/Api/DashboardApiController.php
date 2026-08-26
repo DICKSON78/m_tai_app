@@ -30,7 +30,7 @@ class DashboardApiController extends Controller
         $monthlyRevenue = Order::where('status', 'completed')
             ->where('created_at', '>=', now()->subMonths(6)->startOfMonth())
             ->select(
-                DB::raw("strftime('%Y-%m', created_at) as month"),
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
                 DB::raw('SUM(total) as revenue')
             )
             ->groupBy('month')
@@ -43,7 +43,7 @@ class DashboardApiController extends Controller
 
         $monthlyOrders = Order::where('created_at', '>=', now()->subMonths(6)->startOfMonth())
             ->select(
-                DB::raw("strftime('%Y-%m', created_at) as month"),
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
                 DB::raw('COUNT(*) as orders')
             )
             ->groupBy('month')

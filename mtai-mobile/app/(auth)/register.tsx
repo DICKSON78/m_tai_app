@@ -11,24 +11,37 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Input from '../../src/components/Input';
 import Button from '../../src/components/Button';
 import { useAuthStore } from '../../src/store/authStore';
 import { COLORS, SPACING, FONTS, RADIUS } from '../../src/constants/theme';
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
   const router = useRouter();
-  const login = useAuthStore((state) => state.login);
+  const register = useAuthStore((state) => state.register);
 
-  const [loginId, setLoginId] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('+255');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{ login?: string; password?: string }>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleLogin = async () => {
-    const nextErrors: { login?: string; password?: string } = {};
-    if (!loginId.trim()) nextErrors.login = 'Email or phone number is required';
+  const clearError = (field: string) => {
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }));
+  };
+
+  const handleRegister = async () => {
+    const nextErrors: Record<string, string> = {};
+    if (!name.trim()) nextErrors.name = 'Full name is required';
+    if (!email.trim()) nextErrors.email = 'Email is required';
+    if (!phone.trim() || phone.trim() === '+255') nextErrors.phone = 'Phone number is required';
     if (!password) nextErrors.password = 'Password is required';
+    else if (password.length < 8) nextErrors.password = 'Password must be at least 8 characters';
+    if (!confirmPassword) nextErrors.confirmPassword = 'Please confirm your password';
+    else if (password !== confirmPassword) nextErrors.confirmPassword = 'Passwords do not match';
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -38,23 +51,27 @@ export default function LoginScreen() {
 
     setSubmitting(true);
     try {
-      await login(loginId.trim(), password);
+      await register({
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        password,
+        password_confirmation: confirmPassword,
+      });
       router.replace('/');
     } catch (err: any) {
       const message =
         err?.response?.data?.message ||
-        (err?.response?.status === 401 || err?.response?.status === 422
-          ? 'Invalid credentials. Please try again.'
+        (err?.response?.status === 422
+          ? 'Validation failed. Please check your input.'
           : 'Unable to connect. Please check your connection and try again.');
-      Alert.alert('Login Failed', message);
+      Alert.alert('Registration Failed', message);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleForgotPassword = () => {
-    router.push('/(auth)/forgot-password');
-  };
+  const iconColor = COLORS.gray[400];
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
@@ -80,22 +97,49 @@ export default function LoginScreen() {
 
           {/* Form */}
           <View style={styles.formSection}>
-            <Text style={styles.welcomeTitle}>Welcome back</Text>
+            <Text style={styles.welcomeTitle}>Create Account</Text>
             <Text style={styles.welcomeSubtitle}>
-              Sign in to continue shopping and tracking your orders
+              Sign up to start shopping and tracking your orders
             </Text>
 
             <Input
-              label="Email or Phone"
-              value={loginId}
+              label="Full Name"
+              value={name}
               onChangeText={(text) => {
-                setLoginId(text);
-                if (errors.login) setErrors((prev) => ({ ...prev, login: undefined }));
+                setName(text);
+                clearError('name');
               }}
-              placeholder="you@example.com or 07XX XXX XXX"
+              placeholder="John Doe"
+              error={errors.name}
+              icon={<MaterialCommunityIcons name="account-outline" size={20} color={iconColor} />}
+              style={styles.fieldSpacing}
+            />
+
+            <Input
+              label="Email"
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                clearError('email');
+              }}
+              placeholder="you@example.com"
               keyboardType="email-address"
-              error={errors.login}
-              icon={<Text style={styles.inputIcon}>✉</Text>}
+              error={errors.email}
+              icon={<MaterialCommunityIcons name="email-outline" size={20} color={iconColor} />}
+              style={styles.fieldSpacing}
+            />
+
+            <Input
+              label="Phone"
+              value={phone}
+              onChangeText={(text) => {
+                setPhone(text);
+                clearError('phone');
+              }}
+              placeholder="+255 7XX XXX XXX"
+              keyboardType="phone-pad"
+              error={errors.phone}
+              icon={<MaterialCommunityIcons name="phone-outline" size={20} color={iconColor} />}
               style={styles.fieldSpacing}
             />
 
@@ -104,35 +148,44 @@ export default function LoginScreen() {
               value={password}
               onChangeText={(text) => {
                 setPassword(text);
-                if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }));
+                clearError('password');
               }}
-              placeholder="Enter your password"
+              placeholder="Minimum 8 characters"
               secureTextEntry
               error={errors.password}
-              icon={<Text style={styles.inputIcon}>🔒</Text>}
+              icon={<MaterialCommunityIcons name="lock-outline" size={20} color={iconColor} />}
               style={styles.fieldSpacing}
             />
 
-            <TouchableOpacity
-              onPress={handleForgotPassword}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              style={styles.forgotWrap}
-            >
-              <Text style={styles.forgotText}>Forgot Password?</Text>
-            </TouchableOpacity>
+            <Input
+              label="Confirm Password"
+              value={confirmPassword}
+              onChangeText={(text) => {
+                setConfirmPassword(text);
+                clearError('confirmPassword');
+              }}
+              placeholder="Re-enter your password"
+              secureTextEntry
+              error={errors.confirmPassword}
+              icon={<MaterialCommunityIcons name="lock-check-outline" size={20} color={iconColor} />}
+              style={styles.fieldSpacing}
+            />
 
             <Button
-              title="Sign In"
-              onPress={handleLogin}
+              title="Create Account"
+              onPress={handleRegister}
               loading={submitting}
               size="lg"
               style={styles.submitButton}
             />
 
             <View style={styles.footerRow}>
-              <Text style={styles.footerText}>New to M-TAI? </Text>
-              <TouchableOpacity hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }} onPress={() => router.push('/(auth)/register')}>
-                <Text style={styles.registerText}>Create an account</Text>
+              <Text style={styles.footerText}>Already have an account? </Text>
+              <TouchableOpacity
+                hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+                onPress={() => router.back()}
+              >
+                <Text style={styles.loginText}>Sign In</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -162,7 +215,6 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.xl + SPACING.md,
     paddingBottom: SPACING.xl,
     overflow: 'hidden',
-    // Gradient-style layering: darker tone bleeding from the bottom
     shadowColor: COLORS.primaryDark,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
@@ -223,18 +275,6 @@ const styles = StyleSheet.create({
   fieldSpacing: {
     marginBottom: SPACING.md,
   },
-  inputIcon: {
-    fontSize: FONTS.size.lg,
-  },
-  forgotWrap: {
-    alignSelf: 'flex-end',
-    marginTop: -SPACING.xs,
-  },
-  forgotText: {
-    fontSize: FONTS.size.sm,
-    fontWeight: '600',
-    color: COLORS.primaryDark,
-  },
   submitButton: {
     marginTop: SPACING.lg,
   },
@@ -247,7 +287,7 @@ const styles = StyleSheet.create({
     fontSize: FONTS.size.md,
     color: COLORS.textLight,
   },
-  registerText: {
+  loginText: {
     fontSize: FONTS.size.md,
     fontWeight: '700',
     color: COLORS.primary,

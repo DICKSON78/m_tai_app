@@ -153,8 +153,27 @@ class BusinessController extends Controller
         ]);
     }
 
-    public function stats(Request $request, Business $business)
+    public function profile(Request $request)
     {
+        $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
+        $business = Business::with('user:id,name,email')->find($businessId);
+
+        return response()->json($business);
+    }
+
+    public function stats(Request $request, ?Business $business = null)
+    {
+        if ($business === null) {
+            $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
+
+            return response()->json([
+                'products_count' => \App\Models\Product::where('business_id', $businessId)->count(),
+                'orders_count' => \App\Models\Order::where('business_id', $businessId)->count(),
+                'customers_count' => \App\Models\Customer::where('business_id', $businessId)->count(),
+                'revenue' => \App\Models\Order::where('business_id', $businessId)->where('status', 'completed')->sum('total'),
+            ]);
+        }
+
         $this->authorizeBusiness($request, $business);
 
         return response()->json([

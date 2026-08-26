@@ -162,6 +162,24 @@ class TransporterController extends Controller
         return response()->json(['transporter' => $transporter]);
     }
 
+    public function stats(Request $request)
+    {
+        $transporter = $request->user()->transporter;
+
+        if (!$transporter) {
+            return response()->json(['message' => 'Msafirishaji hajapatikana.'], 404);
+        }
+
+        $deliveries = $transporter->deliveries();
+
+        return response()->json([
+            'total_deliveries' => (clone $deliveries)->count(),
+            'completed' => (clone $deliveries)->where('status', 'delivered')->count(),
+            'in_transit' => (clone $deliveries)->where('status', 'in_transit')->count(),
+            'pending' => (clone $deliveries)->where('status', 'pending')->count(),
+        ]);
+    }
+
     public function updateProfile(Request $request)
     {
         $transporter = $request->user()->transporter;

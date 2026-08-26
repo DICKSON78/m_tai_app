@@ -144,7 +144,7 @@ export default function DeliveryDetailScreen() {
       return;
     }
     try {
-      const response = await api.get(`/deliveries/${deliveryId}`);
+      const response = await api.get(`/transporter/deliveries/${deliveryId}`);
       setDelivery(normalizeDetail(response.data));
       setLoadError(null);
     } catch (error) {
@@ -169,7 +169,7 @@ export default function DeliveryDetailScreen() {
       if (!delivery || updating) return;
       setUpdating(true);
       try {
-        const response = await api.put(`/deliveries/${delivery.id}/status`, {
+        const response = await api.post(`/transporter/deliveries/${delivery.id}/status`, {
           status: next,
         });
         const updated = normalizeDetail(response.data);
@@ -195,7 +195,7 @@ export default function DeliveryDetailScreen() {
     if (!delivery || accepting) return;
     setAccepting(true);
     try {
-      await api.post(`/deliveries/${delivery.id}/accept`);
+      await api.post(`/transporter/deliveries/${delivery.id}/accept`);
       await fetchDelivery();
       Alert.alert('Delivery accepted', 'Head to the pickup point to begin.');
     } catch (error) {

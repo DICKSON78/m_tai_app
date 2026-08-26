@@ -145,6 +145,7 @@ class ManufacturingController extends Controller
         $v = $request->validate([
             'product_name' => 'required|string|max:255',
             'bill_of_material_id' => 'nullable|exists:bill_of_materials,id',
+            'product_id' => 'nullable|exists:products,id',
             'quantity_planned' => 'required|integer|min:1',
             'estimated_cost' => 'nullable|numeric|min:0',
             'planned_start' => 'nullable|date',
@@ -154,6 +155,10 @@ class ManufacturingController extends Controller
 
         $bid = $this->businessId($request);
         $orderNumber = 'WO-'.strtoupper(Str::random(6));
+
+        if (empty($v['product_id']) && ! empty($v['bill_of_material_id'])) {
+            $v['product_id'] = BillOfMaterial::find($v['bill_of_material_id'])->product_id;
+        }
 
         $wo = WorkOrder::create(array_merge($v, [
             'business_id' => $bid,
@@ -191,6 +196,7 @@ class ManufacturingController extends Controller
 
                 if ($workOrder->bill_of_material_id) {
                     \DB::transaction(function () use ($workOrder, $v) {
+                        $bom = BillOfMaterial::find($workOrder->bill_of_material_id);
                         $items = BillOfMaterialItem::where('bill_of_material_id', $workOrder->bill_of_material_id)->get();
                         foreach ($items as $item) {
                             $needed = $item->quantity * $v['quantity_completed'];
@@ -207,6 +213,22 @@ class ManufacturingController extends Controller
                                     'notes' => "BOM consumption for WO {$workOrder->order_number}",
                                 ]);
                             }
+                        }
+
+                        $producedProductId = $workOrder->product_id ?? $bom?->product_id;
+                        if ($producedProductId && ($finished = Product::find($producedProductId))) {
+                            $finished->increment('quantity', $v['quantity_completed']);
+                            StockMovement::create([
+                                'business_id' => $workOrder->business_id,
+                                'product_id' => $finished->id,
+                                'type' => 'manufacturing_output',
+                                'quantity' => $v['quantity_completed'],
+                                'unit_cost' => $bom ? round($bom->estimated_cost / max($bom->quantity_per_build, 1), 2) : 0,
+                                'balance_after' => $finished->quantity,
+                                'reference_type' => 'work_order',
+                                'reference_id' => $workOrder->id,
+                                'notes' => "Manufacturing output for WO {$workOrder->order_number}",
+                            ]);
                         }
                     });
                 }

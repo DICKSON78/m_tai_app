@@ -436,7 +436,7 @@ class AdminController extends Controller
         $monthlyData = Order::where('status', 'completed')
             ->where('created_at', '>=', $since)
             ->select(
-                DB::raw("strftime('%Y-%m', created_at) as month"),
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
                 DB::raw('SUM(total) as revenue'),
                 DB::raw('COUNT(*) as orders')
             )
@@ -479,7 +479,7 @@ class AdminController extends Controller
         $monthlyRevenue = Order::where('status', 'completed')
             ->where('created_at', '>=', $since)
             ->select(
-                DB::raw("strftime('%Y-%m', created_at) as month"),
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
                 DB::raw('SUM(total) as revenue')
             )
             ->groupBy('month')

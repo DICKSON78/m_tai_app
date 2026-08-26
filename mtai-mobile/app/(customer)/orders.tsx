@@ -103,7 +103,7 @@ export default function OrdersScreen() {
     const requestId = requestSeqRef.current;
 
     try {
-      const res = await api.get('/orders/my', { params: { page: targetPage } });
+      const res = await api.get('/customer/orders', { params: { page: targetPage } });
       if (requestId !== requestSeqRef.current) return;
 
       const result = normalizePaginated<Order>(res.data);

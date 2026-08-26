@@ -86,7 +86,7 @@ export default function AdminProfileScreen() {
     const requestId = requestSeqRef.current;
 
     try {
-      const res = await api.get('/admin/stats');
+      const res = await api.get('/admin/dashboard');
       if (requestId !== requestSeqRef.current) return;
       setStats(normalizeStats(res.data));
       setLoadError(null);

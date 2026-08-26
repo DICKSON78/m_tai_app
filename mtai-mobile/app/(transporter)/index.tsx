@@ -177,8 +177,8 @@ export default function DeliveriesScreen() {
   const loadDeliveries = useCallback(async () => {
     setLoadError(null);
     const [availableRes, mineRes] = await Promise.allSettled([
-      api.get('/deliveries/available'),
-      api.get('/deliveries/my'),
+      api.get('/transporter/deliveries/available'),
+      api.get('/transporter/deliveries'),
     ]);
     if (availableRes.status === 'fulfilled') {
       setAvailable(sortNewestFirst(normalizeList(availableRes.value.data)));
@@ -214,7 +214,7 @@ export default function DeliveriesScreen() {
       if (acceptingId != null) return;
       setAcceptingId(delivery.id);
       try {
-        await api.post(`/deliveries/${delivery.id}/accept`);
+        await api.post(`/transporter/deliveries/${delivery.id}/accept`);
         Alert.alert(
           'Delivery accepted',
           `Order ${orderLabel(delivery)} is now yours. Head to the pickup point to begin.`,

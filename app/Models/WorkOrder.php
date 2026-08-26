@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class WorkOrder extends Model
 {
     protected $fillable = [
-        'business_id', 'bill_of_material_id', 'order_number', 'product_name',
+        'business_id', 'bill_of_material_id', 'order_number', 'product_name', 'product_id',
         'quantity_planned', 'quantity_completed', 'quantity_scrapped', 'status',
         'planned_start', 'planned_end', 'actual_start', 'actual_end',
         'estimated_cost', 'actual_cost', 'notes',
@@ -28,5 +28,10 @@ class WorkOrder extends Model
     public function billOfMaterial(): BelongsTo
     {
         return $this->belongsTo(BillOfMaterial::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 }

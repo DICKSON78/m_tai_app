@@ -151,7 +151,7 @@ class ExpenseController extends Controller
 
         $byPeriod = (clone $expenses)
             ->select(
-                DB::raw("strftime('{$groupByFormat}', date) as period"),
+                DB::raw("DATE_FORMAT(date, '{$groupByFormat}') as period"),
                 DB::raw('SUM(amount) as total_amount'),
                 DB::raw('COUNT(*) as count')
             )

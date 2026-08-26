@@ -87,14 +87,29 @@ class DeliveryController extends Controller
         ], 201);
     }
 
-    public function show(Request $request, Business $business, Delivery $delivery)
+    public function show(Request $request, ?Business $business = null, ?Delivery $delivery = null)
     {
-        if ($business->user_id !== $request->user()->id) {
-            abort(403);
+        if (! $delivery) {
+            abort(404);
         }
 
-        if ($delivery->business_id !== $business->id) {
-            abort(404);
+        if ($business) {
+            if ($business->user_id !== $request->user()->id) {
+                abort(403);
+            }
+
+            if ($delivery->business_id !== $business->id) {
+                abort(404);
+            }
+        } else {
+            $user = $request->user();
+            $isOwner = $user->businesses()->whereKey($delivery->business_id)->exists();
+            $isAssignedTransporter = $user->transporter && $delivery->transporter_id === $user->transporter->id;
+            $isCustomer = $delivery->customer && $delivery->customer->user_id === $user->id;
+
+            if (! $isOwner && ! $isAssignedTransporter && ! $isCustomer && $user->role !== 'admin') {
+                abort(403);
+            }
         }
 
         return response()->json($delivery->load([
@@ -295,5 +310,106 @@ class DeliveryController extends Controller
             ->paginate(15);
 
         return response()->json($deliveries);
+    }
+
+    public function availableDeliveries(Request $request)
+    {
+        return $this->available($request);
+    }
+
+    public function myDeliveries(Request $request)
+    {
+        $transporter = $request->user()->transporter;
+
+        if (!$transporter) {
+            return response()->json(['message' => 'Msafirishaji hajapatikana.'], 404);
+        }
+
+        $query = $transporter->deliveries()
+            ->with([
+                'order:id,transaction_code,total',
+                'business:id,business_name',
+                'customer:id,full_name,phone',
+            ]);
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        return response()->json($query->orderBy('created_at', 'desc')->paginate(20));
+    }
+
+    public function acceptDelivery(Request $request, Delivery $delivery)
+    {
+        $transporter = $request->user()->transporter;
+
+        if (!$transporter) {
+            return response()->json(['message' => 'Msafirishaji hajapatikana.'], 404);
+        }
+
+        if ($delivery->status !== 'pending' || !is_null($delivery->transporter_id)) {
+            return response()->json(['message' => 'Usafirishaji huu haupatikani tena.'], 422);
+        }
+
+        $delivery->update([
+            'transporter_id' => $transporter->id,
+            'status' => 'accepted',
+        ]);
+
+        return response()->json([
+            'message' => 'Umekubali usafirishaji.',
+            'delivery' => $delivery->fresh()->load([
+                'order:id,transaction_code,total',
+                'business:id,business_name',
+                'customer:id,full_name,phone',
+            ]),
+        ]);
+    }
+
+    public function updateStatus(Request $request, Delivery $delivery)
+    {
+        $transporter = $request->user()->transporter;
+
+        if (!$transporter) {
+            return response()->json(['message' => 'Msafirishaji hajapatikana.'], 404);
+        }
+
+        if ($delivery->transporter_id !== $transporter->id) {
+            return response()->json(['message' => 'Usafirishaji huu hauhusiani na wewe.'], 403);
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|in:accepted,in_transit,delivered',
+        ]);
+
+        $newStatus = $validated['status'];
+
+        if (in_array($delivery->status, ['delivered', 'cancelled'])) {
+            return response()->json(['message' => 'Hali ya usafirishaji haiwezi kubadilishwa zaidi.'], 422);
+        }
+
+        $validTransitions = [
+            'pending' => ['accepted'],
+            'accepted' => ['in_transit'],
+            'in_transit' => ['delivered'],
+        ];
+
+        $allowed = $validTransitions[$delivery->status] ?? [];
+        if (!in_array($newStatus, $allowed)) {
+            return response()->json([
+                'message' => "Hali ya usafirishaji haiwezi kubadilishwa kutoka '{$delivery->status}' hadi '{$newStatus}'.",
+            ], 422);
+        }
+
+        $delivery->update(['status' => $newStatus]);
+
+        return response()->json([
+            'message' => 'Hali ya usafirishaji imesasishwa.',
+            'delivery' => $delivery->fresh()->load([
+                'order:id,transaction_code,total',
+                'business:id,business_name',
+                'customer:id,full_name,phone',
+            ]),
+        ]);
     }
 }

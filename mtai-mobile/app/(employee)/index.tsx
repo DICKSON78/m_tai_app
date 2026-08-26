@@ -166,7 +166,7 @@ export default function PosScreen() {
 
     setCompleting(true);
     try {
-      const res = await api.post('/orders', {
+      const res = await api.post('/orders/checkout', {
         items: cartItems.map((i) => ({ product_id: i.product.id, quantity: i.quantity })),
         payment_method: paymentMethod,
         channel: 'pos',

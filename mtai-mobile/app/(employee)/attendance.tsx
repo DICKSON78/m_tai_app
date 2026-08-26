@@ -141,7 +141,7 @@ export default function AttendanceScreen() {
     const requestId = requestSeqRef.current;
 
     try {
-      const res = await api.get('/hr/attendance');
+      const res = await api.get('/owner/hr/attendance');
       if (requestId !== requestSeqRef.current) return;
 
       const normalized = normalizeAttendancePayload(res.data);
@@ -196,7 +196,7 @@ export default function AttendanceScreen() {
 
     setSubmitting(true);
     try {
-      await api.post('/hr/attendance', {
+      await api.post('/owner/hr/attendance', {
         action,
         type: isClockedIn ? 'out' : 'in',
         timestamp: new Date().toISOString(),

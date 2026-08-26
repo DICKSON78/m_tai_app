@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Alert,
   FlatList,
   RefreshControl,
   ScrollView,
@@ -141,7 +140,7 @@ export default function AdminOverviewScreen() {
     const requestId = requestSeqRef.current;
 
     try {
-      const res = await api.get('/admin/stats');
+      const res = await api.get('/admin/dashboard');
       if (requestId !== requestSeqRef.current) return;
       const { stats: nextStats, activity: nextActivity } = normalizeStats(res.data);
       setStats(nextStats);
@@ -196,11 +195,7 @@ export default function AdminOverviewScreen() {
       {
         icon: '📣',
         label: 'Announcements',
-        onPress: () =>
-          Alert.alert(
-            'Announcements',
-            'Broadcast tools are on the way. You will be able to send announcements here soon.'
-          ),
+        onPress: () => router.push('/(admin)/announcements'),
       },
     ],
     []

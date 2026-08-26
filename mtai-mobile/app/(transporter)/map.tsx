@@ -108,7 +108,7 @@ export default function ActiveMapScreen() {
 
   const loadDeliveries = useCallback(async () => {
     try {
-      const response = await api.get('/deliveries/my');
+      const response = await api.get('/transporter/deliveries');
       const withCoords = normalizeList(response.data)
         .filter((d) => ACTIVE_STATUSES.has(d.status))
         .filter(hasCoordinates)

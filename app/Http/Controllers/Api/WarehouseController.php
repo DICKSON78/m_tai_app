@@ -171,6 +171,8 @@ class WarehouseController extends Controller
             'product_id' => 'required|exists:products,id',
             'from_warehouse_id' => 'nullable|exists:warehouses,id',
             'to_warehouse_id' => 'nullable|exists:warehouses,id',
+            'from_bin_location_id' => 'nullable|exists:bin_locations,id',
+            'to_bin_location_id' => 'nullable|exists:bin_locations,id',
             'quantity' => 'required|integer|min:1',
             'transfer_date' => 'required|date',
             'notes' => 'nullable|string',
@@ -192,37 +194,67 @@ class WarehouseController extends Controller
             $product = Product::findOrFail($transfer->product_id);
             $qty = (int) $transfer->quantity;
 
-            if ($transfer->from_warehouse_id && $product->quantity < $qty) {
+            $fromBin = $transfer->from_bin_location_id
+                ? BinLocation::whereKey($transfer->from_bin_location_id)->lockForUpdate()->first()
+                : null;
+            $toBin = $transfer->to_bin_location_id
+                ? BinLocation::whereKey($transfer->to_bin_location_id)->lockForUpdate()->first()
+                : null;
+
+            if (($transfer->from_warehouse_id || $fromBin)
+                && (!$fromBin || $fromBin->quantity < $qty)
+                && $product->quantity < $qty) {
                 abort(422, 'Stock haitoshi kwa transfer hii');
+            }
+            if ($fromBin && $fromBin->quantity < $qty) {
+                abort(422, "Stock haitoshi katika bin {$fromBin->code}");
+            }
+
+            if ($fromBin) {
+                $fromBin->decrement('quantity', $qty);
             }
 
             if ($transfer->from_warehouse_id) {
                 $product->decrement('quantity', $qty);
+            }
+
+            if ($fromBin || $transfer->from_warehouse_id) {
                 StockMovement::create([
                     'business_id' => $transfer->business_id,
                     'product_id' => $transfer->product_id,
                     'type' => 'transfer',
                     'quantity' => -$qty,
                     'unit_cost' => $product->buying_price,
-                    'balance_after' => $product->quantity,
+                    'balance_after' => $product->fresh()->quantity,
                     'reference_type' => WarehouseTransfer::class,
                     'reference_id' => $transfer->id,
-                    'notes' => "Transfer out to warehouse #{$transfer->to_warehouse_id}",
+                    'notes' => $fromBin
+                        ? "Transfer out from bin {$fromBin->code} to ".($toBin ? "bin {$toBin->code}" : "warehouse #{$transfer->to_warehouse_id}")
+                        : "Transfer out to warehouse #{$transfer->to_warehouse_id}",
                 ]);
+            }
+
+            if ($toBin) {
+                $toBin->increment('quantity', $qty);
             }
 
             if ($transfer->to_warehouse_id) {
                 $product->increment('quantity', $qty);
+            }
+
+            if ($toBin || $transfer->to_warehouse_id) {
                 StockMovement::create([
                     'business_id' => $transfer->business_id,
                     'product_id' => $transfer->product_id,
                     'type' => 'transfer',
                     'quantity' => $qty,
                     'unit_cost' => $product->buying_price,
-                    'balance_after' => $product->quantity,
+                    'balance_after' => $product->fresh()->quantity,
                     'reference_type' => WarehouseTransfer::class,
                     'reference_id' => $transfer->id,
-                    'notes' => "Transfer in from warehouse #{$transfer->from_warehouse_id}",
+                    'notes' => $toBin
+                        ? "Transfer in to bin {$toBin->code} from ".($fromBin ? "bin {$fromBin->code}" : "warehouse #{$transfer->from_warehouse_id}")
+                        : "Transfer in from warehouse #{$transfer->from_warehouse_id}",
                 ]);
             }
 

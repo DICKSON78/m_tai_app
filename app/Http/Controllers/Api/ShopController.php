@@ -64,6 +64,30 @@ class ShopController extends Controller
         return response()->json($products);
     }
 
+    public function products(Request $request)
+    {
+        $query = Product::where('is_published', true)
+            ->where('quantity', '>', 0)
+            ->whereHas('business', function ($q) {
+                $q->where('status', 'active')
+                  ->where('is_published', true);
+            })
+            ->with(['category', 'business:id,business_name']);
+
+        if ($request->has('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', "%{$request->search}%")
+                  ->orWhere('description', 'like', "%{$request->search}%");
+            });
+        }
+
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        return response()->json($query->orderBy('name')->paginate(20));
+    }
+
     public function productDetail(Request $request, Product $product)
     {
         if (!$product->is_published) {

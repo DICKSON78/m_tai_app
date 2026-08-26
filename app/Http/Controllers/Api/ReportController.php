@@ -46,7 +46,7 @@ class ReportController extends Controller
 
         $salesByPeriod = (clone $orders)
             ->select(
-                DB::raw("strftime('{$groupByFormat}', created_at) as period"),
+                DB::raw("DATE_FORMAT(created_at, '{$groupByFormat}') as period"),
                 DB::raw('COUNT(*) as total_orders'),
                 DB::raw('SUM(total) as total_revenue'),
                 DB::raw('SUM(subtotal) as total_subtotal'),
@@ -132,7 +132,7 @@ class ReportController extends Controller
 
         $revenueByPeriod = (clone $orders)
             ->select(
-                DB::raw("strftime('{$groupByFormat}', created_at) as period"),
+                DB::raw("DATE_FORMAT(created_at, '{$groupByFormat}') as period"),
                 DB::raw('SUM(total) as revenue')
             )
             ->groupBy('period')
@@ -147,7 +147,7 @@ class ReportController extends Controller
             })
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->select(
-                DB::raw("strftime('{$groupByFormat}', order_items.created_at) as period"),
+                DB::raw("DATE_FORMAT(order_items.created_at, '{$groupByFormat}') as period"),
                 DB::raw('SUM(order_items.quantity * products.buying_price) as cost_of_goods')
             )
             ->groupBy('period')
@@ -158,7 +158,7 @@ class ReportController extends Controller
             ->whereDate('date', '>=', $dateFrom)
             ->whereDate('date', '<=', $dateTo)
             ->select(
-                DB::raw("strftime('{$groupByFormat}', date) as period"),
+                DB::raw("DATE_FORMAT(date, '{$groupByFormat}') as period"),
                 DB::raw('SUM(amount) as expenses')
             )
             ->groupBy('period')
@@ -257,7 +257,7 @@ class ReportController extends Controller
 
         $byPeriod = (clone $query)
             ->select(
-                DB::raw("strftime('{$groupByFormat}', date) as period"),
+                DB::raw("DATE_FORMAT(date, '{$groupByFormat}') as period"),
                 DB::raw('SUM(amount) as total_amount'),
                 DB::raw('COUNT(*) as count')
             )
@@ -514,6 +514,86 @@ class ReportController extends Controller
             'by_status' => $byStatus,
             'by_goods_category' => $byGoodsCategory,
             'pending_deliveries' => $pendingDeliveries,
+        ]);
+    }
+
+    public function sales(Request $request)
+    {
+        $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
+
+        $validated = $request->validate([
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date',
+        ]);
+
+        $dateFrom = $validated['date_from'] ?? now()->startOfMonth()->toDateString();
+        $dateTo = $validated['date_to'] ?? now()->toDateString();
+
+        $orders = Order::where('business_id', $businessId)
+            ->where('status', 'completed')
+            ->whereDate('created_at', '>=', $dateFrom)
+            ->whereDate('created_at', '<=', $dateTo);
+
+        $totalRevenue = (float) (clone $orders)->sum('total');
+        $totalOrders = (clone $orders)->count();
+
+        return response()->json([
+            'summary' => [
+                'total_revenue' => round($totalRevenue, 2),
+                'total_orders' => $totalOrders,
+                'average_order_value' => $totalOrders > 0 ? round($totalRevenue / $totalOrders, 2) : 0,
+                'date_from' => $dateFrom,
+                'date_to' => $dateTo,
+            ],
+        ]);
+    }
+
+    public function profit(Request $request)
+    {
+        $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
+
+        $validated = $request->validate([
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date',
+        ]);
+
+        $dateFrom = $validated['date_from'] ?? now()->startOfMonth()->toDateString();
+        $dateTo = $validated['date_to'] ?? now()->toDateString();
+
+        $revenue = (float) Order::where('business_id', $businessId)
+            ->where('status', 'completed')
+            ->whereDate('created_at', '>=', $dateFrom)
+            ->whereDate('created_at', '<=', $dateTo)
+            ->sum('total');
+
+        $cogs = (float) OrderItem::whereHas('order', function ($q) use ($businessId, $dateFrom, $dateTo) {
+                $q->where('business_id', $businessId)
+                    ->where('status', 'completed')
+                    ->whereDate('created_at', '>=', $dateFrom)
+                    ->whereDate('created_at', '<=', $dateTo);
+            })
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->sum(DB::raw('order_items.quantity * products.buying_price'));
+
+        $expenses = (float) Expense::where('business_id', $businessId)
+            ->whereDate('date', '>=', $dateFrom)
+            ->whereDate('date', '<=', $dateTo)
+            ->sum('amount');
+
+        $grossProfit = $revenue - $cogs;
+        $netProfit = $grossProfit - $expenses;
+
+        return response()->json([
+            'summary' => [
+                'total_revenue' => round($revenue, 2),
+                'total_cost_of_goods' => round($cogs, 2),
+                'gross_profit' => round($grossProfit, 2),
+                'total_expenses' => round($expenses, 2),
+                'net_profit' => round($netProfit, 2),
+                'profit_margin' => $revenue > 0 ? round(($netProfit / $revenue) * 100, 2) : 0,
+                'date_from' => $dateFrom,
+                'date_to' => $dateTo,
+            ],
         ]);
     }
 

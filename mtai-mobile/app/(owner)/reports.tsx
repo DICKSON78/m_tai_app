@@ -201,8 +201,8 @@ export default function OwnerReportsScreen() {
     setProfitError(null);
     const config = { params: buildParams() };
     const [salesRes, profitRes] = await Promise.allSettled([
-      api.get('/reports/sales', config),
-      api.get('/reports/profit', config),
+      api.get('/owner/reports/sales', config),
+      api.get('/owner/reports/profit', config),
     ]);
     if (salesRes.status === 'fulfilled') {
       const body = normalizeObject(salesRes.value.data);

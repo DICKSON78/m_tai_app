@@ -154,8 +154,8 @@ export default function EmployeeProfileScreen() {
     setStatsLoading(true);
 
     const results = await Promise.allSettled([
-      api.get('/hr/attendance'),
-      api.get('/orders/my', { params: { page: 1, per_page: 100 } }),
+      api.get('/owner/hr/attendance'),
+      api.get('/customer/orders', { params: { page: 1, per_page: 100 } }),
     ]);
 
     const nextStats: EmployeeStats = { attendanceRate: null, salesThisMonth: null };

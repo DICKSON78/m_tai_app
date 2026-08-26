@@ -66,6 +66,13 @@ export default function OwnerLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="inventory"
+        options={{
+          title: 'Inventory',
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

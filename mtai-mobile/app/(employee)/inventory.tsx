@@ -127,16 +127,7 @@ export default function InventoryScreen() {
     const requestId = requestSeqRef.current;
 
     try {
-      let res;
-      try {
-        res = await api.get('/stock');
-      } catch (err: any) {
-        if ([404, 405, 501].includes(err?.response?.status)) {
-          res = await api.get('/inventory');
-        } else {
-          throw err;
-        }
-      }
+      const res = await api.get('/employee/inventory');
 
       if (requestId !== requestSeqRef.current) return;
       setItems(normalizeStockList(res.data));

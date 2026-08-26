@@ -72,7 +72,7 @@ export default function CheckoutScreen() {
 
     setPlacingOrder(true);
     try {
-      const res = await api.post('/orders', {
+      const res = await api.post('/orders/checkout', {
         items: items.map((i) => ({ product_id: i.product.id, quantity: i.quantity })),
         delivery_address: deliveryAddress.trim(),
         payment_method: paymentMethod,

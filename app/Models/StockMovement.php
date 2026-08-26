@@ -18,6 +18,7 @@ class StockMovement extends Model
     const TYPES = [
         'in', 'out', 'adjustment', 'sale', 'sale_return',
         'purchase_receipt', 'purchase_return', 'damage', 'transfer',
+        'manufacturing_output',
     ];
 
     public function business()
