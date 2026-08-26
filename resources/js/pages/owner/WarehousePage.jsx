@@ -20,9 +20,20 @@ export default function WarehousePage() {
     const [filter, setFilter] = useState('');
     const [expandedWh, setExpandedWh] = useState(null);
     const [whDetail, setWhDetail] = useState(null);
+    const [selectedBusiness, setSelectedBusiness] = useState('');
+
+    useEffect(() => {
+        api.get('/owner/businesses').then(res => {
+            const biz = res.data?.data || res.data || [];
+            if (biz.length === 1) setSelectedBusiness(biz[0].id);
+        }).catch(() => {});
+    }, []);
 
     const fetchSummary = useCallback(async () => { try { const r = await api.get('/owner/warehouses/summary'); setSummary(r.data); } catch {} }, []);
-    const fetchProducts = useCallback(async () => { try { const r = await api.get('/owner/businesses/1/products', { params: { per_page: 200 } }); setProducts(r.data.data || r.data || []); } catch { setProducts([]); } }, []);
+    const fetchProducts = useCallback(async () => {
+        if (!selectedBusiness) return;
+        try { const r = await api.get(`/owner/businesses/${selectedBusiness}/products`, { params: { per_page: 200 } }); setProducts(r.data.data || r.data || []); } catch { setProducts([]); }
+    }, [selectedBusiness]);
 
     const fetchWarehouses = useCallback(async () => {
         setLoading(true);
@@ -34,7 +45,7 @@ export default function WarehousePage() {
         try { const p = {}; if (filter) p.status = filter; const r = await api.get('/owner/warehouses/transfers/list', { params: p }); setTransfers(r.data.data || []); } catch { setTransfers([]); } finally { setLoading(false); }
     }, [filter]);
 
-    useEffect(() => { fetchSummary(); fetchProducts(); }, [fetchSummary, fetchProducts]);
+    useEffect(() => { fetchSummary(); fetchProducts(); }, [fetchSummary, fetchProducts, selectedBusiness]);
     useEffect(() => { setFilter(''); }, [tab]);
     useEffect(() => { if (tab === 'warehouses') fetchWarehouses(); else fetchTransfers(); }, [tab, fetchWarehouses, fetchTransfers]);
 

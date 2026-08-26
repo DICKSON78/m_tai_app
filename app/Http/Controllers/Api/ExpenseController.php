@@ -141,17 +141,17 @@ class ExpenseController extends Controller
             ->whereDate('date', '>=', $dateFrom)
             ->whereDate('date', '<=', $dateTo);
 
-        $groupByFormat = match ($period) {
-            'daily' => '%Y-%m-%d',
-            'weekly' => '%Y-W%u',
-            'monthly' => '%Y-%m',
-            'yearly' => '%Y',
-            default => '%Y-%m',
+        $periodColumn = match ($period) {
+            'daily' => DB::raw("DATE_FORMAT(date, '%Y-%m-%d') as period"),
+            'weekly' => DB::raw("DATE_FORMAT(date, '%Y-W%u') as period"),
+            'monthly' => DB::raw("DATE_FORMAT(date, '%Y-%m') as period"),
+            'yearly' => DB::raw("DATE_FORMAT(date, '%Y') as period"),
+            default => DB::raw("DATE_FORMAT(date, '%Y-%m') as period"),
         };
 
         $byPeriod = (clone $expenses)
             ->select(
-                DB::raw("DATE_FORMAT(date, '{$groupByFormat}') as period"),
+                $periodColumn,
                 DB::raw('SUM(amount) as total_amount'),
                 DB::raw('COUNT(*) as count')
             )

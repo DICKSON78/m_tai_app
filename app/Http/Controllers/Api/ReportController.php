@@ -31,12 +31,12 @@ class ReportController extends Controller
         $dateFrom = $validated['date_from'] ?? now()->startOfMonth()->toDateString();
         $dateTo = $validated['date_to'] ?? now()->toDateString();
 
-        $groupByFormat = match ($period) {
-            'daily' => '%Y-%m-%d',
-            'weekly' => '%Y-W%u',
-            'monthly' => '%Y-%m',
-            'yearly' => '%Y',
-            default => '%Y-%m-%d',
+        $periodColumn = match ($period) {
+            'daily' => DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
+            'weekly' => DB::raw("DATE_FORMAT(created_at, '%Y-W%u') as period"),
+            'monthly' => DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period"),
+            'yearly' => DB::raw("DATE_FORMAT(created_at, '%Y') as period"),
+            default => DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
         };
 
         $orders = $business->orders()
@@ -46,7 +46,7 @@ class ReportController extends Controller
 
         $salesByPeriod = (clone $orders)
             ->select(
-                DB::raw("DATE_FORMAT(created_at, '{$groupByFormat}') as period"),
+                $periodColumn,
                 DB::raw('COUNT(*) as total_orders'),
                 DB::raw('SUM(total) as total_revenue'),
                 DB::raw('SUM(subtotal) as total_subtotal'),
@@ -117,12 +117,12 @@ class ReportController extends Controller
         $dateFrom = $validated['date_from'] ?? now()->startOfMonth()->toDateString();
         $dateTo = $validated['date_to'] ?? now()->toDateString();
 
-        $groupByFormat = match ($period) {
-            'daily' => '%Y-%m-%d',
-            'weekly' => '%Y-W%u',
-            'monthly' => '%Y-%m',
-            'yearly' => '%Y',
-            default => '%Y-%m-%d',
+        $periodColumn = match ($period) {
+            'daily' => DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
+            'weekly' => DB::raw("DATE_FORMAT(created_at, '%Y-W%u') as period"),
+            'monthly' => DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period"),
+            'yearly' => DB::raw("DATE_FORMAT(created_at, '%Y') as period"),
+            default => DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
         };
 
         $orders = $business->orders()
@@ -132,7 +132,7 @@ class ReportController extends Controller
 
         $revenueByPeriod = (clone $orders)
             ->select(
-                DB::raw("DATE_FORMAT(created_at, '{$groupByFormat}') as period"),
+                $periodColumn,
                 DB::raw('SUM(total) as revenue')
             )
             ->groupBy('period')
@@ -147,7 +147,13 @@ class ReportController extends Controller
             })
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->select(
-                DB::raw("DATE_FORMAT(order_items.created_at, '{$groupByFormat}') as period"),
+                match ($period) {
+                    'daily' => DB::raw("DATE_FORMAT(order_items.created_at, '%Y-%m-%d') as period"),
+                    'weekly' => DB::raw("DATE_FORMAT(order_items.created_at, '%Y-W%u') as period"),
+                    'monthly' => DB::raw("DATE_FORMAT(order_items.created_at, '%Y-%m') as period"),
+                    'yearly' => DB::raw("DATE_FORMAT(order_items.created_at, '%Y') as period"),
+                    default => DB::raw("DATE_FORMAT(order_items.created_at, '%Y-%m-%d') as period"),
+                },
                 DB::raw('SUM(order_items.quantity * products.buying_price) as cost_of_goods')
             )
             ->groupBy('period')
@@ -158,7 +164,13 @@ class ReportController extends Controller
             ->whereDate('date', '>=', $dateFrom)
             ->whereDate('date', '<=', $dateTo)
             ->select(
-                DB::raw("DATE_FORMAT(date, '{$groupByFormat}') as period"),
+                match ($period) {
+                    'daily' => DB::raw("DATE_FORMAT(date, '%Y-%m-%d') as period"),
+                    'weekly' => DB::raw("DATE_FORMAT(date, '%Y-W%u') as period"),
+                    'monthly' => DB::raw("DATE_FORMAT(date, '%Y-%m') as period"),
+                    'yearly' => DB::raw("DATE_FORMAT(date, '%Y') as period"),
+                    default => DB::raw("DATE_FORMAT(date, '%Y-%m-%d') as period"),
+                },
                 DB::raw('SUM(amount) as expenses')
             )
             ->groupBy('period')
@@ -239,12 +251,12 @@ class ReportController extends Controller
         $dateFrom = $validated['date_from'] ?? now()->startOfMonth()->toDateString();
         $dateTo = $validated['date_to'] ?? now()->toDateString();
 
-        $groupByFormat = match ($period) {
-            'daily' => '%Y-%m-%d',
-            'weekly' => '%Y-W%u',
-            'monthly' => '%Y-%m',
-            'yearly' => '%Y',
-            default => '%Y-%m',
+        $periodColumn = match ($period) {
+            'daily' => DB::raw("DATE_FORMAT(date, '%Y-%m-%d') as period"),
+            'weekly' => DB::raw("DATE_FORMAT(date, '%Y-W%u') as period"),
+            'monthly' => DB::raw("DATE_FORMAT(date, '%Y-%m') as period"),
+            'yearly' => DB::raw("DATE_FORMAT(date, '%Y') as period"),
+            default => DB::raw("DATE_FORMAT(date, '%Y-%m') as period"),
         };
 
         $query = $business->expenses()
@@ -257,7 +269,7 @@ class ReportController extends Controller
 
         $byPeriod = (clone $query)
             ->select(
-                DB::raw("DATE_FORMAT(date, '{$groupByFormat}') as period"),
+                $periodColumn,
                 DB::raw('SUM(amount) as total_amount'),
                 DB::raw('COUNT(*) as count')
             )

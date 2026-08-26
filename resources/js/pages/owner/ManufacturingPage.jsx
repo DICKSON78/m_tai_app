@@ -18,9 +18,20 @@ export default function ManufacturingPage() {
     const [items, setItems] = useState([]);
     const [saving, setSaving] = useState(false);
     const [filter, setFilter] = useState('');
+    const [selectedBusiness, setSelectedBusiness] = useState('');
+
+    useEffect(() => {
+        api.get('/owner/businesses').then(res => {
+            const biz = res.data?.data || res.data || [];
+            if (biz.length === 1) setSelectedBusiness(biz[0].id);
+        }).catch(() => {});
+    }, []);
 
     const fetchSummary = useCallback(async () => { try { const r = await api.get('/owner/manufacturing/summary'); setSummary(r.data); } catch {} }, []);
-    const fetchProducts = useCallback(async () => { try { const r = await api.get('/owner/businesses/1/products', { params: { per_page: 200 } }); setProducts(r.data.data || r.data || []); } catch { setProducts([]); } }, []);
+    const fetchProducts = useCallback(async () => {
+        if (!selectedBusiness) return;
+        try { const r = await api.get(`/owner/businesses/${selectedBusiness}/products`, { params: { per_page: 200 } }); setProducts(r.data.data || r.data || []); } catch { setProducts([]); }
+    }, [selectedBusiness]);
 
     const fetchBoms = useCallback(async () => {
         setLoading(true);
@@ -32,7 +43,7 @@ export default function ManufacturingPage() {
         try { const p = {}; if (filter) p.status = filter; const r = await api.get('/owner/manufacturing/work-orders', { params: p }); setWorkOrders(r.data.data || []); } catch { setWorkOrders([]); } finally { setLoading(false); }
     }, [filter]);
 
-    useEffect(() => { fetchSummary(); fetchProducts(); }, [fetchSummary, fetchProducts]);
+    useEffect(() => { fetchSummary(); fetchProducts(); }, [fetchSummary, fetchProducts, selectedBusiness]);
     useEffect(() => { setFilter(''); }, [tab]);
     useEffect(() => { if (tab === 'boms') fetchBoms(); else fetchWorkOrders(); }, [tab, fetchBoms, fetchWorkOrders]);
 

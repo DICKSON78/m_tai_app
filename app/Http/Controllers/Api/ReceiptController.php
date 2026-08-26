@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Response;
 
 class ReceiptController extends Controller
 {
+    private static function e($value)
+    {
+        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+    }
+
     public function generate(Request $request, Order $order)
     {
         $user = $request->user();
@@ -69,20 +74,40 @@ class ReceiptController extends Controller
 
     protected function buildReceiptHtml($receipt)
     {
+        $e = [self::class, 'e'];
+
         $items = '';
         foreach ($receipt['items'] as $item) {
+            $name = $e($item['name']);
+            $qty = $e($item['quantity']);
+            $price = $e($item['price']);
+            $total = $e($item['total']);
             $items .= "<tr>
-                <td>{$item['name']}</td>
-                <td style='text-align:right'>{$item['quantity']}</td>
-                <td style='text-align:right'>{$item['price']}</td>
-                <td style='text-align:right'>{$item['total']}</td>
+                <td>{$name}</td>
+                <td style='text-align:right'>{$qty}</td>
+                <td style='text-align:right'>{$price}</td>
+                <td style='text-align:right'>{$total}</td>
             </tr>";
         }
 
         $discountLine = '';
         if (isset($receipt['discount']) && (float)$receipt['discount'] > 0) {
-            $discountLine = "<tr><td>Discount</td><td style='text-align:right'>-TZS {$receipt['discount']}</td></tr>";
+            $disc = $e($receipt['discount']);
+            $discountLine = "<tr><td>Discount</td><td style='text-align:right'>-TZS {$disc}</td></tr>";
         }
+
+        $businessName = $e($receipt['business']['name']);
+        $businessCode = $e($receipt['business']['code']);
+        $businessPhone = $e($receipt['business']['phone']);
+        $txnCode = $e($receipt['order']['transaction_code']);
+        $txnDate = $e($receipt['order']['date']);
+        $payMethod = $e($receipt['order']['payment_method']);
+        $subtotal = $e($receipt['subtotal']);
+        $tax = $e($receipt['tax']);
+        $total = $e($receipt['total']);
+        $amountPaid = $e($receipt['amount_paid']);
+        $change = $e($receipt['change']);
+        $footer = $e($receipt['footer']);
 
         return <<<HTML
 <!DOCTYPE html>
@@ -99,13 +124,13 @@ class ReceiptController extends Controller
     </style>
 </head>
 <body>
-    <div class="center bold">{$receipt['business']['name']}</div>
-    <div class="center">{$receipt['business']['code']}</div>
-    <div class="center">{$receipt['business']['phone']}</div>
+    <div class="center bold">{$businessName}</div>
+    <div class="center">{$businessCode}</div>
+    <div class="center">{$businessPhone}</div>
     <div class="border-top"></div>
-    <div><strong>Transaction:</strong> {$receipt['order']['transaction_code']}</div>
-    <div><strong>Date:</strong> {$receipt['order']['date']}</div>
-    <div><strong>Payment:</strong> {$receipt['order']['payment_method']}</div>
+    <div><strong>Transaction:</strong> {$txnCode}</div>
+    <div><strong>Date:</strong> {$txnDate}</div>
+    <div><strong>Payment:</strong> {$payMethod}</div>
     <div class="border-top"></div>
     <table>
         <thead>
@@ -115,15 +140,15 @@ class ReceiptController extends Controller
     </table>
     <div class="border-top"></div>
     <table>
-        <tr><td>Subtotal</td><td style='text-align:right'>TZS {$receipt['subtotal']}</td></tr>
+        <tr><td>Subtotal</td><td style='text-align:right'>TZS {$subtotal}</td></tr>
         {$discountLine}
-        <tr><td>Tax</td><td style='text-align:right'>TZS {$receipt['tax']}</td></tr>
-        <tr class="total-row"><td>TOTAL</td><td style='text-align:right'>TZS {$receipt['total']}</td></tr>
-        <tr><td>Paid</td><td style='text-align:right'>TZS {$receipt['amount_paid']}</td></tr>
-        <tr><td>Change</td><td style='text-align:right'>TZS {$receipt['change']}</td></tr>
+        <tr><td>Tax</td><td style='text-align:right'>TZS {$tax}</td></tr>
+        <tr class="total-row"><td>TOTAL</td><td style='text-align:right'>TZS {$total}</td></tr>
+        <tr><td>Paid</td><td style='text-align:right'>TZS {$amountPaid}</td></tr>
+        <tr><td>Change</td><td style='text-align:right'>TZS {$change}</td></tr>
     </table>
     <div class="border-top"></div>
-    <div class="center">{$receipt['footer']}</div>
+    <div class="center">{$footer}</div>
 </body>
 </html>
 HTML;

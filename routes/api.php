@@ -76,7 +76,7 @@ Route::post('/register/customer', [AuthApiController::class, 'registerCustomer']
 Route::post('/register/seller', [AuthApiController::class, 'registerSeller'])->middleware('throttle:register');
 Route::post('/login', [AuthApiController::class, 'login'])->middleware('throttle:login');
 Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword'])->middleware('throttle:login');
-Route::post('/reset-password', [AuthApiController::class, 'resetPassword']);
+Route::post('/reset-password', [AuthApiController::class, 'resetPassword'])->middleware('throttle:login');
 
 // Protected API routes
 Route::middleware('auth:sanctum')->group(function () {
