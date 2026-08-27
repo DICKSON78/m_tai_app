@@ -12,9 +12,6 @@ use Illuminate\Http\Request;
 class RestoreController extends Controller
 {
     protected $models = [
-        'orders' => Order::class,
-        'customers' => Customer::class,
-        'expenses' => Expense::class,
         'deliveries' => Delivery::class,
     ];
 
