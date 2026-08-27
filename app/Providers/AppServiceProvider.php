@@ -4,9 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -33,13 +32,16 @@ class AppServiceProvider extends ServiceProvider
         });
 
         if (env('RUN_MIGRATIONS') === 'true') {
-            $marker = storage_path('app/migrations_ran');
-            if (!file_exists($marker)) {
+            $tables = ['orders', 'customers', 'expenses'];
+            foreach ($tables as $table) {
                 try {
-                    Artisan::call('migrate', ['--force' => true]);
-                    file_put_contents($marker, date('Y-m-d H:i:s'));
+                    $columns = DB::select("SHOW COLUMNS FROM `$table` LIKE 'deleted_at'");
+                    if (empty($columns)) {
+                        DB::statement("ALTER TABLE `$table` ADD COLUMN `deleted_at` timestamp NULL DEFAULT NULL");
+                        DB::statement("ALTER TABLE `$table` ADD INDEX `{$table}_deleted_at_index` (`deleted_at`)");
+                    }
                 } catch (\Throwable $e) {
-                    file_put_contents($marker, 'error: ' . $e->getMessage());
+                    // Table might not exist yet, skip
                 }
             }
         }
