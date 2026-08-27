@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
@@ -7,7 +8,7 @@ export default function PageHeader({ title, subtitle, backTo, actions, icon, ico
             <div className="flex items-center gap-3">
                 {icon && (
                     <div className={`h-10 w-10 ${iconColor} rounded-xl flex items-center justify-center text-white shrink-0`}>
-                        {icon}
+                        {typeof icon === 'function' || (icon && icon.$$typeof) ? React.createElement(icon, { size: 20 }) : icon}
                     </div>
                 )}
                 <div>
