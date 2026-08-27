@@ -7,12 +7,9 @@
     "icon": "./assets/icon.png",
     "scheme": "mtai",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#00D4AA"
-    },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.mtai.app"
@@ -23,7 +20,9 @@
         "backgroundColor": "#00D4AA"
       },
       "package": "com.mtai.app",
-      "permissions": ["POST_NOTIFICATIONS"]
+      "permissions": [
+        "POST_NOTIFICATIONS"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -38,10 +37,22 @@
         {
           "color": "#00D4AA"
         }
-      ]
+      ],
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#00D4AA"
+        }
+      ],
+      "expo-status-bar"
     ],
     "extra": {
-      "eas": { "projectId": "mtai-app" },
+      "eas": {
+        "projectId": "mtai-app"
+      },
       "apiUrl": "https://mtai-app-903291264005.africa-south1.run.app"
     }
   }

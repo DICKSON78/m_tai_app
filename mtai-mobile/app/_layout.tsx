@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import { useAuthStore } from '../src/store/authStore';
 import LoadingScreen from '../src/components/LoadingScreen';
+import ErrorBoundary from '../src/components/ErrorBoundary';
 import {
   configureNotificationHandler,
   handleNotificationResponse,
@@ -32,14 +33,16 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(customer)" />
-      <Stack.Screen name="(transporter)" />
-      <Stack.Screen name="(employee)" />
-      <Stack.Screen name="(owner)" />
-      <Stack.Screen name="(admin)" />
-    </Stack>
+    <ErrorBoundary>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(customer)" />
+        <Stack.Screen name="(transporter)" />
+        <Stack.Screen name="(employee)" />
+        <Stack.Screen name="(owner)" />
+        <Stack.Screen name="(admin)" />
+      </Stack>
+    </ErrorBoundary>
   );
 }
