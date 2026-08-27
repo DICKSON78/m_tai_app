@@ -16,7 +16,7 @@ export default function OwnerDashboard() {
     const loadDashboard = async () => {
         try {
             const res = await api.get('/owner/dashboard');
-            setStats(res.data.data);
+            setStats(res.data);
         } catch (e) {
             console.error(e);
         } finally {
@@ -54,7 +54,7 @@ export default function OwnerDashboard() {
                 <div className="stat-card flex items-center justify-between">
                     <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-500 truncate">Products</p>
-                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">{stats?.total_products || 0}</p>
+                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">{stats?.totalProducts || 0}</p>
                     </div>
                     <div className="stat-icon bg-[#00D4AA]/10 text-[#00D4AA] shrink-0">
                         <Package size={24} />
@@ -63,8 +63,8 @@ export default function OwnerDashboard() {
 
                 <div className="stat-card flex items-center justify-between">
                     <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-500 truncate">Today's Sales</p>
-                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {((stats?.today_sales || 0) / 1000).toFixed(0)}K</p>
+                        <p className="text-sm font-medium text-gray-500 truncate">Total Sales</p>
+                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {((stats?.todaySales || 0) / 1000).toFixed(0)}K</p>
                     </div>
                     <div className="stat-icon bg-emerald-500/10 text-emerald-600 shrink-0">
                         <DollarSign size={24} />
@@ -73,8 +73,8 @@ export default function OwnerDashboard() {
 
                 <div className="stat-card flex items-center justify-between">
                     <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-500 truncate">Today's Orders</p>
-                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">{stats?.today_orders || 0}</p>
+                        <p className="text-sm font-medium text-gray-500 truncate">Total Orders</p>
+                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">{stats?.totalOrders || 0}</p>
                     </div>
                     <div className="stat-icon bg-blue-500/10 text-blue-600 shrink-0">
                         <ShoppingCart size={24} />
@@ -83,8 +83,8 @@ export default function OwnerDashboard() {
 
                 <div className="stat-card flex items-center justify-between">
                     <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-500 truncate">Today's Expenses</p>
-                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {((stats?.today_expenses || 0) / 1000).toFixed(0)}K</p>
+                        <p className="text-sm font-medium text-gray-500 truncate">Total Expenses</p>
+                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {((stats?.totalExpenses || 0) / 1000).toFixed(0)}K</p>
                     </div>
                     <div className="stat-icon bg-red-500/10 text-red-600 shrink-0">
                         <Receipt size={24} />
@@ -96,7 +96,7 @@ export default function OwnerDashboard() {
                 <div className="stat-card flex items-center justify-between">
                     <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-500 truncate">Employees</p>
-                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">{stats?.total_employees || 0}</p>
+                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">{stats?.totalEmployees || 0}</p>
                     </div>
                     <div className="stat-icon bg-purple-500/10 text-purple-600 shrink-0">
                         <Users size={24} />
@@ -106,7 +106,7 @@ export default function OwnerDashboard() {
                 <div className="stat-card flex items-center justify-between">
                     <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-500 truncate">Low Stock</p>
-                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">{stats?.low_stock_count || 0}</p>
+                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">{stats?.lowStockProducts || 0}</p>
                     </div>
                     <div className="stat-icon bg-yellow-500/10 text-yellow-600 shrink-0">
                         <AlertTriangle size={24} />
@@ -116,7 +116,7 @@ export default function OwnerDashboard() {
                 <div className="stat-card flex items-center justify-between">
                     <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-500 truncate">Active Loans</p>
-                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {((stats?.total_pending_loans || 0) / 1000).toFixed(0)}K</p>
+                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {((stats?.activeLoans || 0) / 1000).toFixed(0)}K</p>
                     </div>
                     <div className="stat-icon bg-orange-500/10 text-orange-600 shrink-0">
                         <Banknote size={24} />
@@ -126,7 +126,7 @@ export default function OwnerDashboard() {
                 <div className="stat-card flex items-center justify-between">
                     <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-500 truncate">Customer Debts</p>
-                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {((stats?.total_customer_debts || 0) / 1000).toFixed(0)}K</p>
+                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {((stats?.pendingCreditSales || 0) / 1000).toFixed(0)}K</p>
                     </div>
                     <div className="stat-icon bg-red-500/10 text-red-600 shrink-0">
                         <CreditCard size={24} />

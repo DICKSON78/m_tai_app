@@ -73,19 +73,15 @@ class DashboardApiController extends Controller
         $business = $request->user()->businesses()->first();
 
         return response()->json([
-            'data' => [
-                'business' => $business,
-                'total_products' => $business ? $business->products()->count() : 0,
-                'total_orders' => $business ? $business->orders()->count() : 0,
-                'today_orders' => $business ? $business->orders()->whereDate('created_at', today())->count() : 0,
-                'today_sales' => $business ? (float) $business->orders()->whereDate('created_at', today())->sum('total') : 0,
-                'total_expenses' => $business ? (float) $business->expenses()->sum('amount') : 0,
-                'today_expenses' => $business ? (float) $business->expenses()->whereDate('created_at', today())->sum('amount') : 0,
-                'total_employees' => $business ? $business->employees()->count() : 0,
-                'low_stock_count' => $business ? $business->products()->where('quantity', '<=', 5)->count() : 0,
-                'total_pending_loans' => $business ? $business->loans()->where('status', 'active')->sum('amount') : 0,
-                'total_customer_debts' => $business ? (float) $business->creditSales()->where('status', 'pending')->sum('amount') : 0,
-            ],
+            'business' => $business,
+            'totalProducts' => $business ? $business->products()->count() : 0,
+            'totalOrders' => $business ? $business->orders()->count() : 0,
+            'todaySales' => $business ? (float) $business->orders()->whereDate('created_at', today())->sum('total') : 0,
+            'totalExpenses' => $business ? (float) $business->expenses()->sum('amount') : 0,
+            'totalEmployees' => $business ? $business->employees()->count() : 0,
+            'lowStockProducts' => $business ? $business->products()->where('quantity', '<=', 5)->count() : 0,
+            'activeLoans' => $business ? $business->loans()->where('status', 'active')->count() : 0,
+            'pendingCreditSales' => $business ? (float) $business->creditSales()->where('status', 'pending')->sum('amount') : 0,
         ]);
     }
 
