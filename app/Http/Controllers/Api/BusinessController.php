@@ -12,9 +12,13 @@ class BusinessController extends Controller
 {
     public function index(Request $request)
     {
-        $businesses = $request->user()->businesses()
-            ->withCount(['products', 'orders', 'employees'])
-            ->get();
+        $businesses = $request->user()->businesses()->get();
+
+        foreach ($businesses as $business) {
+            $business->products_count = \App\Models\Product::where('business_id', $business->id)->count();
+            $business->orders_count = \DB::table('orders')->where('business_id', $business->id)->count();
+            $business->employees_count = \App\Models\Employee::where('business_id', $business->id)->count();
+        }
 
         return response()->json($businesses);
     }

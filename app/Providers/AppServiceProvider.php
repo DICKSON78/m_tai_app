@@ -33,14 +33,13 @@ class AppServiceProvider extends ServiceProvider
         });
 
         if (env('RUN_MIGRATIONS') === 'true') {
-            $lock = Cache::lock('run_migrations_lock', 30);
-            if ($lock->get()) {
+            $marker = storage_path('app/migrations_ran');
+            if (!file_exists($marker)) {
                 try {
                     Artisan::call('migrate', ['--force' => true]);
+                    file_put_contents($marker, date('Y-m-d H:i:s'));
                 } catch (\Throwable $e) {
-                    // Migration already ran or error
-                } finally {
-                    $lock->release();
+                    file_put_contents($marker, 'error: ' . $e->getMessage());
                 }
             }
         }
