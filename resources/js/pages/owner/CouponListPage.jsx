@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import { Ticket, Plus, Pencil, Trash2, Tag, DollarSign, Calendar, Hash, Filter, RotateCcw, Search, CheckCircle } from 'lucide-react';
 
 const TABS = [
