@@ -31,6 +31,7 @@ export default function GeneralLedgerPage() {
       setSummary(sumRes.data);
       setAccounts(accRes.data.data || []);
     } catch (error) { console.error('Failed to fetch ledger summary:', error); }
+  }, []);
 
   const fetchTransactions = useCallback(async () => {
     setTxLoading(true);

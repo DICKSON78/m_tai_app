@@ -54,7 +54,9 @@ export default function PurchaseOrdersPage() {
       setSuppliers(supRes.data.data || []);
       setProducts(prodRes.data.data || []);
     } catch (error) { console.error('Failed to fetch dropdown data:', error); }
-  }, []); = useCallback(async () => {
+  }, []);
+
+  const fetchSummary = useCallback(async () => {
     try { const res = await api.get('/owner/purchases/orders/summary'); setSummary(res.data); } catch (error) { console.error('Failed to fetch PO summary:', error); }
   }, []);
 

@@ -84,7 +84,9 @@ export default function PurchaseReturnsPage() {
       setSuppliers(supRes.data.data || []);
       setProducts(prodRes.data.data || []);
     } catch (error) { console.error('Failed to fetch dropdown data:', error); }
-  }, []); = useCallback(async () => {
+  }, []);
+
+  const fetchSummary = useCallback(async () => {
     try {
       const res = await api.get('/owner/purchases/returns/summary');
       setSummary(res.data || {});

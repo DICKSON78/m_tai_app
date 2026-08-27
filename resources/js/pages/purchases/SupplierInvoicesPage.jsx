@@ -102,7 +102,9 @@ export default function SupplierInvoicesPage() {
       setPurchaseOrders(poRes.data.data || []);
       setProducts(prodRes.data.data || []);
     } catch (error) { console.error('Failed to fetch dropdown data:', error); }
-  }, []); = useCallback(async () => {
+  }, []);
+
+  const fetchAgingAndSummary = useCallback(async () => {
     try { const res = await api.get('/owner/purchases/invoices', { params: { per_page: 1, summary: 1 } }); setSummary(res.data.summary || {}); } catch (error) { console.error('Failed to fetch invoice summary:', error); }
     try {
       const res = await api.get('/owner/purchases/invoices/aging');

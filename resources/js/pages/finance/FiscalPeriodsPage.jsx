@@ -58,6 +58,7 @@ export default function FiscalPeriodsPage() {
             const res = await api.get(`/owner/finance/fiscal-periods/${id}`);
             setDetailPeriod(res.data);
         } catch (error) { console.error('Failed to fetch fiscal period detail:', error); }
+    };
 
     const openEdit = (p) => {
         setEditing(p);
