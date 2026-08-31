@@ -98,6 +98,7 @@ const navConfig = {
             { to: '/owner/expenses', label: 'Expenses', icon: 'currency-dollar' },
             { to: '/owner/credit-sales', label: 'Credit Sales', icon: 'credit-card' },
             { to: '/owner/imports', label: 'Imports', icon: 'package' },
+            { to: '/owner/projects', label: 'Business Projects', icon: 'trending-up' },
             { to: '/owner/investments', label: 'Savings & Investment', icon: 'banknotes' },
         ]},
         { label: 'Services', items: [

@@ -366,6 +366,150 @@ class DeliveryController extends Controller
         ]);
     }
 
+    public function rejectDelivery(Request $request, Delivery $delivery)
+    {
+        $transporter = $request->user()->transporter;
+
+        if (!$transporter) {
+            return response()->json(['message' => 'Msafirishaji hajapatikana.'], 404);
+        }
+
+        if (in_array($delivery->status, ['delivered', 'cancelled'])) {
+            return response()->json(['message' => 'Usafirishaji huu hauwezi kukataliwa.'], 422);
+        }
+
+        $validated = $request->validate([
+            'reason' => 'nullable|string|max:1000',
+        ]);
+
+        $delivery->update([
+            'rejected' => true,
+            'rejected_reason' => $validated['reason'] ?? null,
+            'rejected_by' => $transporter->id,
+        ]);
+
+        if ($delivery->business && $delivery->business->user) {
+            PushNotificationController::sendNotification(
+                $delivery->business->user,
+                'Delivery rejected',
+                'Msafirishaji amekataa ofa ya usafirishaji. Tafadhali tafuta msafirishaji mwingine.',
+                [
+                    'type' => 'delivery_status',
+                    'delivery_id' => $delivery->id,
+                    'status' => 'rejected',
+                ]
+            );
+        }
+
+        return response()->json([
+            'message' => 'Umekataa usafirishaji.',
+            'delivery' => $delivery->fresh()->load([
+                'order:id,transaction_code,total',
+                'business:id,business_name',
+                'customer:id,full_name,phone',
+            ]),
+        ]);
+    }
+
+    public function negotiateDelivery(Request $request, Delivery $delivery)
+    {
+        $transporter = $request->user()->transporter;
+
+        if (!$transporter) {
+            return response()->json(['message' => 'Msafirishaji hajapatikana.'], 404);
+        }
+
+        if ($delivery->status !== 'pending' || !is_null($delivery->transporter_id)) {
+            return response()->json(['message' => 'Usafirishaji huu hauko katika hatua ya mazungumzo.'], 422);
+        }
+
+        if (! $delivery->is_negotiable) {
+            return response()->json(['message' => 'Ofa hii haikubali mazungumzo ya bei.'], 422);
+        }
+
+        $validated = $request->validate([
+            'counter_price' => 'required|numeric|min:0',
+        ]);
+
+        $delivery->update([
+            'counter_price' => $validated['counter_price'],
+            'counter_status' => 'requested',
+        ]);
+
+        if ($delivery->business && $delivery->business->user) {
+            PushNotificationController::sendNotification(
+                $delivery->business->user,
+                'Price negotiation',
+                "Msafirishaji amependekeza bei mpya ya " . number_format($validated['counter_price'], 2) . " TZS.",
+                [
+                    'type' => 'delivery_negotiation',
+                    'delivery_id' => $delivery->id,
+                    'counter_price' => $validated['counter_price'],
+                ]
+            );
+        }
+
+        return response()->json([
+            'message' => 'Umependekeza bei yako ya mazungumzo.',
+            'delivery' => $delivery->fresh()->load([
+                'order:id,transaction_code,total',
+                'business:id,business_name',
+                'customer:id,full_name,phone',
+            ]),
+        ]);
+    }
+
+    public function respondToNegotiation(Request $request, Business $business, Delivery $delivery)
+    {
+        if ($business->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        if ($delivery->business_id !== $business->id) {
+            abort(404);
+        }
+
+        if (is_null($delivery->counter_price) || $delivery->counter_status !== 'requested') {
+            return response()->json(['message' => 'Hakuna ombi la mazungumzo linalosubiri.'], 422);
+        }
+
+        $validated = $request->validate([
+            'decision' => 'required|in:accept,decline',
+        ]);
+
+        if ($validated['decision'] === 'accept') {
+            $delivery->update([
+                'offered_price' => $delivery->counter_price,
+                'counter_status' => 'accepted',
+            ]);
+            $message = 'Umeikubali bei ya mazungumzo.';
+
+            if ($delivery->transporter && $delivery->transporter->user) {
+                PushNotificationController::sendNotification(
+                    $delivery->transporter->user,
+                    'Negotiation accepted',
+                    'Bei yako ya mazungumzo imekubaliwa.',
+                    [
+                        'type' => 'delivery_negotiation',
+                        'delivery_id' => $delivery->id,
+                    ]
+                );
+            }
+        } else {
+            $delivery->update(['counter_status' => 'declined']);
+            $message = 'Umekataa bei ya mazungumzo.';
+        }
+
+        return response()->json([
+            'message' => $message,
+            'delivery' => $delivery->fresh()->load([
+                'order:id,transaction_code,total',
+                'customer:id,full_name,phone',
+                'transporter:id,full_name,phone',
+            ]),
+        ]);
+    }
+
     public function updateStatus(Request $request, Delivery $delivery)
     {
         $transporter = $request->user()->transporter;

@@ -50,6 +50,7 @@ class LoanController extends Controller
             'loan_amount' => 'required|numeric|min:0.01',
             'interest_rate' => 'sometimes|numeric|min:0|max:100',
             'repayment_plan' => 'nullable|string|max:1000',
+            'repayment_months' => 'nullable|integer|min:1|max:120',
             'start_date' => 'required|date',
             'due_date' => 'nullable|date|after_or_equal:start_date',
             'notes' => 'nullable|string|max:1000',
@@ -63,6 +64,17 @@ class LoanController extends Controller
             ], 422);
         }
 
+        $schedule = null;
+        $repaymentMonths = $validated['repayment_months'] ?? null;
+        if ($repaymentMonths) {
+            $schedule = $this->buildRepaymentSchedule(
+                (float) $validated['loan_amount'],
+                (float) ($validated['interest_rate'] ?? 0),
+                $repaymentMonths,
+                $validated['start_date']
+            );
+        }
+
         $loan = Loan::create([
             'business_id' => $business->id,
             'customer_id' => $validated['customer_id'],
@@ -71,9 +83,11 @@ class LoanController extends Controller
             'loan_balance' => $validated['loan_amount'],
             'interest_rate' => $validated['interest_rate'] ?? 0,
             'repayment_plan' => $validated['repayment_plan'] ?? null,
+            'repayment_months' => $repaymentMonths,
+            'repayment_schedule' => $schedule,
             'status' => 'active',
             'start_date' => $validated['start_date'],
-            'due_date' => $validated['due_date'] ?? null,
+            'due_date' => $validated['due_date'] ?? ($schedule ? last($schedule)['due_date'] : null),
             'notes' => $validated['notes'] ?? null,
         ]);
 
@@ -83,6 +97,76 @@ class LoanController extends Controller
             'message' => 'Hisa limeundwa kwa mafanikio.',
             'loan' => $loan,
         ], 201);
+    }
+
+    protected function buildRepaymentSchedule($principal, $annualRate, $months, $startDate)
+    {
+        $installments = array_fill(0, $months, 0);
+        $interestTotal = $months > 0 ? round($principal * ($annualRate / 100) * ($months / 12), 2) : 0;
+        $totalRepayable = $principal + $interestTotal;
+        $baseInstallment = round($totalRepayable / $months, 2);
+
+        $start = \Carbon\Carbon::parse($startDate);
+        $schedule = [];
+        for ($i = 0; $i < $months; $i++) {
+            $due = $start->copy()->addMonths($i + 1)->toDateString();
+            $schedule[] = [
+                'installment' => $i + 1,
+                'due_date' => $due,
+                'principal' => round($principal / $months, 2),
+                'interest' => round($interestTotal / $months, 2),
+                'amount' => $baseInstallment,
+                'status' => 'pending',
+            ];
+        }
+
+        return $schedule;
+    }
+
+    public function schedule(Request $request, Business $business, Loan $loan)
+    {
+        $this->authorizeBusiness($request, $business);
+
+        if ($loan->business_id !== $business->id) {
+            abort(403, 'Huna ruhusa kuona hisa hili.');
+        }
+
+        $totalPaid = $loan->totalPaid();
+        $schedule = collect($loan->repayment_schedule ?? [])->map(function ($row) {
+            return $row;
+        })->toArray();
+
+        return response()->json([
+            'loan' => [
+                'id' => $loan->id,
+                'loan_amount' => (float) $loan->loan_amount,
+                'interest_rate' => (float) $loan->interest_rate,
+                'repayment_months' => $loan->repayment_months,
+            ],
+            'total_paid' => $totalPaid,
+            'loan_balance' => (float) $loan->loan_balance,
+            'schedule' => $schedule,
+        ]);
+    }
+
+    public function approve(Request $request, Business $business, Loan $loan)
+    {
+        $this->authorizeBusiness($request, $business);
+
+        if ($loan->business_id !== $business->id) {
+            abort(403, 'Huna ruhusa kuibadilisha hisa hili.');
+        }
+
+        if ($loan->approved_at) {
+            return response()->json(['message' => 'Hisa hili tayari limeidhinishwa.'], 422);
+        }
+
+        $loan->update(['approved_at' => now(), 'status' => 'active']);
+
+        return response()->json([
+            'message' => 'Hisa limeidhinishwa.',
+            'loan' => $loan->fresh()->load('customer:id,full_name,phone'),
+        ]);
     }
 
     public function show(Request $request, Business $business, Loan $loan)
@@ -152,7 +236,11 @@ class LoanController extends Controller
         ]);
 
         $totalPaid = $loan->totalPaid();
-        $remaining = max(0, (float) $loan->loan_amount - $totalPaid);
+
+        $schedule = $loan->repayment_schedule ?? [];
+        $interestTotal = $schedule ? (float) collect($schedule)->sum('interest') : 0;
+        $totalRepayable = (float) $loan->loan_amount + $interestTotal;
+        $remaining = max(0, $totalRepayable - $totalPaid);
 
         if ($validated['amount'] > $remaining) {
             return response()->json([
@@ -172,11 +260,12 @@ class LoanController extends Controller
                 'recorded_by' => $request->user()->id,
             ]);
 
-            $newBalance = max(0, (float) $loan->loan_balance - $validated['amount']);
+            $newOutstanding = max(0, $totalRepayable - ($totalPaid + $validated['amount']));
+            $newBalance = max(0, $newOutstanding - $interestTotal);
             $loan->update(['loan_balance' => $newBalance]);
 
             $newTotalPaid = $totalPaid + $validated['amount'];
-            if ($newTotalPaid >= (float) $loan->loan_amount) {
+            if ($newTotalPaid >= $totalRepayable) {
                 $loan->update(['status' => 'paid']);
             }
 
@@ -193,8 +282,8 @@ class LoanController extends Controller
                 'stats' => [
                     'total_paid' => $newTotalPaid,
                     'loan_balance' => (float) $loan->loan_balance,
-                    'remaining' => max(0, (float) $loan->loan_amount - $newTotalPaid),
-                    'is_fully_paid' => $newTotalPaid >= (float) $loan->loan_amount,
+                    'remaining' => max(0, $totalRepayable - $newTotalPaid),
+                    'is_fully_paid' => $newTotalPaid >= $totalRepayable,
                 ],
             ], 201);
         } catch (\Exception $e) {
@@ -230,6 +319,56 @@ class LoanController extends Controller
                 'paid' => $countsByStatus['paid'] ?? 0,
                 'overdue' => $countsByStatus['overdue'] ?? 0,
                 'defaulted' => $countsByStatus['defaulted'] ?? 0,
+            ],
+        ]);
+    }
+
+    public function calculator(Request $request, Business $business)
+    {
+        $this->authorizeBusiness($request, $business);
+
+        $validated = $request->validate([
+            'required_capital' => 'required|numeric|min:0',
+            'timeline_months' => 'required|integer|min:1',
+            'available_capital' => 'nullable|numeric|min:0',
+            'interest_rate' => 'nullable|numeric|min:0|max:100',
+            'monthly_savings_capacity' => 'nullable|numeric|min:0',
+        ]);
+
+        $requiredCapital = (float) $validated['required_capital'];
+        $timeline = (int) $validated['timeline_months'];
+        $available = (float) ($validated['available_capital'] ?? 0);
+        $interestRate = (float) ($validated['interest_rate'] ?? 0);
+
+        $gap = max(0, $requiredCapital - $available);
+
+        $savingsPerMonth = $timeline > 0 ? $gap / $timeline : 0;
+
+        $savingsCapacity = isset($validated['monthly_savings_capacity'])
+            ? (float) $validated['monthly_savings_capacity']
+            : max($savingsPerMonth, round($gap > 0 ? $gap * 0.05 : 0, 2));
+
+        $affordableLoan = $timeline * $savingsCapacity;
+        $loanWithInterest = $interestRate > 0
+            ? $affordableLoan * (1 + $interestRate / 100)
+            : $affordableLoan;
+
+        $recommendedLoan = round(min($gap, $loanWithInterest), 2);
+
+        return response()->json([
+            'calculator' => [
+                'required_capital' => round($requiredCapital, 2),
+                'total_available_capital' => round($available, 2),
+                'capital_gap' => round($gap, 2),
+                'timeline_months' => $timeline,
+                'savings_plan' => [
+                    'monthly_savings_needed' => round($savingsPerMonth, 2),
+                    'monthly_savings_capacity' => round($savingsCapacity, 2),
+                    'expected_total_savings' => round($savingsCapacity * $timeline, 2),
+                ],
+                'recommended_loan_amount' => $recommendedLoan,
+                'interest_rate' => $interestRate,
+                'estimated_total_repayable' => round($recommendedLoan * (1 + $interestRate / 100), 2),
             ],
         ]);
     }

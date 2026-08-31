@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\BarcodeController;
 use App\Http\Controllers\Api\BusinessController;
+use App\Http\Controllers\Api\BusinessProjectController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CostCenterController;
@@ -69,6 +70,7 @@ use App\Http\Controllers\Api\SupplierPriceListController;
 use App\Http\Controllers\Api\TransporterController;
 use App\Http\Controllers\Api\WarehouseController;
 use App\Http\Controllers\Api\WishlistController;
+use App\Http\Controllers\Api\SupportTicketController;
 use App\Http\Controllers\Api\RestoreController;
 use App\Http\Controllers\Api\BulkController;
 use Illuminate\Support\Facades\Route;
@@ -76,6 +78,8 @@ use Illuminate\Support\Facades\Route;
 // Public API routes
 Route::post('/register/customer', [AuthApiController::class, 'registerCustomer'])->middleware('throttle:register');
 Route::post('/register/seller', [AuthApiController::class, 'registerSeller'])->middleware('throttle:register');
+Route::post('/register/logistic', [AuthApiController::class, 'registerLogistic'])->middleware('throttle:register');
+Route::post('/register/transporter', [AuthApiController::class, 'registerLogistic'])->middleware('throttle:register');
 Route::post('/login', [AuthApiController::class, 'login'])->middleware('throttle:login');
 Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword'])->middleware('throttle:login');
 Route::post('/reset-password', [AuthApiController::class, 'resetPassword'])->middleware('throttle:login');
@@ -88,8 +92,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profile
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
+    Route::delete('/profile', [ProfileController::class, 'destroy']);
     Route::put('/profile/password', [ProfileController::class, 'changePassword']);
     Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar']);
+
+    // Support tickets
+    Route::post('/support-tickets', [SupportTicketController::class, 'store']);
+    Route::get('/support-tickets', [SupportTicketController::class, 'index']);
 
     // Notifications
     Route::post('/notifications', [NotificationController::class, 'store']);
@@ -184,6 +193,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Reports
         Route::get('/businesses/{business}/reports/sales', [ReportController::class, 'salesReport']);
         Route::get('/businesses/{business}/reports/profit', [ReportController::class, 'profitReport']);
+        Route::get('/businesses/{business}/reports/kpis', [ReportController::class, 'kpis']);
         Route::get('/businesses/{business}/reports/expenses', [ReportController::class, 'expenseReport']);
         Route::get('/businesses/{business}/reports/inventory', [ReportController::class, 'inventoryReport']);
         Route::get('/businesses/{business}/reports/customers', [ReportController::class, 'customerReport']);
@@ -210,9 +220,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/businesses/{business}/loans', [LoanController::class, 'index']);
         Route::post('/businesses/{business}/loans', [LoanController::class, 'store']);
         Route::get('/businesses/{business}/loans/summary', [LoanController::class, 'summary']);
+        Route::post('/businesses/{business}/loans/calculator', [LoanController::class, 'calculator']);
         Route::get('/businesses/{business}/loans/{loan}', [LoanController::class, 'show']);
         Route::put('/businesses/{business}/loans/{loan}', [LoanController::class, 'update']);
         Route::post('/businesses/{business}/loans/{loan}/pay', [LoanController::class, 'pay']);
+        Route::get('/businesses/{business}/loans/{loan}/schedule', [LoanController::class, 'schedule']);
+        Route::post('/businesses/{business}/loans/{loan}/approve', [LoanController::class, 'approve']);
 
         // Credit Sales (Kopesha)
         Route::get('/businesses/{business}/credit-sales', [CreditSaleController::class, 'index']);
@@ -225,6 +238,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Import Goods
         Route::get('/businesses/{business}/imports', [ImportGoodController::class, 'index']);
+        Route::get('/businesses/{business}/imports/suggestions', [ImportGoodController::class, 'suggestions']);
         Route::post('/businesses/{business}/imports', [ImportGoodController::class, 'store']);
         Route::get('/businesses/{business}/imports/{importGood}', [ImportGoodController::class, 'show']);
         Route::put('/businesses/{business}/imports/{importGood}', [ImportGoodController::class, 'update']);
@@ -237,6 +251,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/businesses/{business}/investments/allocate', [InvestmentController::class, 'allocate']);
         Route::delete('/businesses/{business}/investments/{investment}', [InvestmentController::class, 'destroy']);
 
+        Route::get('/businesses/{business}/projects', [BusinessProjectController::class, 'index']);
+        Route::post('/businesses/{business}/projects', [BusinessProjectController::class, 'store']);
+        Route::post('/businesses/{business}/projects/estimate', [BusinessProjectController::class, 'estimate']);
+        Route::get('/businesses/{business}/projects/{project}', [BusinessProjectController::class, 'show']);
+        Route::put('/businesses/{business}/projects/{project}', [BusinessProjectController::class, 'update']);
+        Route::delete('/businesses/{business}/projects/{project}', [BusinessProjectController::class, 'destroy']);
+
         // Deliveries - Business Owner
         Route::get('/businesses/{business}/deliveries', [DeliveryController::class, 'index']);
         Route::post('/businesses/{business}/deliveries', [DeliveryController::class, 'store']);
@@ -244,6 +265,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/businesses/{business}/deliveries/{delivery}', [DeliveryController::class, 'update']);
         Route::post('/businesses/{business}/deliveries/{delivery}/status', [DeliveryController::class, 'status']);
         Route::post('/businesses/{business}/deliveries/{delivery}/assign', [DeliveryController::class, 'assignTransporter']);
+        Route::post('/businesses/{business}/deliveries/{delivery}/negotiation', [DeliveryController::class, 'respondToNegotiation']);
 
         // Business Settings
         Route::get('/businesses/{business}/settings', [SettingController::class, 'getSettings']);
@@ -265,6 +287,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/businesses', [AdminController::class, 'storeBusiness']);
         Route::put('/businesses/{business}', [AdminController::class, 'updateBusiness']);
         Route::delete('/businesses/{business}', [AdminController::class, 'deleteBusiness']);
+        Route::post('/businesses/{business}/verify', [AdminController::class, 'verifyShop']);
+        Route::post('/businesses/{business}/approve', [AdminController::class, 'approveShop']);
+        Route::post('/businesses/{business}/suspend', [AdminController::class, 'suspendShop']);
+        Route::post('/businesses/{business}/reactivate', [AdminController::class, 'reactivateShop']);
+        Route::post('/businesses/{business}/close', [AdminController::class, 'closeShop']);
         Route::get('/users', [AdminController::class, 'allUsers']);
         Route::get('/users/{user}', [AdminController::class, 'showUser']);
         Route::post('/users', [AdminController::class, 'storeUser']);
@@ -285,6 +312,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/announcements/{announcement}', [AdminController::class, 'updateAnnouncement']);
         Route::delete('/announcements/{announcement}', [AdminController::class, 'deleteAnnouncement']);
         Route::get('/reports', [AdminController::class, 'reports']);
+        Route::get('/reports/profitability', [AdminController::class, 'profitability']);
         Route::get('/finance', [AdminController::class, 'finance']);
         Route::get('/deliveries', [AdminController::class, 'deliveries']);
         Route::get('/coupons', [AdminController::class, 'allCoupons']);
@@ -624,7 +652,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/customers', [EmployeeDataController::class, 'customers']);
         Route::get('/deliveries', [EmployeeDataController::class, 'deliveries']);
         Route::get('/expenses', [EmployeeDataController::class, 'expenses']);
-        Route::post('/expenses', [EmployeeDataController::class, 'storeExpense']);
+        Route::post('/expenses', [EmployeeDataController::class, 'storeExpense'])->middleware('permission:manage_expenses');
+        Route::get('/attendance', [HrAttendanceController::class, 'employeeIndex']);
+        Route::post('/attendance', [HrAttendanceController::class, 'employeeStore'])->middleware('permission:manage_attendance');
+        Route::get('/orders', [OrderController::class, 'employeeOrders']);
     });
 
     // Attendance alias for mobile app
@@ -642,6 +673,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancelOrder']);
         Route::get('/orders/{order}/reorder', [OrderController::class, 'reorder']);
         Route::get('/deliveries', [DeliveryController::class, 'customerDeliveries']);
+        Route::get('/deliveries/{delivery}', [DeliveryController::class, 'show']);
+        Route::get('/wishlist', [WishlistController::class, 'index']);
     });
 
     Route::get('/orders/my', [OrderController::class, 'myOrders']);
@@ -650,7 +683,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:transporter')->prefix('transporter')->group(function () {
         Route::get('/dashboard', [DashboardApiController::class, 'transporterDashboard']);
         Route::get('/deliveries', [TransporterController::class, 'myDeliveries']);
+        Route::get('/deliveries/{delivery}', [DeliveryController::class, 'show']);
         Route::post('/deliveries/{delivery}/status', [TransporterController::class, 'updateDeliveryStatus']);
+        Route::post('/deliveries/{delivery}/accept', [DeliveryController::class, 'acceptDelivery']);
+        Route::post('/deliveries/{delivery}/reject', [DeliveryController::class, 'rejectDelivery']);
+        Route::post('/deliveries/{delivery}/negotiate', [DeliveryController::class, 'negotiateDelivery']);
         Route::get('/deliveries/available', [DeliveryController::class, 'available']);
         Route::get('/profile', [TransporterController::class, 'profile']);
         Route::put('/profile', [TransporterController::class, 'updateProfile']);
@@ -721,7 +758,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Orders - Employee
-    Route::middleware('role:employee')->group(function () {
+    Route::middleware(['role:employee', 'permission:process_orders'])->group(function () {
         Route::post('/employee/orders/{order}/verify', [OrderController::class, 'verify']);
         Route::post('/employee/orders/{order}/status', [OrderController::class, 'updateStatus']);
     });

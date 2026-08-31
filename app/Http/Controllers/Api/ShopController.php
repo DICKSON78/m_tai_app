@@ -72,7 +72,7 @@ class ShopController extends Controller
                 $q->where('status', 'active')
                   ->where('is_published', true);
             })
-            ->with(['category', 'business:id,business_name']);
+            ->with(['category', 'business:id,business_name', 'images']);
 
         if ($request->has('search')) {
             $query->where(function ($q) use ($request) {
@@ -85,7 +85,24 @@ class ShopController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        return response()->json($query->orderBy('name')->paginate(20));
+        $products = $query->orderBy('name')->paginate(20);
+
+        $products->getCollection()->transform(function ($product) {
+            $product->setAttribute('images', $product->images->map(function ($img) {
+                return [
+                    'id' => $img->id,
+                    'url' => $img->image_path
+                        ? (preg_match('#^https?://#i', $img->image_path)
+                            ? $img->image_path
+                            : url('storage/' . ltrim($img->image_path, '/')))
+                        : null,
+                ];
+            }));
+            $product->setAttribute('stock_status', $product->stock_level);
+            return $product;
+        });
+
+        return response()->json($products);
     }
 
     public function productDetail(Request $request, Product $product)
@@ -94,8 +111,19 @@ class ShopController extends Controller
             return response()->json(['message' => 'Bidhaa hii haipatikani.'], 404);
         }
 
-        $product->load(['category', 'business']);
+        $product->load(['category', 'business', 'images']);
         $product->loadCount('orderItems');
+        $product->setAttribute('images', $product->images->map(function ($img) {
+            return [
+                'id' => $img->id,
+                'url' => $img->image_path
+                    ? (preg_match('#^https?://#i', $img->image_path)
+                        ? $img->image_path
+                        : url('storage/' . ltrim($img->image_path, '/')))
+                    : null,
+            ];
+        }));
+        $product->setAttribute('stock_status', $product->stock_level);
 
         return response()->json($product);
     }

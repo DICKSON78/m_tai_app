@@ -68,4 +68,13 @@ class ProfileController extends Controller
             'avatar' => Storage::url($path),
         ]);
     }
+
+    public function destroy(Request $request)
+    {
+        $request->user()->delete();
+
+        return response()->json([
+            'message' => 'Akaunti imefutwa.',
+        ]);
+    }
 }

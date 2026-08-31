@@ -10,6 +10,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('backup:database')->dailyAt('02:00');
+        $schedule->command('notifications:send-reminders')->everyFourHours();
     }
 
     protected function commands(): void

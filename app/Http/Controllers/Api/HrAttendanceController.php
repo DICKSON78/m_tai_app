@@ -69,4 +69,74 @@ class HrAttendanceController extends Controller
         $attendance->delete();
         return response()->json(['message' => 'Attendance record deleted']);
     }
+
+    private function resolveEmployee(Request $request)
+    {
+        return HrEmployee::where('user_id', $request->user()->id)->first();
+    }
+
+    public function employeeIndex(Request $request)
+    {
+        $employee = $this->resolveEmployee($request);
+        if (! $employee) {
+            return response()->json(['data' => [], 'today' => null]);
+        }
+
+        $records = Attendance::where('employee_id', $employee->id)
+            ->orderBy('date', 'desc')
+            ->paginate($request->per_page ?? 30);
+
+        $today = Attendance::where('employee_id', $employee->id)
+            ->where('date', now()->toDateString())
+            ->first();
+
+        return response()->json([
+            'data' => $records,
+            'today' => $today,
+        ]);
+    }
+
+    public function employeeStore(Request $request)
+    {
+        $employee = $this->resolveEmployee($request);
+        if (! $employee) {
+            return response()->json(['message' => 'Profaili ya mfanyakazi haijapatikana.'], 404);
+        }
+
+        $validated = $request->validate([
+            'action' => 'required|in:clock_in,clock_out',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'location' => 'nullable|string|max:255',
+        ]);
+
+        $today = now()->toDateString();
+        $record = Attendance::firstOrNew(['employee_id' => $employee->id, 'date' => $today]);
+
+        if ($validated['action'] === 'clock_in') {
+            if ($record->exists && $record->clock_in) {
+                return response()->json(['message' => 'Umeshaingia leo.'], 422);
+            }
+            $record->clock_in = now()->format('H:i:s');
+            $record->status = now()->hour >= 9 ? 'late' : 'present';
+            $record->latitude = $request->input('latitude');
+            $record->longitude = $request->input('longitude');
+            $record->location = $request->input('location');
+            $record->save();
+        } else {
+            if (! $record->exists || ! $record->clock_in) {
+                return response()->json(['message' => 'Hujaja kuingia.'], 422);
+            }
+            $record->clock_out = now()->format('H:i:s');
+            if ($request->filled('latitude')) $record->latitude = $request->input('latitude');
+            if ($request->filled('longitude')) $record->longitude = $request->input('longitude');
+            if ($request->filled('location')) $record->location = $request->input('location');
+            $in = \Carbon\Carbon::parse($record->clock_in);
+            $out = \Carbon\Carbon::parse($record->clock_out);
+            $record->hours_worked = round($in->diffInMinutes($out) / 60, 2);
+            $record->save();
+        }
+
+        return response()->json(['record' => $record]);
+    }
 }

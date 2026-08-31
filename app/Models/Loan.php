@@ -11,8 +11,8 @@ class Loan extends Model
 
     protected $fillable = [
         'business_id', 'customer_id', 'loan_type', 'loan_amount', 'loan_balance',
-        'repayment_plan', 'interest_rate', 'status', 'start_date',
-        'due_date', 'notes',
+        'repayment_plan', 'repayment_months', 'repayment_schedule', 'interest_rate',
+        'status', 'start_date', 'due_date', 'notes', 'approved_at',
     ];
 
     protected function casts(): array
@@ -21,6 +21,7 @@ class Loan extends Model
             'loan_amount' => 'decimal:2',
             'loan_balance' => 'decimal:2',
             'interest_rate' => 'decimal:2',
+            'repayment_schedule' => 'array',
             'start_date' => 'date',
             'due_date' => 'date',
         ];

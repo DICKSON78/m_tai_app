@@ -236,6 +236,63 @@ class ReportController extends Controller
         ]);
     }
 
+    public function kpis(Request $request, Business $business)
+    {
+        $this->authorizeBusiness($request, $business);
+
+        $validated = $request->validate([
+            'period' => 'sometimes|in:daily,weekly,monthly,yearly',
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date',
+        ]);
+
+        $period = $validated['period'] ?? 'daily';
+        $dateFrom = $validated['date_from'] ?? now()->startOfMonth()->toDateString();
+        $dateTo = $validated['date_to'] ?? now()->toDateString();
+
+        $orders = $business->orders()
+            ->where('status', 'completed')
+            ->whereDate('created_at', '>=', $dateFrom)
+            ->whereDate('created_at', '<=', $dateTo);
+
+        $gds = (float) (clone $orders)->sum('total');
+
+        $totalCogs = (float) OrderItem::whereHas('order', function ($q) use ($business, $dateFrom, $dateTo) {
+                $q->where('business_id', $business->id)
+                    ->where('status', 'completed')
+                    ->whereDate('created_at', '>=', $dateFrom)
+                    ->whereDate('created_at', '<=', $dateTo);
+            })
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->sum(DB::raw('order_items.quantity * products.buying_price'));
+
+        $gde = (float) $business->expenses()
+            ->whereDate('date', '>=', $dateFrom)
+            ->whereDate('date', '<=', $dateTo)
+            ->sum('amount');
+
+        $gtp = $gds - $totalCogs;
+        $gdp = $gtp - $gde;
+
+        $oc = (float) ($business->opening_capital ?? $business->capitals()->sum('capital_amount'));
+
+        return response()->json([
+            'period' => $period,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
+            'kpis' => [
+                'opening_capital' => round($oc, 2),
+                'initial_day_capital' => round($oc, 2),
+                'grand_daily_sales' => round($gds, 2),
+                'grand_daily_expenditure' => round($gde, 2),
+                'grand_total_profit' => round($gtp, 2),
+                'grand_daily_profit' => round($gdp, 2),
+                'perfect_profit' => round($gdp, 2),
+                'profit_margin' => $gds > 0 ? round(($gdp / $gds) * 100, 2) : 0,
+            ],
+        ]);
+    }
+
     public function expenseReport(Request $request, Business $business)
     {
         $this->authorizeBusiness($request, $business);

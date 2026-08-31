@@ -180,11 +180,22 @@ class ExpenseController extends Controller
             ->whereYear('date', now()->year)
             ->sum('amount');
 
+        $monthlyBillCategories = ['rent', 'salaries', 'water', 'electricity', 'security', 'taxes', 'internet', 'charity', 'maintenance'];
+        $monthlyBills = $business->expenses()
+            ->whereIn('category', $monthlyBillCategories)
+            ->whereMonth('date', now()->month)
+            ->whereYear('date', now()->year)
+            ->sum('amount');
+
+        $averageBill = round((float) $monthlyBills / 30, 2);
+
         return response()->json([
             'summary' => [
                 'total_expenses' => (float) $totalExpenses,
                 'daily_total' => (float) $dailyTotal,
                 'monthly_total' => (float) $monthlyTotal,
+                'average_bill' => $averageBill,
+                'grand_daily_expenditure' => round((float) $monthlyTotal / 30, 2),
                 'period' => $period,
                 'date_from' => $dateFrom,
                 'date_to' => $dateTo,

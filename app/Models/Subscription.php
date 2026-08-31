@@ -10,8 +10,8 @@ class Subscription extends Model
     use HasFactory;
 
     protected $fillable = [
-        'business_id', 'user_id', 'plan', 'amount', 'status', 'start_date',
-        'end_date',
+        'business_id', 'user_id', 'plan', 'performance_tier', 'amount', 'status',
+        'start_date', 'end_date',
     ];
 
     protected function casts(): array

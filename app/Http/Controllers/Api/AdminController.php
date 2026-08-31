@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\PlatformNotification;
 use App\Models\Subscription;
+use App\Models\OrderItem;
+use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -102,6 +104,83 @@ class AdminController extends Controller
     {
         $business->delete();
         return response()->json(['message' => 'Business deleted successfully.']);
+    }
+
+    public function verifyShop(Request $request, Business $business)
+    {
+        if ($business->status !== 'pending') {
+            return response()->json(['message' => 'Shops in status "' . $business->status . '" cannot be verified.'], 422);
+        }
+
+        $business->update(['status' => 'active', 'verified_at' => now()]);
+
+        if ($business->user) {
+            PushNotificationController::sendNotification(
+                $business->user,
+                'Shop approved',
+                "Hongera! Biashara yako \"{$business->business_name}\" imethibitishwa na sasa iko hai.",
+                ['type' => 'shop_approval', 'business_id' => $business->id],
+            );
+        }
+
+        return response()->json([
+            'message' => 'Shop verified and activated.',
+            'business' => $business->fresh()->load('user:id,name,email,phone'),
+        ]);
+    }
+
+    public function approveShop(Request $request, Business $business)
+    {
+        return $this->verifyShop($request, $business);
+    }
+
+    public function suspendShop(Request $request, Business $business)
+    {
+        if (! in_array($business->status, ['active', 'pending'])) {
+            return response()->json(['message' => 'Shop cannot be suspended from status "' . $business->status . '".'], 422);
+        }
+
+        $validated = $request->validate([
+            'reason' => 'nullable|string|max:1000',
+        ]);
+
+        $business->update([
+            'status' => 'suspended',
+            'suspension_reason' => $validated['reason'] ?? null,
+        ]);
+
+        return response()->json([
+            'message' => 'Shop suspended.',
+            'business' => $business->fresh()->load('user:id,name,email,phone'),
+        ]);
+    }
+
+    public function reactivateShop(Request $request, Business $business)
+    {
+        if ($business->status !== 'suspended') {
+            return response()->json(['message' => 'Only suspended shops can be reactivated.'], 422);
+        }
+
+        $business->update(['status' => 'active', 'suspension_reason' => null]);
+
+        return response()->json([
+            'message' => 'Shop reactivated.',
+            'business' => $business->fresh()->load('user:id,name,email,phone'),
+        ]);
+    }
+
+    public function closeShop(Request $request, Business $business)
+    {
+        if ($business->status === 'closed') {
+            return response()->json(['message' => 'Shop is already closed.'], 422);
+        }
+
+        $business->update(['status' => 'closed']);
+
+        return response()->json([
+            'message' => 'Shop closed.',
+            'business' => $business->fresh()->load('user:id,name,email,phone'),
+        ]);
     }
 
     public function allUsers(Request $request)
@@ -310,14 +389,28 @@ class AdminController extends Controller
         $validated = $request->validate([
             'business_id' => 'required|exists:businesses,id',
             'plan' => 'required|in:daily,monthly,quarterly,yearly',
-            'amount' => 'required|numeric|min:0',
+            'amount' => 'nullable|numeric|min:0',
             'status' => 'nullable|in:active,expired,suspended',
         ]);
+
+        $business = Business::findOrFail($validated['business_id']);
+
+        $tier = null;
+        if (isset($validated['amount'])) {
+            $amount = $validated['amount'];
+        } else {
+            $profit = $this->computeBusinessProfit($business);
+            $tier = $this->resolvePerformanceTier($profit);
+            $dailyRate = config('mtai.subscription_rates.' . $tier, 1000);
+            $multiplier = config('mtai.subscription_plan_multipliers.' . $validated['plan'], 1);
+            $amount = round($dailyRate * $multiplier, 2);
+        }
 
         $subscription = Subscription::create([
             'business_id' => $validated['business_id'],
             'plan' => $validated['plan'],
-            'amount' => $validated['amount'],
+            'performance_tier' => $tier ?? 'custom',
+            'amount' => $amount,
             'status' => $validated['status'] ?? 'active',
             'start_date' => now()->toDateString(),
             'end_date' => match ($validated['plan']) {
@@ -331,7 +424,59 @@ class AdminController extends Controller
         return response()->json([
             'message' => 'Subscription created.',
             'subscription' => $subscription->fresh()->load(['business:id,business_name']),
+            'profit_used' => $tier ? $profit : null,
+            'performance_tier' => $tier ?? 'custom',
         ], 201);
+    }
+
+    /**
+     * Compute the business's net profit for the current month:
+     * revenue (completed orders) - COGS (order items cost) - expenses.
+     */
+    protected function computeBusinessProfit(Business $business)
+    {
+        $monthStart = now()->startOfMonth()->toDateString();
+        $monthEnd = now()->toDateString();
+
+        $revenue = (float) $business->orders()
+            ->where('status', 'completed')
+            ->whereDate('created_at', '>=', $monthStart)
+            ->whereDate('created_at', '<=', $monthEnd)
+            ->sum('total');
+
+        $cogs = (float) OrderItem::whereHas('order', function ($q) use ($business, $monthStart, $monthEnd) {
+                $q->where('business_id', $business->id)
+                    ->where('status', 'completed')
+                    ->whereDate('created_at', '>=', $monthStart)
+                    ->whereDate('created_at', '<=', $monthEnd);
+            })
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->select(DB::raw('SUM(order_items.quantity * products.buying_price) as cogs'))
+            ->value('cogs');
+
+        $expenses = (float) Expense::where('business_id', $business->id)
+            ->whereDate('date', '>=', $monthStart)
+            ->whereDate('date', '<=', $monthEnd)
+            ->sum('amount');
+
+        return round($revenue - ($cogs ?? 0) - $expenses, 2);
+    }
+
+    /**
+     * Map a computed profit to a subscription performance tier (SRS §22).
+     */
+    protected function resolvePerformanceTier($profit)
+    {
+        if ($profit < 100000) {
+            return 'below_100000';
+        }
+        if ($profit < 500000) {
+            return 'below_500000';
+        }
+        if ($profit < 1000000) {
+            return 'below_1000000';
+        }
+        return 'above_1000000';
     }
 
     public function deleteSubscription(Subscription $subscription)
@@ -457,6 +602,61 @@ class AdminController extends Controller
             'total_revenue' => (float) Order::where('status', 'completed')->sum('total'),
             'new_customers_month' => $newCustomersMonth,
             'monthly_data' => $monthlyData,
+        ]);
+    }
+
+    public function profitability(Request $request)
+    {
+        $range = $request->range ?? 'this_month';
+        $since = match ($range) {
+            'this_week' => now()->startOfWeek(),
+            'this_month' => now()->startOfMonth(),
+            'this_year' => now()->startOfYear(),
+            'all_time' => now()->subYears(10),
+            default => now()->startOfMonth(),
+        };
+
+        $completedIds = Order::where('status', 'completed')
+            ->whereDate('created_at', '>=', $since)
+            ->pluck('id');
+
+        $revenue = (float) Order::where('status', 'completed')
+            ->where('created_at', '>=', $since)
+            ->sum('total');
+
+        $cogs = (float) OrderItem::whereIn('order_id', $completedIds)
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->select(DB::raw('SUM(order_items.quantity * products.buying_price) as cogs'))
+            ->value('cogs');
+
+        $expenses = (float) Expense::whereDate('date', '>=', $since)->sum('amount');
+
+        $grossProfit = $revenue - $cogs;
+        $netProfit = $grossProfit - $expenses;
+        $margin = $revenue > 0 ? round(($netProfit / $revenue) * 100, 2) : 0;
+
+        $topBusinesses = Business::withCount('orders')
+            ->withSum(['orders as revenue' => fn ($q) => $q->where('status', 'completed')], 'total')
+            ->orderByDesc('revenue')
+            ->take((int) $request->get('top', 10))
+            ->get()
+            ->map(fn ($b) => [
+                'id' => $b->id,
+                'name' => $b->name,
+                'type' => $b->type,
+                'revenue' => round((float) $b->revenue, 2),
+                'orders_count' => $b->orders_count,
+            ]);
+
+        return response()->json([
+            'period' => $range,
+            'total_revenue' => round($revenue, 2),
+            'total_cogs' => round($cogs, 2),
+            'total_expenses' => round($expenses, 2),
+            'gross_profit' => round($grossProfit, 2),
+            'net_profit' => round($netProfit, 2),
+            'net_margin_percent' => $margin,
+            'top_businesses' => $topBusinesses,
         ]);
     }
 

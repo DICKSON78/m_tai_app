@@ -10,14 +10,6 @@ use Illuminate\Support\Facades\DB;
 
 class InvestmentController extends Controller
 {
-    const ALLOCATIONS = [
-        'investment_account' => 50,
-        'life_insurance' => 20,
-        'normal_savings' => 15,
-        'wallet' => 5,
-        'bata_account' => 10,
-    ];
-
     const TYPE_LABELS = [
         'investment_account' => 'Akaunti ya Uwekezaji',
         'life_insurance' => 'Bima ya Maisha',
@@ -25,6 +17,19 @@ class InvestmentController extends Controller
         'wallet' => 'Mtandao (Wallet)',
         'bata_account' => 'Akaunti ya BATA',
     ];
+
+    protected function allocations()
+    {
+        $cfg = config('mtai.savings_allocation', []);
+
+        return [
+            'investment_account' => (int) ($cfg['investment'] ?? 50),
+            'life_insurance' => (int) ($cfg['life_insurance'] ?? 20),
+            'normal_savings' => (int) ($cfg['savings'] ?? 15),
+            'wallet' => (int) ($cfg['wallet'] ?? 5),
+            'bata_account' => (int) ($cfg['bata'] ?? 10),
+        ];
+    }
 
     public function index(Request $request, Business $business)
     {
@@ -45,7 +50,7 @@ class InvestmentController extends Controller
         return response()->json(array_merge($investments->toArray(), [
             'totals' => $totals,
             'grand_total' => $grandTotal,
-            'allocations' => self::ALLOCATIONS,
+            'allocations' => $this->allocations(),
             'type_labels' => self::TYPE_LABELS,
         ]));
     }
@@ -67,7 +72,7 @@ class InvestmentController extends Controller
         $created = [];
 
         DB::transaction(function () use ($business, $amount, $date, $description, &$created) {
-            foreach (self::ALLOCATIONS as $type => $percent) {
+            foreach ($this->allocations() as $type => $percent) {
                 $allocated = round($amount * $percent / 100, 2);
                 if ($allocated > 0) {
                     $inv = $business->investments()->create([

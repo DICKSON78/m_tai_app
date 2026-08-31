@@ -14,7 +14,7 @@ class Business extends Model
         'business_type', 'business_category', 'region', 'district',
         'ward', 'street', 'road', 'working_days', 'working_hours',
         'payment_code', 'bank_account_number', 'opening_capital',
-        'status', 'is_published', 'settings',
+        'status', 'is_published', 'settings', 'suspension_reason', 'verified_at',
     ];
 
     protected function casts(): array
@@ -81,6 +81,11 @@ class Business extends Model
     public function investments()
     {
         return $this->hasMany(Investment::class);
+    }
+
+    public function businessProjects()
+    {
+        return $this->hasMany(BusinessProject::class);
     }
 
     public function subscriptions()

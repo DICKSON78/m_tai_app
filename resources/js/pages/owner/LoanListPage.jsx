@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
-import { Wallet, Plus, DollarSign, User, Calendar, FileText, Search, Clock, CheckCircle, TrendingDown, Filter, RotateCcw } from 'lucide-react';
+import { Wallet, Plus, DollarSign, User, Calendar, FileText, Search, Clock, CheckCircle, TrendingDown, Filter, RotateCcw, Calculator } from 'lucide-react';
 
 const LOAN_TABS = [
     { key: '', label: 'All' },
@@ -40,6 +40,12 @@ export default function LoanListPage() {
     const [payAmount, setPayAmount] = useState('');
     const [paySubmitting, setPaySubmitting] = useState(false);
     const [payError, setPayError] = useState('');
+
+    const [calcModalOpen, setCalcModalOpen] = useState(false);
+    const [calcForm, setCalcForm] = useState({ required_capital: '', timeline_months: '', available_capital: '', interest_rate: '', monthly_savings_capacity: '' });
+    const [calcResult, setCalcResult] = useState(null);
+    const [calcLoading, setCalcLoading] = useState(false);
+    const [calcError, setCalcError] = useState('');
 
     useEffect(() => {
         api.get('/owner/businesses').then(res => {
@@ -111,6 +117,22 @@ export default function LoanListPage() {
 
     const handleReset = () => { setSearch(''); setStatusFilter(''); };
 
+    const handleCalculator = async (e) => {
+        e.preventDefault();
+        setCalcLoading(true); setCalcError(''); setCalcResult(null);
+        try {
+            const payload = {
+                required_capital: Number(calcForm.required_capital),
+                timeline_months: Number(calcForm.timeline_months),
+                available_capital: calcForm.available_capital ? Number(calcForm.available_capital) : 0,
+                interest_rate: calcForm.interest_rate ? Number(calcForm.interest_rate) : 0,
+                monthly_savings_capacity: calcForm.monthly_savings_capacity ? Number(calcForm.monthly_savings_capacity) : undefined,
+            };
+            const res = await api.post(`/owner/businesses/${selectedBusiness}/loans/calculator`, payload);
+            setCalcResult(res.data?.calculator || res.data || null);
+        } catch (error) { console.error('Failed to run loan calculator:', error); setCalcError(error?.response?.data?.message || 'Failed to run calculator.'); } finally { setCalcLoading(false); }
+    };
+
     const formatCurrency = (val) => `TZS ${Number(val || 0).toLocaleString()}`;
 
     return (
@@ -138,9 +160,14 @@ export default function LoanListPage() {
 
             <div className="flex items-center justify-end mb-6">
                 {selectedBusiness && (
-                    <button onClick={() => { setLoanForm({ customer_id: '', amount: '', due_date: '', notes: '' }); setLoanErrors({}); setAddModalOpen(true); }} className="inline-flex items-center gap-2 px-5 py-2.5 text-white font-medium rounded-xl transition-all duration-200 shadow-md hover:shadow-lg" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
-                        <Plus size={16} /> <span className="hidden sm:inline">Add New</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button onClick={() => { setCalcForm({ required_capital: '', timeline_months: '', available_capital: '', interest_rate: '', monthly_savings_capacity: '' }); setCalcResult(null); setCalcError(''); setCalcModalOpen(true); }} className="inline-flex items-center gap-2 px-5 py-2.5 font-medium rounded-xl transition-all duration-200 shadow-md hover:shadow-lg border border-[#00D4AA]/30 text-[#00D4AA] bg-white hover:bg-[#00D4AA]/5">
+                            <Calculator size={16} /> <span className="hidden sm:inline">Loan Calculator</span>
+                        </button>
+                        <button onClick={() => { setLoanForm({ customer_id: '', amount: '', due_date: '', notes: '' }); setLoanErrors({}); setAddModalOpen(true); }} className="inline-flex items-center gap-2 px-5 py-2.5 text-white font-medium rounded-xl transition-all duration-200 shadow-md hover:shadow-lg" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
+                            <Plus size={16} /> <span className="hidden sm:inline">Add New</span>
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -288,6 +315,57 @@ export default function LoanListPage() {
                         </div>
                     </form>
                 )}
+            </Modal>
+
+            <Modal isOpen={calcModalOpen} onClose={() => { setCalcModalOpen(false); setCalcResult(null); setCalcError(''); }} title="Loan Calculator" size="md">
+                <form onSubmit={handleCalculator} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-900 mb-2">Required Capital (TZS) <span className="text-red-500">*</span></label>
+                            <input type="number" min="0" value={calcForm.required_capital} onChange={(e) => { setCalcForm({ ...calcForm, required_capital: e.target.value }); setCalcResult(null); }} required placeholder="e.g. 2000000" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-900 mb-2">Timeline (months) <span className="text-red-500">*</span></label>
+                            <input type="number" min="1" value={calcForm.timeline_months} onChange={(e) => { setCalcForm({ ...calcForm, timeline_months: e.target.value }); setCalcResult(null); }} required placeholder="e.g. 12" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-900 mb-2">Available Capital (TZS)</label>
+                            <input type="number" min="0" value={calcForm.available_capital} onChange={(e) => { setCalcForm({ ...calcForm, available_capital: e.target.value }); setCalcResult(null); }} placeholder="Current capital" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-900 mb-2">Interest Rate (%)</label>
+                            <input type="number" min="0" max="100" value={calcForm.interest_rate} onChange={(e) => { setCalcForm({ ...calcForm, interest_rate: e.target.value }); setCalcResult(null); }} placeholder="e.g. 10" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" />
+                        </div>
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-semibold text-gray-900 mb-2">Monthly Savings Capacity (TZS)</label>
+                            <input type="number" min="0" value={calcForm.monthly_savings_capacity} onChange={(e) => setCalcForm({ ...calcForm, monthly_savings_capacity: e.target.value })} placeholder="Optional - how much you can save monthly" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" />
+                        </div>
+                    </div>
+                    {calcError && <p className="text-sm text-red-600">{calcError}</p>}
+
+                    {calcResult && (
+                        <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                            <p className="text-sm font-semibold text-gray-900">Recommendation</p>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+                                <div><p className="text-gray-500 text-xs">Capital Gap</p><p className="font-bold text-red-600">{formatCurrency(calcResult.capital_gap)}</p></div>
+                                <div><p className="text-gray-500 text-xs">Recommended Loan</p><p className="font-bold text-[#00B894]">{formatCurrency(calcResult.recommended_loan_amount)}</p></div>
+                                <div><p className="text-gray-500 text-xs">Est. Repayable</p><p className="font-bold text-gray-800">{formatCurrency(calcResult.estimated_total_repayable)}</p></div>
+                            </div>
+                            <div className="border-t border-gray-200 pt-3 space-y-1">
+                                <div className="flex justify-between"><span className="text-gray-500 text-sm">Monthly Savings Needed</span><span className="font-semibold text-gray-800 text-sm">{formatCurrency(calcResult.savings_plan?.monthly_savings_needed)}</span></div>
+                                <div className="flex justify-between"><span className="text-gray-500 text-sm">Savings Capacity</span><span className="font-semibold text-gray-800 text-sm">{formatCurrency(calcResult.savings_plan?.monthly_savings_capacity)}</span></div>
+                                <div className="flex justify-between"><span className="text-gray-500 text-sm">Expected Total Savings</span><span className="font-semibold text-gray-800 text-sm">{formatCurrency(calcResult.savings_plan?.expected_total_savings)}</span></div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex justify-end space-x-3 pt-2">
+                        <button type="button" onClick={() => { setCalcModalOpen(false); setCalcResult(null); setCalcError(''); }} className="px-5 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm">Close</button>
+                        <button type="submit" disabled={calcLoading || !calcForm.required_capital || !calcForm.timeline_months} className="px-6 py-2.5 font-bold text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm shadow-md hover:shadow-lg disabled:opacity-50 bg-[#00D4AA] hover:bg-[#00B894]">
+                            <Calculator size={15} /> {calcLoading ? 'Calculating...' : 'Calculate'}
+                        </button>
+                    </div>
+                </form>
             </Modal>
         </div>
     );

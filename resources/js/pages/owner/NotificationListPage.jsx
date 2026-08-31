@@ -1,13 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
-import { Bell, CheckCircle, CheckCheck, Trash2, Package, DollarSign, Filter, RotateCcw } from 'lucide-react';
+import { Bell, CheckCircle, CheckCheck, Trash2, Package, DollarSign, Filter, RotateCcw, CreditCard, Wallet, FileText, AlertTriangle, TrendingDown } from 'lucide-react';
 
 const NOTIFICATION_ICONS = {
     order: <Package size={18} />,
     system: <CheckCircle size={18} />,
     stock: <Package size={18} />,
     payment: <DollarSign size={18} />,
+    credit_sale: <CreditCard size={18} />,
+    loan: <Wallet size={18} />,
+    bill: <FileText size={18} />,
+    stock_out: <AlertTriangle size={18} />,
+    stock_low: <Package size={18} />,
 };
 
 const BG_BY_TYPE = {
@@ -15,9 +20,24 @@ const BG_BY_TYPE = {
     system: 'bg-[#00D4AA]/10 text-[#00B894]',
     stock: 'bg-orange-100 text-orange-600',
     payment: 'bg-purple-100 text-purple-600',
+    credit_sale: 'bg-red-100 text-red-600',
+    loan: 'bg-blue-100 text-blue-600',
+    bill: 'bg-yellow-100 text-yellow-700',
+    stock_out: 'bg-red-100 text-red-600',
+    stock_low: 'bg-orange-100 text-orange-600',
 };
 
 const DEFAULT_BG = 'bg-gray-100 text-gray-600';
+
+const getNotificationCategory = (type) => {
+    if (!type) return 'system';
+    if (type.startsWith('credit_sale_')) return 'credit_sale';
+    if (type.startsWith('loan_')) return 'loan';
+    if (type.startsWith('bill_')) return 'bill';
+    if (type.startsWith('stock_out')) return 'stock_out';
+    if (type.startsWith('stock_low')) return 'stock_low';
+    return NOTIFICATION_ICONS[type] ? type : 'system';
+};
 
 export default function NotificationListPage() {
     document.title = 'Notifications - M-TAI';
@@ -106,8 +126,9 @@ export default function NotificationListPage() {
                     <div className="space-y-3">
                         {notifications.map((notif) => {
                             const isRead = notif.type === 'read' || !!notif.read_at || !!notif.is_read;
-                            const icon = NOTIFICATION_ICONS[notif.type] || NOTIFICATION_ICONS.system;
-                            const bg = BG_BY_TYPE[notif.type] || DEFAULT_BG;
+                            const category = getNotificationCategory(notif.type);
+                            const icon = NOTIFICATION_ICONS[category] || NOTIFICATION_ICONS.system;
+                            const bg = BG_BY_TYPE[category] || DEFAULT_BG;
                             return (
                                 <div key={notif.id} onClick={() => !isRead && markAsRead(notif.id)} className={`bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition cursor-pointer ${!isRead ? 'border-l-4 border-l-[#00D4AA]' : ''}`}>
                                     <div className="flex items-start p-4">

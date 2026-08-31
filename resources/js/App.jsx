@@ -57,6 +57,7 @@ import InvestmentPage from './pages/owner/InvestmentPage';
 import BarcodePage from './pages/owner/BarcodePage';
 import ExportPage from './pages/owner/ExportPage';
 import ReceiptPage from './pages/owner/ReceiptPage';
+import ProjectListPage from './pages/owner/ProjectListPage';
 
 // Admin pages
 import AdminShopsPage from './pages/admin/AdminShopsPage';
@@ -280,6 +281,8 @@ function AppRoutes() {
             <Route path="/owner/settings" element={<ProtectedRoute roles={['business_owner']}><SettingsPage /></ProtectedRoute>} />
             <Route path="/owner/notifications" element={<ProtectedRoute roles={['business_owner']}><NotificationListPage /></ProtectedRoute>} />
             <Route path="/owner/coupons" element={<ProtectedRoute roles={['business_owner']}><CouponListPage /></ProtectedRoute>} />
+            <Route path="/owner/projects" element={<ProtectedRoute roles={['business_owner']}><ProjectListPage /></ProtectedRoute>}
+            />
             <Route path="/owner/profile" element={<ProtectedRoute roles={['business_owner']}><ProfilePage /></ProtectedRoute>} />
 
             {/* Owner - Tools Routes */}

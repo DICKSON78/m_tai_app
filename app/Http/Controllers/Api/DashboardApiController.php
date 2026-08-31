@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Business;
+use App\Models\Delivery;
 use App\Models\Order;
+use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -56,10 +58,22 @@ class DashboardApiController extends Controller
 
         return response()->json([
             'total_businesses' => Business::count(),
+            'total_shops' => Business::count(),
             'total_customers' => User::where('role', 'customer')->count(),
+            'total_delivery_providers' => User::where('role', 'transporter')->count(),
             'total_users' => User::count(),
             'total_orders' => $totalOrders,
             'total_revenue' => $totalRevenue,
+            'total_daily_transactions' => Order::whereDate('created_at', today())->count(),
+            'total_active_businesses' => Business::where('status', 'active')->count(),
+            'total_active_customers' => User::where('role', 'customer')->where('is_active', true)->count(),
+            'total_active_delivery_providers' => User::where('role', 'transporter')->where('is_active', true)->count(),
+            'system_revenue' => round(Subscription::where('status', 'active')->sum('amount') + $totalRevenue, 2),
+            'subscription_revenue' => round(Subscription::where('status', 'active')->sum('amount'), 2),
+            'pending_approvals' => Business::where('status', 'pending')->count()
+                + Subscription::where('status', 'pending')->count(),
+            'pending_shops' => Business::where('status', 'pending')->count(),
+            'pending_subscriptions' => Subscription::where('status', 'pending')->count(),
             'new_customers_month' => $newCustomersMonth,
             'avg_order_value' => $avgOrderValue,
             'recent_orders' => $recentOrders,

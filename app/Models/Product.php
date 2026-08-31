@@ -10,6 +10,8 @@ class Product extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $appends = ['price', 'compare_at_price'];
+
     protected $fillable = [
         'business_id', 'category_id', 'name', 'slug', 'sku', 'barcode', 'description',
         'image', 'video', 'buying_price', 'selling_price', 'wholesale_price',
@@ -72,6 +74,26 @@ class Product extends Model
         }
 
         return 'healthy';
+    }
+
+    public function getPriceAttribute()
+    {
+        if ($this->selling_price > 0) {
+            return (float) $this->selling_price;
+        }
+        if ((float) $this->retail_price > 0) {
+            return (float) $this->retail_price;
+        }
+
+        return (float) $this->selling_price;
+    }
+
+    public function getCompareAtPriceAttribute()
+    {
+        $price = $this->price;
+        $wholesale = (float) $this->wholesale_price;
+
+        return $wholesale > $price ? $wholesale : null;
     }
 
     public function getStockValueCostAttribute()

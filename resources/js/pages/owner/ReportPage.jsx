@@ -7,6 +7,7 @@ import EmptyState from '../../components/casfeta/EmptyState';
 import { BarChart3, DollarSign, ShoppingCart, TrendingUp, Package, Users, Calendar, Clock } from 'lucide-react';
 
 const REPORT_TABS = [
+    { key: 'kpis', label: 'KPIs' },
     { key: 'sales', label: 'Sales' },
     { key: 'profit', label: 'Profit' },
     { key: 'expenses', label: 'Expenses' },
@@ -111,6 +112,39 @@ export default function ReportPage() {
                 <EmptyState title="No report data" description="No report data available for the selected period." />
             ) : (
                 <>
+                    {activeTab === 'kpis' && (() => {
+                        const k = reportData?.kpis || reportData || {};
+                        const kpiDefs = [
+                            { key: 'opening_capital', label: 'Opening Capital', icon: <DollarSign size={18} />, color: 'text-[#00D4AA]' },
+                            { key: 'initial_day_capital', label: 'Initial Day Capital', icon: <DollarSign size={18} />, color: 'text-blue-600' },
+                            { key: 'grand_daily_sales', label: 'GDS (Grand Daily Sales)', icon: <TrendingUp size={18} />, color: 'text-[#00B894]' },
+                            { key: 'grand_daily_expenditure', label: 'GDE (Grand Daily Expenditure)', icon: <TrendingUp size={18} />, color: 'text-red-600' },
+                            { key: 'grand_total_profit', label: 'GTP (Grand Total Profit)', icon: <TrendingUp size={18} />, color: 'text-[#00D4AA]' },
+                            { key: 'grand_daily_profit', label: 'GDP (Grand Daily Profit)', icon: <TrendingUp size={18} />, color: 'text-[#00B894]' },
+                            { key: 'perfect_profit', label: 'Perfect Profit', icon: <TrendingUp size={18} />, color: 'text-[#00D4AA]' },
+                        ];
+                        return (
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {kpiDefs.map((def) => (
+                                        <SummaryBox key={def.key} icon={def.icon} label={def.label} value={formatCurrency(k[def.key])} color={def.color} />
+                                    ))}
+                                    <SummaryBox icon={<TrendingUp size={18} />} label="Profit Margin" value={`${Number(k.profit_margin || 0).toFixed(1)}%`} color="text-[#00D4AA]" />
+                                </div>
+                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                                    <SectionHeader icon={<BarChart3 size={18} />} title="KPI Formula (System)" />
+                                    <div className="bg-gray-50 rounded-xl p-4 font-mono text-sm space-y-2">
+                                        <div className="text-gray-700">GDS - COGS = <span className="font-semibold text-[#00B894]">GTP (Grand Total Profit)</span></div>
+                                        <div className="text-gray-700">GTP - GDE = <span className="font-semibold text-[#00D4AA]">GDP (Grand Daily Profit)</span></div>
+                                        <div className="border-t pt-2 text-gray-700">GDP = <span className="font-semibold text-[#00D4AA]">Perfect Profit</span></div>
+                                        <div className="text-gray-700">Profit Margin = <span className="font-semibold">{Number(k.profit_margin || 0).toFixed(1)}%</span> (GDP / GDS × 100)</div>
+                                        <div className="border-t pt-2 text-xs text-gray-400">Period: {reportData.period} · {reportData.date_from} → {reportData.date_to}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })()}
+
                     {activeTab === 'sales' && (
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

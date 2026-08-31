@@ -59,6 +59,8 @@ class AuthApiController extends Controller
             'street' => 'nullable|string|max:255',
             'road' => 'nullable|string|max:255',
             'age' => 'nullable|integer|min:13|max:120',
+            'photo' => 'nullable|string|max:255',
+            'nida_number' => 'nullable|string|max:50',
         ]);
 
         $user = User::create([
@@ -70,6 +72,8 @@ class AuthApiController extends Controller
             'street' => $validated['street'] ?? null,
             'road' => $validated['road'] ?? null,
             'age' => $validated['age'] ?? null,
+            'photo' => $validated['photo'] ?? null,
+            'nida_number' => $validated['nida_number'] ?? null,
             'role' => 'customer',
             'user_code' => User::generateUserCode(),
         ]);
@@ -99,6 +103,11 @@ class AuthApiController extends Controller
             'road' => 'nullable|string|max:255',
             'payment_code' => 'nullable|string|max:50',
             'bank_account_number' => 'nullable|string|max:50',
+            'business_logo' => 'nullable|string|max:255',
+            'working_days' => 'nullable|array',
+            'working_days.*' => 'string',
+            'working_hours' => 'nullable|array',
+            'working_hours.*' => 'string',
         ]);
 
         $user = User::create([
@@ -122,9 +131,50 @@ class AuthApiController extends Controller
             'ward' => $validated['ward'] ?? '-',
             'street' => $validated['street'] ?? '-',
             'road' => $validated['road'] ?? '-',
+            'business_logo' => $validated['business_logo'] ?? null,
+            'working_days' => $validated['working_days'] ?? null,
+            'working_hours' => $validated['working_hours'] ?? null,
             'payment_code' => $validated['payment_code'] ?? '-',
             'bank_account_number' => $validated['bank_account_number'] ?? '-',
             'status' => 'pending',
+        ]);
+
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token,
+        ], 201);
+    }
+
+    public function registerLogistic(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string|unique:users,phone',
+            'password' => ['required', 'confirmed', Password::min(6)],
+            'vehicle_type' => 'required|string|max:255',
+            'plate_number' => 'nullable|string|max:50',
+            'region' => 'nullable|string|max:255',
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'password' => Hash::make($validated['password']),
+            'region' => $validated['region'] ?? null,
+            'role' => 'transporter',
+            'user_code' => User::generateUserCode(),
+        ]);
+
+        $user->transporter()->create([
+            'full_name' => $validated['name'],
+            'phone' => $validated['phone'],
+            'vehicle_type' => $validated['vehicle_type'],
+            'plate_number' => $validated['plate_number'] ?? null,
+            'is_active' => true,
         ]);
 
         $token = $user->createToken('auth-token')->plainTextToken;

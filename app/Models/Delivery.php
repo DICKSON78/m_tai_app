@@ -14,6 +14,8 @@ class Delivery extends Model
         'business_id', 'order_id', 'customer_id', 'goods_category',
         'item_description', 'quantity', 'pickup_location', 'destination',
         'offered_price', 'is_negotiable', 'status', 'transporter_id',
+        'counter_price', 'counter_status', 'rejected', 'rejected_reason',
+        'rejected_by',
     ];
 
     protected function casts(): array

@@ -11,7 +11,7 @@ class Attendance extends Model
 
     protected $table = 'attendance';
 
-    protected $fillable = ['employee_id', 'date', 'clock_in', 'clock_out', 'hours_worked', 'status', 'notes'];
+    protected $fillable = ['employee_id', 'date', 'clock_in', 'clock_out', 'hours_worked', 'status', 'notes', 'latitude', 'longitude', 'location'];
 
     protected function casts(): array
     {

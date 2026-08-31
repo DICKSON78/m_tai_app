@@ -9,7 +9,7 @@ import FormField from '../../components/casfeta/FormField';
 import SummaryBox from '../../components/casfeta/SummaryBox';
 import EmptyState from '../../components/casfeta/EmptyState';
 import ActionBar from '../../components/casfeta/ActionBar';
-import { Package, Plus, Pencil, Trash2, DollarSign, MapPin, Truck, CreditCard, Search, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { Package, Plus, Pencil, Trash2, DollarSign, MapPin, Truck, CreditCard, Search, CheckCircle, Clock, AlertTriangle, Sparkles, RefreshCw } from 'lucide-react';
 
 const STATUS_TABS = [
     { key: '', label: 'All' },
@@ -51,6 +51,10 @@ export default function ImportGoodsPage() {
     const [submitting, setSubmitting] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+    const [suggestions, setSuggestions] = useState([]);
+    const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+    const [suggestDays, setSuggestDays] = useState(90);
 
     useEffect(() => {
         api.get('/owner/businesses').then(res => { const biz = res.data?.data || res.data || []; setBusinesses(biz); if (biz.length === 1) setSelectedBusiness(biz[0].id); }).catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
@@ -87,6 +91,30 @@ export default function ImportGoodsPage() {
     const openEdit = (item) => { setEditingItem(item); setForm({ item_name: item.item_name || '', quantity: item.quantity || '', buying_price: item.buying_price || '', selling_price: item.selling_price || '', distance_km: item.distance_km || '', transport_cost: item.transport_cost || '', payment_method: item.payment_method || 'cash' }); setEditModalOpen(true); };
     const formatCurrency = (val) => `TZS ${Number(val || 0).toLocaleString()}`;
 
+    const fetchSuggestions = async () => {
+        if (!selectedBusiness) return;
+        setSuggestionsLoading(true); setSuggestions([]);
+        try {
+            const res = await api.get(`/owner/businesses/${selectedBusiness}/imports/suggestions`, { params: { days: suggestDays } });
+            setSuggestions(res.data?.suggestions || []);
+        } catch (error) { console.error('Failed to fetch import suggestions:', error); alert(error?.response?.data?.message || 'Failed to load suggestions.'); } finally { setSuggestionsLoading(false); }
+    };
+
+    const openSuggestions = () => { setSuggestionsOpen(true); fetchSuggestions(); };
+
+    const useSuggestion = (s) => {
+        setForm({ item_name: s.name || '', quantity: s.suggested_quantity || '', buying_price: '', selling_price: '', distance_km: '', transport_cost: '', payment_method: 'cash' });
+        setSuggestionsOpen(false);
+        setAddModalOpen(true);
+    };
+
+    const statusBadge = (status) => {
+        if (status === 'out_of_stock') return { label: 'Out of Stock', cls: 'bg-red-100 text-red-600' };
+        if (status === 'low_stock') return { label: 'Low Stock', cls: 'bg-orange-100 text-orange-700' };
+        return { label: 'Healthy', cls: 'bg-[#00D4AA]/10 text-[#00B894]' };
+    };
+
+
     return (
         <div className="space-y-6">
             <PageHeader
@@ -94,9 +122,14 @@ export default function ImportGoodsPage() {
                 subtitle="Track goods imported from suppliers."
                 icon={<Package size={20} />}
                 actions={selectedBusiness && (
-                    <button onClick={() => { setForm(emptyForm); setAddModalOpen(true); }} className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#00D4AA] text-white rounded-lg text-sm font-medium hover:bg-[#00B894] transition-all shadow-md">
-                        <Plus size={16} /> Add Item
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button onClick={openSuggestions} className="inline-flex items-center gap-2 px-4 py-2.5 text-[#00D4AA] font-medium rounded-lg border border-[#00D4AA]/30 bg-white hover:bg-[#00D4AA]/5 transition-all shadow-sm">
+                            <Sparkles size={16} /> Smart Suggestions
+                        </button>
+                        <button onClick={() => { setForm(emptyForm); setAddModalOpen(true); }} className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#00D4AA] text-white rounded-lg text-sm font-medium hover:bg-[#00B894] transition-all shadow-md">
+                            <Plus size={16} /> Add Item
+                        </button>
+                    </div>
                 )}
             />
 
@@ -244,6 +277,59 @@ export default function ImportGoodsPage() {
             </Modal>
 
             <ConfirmDialog isOpen={deleteModalOpen} onClose={() => { setDeleteModalOpen(false); setDeleteId(null); }} onConfirm={handleDelete} title="Delete Item" message="Are you sure you want to delete this item?" confirmText="Delete" cancelText="Cancel" variant="danger" />
+
+            <Modal isOpen={suggestionsOpen} onClose={() => setSuggestionsOpen(false)} title="Smart Import Suggestions" size="lg">
+                <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <p className="text-sm text-gray-500">Based on sales history and current stock levels.</p>
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm font-semibold text-gray-700">Analyze</label>
+                            <select value={suggestDays} onChange={(e) => setSuggestDays(Number(e.target.value))} className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]">
+                                {[30, 60, 90, 180, 365].map(d => <option key={d} value={d}>{d} days</option>)}
+                            </select>
+                            <button onClick={fetchSuggestions} className="inline-flex items-center gap-1.5 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-all"><RefreshCw size={14} /> Refresh</button>
+                        </div>
+                    </div>
+
+                    {suggestionsLoading ? (
+                        <div className="flex items-center justify-center h-48"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]"></div></div>
+                    ) : suggestions.length === 0 ? (
+                        <div className="px-6 py-12 text-center"><Sparkles size={40} className="mx-auto text-gray-300 mb-3" /><p className="text-sm text-gray-500">No suggestions available for this period.</p></div>
+                    ) : (
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between px-2 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                <span>Product</span><span>Current</span><span>Sold</span><span>Trend</span><span className="w-24 text-right">Suggested</span>
+                            </div>
+                            {suggestions.map((s, i) => {
+                                const badge = statusBadge(s.status);
+                                return (
+                                    <div key={s.product_id} className="flex items-center justify-between gap-3 bg-gray-50 rounded-lg px-3 py-2.5">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-800 truncate">#{i + 1} {s.name}</p>
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${badge.cls}`}>{badge.label}</span>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-sm text-gray-600">{s.current_stock}</p>
+                                            <p className="text-[10px] text-gray-400">stock</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-sm text-gray-700">{Math.round(s.units_sold)}</p>
+                                            <p className="text-[10px] text-gray-400">sold</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className={`text-sm font-semibold ${s.demand_trend >= 0 ? 'text-[#00B894]' : 'text-red-500'}`}>{s.demand_trend >= 0 ? '+' : ''}{s.demand_trend}%</p>
+                                            <p className="text-[10px] text-gray-400">demand</p>
+                                        </div>
+                                        <button onClick={() => useSuggestion(s)} className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#00D4AA] text-white rounded-lg text-xs font-medium hover:bg-[#00B894] transition-all shrink-0" title="Use suggestion">
+                                            <Plus size={13} /> {s.suggested_quantity}
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </Modal>
         </div>
     );
 }

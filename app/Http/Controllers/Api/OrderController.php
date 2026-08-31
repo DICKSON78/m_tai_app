@@ -24,6 +24,7 @@ class OrderController extends Controller
             'customer_phone' => 'required|string|max:20',
             'payment_method' => 'required|in:cash,mobile_money,bank_transfer,card,other',
             'notes' => 'nullable|string|max:1000',
+            'customer_type' => 'sometimes|in:registered,guest,walk_in',
             'price_type' => 'sometimes|in:selling,wholesale,retail',
             'coupon_code' => 'nullable|string|max:50',
             'currency_code' => 'nullable|string|size:3',
@@ -55,7 +56,16 @@ class OrderController extends Controller
             }
         }
 
-        $cart = $request->session()->get('cart', []);
+        if ($request->has('items') && is_array($request->input('items'))) {
+            $cart = collect($request->input('items'))->map(function ($i) {
+                return [
+                    'product_id' => (int) ($i['product_id'] ?? 0),
+                    'quantity' => (int) ($i['quantity'] ?? 1),
+                ];
+            })->filter(fn ($i) => $i['product_id'] > 0 && $i['quantity'] > 0)->values()->all();
+        } else {
+            $cart = $request->session()->get('cart', []);
+        }
 
         if (empty($cart)) {
             return response()->json(['message' => 'Cart is empty. Please add products.'], 422);
@@ -72,7 +82,12 @@ class OrderController extends Controller
                 ], 422);
             }
             $businessId = $product->business_id;
-            $grouped[$businessId][] = ['key' => $key, 'product' => $product, 'quantity' => $item['quantity'], 'price' => $item['price']];
+            $grouped[$businessId][] = [
+                'key' => $key,
+                'product' => $product,
+                'quantity' => $item['quantity'],
+                'price' => $item['price'] ?? (float) $product->price,
+            ];
         }
 
         $orders = [];
@@ -128,6 +143,7 @@ class OrderController extends Controller
                         'phone' => $validated['customer_phone'],
                         'customer_code' => Customer::generateCustomerCode(),
                         'is_guest' => true,
+                        'customer_type' => $validated['customer_type'] ?? 'walk_in',
                     ]);
                 }
 
@@ -224,12 +240,67 @@ class OrderController extends Controller
     {
         $user = $request->user();
 
-        $orders = Order::whereHas('customer', function ($q) use ($user) {
+        $validated = $request->validate([
+            'period' => 'sometimes|in:daily,weekly,monthly,yearly',
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date',
+            'search' => 'nullable|string|max:255',
+            'sort' => 'sometimes|in:newest,oldest,most_bought,least_bought',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
+        $period = $validated['period'] ?? null;
+        $dateFrom = $validated['date_from'] ?? null;
+        $dateTo = $validated['date_to'] ?? null;
+        $sort = $validated['sort'] ?? 'newest';
+
+        $query = Order::whereHas('customer', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         })
-            ->with(['items.product', 'business', 'payments'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->where('status', 'completed');
+
+        if ($period) {
+            match ($period) {
+                'daily' => $query->whereDate('created_at', now()->toDateString()),
+                'weekly' => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
+                'monthly' => $query->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]),
+                'yearly' => $query->whereBetween('created_at', [now()->startOfYear(), now()->endOfYear()]),
+            };
+        }
+
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+
+        if (! empty($validated['search'])) {
+            $search = $validated['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('transaction_code', 'like', "%{$search}%")
+                    ->orWhereHas('items.product', function ($pq) use ($search) {
+                        $pq->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($sort === 'most_bought') {
+            $query->withCount('items')
+                ->orderByDesc('items_count')
+                ->orderBy('created_at', 'desc');
+        } elseif ($sort === 'least_bought') {
+            $query->withCount('items')
+                ->orderBy('items_count')
+                ->orderBy('created_at', 'desc');
+        } elseif ($sort === 'oldest') {
+            $query->orderBy('created_at', 'asc');
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $orders = $query->with(['items.product', 'business', 'payments'])
+            ->paginate($validated['per_page'] ?? 15);
 
         return response()->json($orders);
     }
@@ -261,6 +332,20 @@ class OrderController extends Controller
             ->with(['customer', 'items.product'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
+
+        return response()->json($orders);
+    }
+
+    public function employeeOrders(Request $request)
+    {
+        $user = $request->user();
+
+        $businessIds = $user->employees()->pluck('business_id');
+
+        $orders = Order::whereIn('business_id', $businessIds)
+            ->with(['customer', 'items.product'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($request->per_page ?? 100);
 
         return response()->json($orders);
     }
@@ -330,15 +415,11 @@ class OrderController extends Controller
         }
     }
 
-    public function updateStatus(Request $request)
+    public function updateStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'transaction_code' => 'required|string|exists:orders,transaction_code',
             'status' => 'required|in:pending,confirmed,completed,cancelled',
         ]);
-
-        $order = Order::where('transaction_code', $validated['transaction_code'])
-            ->firstOrFail();
 
         $user = $request->user();
         $businessIds = $user->businesses()->pluck('id');
