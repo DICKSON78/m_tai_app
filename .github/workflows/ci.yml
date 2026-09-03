@@ -6,10 +6,13 @@ on:
   pull_request:
     branches: [master]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       mysql:
         image: mysql:8.0
@@ -21,29 +24,39 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -ppassword"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
-    
+          --health-retries=10
+
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, xml, ctype, json, bcmath, dom, zip
+          extensions: mbstring, xml, ctype, json, bcmath, dom, zip, pdo_mysql
           coverage: none
-      
-      - name: Install Dependencies
-        run: composer install --no-progress --prefer-dist
-      
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Install frontend dependencies
+        run: npm install --legacy-peer-deps --no-audit --no-fund
+
       - name: Prepare Environment
         run: |
           cp .env.example .env
           php artisan key:generate
-      
+
       - name: Run Migrations
         env:
           DB_CONNECTION: mysql
@@ -53,7 +66,10 @@ jobs:
           DB_USERNAME: mtai_test
           DB_PASSWORD: mtai_test
         run: php artisan migrate --force
-      
+
+      - name: Build frontend
+        run: npm run build
+
       - name: Run Tests
         env:
           DB_CONNECTION: mysql
