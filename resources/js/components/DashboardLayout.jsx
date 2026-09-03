@@ -350,9 +350,9 @@ export default function DashboardLayout({ children }) {
             {/* Logo */}
             <div className="p-5 pb-3 flex items-center justify-between">
                 <Link to={`/${role === 'business_owner' ? 'owner' : role}/dashboard`} className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm"
-                         style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
-                        MT
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden bg-white"
+                         style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
+                        <img src="/icons/icon-96x96.png" alt="M-TAI" className="w-8 h-8 object-contain" />
                     </div>
                     <div>
                         <h1 className="text-white font-bold text-[15px] leading-tight">M-TAI</h1>

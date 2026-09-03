@@ -81,6 +81,7 @@ Route::post('/register/seller', [AuthApiController::class, 'registerSeller'])->m
 Route::post('/register/logistic', [AuthApiController::class, 'registerLogistic'])->middleware('throttle:register');
 Route::post('/register/transporter', [AuthApiController::class, 'registerLogistic'])->middleware('throttle:register');
 Route::post('/login', [AuthApiController::class, 'login'])->middleware('throttle:login');
+Route::post('/auth/google', [AuthApiController::class, 'googleLogin'])->middleware('throttle:login');
 Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword'])->middleware('throttle:login');
 Route::post('/reset-password', [AuthApiController::class, 'resetPassword'])->middleware('throttle:login');
 

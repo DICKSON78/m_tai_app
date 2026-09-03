@@ -37,6 +37,7 @@
     <link rel="apple-touch-icon" sizes="76x76" href="/icons/icon-72x72.png">
 
     <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
     <link rel="icon" type="image/png" sizes="96x96" href="/icons/icon-96x96.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-72x72.png">
@@ -104,8 +105,8 @@
                     container.innerHTML = `
                         <div class="pwa-install-banner show" id="pwa-install-banner">
                             <div style="max-width:640px;margin:0 auto;display:flex;align-items:center;gap:12px;">
-                                <div style="width:40px;height:40px;background:linear-gradient(135deg,#d0f4dd,#b8f0cc);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                    <span style="color:#00D4AA;font-weight:700;font-size:18px;">M</span>
+                                <div style="width:40px;height:40px;background:#ffffff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid #e5e7eb;">
+                                    <img src="/icons/icon-96x96.png" alt="M-TAI" style="width:32px;height:32px;object-fit:contain;" />
                                 </div>
                                 <div style="flex:1;min-width:0;">
                                     <p style="font-weight:600;font-size:14px;color:#111827;">Install M-TAI</p>

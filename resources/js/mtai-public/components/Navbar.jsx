@@ -33,8 +33,8 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-[72px]">
             <Link to="/" className="flex items-center gap-3 group">
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#00D4AA] to-[#00B894] rounded-xl flex items-center justify-center shadow-lg shadow-[#00D4AA]/20 group-hover:shadow-[#00D4AA]/40 transition-shadow duration-300">
-                  <span className="text-[#0A140C] font-black text-lg">M</span>
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-black/20 overflow-hidden">
+                  <img src="/icons/icon-96x96.png" alt="M-TAI" className="w-8 h-8 object-contain" />
                 </div>
                 <div className="absolute -inset-1 bg-[#00D4AA]/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>

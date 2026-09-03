@@ -130,8 +130,8 @@ export default function RegisterSellerPage() {
             <div className="w-full max-w-2xl">
                 <div className="text-center mb-12">
                     <div className="flex items-center justify-center gap-3 mb-8">
-                        <div className="w-12 h-12 bg-[#00D4AA] rounded-xl flex items-center justify-center">
-                            <span className="text-[#0A140C] font-black text-xl">M</span>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden border border-gray-100 shadow-sm">
+                            <img src="/icons/icon-96x96.png" alt="M-TAI" className="w-10 h-10 object-contain" />
                         </div>
                         <span className="text-gray-600 font-black text-3xl">M-TAI</span>
                     </div>

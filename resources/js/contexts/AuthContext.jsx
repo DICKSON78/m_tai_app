@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import api from '../services/api';
+import { auth, googleProvider, signInWithPopup, signOut as fbSignOut } from '../services/firebase';
 
 const AuthContext = createContext(null);
 const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes in ms
@@ -94,6 +95,18 @@ export function AuthProvider({ children }) {
         return userData;
     };
 
+    const loginWithGoogle = async () => {
+        const result = await signInWithPopup(auth, googleProvider);
+        const idToken = await result.user.getIdToken();
+        const response = await api.post('/auth/google', { id_token: idToken });
+        const { user: userData, token } = response.data;
+        localStorage.setItem('auth_token', token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+        resetIdleTimer();
+        return userData;
+    };
+
     const register = async (data, type) => {
         const endpoint = type === 'customer' ? '/register/customer' : '/register/seller';
         try {
@@ -115,13 +128,14 @@ export function AuthProvider({ children }) {
     const logout = async () => {
         clearIdleTimer();
         try { await api.post('/logout'); } catch (e) {}
+        try { await fbSignOut(auth); } catch (e) {}
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user');
         setUser(null);
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, loginWithGoogle }}>
             {children}
         </AuthContext.Provider>
     );

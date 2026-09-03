@@ -8,7 +8,8 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    const [googleLoading, setGoogleLoading] = useState(false);
+    const { login, loginWithGoogle } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -33,13 +34,38 @@ export default function LoginPage() {
         }
     };
 
+    const redirectByRole = (role) => {
+        if (role === 'admin') window.location.href = '/admin/dashboard';
+        else if (role === 'business_owner') window.location.href = '/owner/dashboard';
+        else if (role === 'employee') window.location.href = '/employee/dashboard';
+        else if (role === 'transporter') window.location.href = '/transporter/dashboard';
+        else window.location.href = '/customer/dashboard';
+    };
+
+    const handleGoogleLogin = async () => {
+        setGoogleLoading(true);
+        setError('');
+        try {
+            const userData = await loginWithGoogle();
+            redirectByRole(userData.role);
+        } catch (err) {
+            console.error('Google login failed:', err);
+            const msg = err?.response?.data?.errors?.id_token?.[0]
+                || err?.response?.data?.message
+                || 'Google sign-in failed. Please try again.';
+            setError(msg);
+        } finally {
+            setGoogleLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-white flex items-center justify-center px-6 py-12 auth-page">
             <div className="w-full max-w-2xl">
                 <div className="text-center mb-12">
                     <div className="flex items-center justify-center gap-3 mb-8">
-                        <div className="w-12 h-12 bg-[#00D4AA] rounded-xl flex items-center justify-center">
-                            <span className="text-[#0A140C] font-black text-xl">M</span>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden border border-gray-100 shadow-sm">
+                            <img src="/icons/icon-96x96.png" alt="M-TAI" className="w-10 h-10 object-contain" />
                         </div>
                         <span className="text-gray-600 font-black text-3xl">M-TAI</span>
                     </div>
@@ -127,7 +153,9 @@ export default function LoginPage() {
 
                 <button
                     type="button"
-                    className="w-full flex items-center justify-center gap-3 py-3 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
+                    onClick={handleGoogleLogin}
+                    disabled={googleLoading}
+                    className="w-full flex items-center justify-center gap-3 py-3 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 disabled:opacity-50"
                 >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -135,7 +163,7 @@ export default function LoginPage() {
                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
-                    Continue with Google
+                    {googleLoading ? 'Signing in...' : 'Continue with Google'}
                 </button>
 
                 <div className="mt-10 text-center">

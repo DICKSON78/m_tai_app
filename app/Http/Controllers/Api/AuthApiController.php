@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use App\Mail\PasswordResetMail;
+use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
@@ -46,6 +47,162 @@ class AuthApiController extends Controller
             'user' => $user,
             'token' => $token,
         ]);
+    }
+
+    /**
+     * Verify a Google ID token (from Google Identity Services) and
+     * log in / create the matching user.
+     */
+    public function googleLogin(Request $request)
+    {
+        $request->validate([
+            'id_token' => 'required|string',
+        ]);
+
+        $token = $this->verifyGoogleIdToken($request->id_token);
+
+        if (!$token) {
+            throw ValidationException::withMessages([
+                'id_token' => ['Uthibitisho wa Google haukufanikiwa.'],
+            ]);
+        }
+
+        $googleId = $token['sub'];
+        $email = $token['email'] ?? null;
+        $name = $token['name'] ?? null;
+        $avatar = $token['picture'] ?? null;
+
+        if (!$email) {
+            throw ValidationException::withMessages([
+                'id_token' => ['Barua pepe ya Google haikupatikana.'],
+            ]);
+        }
+
+        $user = User::where('google_id', $googleId)->first();
+
+        if (!$user) {
+            $user = User::where('email', $email)->first();
+            if ($user && !$user->google_id) {
+                // Link an existing account that was created with a password.
+                $user->update([
+                    'google_id' => $googleId,
+                    'avatar' => $avatar ?: $user->avatar,
+                ]);
+            }
+        }
+
+        if (!$user) {
+            $user = User::create([
+                'name' => $name ?? explode('@', $email)[0],
+                'email' => $email,
+                'phone' => null,
+                'password' => null,
+                'photo' => $avatar,
+                'avatar' => $avatar,
+                'google_id' => $googleId,
+                'role' => 'customer',
+                'user_code' => User::generateUserCode(),
+            ]);
+        }
+
+        if (!$user->is_active) {
+            throw ValidationException::withMessages([
+                'id_token' => ['Akaunti yako imesimamishwa.'],
+            ]);
+        }
+
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
+
+    /**
+     * Validate a Firebase Auth ID token (issued after Google sign-in) and
+     * return its claims, or null.
+     */
+    protected function verifyGoogleIdToken(string $idToken): ?array
+    {
+        try {
+            $projectId = config('services.firebase.project_id');
+            $apiKey = config('services.firebase.api_key');
+
+            if (!$projectId || !$apiKey) {
+                \Log::error('Firebase project_id/api_key are not configured.');
+                return null;
+            }
+
+            $jwt = explode('.', $idToken);
+            if (count($jwt) !== 3) {
+                return null;
+            }
+
+            $header = (array) JWT::jsonDecode(JWT::urlsafeB64Decode($jwt[0]));
+            $kid = $header['kid'] ?? null;
+            if (!$kid) {
+                return null;
+            }
+
+            $pem = $this->fetchFirebasePublicKey($kid);
+            if (!$pem) {
+                \Log::warning('Could not resolve Firebase public key for kid=' . $kid);
+                return null;
+            }
+
+            $decoded = JWT::decode($idToken, new \Firebase\JWT\Key($pem, 'RS256'));
+
+            $payload = (array) $decoded;
+
+            $expectedAud = $projectId;
+            $expectedIss = 'https://securetoken.google.com/' . $projectId;
+
+            if (($payload['aud'] ?? null) !== $expectedAud) {
+                \Log::warning('Firebase ID token audience mismatch.');
+                return null;
+            }
+
+            if (($payload['iss'] ?? null) !== $expectedIss) {
+                \Log::warning('Firebase ID token issuer mismatch.');
+                return null;
+            }
+
+            if (($payload['exp'] ?? 0) < time()) {
+                \Log::warning('Firebase ID token has expired.');
+                return null;
+            }
+
+            return $payload;
+        } catch (\Throwable $e) {
+            \Log::error('Firebase ID token verification failed: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Fetch a single Firebase public signing key (PEM) for the given kid.
+     * Firebase keys rotate ~hourly, so we fetch without long-lived caching.
+     */
+    protected function fetchFirebasePublicKey(string $kid): ?string
+    {
+        try {
+            $apiKey = config('services.firebase.api_key');
+            $url = 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/publicKeys?key=' . urlencode($apiKey);
+
+            $response = \Illuminate\Support\Facades\Http::timeout(10)->get($url);
+
+            if (!$response->successful()) {
+                return null;
+            }
+
+            $keys = $response->json();
+
+            return $keys[$kid] ?? null;
+        } catch (\Throwable $e) {
+            \Log::error('Failed to fetch Firebase keys: ' . $e->getMessage());
+            return null;
+        }
     }
 
     public function registerCustomer(Request $request)
