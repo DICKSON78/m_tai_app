@@ -45,7 +45,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('lead_id')->nullable()->constrained('crm_leads')->nullOnDelete();
-            $table->foreignId('deal_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('deal_id')->nullable()->constrained('crm_deals')->nullOnDelete();
             $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('type', ['call', 'email', 'meeting', 'task', 'note'])->default('note');
             $table->string('subject');
