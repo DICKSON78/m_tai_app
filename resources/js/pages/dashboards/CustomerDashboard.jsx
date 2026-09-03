@@ -145,7 +145,7 @@ export default function CustomerDashboard() {
     const chipList = [{ name: 'All', id: null }, ...categories];
 
     return (
-        <div className="max-w-2xl mx-auto space-y-4">
+        <div className="w-full space-y-5">
             {/* Greeting */}
             <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full flex items-center justify-center text-lg font-bold text-white shrink-0" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
@@ -205,11 +205,11 @@ export default function CustomerDashboard() {
                 <span className="text-xs text-gray-500">{totalCount} item{totalCount === 1 ? '' : 's'}</span>
             </div>
 
-            {/* Single-column feed (Instagram/Twitter style) */}
+            {/* Product grid (e-commerce layout, fills width) */}
             {loading ? (
-                <div className="space-y-4">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="bg-white rounded-2xl border border-gray-200 animate-pulse h-80" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="bg-white rounded-2xl border border-gray-200 animate-pulse h-72" />
                     ))}
                 </div>
             ) : products.length === 0 ? (
@@ -223,7 +223,7 @@ export default function CustomerDashboard() {
                     <p className="text-sm text-gray-500">Try a different category or check back soon.</p>
                 </div>
             ) : (
-                <div className="space-y-4 pb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
                     {products.map(product => (
                         <ProductCard key={product.id} product={product} />
                     ))}

@@ -1,21 +1,15 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
-
-const NAV_LINKS = [
-    { to: '/customer/shops', label: 'Shops', icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z' },
-    { to: '/customer/orders', label: 'Orders', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
-    { to: '/customer/wishlist', label: 'Wishlist', icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z' },
-];
+import CustomerSidebar from './CustomerSidebar';
 
 export default function CustomerMarketplaceLayout({ children }) {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-    const location = useLocation();
     const [cartCount, setCartCount] = useState(0);
     const [search, setSearch] = useState('');
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -50,13 +44,12 @@ export default function CustomerMarketplaceLayout({ children }) {
     };
 
     const userInitials = (user?.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-    const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
 
     return (
         <div className="min-h-screen flex flex-col bg-surface">
             {/* ===== Top navbar ===== */}
             <header className="sticky top-0 z-50" style={{ background: 'linear-gradient(135deg, #0a3d33 0%, #0d4a3e 50%, #06271f 100%)' }}>
-                <div className="mx-auto max-w-7xl px-4">
+                <div className="mx-auto max-w-[1200px] px-4">
                     <div className="flex items-center gap-3 h-16">
                         {/* Mobile hamburger */}
                         <button
@@ -77,9 +70,9 @@ export default function CustomerMarketplaceLayout({ children }) {
                         </Link>
 
                         {/* Search */}
-                        <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-2 lg:mx-4">
-                            <div className="flex items-center bg-white rounded-full overflow-hidden border border-primary focus-within:ring-2 focus-within:ring-primary/50">
-                                <div className="pl-4 text-gray-400">
+                        <form onSubmit={handleSearch} className="flex-1 min-w-0 max-w-3xl mx-2 lg:mx-6">
+                            <div className="flex items-center bg-white rounded-xl overflow-hidden border border-primary focus-within:ring-2 focus-within:ring-primary/50 shadow-sm">
+                                <div className="pl-4 text-gray-400 shrink-0">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
@@ -87,35 +80,20 @@ export default function CustomerMarketplaceLayout({ children }) {
                                 <input
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Search products..."
-                                    className="flex-1 px-3 py-2.5 text-sm text-gray-800 outline-none bg-transparent"
+                                    placeholder="Search products, shops..."
+                                    className="flex-1 px-3 py-2.5 text-sm text-gray-800 outline-none bg-transparent min-w-0"
                                 />
-                                <button type="submit" className="px-5 py-2.5 text-sm font-bold text-white" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
+                                <button type="submit" className="px-5 py-2.5 text-sm font-bold text-white shrink-0" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
                                     Search
                                 </button>
                             </div>
                         </form>
 
                         <div className="flex items-center gap-1.5 shrink-0">
-                            {/* Desktop nav links */}
-                            <nav className="hidden lg:flex items-center gap-1">
-                                {NAV_LINKS.map((link) => (
-                                    <Link
-                                        key={link.to}
-                                        to={link.to}
-                                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                            isActive(link.to) ? 'bg-white/15 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'
-                                        }`}
-                                    >
-                                        {link.label}
-                                    </Link>
-                                ))}
-                            </nav>
-
                             {/* Cart */}
                             <Link
                                 to="/customer/cart"
-                                className="relative p-2.5 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                                className="relative p-2.5 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-2"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
@@ -148,7 +126,7 @@ export default function CustomerMarketplaceLayout({ children }) {
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem onClick={() => navigate('/customer/profile')} className="cursor-pointer">
-                                        My Profile
+                                        Settings
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => navigate('/customer/wishlist')} className="cursor-pointer">
                                         My Wishlist
@@ -162,37 +140,35 @@ export default function CustomerMarketplaceLayout({ children }) {
                         </div>
                     </div>
 
-                    {/* Mobile nav */}
+                    {/* Mobile nav (collapsible sidebar) */}
                     {mobileOpen && (
-                        <nav className="lg:hidden flex flex-col gap-1 pb-3">
-                            {NAV_LINKS.map((link) => (
-                                <Link
-                                    key={link.to}
-                                    to={link.to}
-                                    onClick={() => setMobileOpen(false)}
-                                    className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                                        isActive(link.to) ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10'
-                                    }`}
-                                >
-                                    {link.label}
-                                </Link>
-                            ))}
-                            <Link to="/customer/profile" onClick={() => setMobileOpen(false)} className="px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10">
-                                My Profile
-                            </Link>
-                        </nav>
+                        <div className="lg:hidden pb-3">
+                            <CustomerSidebar onNavigate={() => setMobileOpen(false)} />
+                        </div>
                     )}
                 </div>
             </header>
 
-            {/* ===== Content ===== */}
-            <main className="flex-1 w-full mx-auto max-w-7xl px-4 py-6 content-area">
-                {children}
-            </main>
+            {/* ===== Body: sidebar + content (mbg-style e-commerce layout) ===== */}
+            <div className="bg-[#f5f7f5] min-h-[70vh]">
+                <div className="max-w-[1200px] mx-auto px-6 py-8">
+                    <div className="flex gap-8">
+                        {/* Sidebar — desktop */}
+                        <aside className="customer-sidebar shrink-0 hidden lg:block">
+                            <CustomerSidebar />
+                        </aside>
+
+                        {/* Main content — fills remaining width */}
+                        <main className="flex-1 min-w-0 content-area">
+                            {children}
+                        </main>
+                    </div>
+                </div>
+            </div>
 
             {/* ===== Footer ===== */}
             <footer className="mt-auto" style={{ background: '#06271f' }}>
-                <div className="mx-auto max-w-7xl px-4 py-8">
+                <div className="mx-auto max-w-[1200px] px-4 py-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-sm">
                         <div>
                             <div className="flex items-center gap-2 mb-3">
