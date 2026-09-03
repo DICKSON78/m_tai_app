@@ -155,10 +155,10 @@ export default function CustomerMarketplaceLayout({ children }) {
 
             {/* ===== Body: sidebar (static) + content + right rail ===== */}
             <div className="bg-[#f5f7f5] min-h-[70vh]">
-                <div className="max-w-[1440px] mx-auto px-2 sm:px-3 py-4 sm:py-6">
+                <div className="px-3 py-4 sm:py-6">
                     <div className="flex gap-3 items-start">
                         {/* Sidebar — static (sticky, doesn't scroll) */}
-                        <aside className="customer-sidebar shrink-0 hidden lg:block sticky top-20 self-start">
+                        <aside className="customer-sidebar shrink-0 hidden lg:block sticky top-20 self-start pr-3 border-r border-gray-200">
                             <CustomerSidebar />
                         </aside>
 
@@ -168,7 +168,7 @@ export default function CustomerMarketplaceLayout({ children }) {
                         </main>
 
                         {/* Right rail — top shops + ad banners (static, doesn't scroll) */}
-                        <aside className="hidden lg:block w-64 shrink-0 sticky top-20 self-start">
+                        <aside className="hidden lg:block w-64 shrink-0 sticky top-20 self-start pl-3 border-l border-gray-200">
                             <CustomerRightRail />
                         </aside>
                     </div>

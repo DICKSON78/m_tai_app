@@ -146,6 +146,8 @@ export default function CustomerDashboard() {
 
     return (
         <div className="w-full space-y-5">
+            {/* Greeting + categories — static (sticky, doesn't scroll) */}
+            <div className="sticky top-20 z-20 -mx-0 bg-[#f5f7f5] pb-2 pt-1 rounded-b-xl">
             {/* Greeting */}
             <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full flex items-center justify-center text-lg font-bold text-white shrink-0" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
@@ -159,7 +161,7 @@ export default function CustomerDashboard() {
             </div>
 
             {/* Category chips — tile style (like the app) */}
-            <div className="flex gap-2.5 overflow-x-auto pb-0.5 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+            <div className="flex gap-2.5 overflow-x-auto pb-0.5 -mx-1 px-1 mt-3" style={{ scrollbarWidth: 'none' }}>
                 {chipList.map((c) => {
                     const active = selectedCategoryId === c.id;
                     return (
@@ -180,6 +182,7 @@ export default function CustomerDashboard() {
                         </button>
                     );
                 })}
+            </div>
             </div>
 
             {/* Banner */}
@@ -207,7 +210,7 @@ export default function CustomerDashboard() {
 
             {/* Product grid (e-commerce layout, fills width) */}
             {loading ? (
-                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                     {[1, 2, 3, 4].map(i => (
                         <div key={i} className="bg-white rounded-2xl border border-gray-200 animate-pulse h-72" />
                     ))}
@@ -223,7 +226,7 @@ export default function CustomerDashboard() {
                     <p className="text-sm text-gray-500">Try a different category or check back soon.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 pb-4">
                     {products.map(product => (
                         <ProductCard key={product.id} product={product} />
                     ))}
