@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import CustomerSidebar from './CustomerSidebar';
@@ -165,50 +164,6 @@ export default function CustomerMarketplaceLayout({ children }) {
                     <div className="px-3 py-4">
                         {children}
                     </div>
-
-                    {/* ===== Footer ===== */}
-                    <footer style={{ background: '#06271f' }}>
-                        <div className="mx-auto max-w-[1440px] px-4 py-8">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-sm">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <div className="w-8 h-8 rounded-lg overflow-hidden bg-white flex items-center justify-center">
-                                            <img src="/icons/icon-96x96.png" alt="M-TAI" className="w-7 h-7 object-contain" />
-                                        </div>
-                                        <span className="text-white font-black text-lg">M-TAI</span>
-                                    </div>
-                                    <p className="text-white/50 leading-relaxed">Your trusted marketplace for fresh goods and everyday essentials, delivered fast.</p>
-                                </div>
-                                <div>
-                                    <h4 className="text-white font-semibold mb-3">Shop</h4>
-                                    <ul className="space-y-2 text-white/60">
-                                        <li><Link to="/customer/shops" className="hover:text-primary transition-colors">Browse Shops</Link></li>
-                                        <li><Link to="/customer/orders" className="hover:text-primary transition-colors">My Orders</Link></li>
-                                        <li><Link to="/customer/wishlist" className="hover:text-primary transition-colors">Wishlist</Link></li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 className="text-white font-semibold mb-3">Support</h4>
-                                    <ul className="space-y-2 text-white/60">
-                                        <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
-                                        <li><a href="#" className="hover:text-primary transition-colors">Delivery Info</a></li>
-                                        <li><a href="#" className="hover:text-primary transition-colors">Returns</a></li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 className="text-white font-semibold mb-3">Trust & Safety</h4>
-                                    <ul className="space-y-2 text-white/60">
-                                        <li className="flex items-center gap-2"><Badge variant="outline" className="rounded-full border-primary/40 text-primary-light">Secure Payment</Badge></li>
-                                        <li className="flex items-center gap-2"><Badge variant="outline" className="rounded-full border-primary/40 text-primary-light">Fast Delivery</Badge></li>
-                                        <li className="flex items-center gap-2"><Badge variant="outline" className="rounded-full border-primary/40 text-primary-light">24/7 Support</Badge></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div className="mt-8 pt-4 border-t border-white/10 text-center text-white/40 text-xs">
-                                © {new Date().getFullYear()} M-TAI. All rights reserved.
-                            </div>
-                        </div>
-                    </footer>
                 </div>
 
                 {/* Right rail — static (never scrolls) */}
