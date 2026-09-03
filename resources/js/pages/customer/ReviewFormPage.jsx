@@ -94,13 +94,9 @@ export default function ReviewFormPage() {
 
     return (
         <div>
-            <div style={{ background: 'linear-gradient(135deg, #12601f 0%, #133d29 50%, #0f2a1c 100%)' }} className="rounded-2xl p-8 overflow-hidden mx-4 mt-4">
-                <div className="max-w-2xl mx-auto py-2">
-                    <h1 className="text-2xl font-bold text-white">Write Review</h1>
-                </div>
-            </div>
+            <h1 className="text-xl font-black text-gray-900 mb-4">Write Review</h1>
 
-            <div className="max-w-2xl mx-auto px-4 py-8">
+            <div className="max-w-2xl mx-auto pb-6">
                 {product ? (
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-gray-100">

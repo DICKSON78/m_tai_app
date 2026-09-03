@@ -236,18 +236,14 @@ export default function CheckoutPage() {
 
     return (
         <div>
-            <div style={{ background: 'linear-gradient(135deg, #12601f 0%, #133d29 50%, #0f2a1c 100%)' }} className="rounded-2xl p-8 overflow-hidden mx-4 mt-4">
-                <div className="py-2">
-                    <div className="flex items-center space-x-2 text-sm text-white/70 mb-2">
-                        <Link to="/customer/cart" className="hover:text-white transition">Cart</Link>
-                        <span>/</span>
-                        <span className="text-white font-medium">Payment</span>
-                    </div>
-                    <h1 className="text-2xl font-bold text-white">Payment</h1>
-                </div>
-            </div>
+            <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-1">
+                <Link to="/customer/cart" className="hover:text-primary transition">Cart</Link>
+                <span>/</span>
+                <span className="text-gray-900 font-medium">Payment</span>
+            </nav>
+            <h1 className="text-xl font-black text-gray-900 mb-4">Payment</h1>
 
-            <div className="px-4 sm:px-6 lg:px-8 py-8">
+            <div className="pb-6">
                 {error && (
                     <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl mb-6">
                         {error}

@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
-import PageHeader from '../../components/casfeta/PageHeader';
-import { Truck } from 'lucide-react';
 
 const STATUS_CONFIG = {
     pending: { label: 'Pending', badge: 'badge badge-yellow', color: 'text-yellow-600' },
@@ -49,18 +47,10 @@ export default function CustomerDeliveriesPage() {
 
     return (
         <div>
-            <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-2">
-                <PageHeader title="Deliveries" subtitle="Track your delivery orders" icon={<Truck size={20} />} />
-            </div>
-            <div style={{ background: 'linear-gradient(135deg, #12601f 0%, #133d29 50%, #0f2a1c 100%)' }} className="rounded-2xl p-8 overflow-hidden mx-4 mt-4">
-                <div className="relative">
-                    <p className="text-[11px] font-semibold text-[#00D4AA] uppercase tracking-widest mb-1.5">Deliveries</p>
-                    <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">My Deliveries</h1>
-                    <p className="text-white/50 text-sm">Track your order deliveries</p>
-                </div>
-            </div>
+            <h1 className="text-xl font-black text-gray-900 mb-1">My Deliveries</h1>
+            <p className="text-sm text-gray-500 mb-4">Track your order deliveries</p>
 
-            <div className="max-w-5xl mx-auto px-4 py-8">
+            <div className="mt-2 pb-6">
                 {loading ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]"></div>

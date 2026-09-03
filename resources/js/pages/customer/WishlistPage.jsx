@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
 import ConfirmDialog from '../../components/ConfirmDialog';
-import PageHeader from '../../components/casfeta/PageHeader';
-import { Heart } from 'lucide-react';
 
 export default function WishlistPage() {
     const [items, setItems] = useState([]);
@@ -64,19 +62,12 @@ export default function WishlistPage() {
 
     return (
         <div>
-            <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-2">
-                <PageHeader title="Wishlist" subtitle="Your saved products" icon={<Heart size={20} />} />
-            </div>
-            <div style={{ background: 'linear-gradient(135deg, #12601f 0%, #133d29 50%, #0f2a1c 100%)' }} className="rounded-2xl p-8 overflow-hidden mx-4 mt-4">
-                <div className="py-2">
-                    <h1 className="text-2xl font-bold text-white mb-1">My Wishlist</h1>
-                    {totalItems > 0 && (
-                        <p className="text-sm text-white/70">{totalItems} products in wishlist</p>
-                    )}
-                </div>
-            </div>
+            <h1 className="text-xl font-black text-gray-900 mb-1">My Wishlist</h1>
+            {totalItems > 0 && (
+                <p className="text-sm text-gray-500 mb-4">{totalItems} products in wishlist</p>
+            )}
 
-            <div className="px-4 sm:px-6 lg:px-8 py-8">
+            <div className="mt-2 pb-6">
                 {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {[...Array(8)].map((_, i) => (

@@ -149,49 +149,46 @@ export default function ShopDetailPage() {
                 </div>
             )}
 
-            <div style={{ background: 'linear-gradient(135deg, #12601f 0%, #133d29 50%, #0f2a1c 100%)' }} className="rounded-2xl p-8 overflow-hidden mx-4 mt-4">
-                <div className="py-2">
-                    <div className="flex items-center space-x-2 text-sm text-white/70 mb-4">
-                        <Link to="/customer/shops" className="hover:text-white transition">Shop</Link>
-                        <span>/</span>
-                        <span className="text-white font-medium">{shop.business_name}</span>
-                    </div>
-
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div className="flex items-center space-x-4">
-                            <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-                                {shop.logo ? (
-                                    <img
-                                        src={shop.logo_url || `/storage/${shop.logo}`}
-                                        alt={shop.business_name}
-                                        className="w-16 h-16 rounded-xl object-cover"
-                                    />
-                                ) : (
-                                    <span className="text-white font-bold text-2xl">
-                                        {shop.business_name?.charAt(0)?.toUpperCase()}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-4">
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Link to="/customer/shops" className="hover:text-primary transition">Shop</Link>
+                    <span>/</span>
+                    <span className="text-gray-900 font-medium">{shop.business_name}</span>
+                </div>
+                <div className="mt-3 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="flex items-center space-x-4">
+                        <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
+                            {shop.logo ? (
+                                <img
+                                    src={shop.logo_url || `/storage/${shop.logo}`}
+                                    alt={shop.business_name}
+                                    className="w-16 h-16 rounded-xl object-cover"
+                                />
+                            ) : (
+                                <span className="text-primary font-bold text-2xl">
+                                    {shop.business_name?.charAt(0)?.toUpperCase()}
+                                </span>
+                            )}
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-black text-gray-900">{shop.business_name}</h1>
+                            <p className="text-gray-500">{shop.code}</p>
+                            <div className="flex items-center space-x-2 mt-1">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                    {shop.business_category || shop.business_type || 'Business'}
+                                </span>
+                                {shop.region && (
+                                    <span className="text-gray-500 text-sm">
+                                        {shop.district ? `${shop.district}, ` : ''}{shop.region}
                                     </span>
                                 )}
-                            </div>
-                            <div>
-                                <h1 className="text-2xl md:text-3xl font-bold text-white">{shop.business_name}</h1>
-                                <p className="text-white/70">{shop.code}</p>
-                                <div className="flex items-center space-x-2 mt-1">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/20 text-white">
-                                        {shop.business_category || shop.business_type || 'Business'}
-                                    </span>
-                                    {shop.region && (
-                                        <span className="text-white/70 text-sm">
-                                            {shop.district ? `${shop.district}, ` : ''}{shop.region}
-                                        </span>
-                                    )}
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="px-4 sm:px-6 lg:px-8 py-8">
+            <div className="pb-6">
                 <div className="flex flex-col lg:flex-row gap-8">
                     <div className="lg:w-64 shrink-0">
                         <div className="card">

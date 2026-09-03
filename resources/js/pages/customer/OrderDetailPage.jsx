@@ -144,67 +144,63 @@ export default function OrderDetailPage() {
 
     return (
         <div>
-            <div style={{ background: 'linear-gradient(135deg, #12601f 0%, #133d29 50%, #0f2a1c 100%)' }} className="rounded-2xl p-8 overflow-hidden mx-4 mt-4">
-                <div className="max-w-5xl mx-auto py-2">
-                    <div className="flex items-center space-x-2 text-sm text-white/70 mb-2">
-                        <Link to="/customer/orders" className="hover:text-white transition">Orders</Link>
-                        <span>/</span>
-                        <span className="text-white font-medium">
-                            {order.transaction_code || order.code || `Order #${order.id}`}
-                        </span>
-                    </div>
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h1 className="text-2xl font-bold text-white mb-1">
-                                Order {order.transaction_code || order.code || `#${order.id}`}
-                            </h1>
-                            <p className="text-sm text-white/70">
-                                Created: {formatDate(order.created_at || order.date)}
-                            </p>
-                        </div>
-                        <div className="flex items-center flex-wrap gap-2">
-                            <span className={status.badge}>
-                                {status.label}
-                            </span>
-                            <span className={payStatus.badge}>
-                                {payStatus.label}
-                            </span>
-                            {['pending', 'confirmed'].includes(order.status) && (
-                                <button
-                                    onClick={handleCancel}
-                                    disabled={cancelling}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 disabled:opacity-50 transition-colors"
-                                >
-                                    <X size={14} />
-                                    {cancelling ? 'Cancelling...' : 'Cancel Order'}
-                                </button>
-                            )}
-                            {order.status === 'completed' && (
-                                <button
-                                    onClick={handleReorder}
-                                    disabled={reordering}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#00D4AA] bg-[#d0f9f1] rounded-lg hover:bg-[#b0f2e3] disabled:opacity-50 transition-colors"
-                                >
-                                    <RotateCcw size={14} />
-                                    {reordering ? 'Adding...' : 'Reorder'}
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
-                    {message && (
-                        <div className="mt-4 flex items-center gap-2 bg-[#d0f9f1] text-[#006b53] px-4 py-2.5 rounded-lg text-sm">
-                            <CheckCircle size={16} />
-                            {message}
-                            <button onClick={() => setMessage('')} className="ml-auto text-[#006b53]/60 hover:text-[#006b53]">
-                                <X size={14} />
-                            </button>
-                        </div>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-4">
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Link to="/customer/orders" className="hover:text-primary transition">Orders</Link>
+                    <span>/</span>
+                    <span className="text-gray-900 font-medium">
+                        {order.transaction_code || order.code || `Order #${order.id}`}
+                    </span>
+                </div>
+                <div className="mt-2">
+                    <h1 className="text-xl font-black text-gray-900">
+                        Order {order.transaction_code || order.code || `#${order.id}`}
+                    </h1>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                        Created: {formatDate(order.created_at || order.date)}
+                    </p>
+                </div>
+                <div className="mt-3 flex items-center flex-wrap gap-2">
+                    <span className={status.badge}>
+                        {status.label}
+                    </span>
+                    <span className={payStatus.badge}>
+                        {payStatus.label}
+                    </span>
+                    {['pending', 'confirmed'].includes(order.status) && (
+                        <button
+                            onClick={handleCancel}
+                            disabled={cancelling}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 disabled:opacity-50 transition-colors"
+                        >
+                            <X size={14} />
+                            {cancelling ? 'Cancelling...' : 'Cancel Order'}
+                        </button>
+                    )}
+                    {order.status === 'completed' && (
+                        <button
+                            onClick={handleReorder}
+                            disabled={reordering}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#00D4AA] bg-[#d0f9f1] rounded-lg hover:bg-[#b0f2e3] disabled:opacity-50 transition-colors"
+                        >
+                            <RotateCcw size={14} />
+                            {reordering ? 'Adding...' : 'Reorder'}
+                        </button>
                     )}
                 </div>
+
+                {message && (
+                    <div className="mt-4 flex items-center gap-2 bg-[#d0f9f1] text-[#006b53] px-4 py-2.5 rounded-lg text-sm">
+                        <CheckCircle size={16} />
+                        {message}
+                        <button onClick={() => setMessage('')} className="ml-auto text-[#006b53]/60 hover:text-[#006b53]">
+                            <X size={14} />
+                        </button>
+                    </div>
+                )}
             </div>
 
-            <div className="max-w-5xl mx-auto px-4 py-8">
+            <div className="pb-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-6">
                         {order.shop_name && (

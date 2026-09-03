@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
-import PageHeader from '../../components/casfeta/PageHeader';
-import { Store } from 'lucide-react';
 
 export default function ShopSearchPage() {
     const navigate = useNavigate();
@@ -70,42 +68,36 @@ export default function ShopSearchPage() {
 
     return (
         <div>
-            <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-2">
-                <PageHeader title="Shops" subtitle="Browse and search available shops" icon={<Store size={20} />} />
-            </div>
-            <div style={{ background: 'linear-gradient(135deg, #12601f 0%, #133d29 50%, #0f2a1c 100%)' }} className="rounded-2xl p-8 overflow-hidden mx-4 mt-4">
-                <div className="py-4 text-center">
-                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">Search Shops</h1>
-                    <p className="text-white/70 text-lg mb-8">
-                        Search shops by name or code
-                    </p>
-
-                    <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
-                        <div className="flex items-center bg-white rounded-2xl overflow-hidden shadow-lg">
-                            <div className="pl-4 text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-                            <input
-                                type="text"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Enter shop name or code..."
-                                className="flex-1 px-4 py-4 text-gray-800 text-lg outline-none"
-                            />
-                            <button
-                                type="submit"
-                                className="btn-primary rounded-none rounded-r-2xl"
-                            >
-                                Search
-                            </button>
-                        </div>
-                    </form>
+            {/* Compact heading + clean search (no banner) */}
+            <div className="pb-3">
+                <div className="flex items-center gap-2 mb-3">
+                    <h1 className="text-xl font-black text-gray-900">Shops</h1>
                 </div>
+                <form onSubmit={handleSearch}>
+                    <div className="flex items-center bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm focus-within:border-primary/60">
+                        <div className="pl-3 text-gray-400">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input
+                            type="text"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Search shops by name or code..."
+                            className="flex-1 px-3 py-2.5 text-gray-800 outline-none"
+                        />
+                        <button
+                            type="submit"
+                            className="bg-primary text-white font-semibold px-4 py-2.5 hover:bg-primary-dark transition-colors"
+                        >
+                            Search
+                        </button>
+                    </div>
+                </form>
             </div>
 
-            <div className="px-4 sm:px-6 lg:px-8 py-8">
+            <div className="pt-2 pb-6">
                 {hasSearched && !loading && (
                     <p className="text-sm text-gray-500 mb-6">
                         {totalResults > 0

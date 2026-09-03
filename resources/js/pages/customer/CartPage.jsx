@@ -82,13 +82,9 @@ export default function CartPage() {
 
     return (
         <div>
-            <div style={{ background: 'linear-gradient(135deg, #12601f 0%, #133d29 50%, #0f2a1c 100%)' }} className="rounded-2xl p-8 overflow-hidden mx-4 mt-4">
-                <div className="py-2">
-                    <h1 className="text-2xl font-bold text-white">My Cart</h1>
-                </div>
-            </div>
+            <h1 className="text-xl font-black text-gray-900 mb-4">My Cart</h1>
 
-            <div className="px-4 sm:px-6 lg:px-8 py-8">
+            <div className="pb-6">
                 {items.length === 0 ? (
                     <div className="card empty-state">
                         <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">

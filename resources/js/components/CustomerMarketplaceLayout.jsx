@@ -47,10 +47,10 @@ export default function CustomerMarketplaceLayout({ children }) {
     const userInitials = (user?.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
     return (
-        <div className="min-h-screen flex flex-col bg-surface">
+        <div className="h-screen flex flex-col bg-surface overflow-hidden">
             {/* ===== Top navbar (glassmorphism, teal like active buttons) ===== */}
             <header
-                className="sticky top-0 z-50 backdrop-blur-xl border-b border-white/20 shadow-sm"
+                className="shrink-0 z-50 backdrop-blur-xl border-b border-white/20 shadow-sm"
                 style={{ background: 'linear-gradient(135deg, rgba(0,212,170,0.97), rgba(0,184,148,0.97))' }}
             >
                 <div className="mx-auto max-w-[1440px] px-2 sm:px-4">
@@ -153,71 +153,69 @@ export default function CustomerMarketplaceLayout({ children }) {
                 </div>
             </header>
 
-            {/* ===== Body: sidebar (static) + content + right rail ===== */}
-            <div className="bg-[#f5f7f5] min-h-[70vh]">
-                <div className="px-3 py-4 sm:py-6">
-                    <div className="flex gap-3 items-start">
-                        {/* Sidebar — static (sticky, doesn't scroll) */}
-                        <aside className="customer-sidebar shrink-0 hidden lg:block sticky top-16 self-start pr-3 border-r border-gray-200">
-                            <CustomerSidebar />
-                        </aside>
+            {/* ===== Body: static sidebar + scrollable content + static right rail ===== */}
+            <div className="flex-1 min-h-0 flex bg-[#f5f7f5]">
+                {/* Sidebar — static (never scrolls) */}
+                <aside className="customer-sidebar shrink-0 hidden lg:block overflow-y-auto py-4 pr-3 border-r border-gray-200">
+                    <CustomerSidebar />
+                </aside>
 
-                        {/* Main content — fills remaining width */}
-                        <main className="flex-1 min-w-0 content-area">
-                            {children}
-                        </main>
-
-                        {/* Right rail — top shops + ad banners (static, doesn't scroll) */}
-                        <aside className="hidden lg:block w-64 shrink-0 sticky top-16 self-start pl-3 border-l border-gray-200">
-                            <CustomerRightRail />
-                        </aside>
+                {/* Main content — the ONLY scrollable area */}
+                <div className="flex-1 min-w-0 min-h-0 overflow-y-auto">
+                    <div className="px-3 py-4">
+                        {children}
                     </div>
-                </div>
-            </div>
 
-            {/* ===== Footer ===== */}
-            <footer className="mt-auto" style={{ background: '#06271f' }}>
-                <div className="mx-auto max-w-[1440px] px-4 py-8">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-sm">
-                        <div>
-                            <div className="flex items-center gap-2 mb-3">
-                                <div className="w-8 h-8 rounded-lg overflow-hidden bg-white flex items-center justify-center">
-                                    <img src="/icons/icon-96x96.png" alt="M-TAI" className="w-7 h-7 object-contain" />
+                    {/* ===== Footer ===== */}
+                    <footer style={{ background: '#06271f' }}>
+                        <div className="mx-auto max-w-[1440px] px-4 py-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="w-8 h-8 rounded-lg overflow-hidden bg-white flex items-center justify-center">
+                                            <img src="/icons/icon-96x96.png" alt="M-TAI" className="w-7 h-7 object-contain" />
+                                        </div>
+                                        <span className="text-white font-black text-lg">M-TAI</span>
+                                    </div>
+                                    <p className="text-white/50 leading-relaxed">Your trusted marketplace for fresh goods and everyday essentials, delivered fast.</p>
                                 </div>
-                                <span className="text-white font-black text-lg">M-TAI</span>
+                                <div>
+                                    <h4 className="text-white font-semibold mb-3">Shop</h4>
+                                    <ul className="space-y-2 text-white/60">
+                                        <li><Link to="/customer/shops" className="hover:text-primary transition-colors">Browse Shops</Link></li>
+                                        <li><Link to="/customer/orders" className="hover:text-primary transition-colors">My Orders</Link></li>
+                                        <li><Link to="/customer/wishlist" className="hover:text-primary transition-colors">Wishlist</Link></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="text-white font-semibold mb-3">Support</h4>
+                                    <ul className="space-y-2 text-white/60">
+                                        <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
+                                        <li><a href="#" className="hover:text-primary transition-colors">Delivery Info</a></li>
+                                        <li><a href="#" className="hover:text-primary transition-colors">Returns</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="text-white font-semibold mb-3">Trust & Safety</h4>
+                                    <ul className="space-y-2 text-white/60">
+                                        <li className="flex items-center gap-2"><Badge variant="outline" className="rounded-full border-primary/40 text-primary-light">Secure Payment</Badge></li>
+                                        <li className="flex items-center gap-2"><Badge variant="outline" className="rounded-full border-primary/40 text-primary-light">Fast Delivery</Badge></li>
+                                        <li className="flex items-center gap-2"><Badge variant="outline" className="rounded-full border-primary/40 text-primary-light">24/7 Support</Badge></li>
+                                    </ul>
+                                </div>
                             </div>
-                            <p className="text-white/50 leading-relaxed">Your trusted marketplace for fresh goods and everyday essentials, delivered fast.</p>
+                            <div className="mt-8 pt-4 border-t border-white/10 text-center text-white/40 text-xs">
+                                © {new Date().getFullYear()} M-TAI. All rights reserved.
+                            </div>
                         </div>
-                        <div>
-                            <h4 className="text-white font-semibold mb-3">Shop</h4>
-                            <ul className="space-y-2 text-white/60">
-                                <li><Link to="/customer/shops" className="hover:text-primary transition-colors">Browse Shops</Link></li>
-                                <li><Link to="/customer/orders" className="hover:text-primary transition-colors">My Orders</Link></li>
-                                <li><Link to="/customer/wishlist" className="hover:text-primary transition-colors">Wishlist</Link></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="text-white font-semibold mb-3">Support</h4>
-                            <ul className="space-y-2 text-white/60">
-                                <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
-                                <li><a href="#" className="hover:text-primary transition-colors">Delivery Info</a></li>
-                                <li><a href="#" className="hover:text-primary transition-colors">Returns</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="text-white font-semibold mb-3">Trust & Safety</h4>
-                            <ul className="space-y-2 text-white/60">
-                                <li className="flex items-center gap-2"><Badge variant="outline" className="rounded-full border-primary/40 text-primary-light">Secure Payment</Badge></li>
-                                <li className="flex items-center gap-2"><Badge variant="outline" className="rounded-full border-primary/40 text-primary-light">Fast Delivery</Badge></li>
-                                <li className="flex items-center gap-2"><Badge variant="outline" className="rounded-full border-primary/40 text-primary-light">24/7 Support</Badge></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div className="mt-8 pt-4 border-t border-white/10 text-center text-white/40 text-xs">
-                        © {new Date().getFullYear()} M-TAI. All rights reserved.
-                    </div>
+                    </footer>
                 </div>
-            </footer>
+
+                {/* Right rail — static (never scrolls) */}
+                <aside className="hidden lg:block w-64 shrink-0 overflow-y-auto py-4 pl-3 border-l border-gray-200">
+                    <CustomerRightRail />
+                </aside>
+            </div>
         </div>
     );
 }

@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
-import PageHeader from '../../components/casfeta/PageHeader';
-import { ShoppingCart } from 'lucide-react';
 
 const STATUS_CONFIG = {
     pending: { label: 'Pending', badge: 'badge badge-yellow' },
@@ -82,19 +80,12 @@ export default function OrderHistoryPage() {
 
     return (
         <div>
-            <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-2">
-                <PageHeader title="My Orders" subtitle="View your order history and track deliveries" icon={<ShoppingCart size={20} />} />
-            </div>
-            <div style={{ background: 'linear-gradient(135deg, #12601f 0%, #133d29 50%, #0f2a1c 100%)' }} className="rounded-2xl p-8 overflow-hidden mx-4 mt-4">
-                <div className="py-2">
-                    <h1 className="text-2xl font-bold text-white mb-1">Order History</h1>
-                    {totalOrders > 0 && (
-                        <p className="text-sm text-white/70">Total orders: {totalOrders}</p>
-                    )}
-                </div>
-            </div>
+            <h1 className="text-xl font-black text-gray-900 mb-1">Order History</h1>
+            {totalOrders > 0 && (
+                <p className="text-sm text-gray-500 mb-4">Total orders: {totalOrders}</p>
+            )}
 
-            <div className="px-4 sm:px-6 lg:px-8 py-8">
+            <div className="mt-2 pb-6">
                 <div className="mb-6">
                     <div className="tab-nav">
                         <button
