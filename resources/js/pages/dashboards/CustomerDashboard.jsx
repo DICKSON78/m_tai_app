@@ -11,27 +11,6 @@ const TRUST_ITEMS = [
     { label: 'Easy Returns', icon: 'M4 4v5h5M20 20v-5h-5m-9.07 3A8 8 0 1011.93 4M4 4l2.5.5m0 0L6.5 3M16 12a2 2 0 11-4 0 2 2 0 014 0z' },
 ];
 
-const BANNER_SLIDES = [
-    {
-        title: 'Shop the freshest',
-        subtitle: 'Farm produce delivered straight to your door.',
-        icon: 'M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5zM2 2l7.586 7.586M6 14l7-7',
-        bg: 'linear-gradient(135deg, #0FAE8C, #00D4AA)',
-    },
-    {
-        title: 'Flash Sale Today',
-        subtitle: 'Up to 50% off everyday essentials.',
-        icon: 'M13 2L3 14h7l-1 8 10-12h-7l1-8z',
-        bg: 'linear-gradient(135deg, #F2994A, #EB5757)',
-    },
-    {
-        title: 'Best prices on M-TAI',
-        subtitle: 'Compare shops and save on everything you need.',
-        icon: 'M11 3h2v18h-2zM5.5 8h13l-1 8h-11l-1-8zM7 12h10',
-        bg: 'linear-gradient(135deg, #2F80ED, #9B51E0)',
-    },
-];
-
 const BANNER_FALLBACKS = [
     { url: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1400&q=80', title: 'Fresh produce delivered daily', subtitle: 'Farm-fresh fruits & veggies at your door.' },
     { url: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=1400&q=80', title: 'Everyday kitchen essentials', subtitle: 'Everything for your home, delivered fast.' },
@@ -80,11 +59,7 @@ function BannerCarousel({ slides }) {
                         {slide.url ? (
                             <img src={slide.url} alt={slide.title} className="w-full h-full object-cover" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center" style={{ background: slide.bg || 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
-                                <svg className="w-14 h-14 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.4} d={slide.icon || 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'} />
-                                </svg>
-                            </div>
+                            <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }} />
                         )}
                         <div className="absolute inset-0 bg-black/25" />
                         <div className="absolute bottom-5 left-5 right-5 text-white">
@@ -164,14 +139,7 @@ export default function CustomerDashboard() {
             }
             if (withImages.length >= 3) break;
         }
-        const ads = BANNER_SLIDES.slice();
-        const merged = withImages.reduce((acc, img, i) => {
-            acc.push(img);
-            if (ads.length) acc.push(ads.shift());
-            return acc;
-        }, []);
-        while (merged.length < 3 && ads.length) merged.push(ads.shift());
-        return merged.length ? merged : BANNER_FALLBACKS;
+        return withImages.length >= 3 ? withImages : BANNER_FALLBACKS;
     }, [products]);
 
     const categoryAccent = (c) => CATEGORY_ACCENTS[Math.abs(c.id) % CATEGORY_ACCENTS.length];
