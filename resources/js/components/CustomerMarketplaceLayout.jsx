@@ -155,7 +155,7 @@ export default function CustomerMarketplaceLayout({ children }) {
             {/* ===== Body: static sidebar + scrollable content + static right rail ===== */}
             <div className="flex-1 min-h-0 flex bg-[#f5f7f5]">
                 {/* Sidebar — static (never scrolls) */}
-                <aside className="customer-sidebar shrink-0 hidden lg:block overflow-y-auto py-4 pr-3 border-r border-gray-200">
+                <aside className="customer-sidebar shrink-0 hidden lg:block overflow-y-auto py-4 ml-2.5 pr-3 border-r border-gray-200">
                     <CustomerSidebar />
                 </aside>
 
@@ -167,7 +167,7 @@ export default function CustomerMarketplaceLayout({ children }) {
                 </div>
 
                 {/* Right rail — static (never scrolls) */}
-                <aside className="hidden lg:block w-64 shrink-0 overflow-y-auto py-4 pl-3 border-l border-gray-200">
+                <aside className="hidden lg:block w-64 shrink-0 overflow-y-auto py-4 pl-3 mr-2.5 border-l border-gray-200">
                     <CustomerRightRail />
                 </aside>
             </div>
