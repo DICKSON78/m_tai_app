@@ -146,8 +146,8 @@ export default function CustomerDashboard() {
 
     return (
         <div className="w-full space-y-5">
-            {/* Greeting + categories — static (sticky, doesn't scroll) */}
-            <div className="sticky top-20 z-20 -mx-0 bg-[#f5f7f5] pb-2 pt-1 rounded-b-xl">
+            {/* Greeting + categories — static (sticky, opaque, like the app) */}
+            <div className="sticky top-16 z-20 bg-[#f5f7f5] pb-2 pt-1 border-b border-gray-200">
             {/* Greeting */}
             <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full flex items-center justify-center text-lg font-bold text-white shrink-0" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>

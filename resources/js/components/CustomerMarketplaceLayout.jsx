@@ -51,7 +51,7 @@ export default function CustomerMarketplaceLayout({ children }) {
             {/* ===== Top navbar (glassmorphism, teal like active buttons) ===== */}
             <header
                 className="sticky top-0 z-50 backdrop-blur-xl border-b border-white/20 shadow-sm"
-                style={{ background: 'linear-gradient(135deg, rgba(0,212,170,0.82), rgba(0,184,148,0.82))' }}
+                style={{ background: 'linear-gradient(135deg, rgba(0,212,170,0.97), rgba(0,184,148,0.97))' }}
             >
                 <div className="mx-auto max-w-[1440px] px-2 sm:px-4">
                     <div className="flex items-center gap-3 h-16">
@@ -158,7 +158,7 @@ export default function CustomerMarketplaceLayout({ children }) {
                 <div className="px-3 py-4 sm:py-6">
                     <div className="flex gap-3 items-start">
                         {/* Sidebar — static (sticky, doesn't scroll) */}
-                        <aside className="customer-sidebar shrink-0 hidden lg:block sticky top-20 self-start pr-3 border-r border-gray-200">
+                        <aside className="customer-sidebar shrink-0 hidden lg:block sticky top-16 self-start pr-3 border-r border-gray-200">
                             <CustomerSidebar />
                         </aside>
 
@@ -168,7 +168,7 @@ export default function CustomerMarketplaceLayout({ children }) {
                         </main>
 
                         {/* Right rail — top shops + ad banners (static, doesn't scroll) */}
-                        <aside className="hidden lg:block w-64 shrink-0 sticky top-20 self-start pl-3 border-l border-gray-200">
+                        <aside className="hidden lg:block w-64 shrink-0 sticky top-16 self-start pl-3 border-l border-gray-200">
                             <CustomerRightRail />
                         </aside>
                     </div>
