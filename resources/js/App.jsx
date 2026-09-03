@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { TooltipProvider } from './components/ui/tooltip';
 import Layout from './components/Layout';
 import DashboardLayout from './components/DashboardLayout';
+import CustomerMarketplaceLayout from './components/CustomerMarketplaceLayout';
 
 // Public pages (Phermex-style)
 import PublicNavbar from './mtai-public/components/Navbar';
@@ -156,6 +157,10 @@ function ProtectedRoute({ children, roles }) {
 
     if (!user) return <Navigate to="/login" />;
     if (roles && !roles.includes(user.role)) return <Navigate to="/" />;
+
+    if (user.role === 'customer') {
+        return <CustomerMarketplaceLayout>{children}</CustomerMarketplaceLayout>;
+    }
 
     return <DashboardLayout>{children}</DashboardLayout>;
 }
@@ -342,6 +347,7 @@ function AppRoutes() {
             <Route path="/employee/profile" element={<ProtectedRoute roles={['employee']}><ProfilePage /></ProtectedRoute>} />
 
             {/* Customer Routes */}
+            <Route path="/customer" element={<Navigate to="/customer/dashboard" replace />} />
             <Route path="/customer/dashboard" element={<ProtectedRoute roles={['customer']}><CustomerDashboard /></ProtectedRoute>} />
             <Route path="/customer/shops" element={<ProtectedRoute roles={['customer']}><ShopSearchPage /></ProtectedRoute>} />
             <Route path="/customer/shops/:id" element={<ProtectedRoute roles={['customer']}><ShopDetailPage /></ProtectedRoute>} />
