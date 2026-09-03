@@ -6,6 +6,7 @@ import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import CustomerSidebar from './CustomerSidebar';
+import CustomerRightRail from './CustomerRightRail';
 
 export default function CustomerMarketplaceLayout({ children }) {
     const { user, logout } = useAuth();
@@ -47,9 +48,12 @@ export default function CustomerMarketplaceLayout({ children }) {
 
     return (
         <div className="min-h-screen flex flex-col bg-surface">
-            {/* ===== Top navbar ===== */}
-            <header className="sticky top-0 z-50" style={{ background: 'linear-gradient(135deg, #0a3d33 0%, #0d4a3e 50%, #06271f 100%)' }}>
-                <div className="mx-auto max-w-[1200px] px-4">
+            {/* ===== Top navbar (glassmorphism, teal like active buttons) ===== */}
+            <header
+                className="sticky top-0 z-50 backdrop-blur-xl border-b border-white/20 shadow-sm"
+                style={{ background: 'linear-gradient(135deg, rgba(0,212,170,0.82), rgba(0,184,148,0.82))' }}
+            >
+                <div className="mx-auto max-w-[1440px] px-2 sm:px-4">
                     <div className="flex items-center gap-3 h-16">
                         {/* Mobile hamburger */}
                         <button
@@ -149,12 +153,12 @@ export default function CustomerMarketplaceLayout({ children }) {
                 </div>
             </header>
 
-            {/* ===== Body: sidebar + content (mbg-style e-commerce layout) ===== */}
+            {/* ===== Body: sidebar (static) + content + right rail ===== */}
             <div className="bg-[#f5f7f5] min-h-[70vh]">
-                <div className="max-w-[1200px] mx-auto px-6 py-8">
-                    <div className="flex gap-8">
-                        {/* Sidebar — desktop */}
-                        <aside className="customer-sidebar shrink-0 hidden lg:block">
+                <div className="max-w-[1440px] mx-auto px-2 sm:px-3 py-4 sm:py-6">
+                    <div className="flex gap-3 items-start">
+                        {/* Sidebar — static (sticky, doesn't scroll) */}
+                        <aside className="customer-sidebar shrink-0 hidden lg:block sticky top-20 self-start">
                             <CustomerSidebar />
                         </aside>
 
@@ -162,13 +166,18 @@ export default function CustomerMarketplaceLayout({ children }) {
                         <main className="flex-1 min-w-0 content-area">
                             {children}
                         </main>
+
+                        {/* Right rail — top shops + ad banners (static, doesn't scroll) */}
+                        <aside className="hidden lg:block w-64 shrink-0 sticky top-20 self-start">
+                            <CustomerRightRail />
+                        </aside>
                     </div>
                 </div>
             </div>
 
             {/* ===== Footer ===== */}
             <footer className="mt-auto" style={{ background: '#06271f' }}>
-                <div className="mx-auto max-w-[1200px] px-4 py-8">
+                <div className="mx-auto max-w-[1440px] px-4 py-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-sm">
                         <div>
                             <div className="flex items-center gap-2 mb-3">

@@ -207,7 +207,7 @@ export default function CustomerDashboard() {
 
             {/* Product grid (e-commerce layout, fills width) */}
             {loading ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[1, 2, 3, 4].map(i => (
                         <div key={i} className="bg-white rounded-2xl border border-gray-200 animate-pulse h-72" />
                     ))}
@@ -223,7 +223,7 @@ export default function CustomerDashboard() {
                     <p className="text-sm text-gray-500">Try a different category or check back soon.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
+                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
                     {products.map(product => (
                         <ProductCard key={product.id} product={product} />
                     ))}
