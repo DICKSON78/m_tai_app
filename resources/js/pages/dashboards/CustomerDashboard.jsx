@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import ProductCard from '../../components/ProductCard';
@@ -19,13 +18,27 @@ const BANNER_FALLBACKS = [
 
 const CATEGORY_ACCENTS = ['#0FAE8C', '#2F80ED', '#F2994A', '#EB5757', '#9B51E0', '#27AE60'];
 
+function categoryIcon(name) {
+    const n = (name || '').toLowerCase();
+    if (n.includes('groc') || n.includes('food') || n.includes('produc')) return 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z';
+    if (n.includes('fruit') || n.includes('veget') || n.includes('fresh')) return 'M12 22c5-3 8-7 8-12a8 8 0 10-16 0c0 5 3 9 8 12zm0 0V8';
+    if (n.includes('drink') || n.includes('bever')) return 'M9 3h6m-1.5 0v4.5a4.5 4.5 0 01-9 0V3m9 8.5a4.5 4.5 0 01-9 .5M7 18h10m-4-1.5V21';
+    if (n.includes('baker') || n.includes('bread')) return 'M12 3a4 4 0 00-4 4c0 1.5 1 2 1 3.5C9 12.5 10.5 14 12 14s3-1.5 3-3.5C15 9 16 8.5 16 7a4 4 0 00-4-4zm0 0c3 1 5 3 5 6H7c0-3 2-5 5-6zM5 15h14M7 21h10M8 15v3m8-3v3';
+    if (n.includes('dairy') || n.includes('milk')) return 'M19 4h-2V2h-2v2H9V2H7v2H5a2 2 0 00-2 2v1a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zM6 9l1 11a1 1 0 001 1h8a1 1 0 001-1l1-11M7 4v2M10 4v2m4-2v2M7 4v2';
+    if (n.includes('cloth') || n.includes('fashion') || n.includes('apparel')) return 'M16 20V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v16m0 0a2 2 0 102 2 2 2 0 10-2-2zm8 0a2 2 0 102 2 2 2 0 10-2-2zM2 8V6a2 2 0 012-2h4m0 14H3a1 1 0 01-1-1V9a1 1 0 011-1h4m12 14V6a2 2 0 00-2-2h-4m0 14h4a1 1 0 001-1V9a1 1 0 00-1-1h-4';
+    if (n.includes('elect') || n.includes('gadget')) return 'M12 4v16m-3-13h6M10 3h4m-6 5h8m-8 4h8';
+    if (n.includes('home') || n.includes('house')) return 'M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3m10-11v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6';
+    if (n.includes('beaut') || n.includes('cosmetic')) return 'M7 21h10m-2-3h-6m1-15h4m-2-2v4m-5 4a3 3 0 016 0c0 2-1.5 2.5-1.5 4H9c0-1.5-1.5-2-1.5-4a3 3 0 016 0';
+    if (n.includes('health') || n.includes('pharm')) return 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2m-7-2h8';
+    if (n.includes('station') || n.includes('office') || n.includes('paper')) return 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10M9 15h6';
+    return 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4';
+}
+
 function normalizePaginated(payload) {
     const body = payload && typeof payload === 'object' ? payload : {};
     const paginated = Array.isArray(body.data?.data) ? body.data : body;
     return {
         items: Array.isArray(paginated?.data) ? paginated.data : [],
-        currentPage: typeof paginated?.current_page === 'number' ? paginated.current_page : 1,
-        lastPage: typeof paginated?.last_page === 'number' ? paginated.last_page : 1,
     };
 }
 
@@ -38,7 +51,7 @@ function BannerCarousel({ slides }) {
     }, [slides.length]);
 
     return (
-        <div className="relative overflow-hidden rounded-2xl shadow-lg" style={{ height: 240 }}>
+        <div className="relative overflow-hidden rounded-2xl shadow-md" style={{ height: 200 }}>
             <div className="flex h-full transition-transform duration-500 ease-out" style={{ transform: `translateX(-${index * 100}%)` }}>
                 {slides.map((slide, i) => (
                     <div key={i} className="relative w-full h-full shrink-0">
@@ -48,9 +61,9 @@ function BannerCarousel({ slides }) {
                             <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }} />
                         )}
                         <div className="absolute inset-0 bg-black/25" />
-                        <div className="absolute bottom-6 left-6 right-6 text-white">
-                            <p className="text-[11px] font-bold tracking-[2px] text-primary-light mb-1">M-TAI • FEATURED</p>
-                            <p className="text-2xl md:text-3xl font-black leading-tight">{slide.title}</p>
+                        <div className="absolute bottom-5 left-5 right-5 text-white">
+                            <p className="text-[10px] font-bold tracking-[2px] text-primary-light mb-1">M-TAI • FEATURED</p>
+                            <p className="text-xl md:text-2xl font-black leading-tight">{slide.title}</p>
                             <p className="text-sm text-white/90 mt-1 max-w-md">{slide.subtitle}</p>
                         </div>
                     </div>
@@ -72,9 +85,8 @@ export default function CustomerDashboard() {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-    const [productsCount, setProductsCount] = useState(0);
+    const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
     const seqRef = useRef(0);
 
     const greeting = (() => {
@@ -91,12 +103,12 @@ export default function CustomerDashboard() {
         setLoading(true);
         try {
             const res = await api.get('/shop/products', {
-                params: { category_id: categoryId ?? undefined, per_page: 24 },
+                params: { category_id: categoryId ?? undefined, per_page: 40 },
             });
             if (id !== seqRef.current) return;
             const result = normalizePaginated(res.data);
             setProducts(result.items);
-            setProductsCount(res.data?.total ?? result.items.length);
+            setTotalCount(res.data?.total ?? result.items.length);
             const map = new Map();
             result.items.forEach(p => {
                 if (p.category?.name && p.category.id && !map.has(p.category.id)) {
@@ -107,12 +119,9 @@ export default function CustomerDashboard() {
         } catch (e) {
             console.error(e);
             setProducts([]);
-            setProductsCount(0);
+            setTotalCount(0);
         } finally {
-            if (id === seqRef.current) {
-                setLoading(false);
-                setRefreshing(false);
-            }
+            if (id === seqRef.current) setLoading(false);
         }
     }, []);
 
@@ -120,108 +129,101 @@ export default function CustomerDashboard() {
         fetchProducts(selectedCategoryId);
     }, [selectedCategoryId, fetchProducts]);
 
-    // Refresh products when cart is updated (to reflect stock changes)
-    useEffect(() => {
-        const handler = () => fetchProducts(selectedCategoryId);
-        window.addEventListener('mtai-cart-updated', handler);
-        return () => window.removeEventListener('mtai-cart-updated', handler);
-    }, [fetchProducts, selectedCategoryId]);
-
     const bannerSlides = useMemo(() => {
         const withImages = [];
         for (const p of products) {
             const url = p.images?.[0]?.url;
             if (url) {
-                withImages.push({ url, title: p.name.length > 30 ? p.name.slice(0, 30) + '…' : p.name, subtitle: p.business?.business_name || p.business?.name || 'Fresh goods, delivered fast' });
+                withImages.push({ url, title: p.name.length > 34 ? p.name.slice(0, 34) + '…' : p.name, subtitle: p.business?.business_name || p.business?.name || 'Fresh goods, delivered fast' });
             }
             if (withImages.length >= 3) break;
         }
         return withImages.length >= 3 ? withImages : BANNER_FALLBACKS;
     }, [products]);
 
-    const categoryAccent = (i) => CATEGORY_ACCENTS[i % CATEGORY_ACCENTS.length];
+    const categoryAccent = (c) => CATEGORY_ACCENTS[Math.abs(c.id) % CATEGORY_ACCENTS.length];
+    const chipList = [{ name: 'All', id: null }, ...categories];
 
     return (
-        <div className="space-y-5">
+        <div className="max-w-2xl mx-auto space-y-4">
             {/* Greeting */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-sm text-gray-500">{greeting},</p>
-                    <h1 className="text-2xl md:text-3xl font-black text-gray-900">{userName} 👋</h1>
-                    <p className="text-sm text-gray-500 mt-0.5">Fresh goods, delivered fast</p>
+            <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-full flex items-center justify-center text-lg font-bold text-white shrink-0" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
+                    {userName.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                    <p className="text-xs text-gray-500">{greeting},</p>
+                    <h1 className="text-xl font-black text-gray-900 truncate">{userName}</h1>
+                    <p className="text-xs text-gray-500">Fresh goods, delivered fast</p>
                 </div>
             </div>
 
-            {/* Trust row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {TRUST_ITEMS.map((item) => (
-                    <div key={item.label} className="flex items-center gap-2.5 bg-white rounded-xl border border-gray-200 p-3">
-                        <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: '#d0f9f1' }}>
-                            <svg className="w-5 h-5 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
-                            </svg>
-                        </div>
-                        <span className="text-xs font-semibold text-gray-700">{item.label}</span>
-                    </div>
-                ))}
+            {/* Category chips — tile style (like the app) */}
+            <div className="flex gap-2.5 overflow-x-auto pb-0.5 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+                {chipList.map((c) => {
+                    const active = selectedCategoryId === c.id;
+                    return (
+                        <button
+                            key={c.name}
+                            onClick={() => setSelectedCategoryId(c.id)}
+                            className="flex flex-col items-center gap-1.5 shrink-0 w-[68px]"
+                        >
+                            <span
+                                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${active ? 'text-white' : 'text-primary-dark'}`}
+                                style={active ? { background: 'linear-gradient(135deg, #00D4AA, #00b894)' } : { background: '#d0f9f1' }}
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d={categoryIcon(c.name)} />
+                                </svg>
+                            </span>
+                            <span className={`text-[11px] text-center truncate w-full ${active ? 'font-semibold text-primary-dark' : 'text-gray-500'}`}>{c.name}</span>
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Banner */}
             <BannerCarousel slides={bannerSlides} />
 
-            {/* Category chips */}
-            <div className="flex gap-2.5 overflow-x-auto pb-1">
-                <button
-                    onClick={() => setSelectedCategoryId(null)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-colors shrink-0 ${
-                        selectedCategoryId === null ? 'text-white border-transparent' : 'bg-white border-gray-200 text-gray-600 hover:border-primary'
-                    }`}
-                    style={selectedCategoryId === null ? { background: 'linear-gradient(135deg, #00D4AA, #00b894)' } : undefined}
-                >
-                    All Products
-                </button>
-                {categories.map((c, i) => (
-                    <button
-                        key={c.id}
-                        onClick={() => setSelectedCategoryId(c.id)}
-                        className={`flex items-center gap-2 pl-2 pr-4 py-1 rounded-full border text-sm font-semibold transition-colors shrink-0 ${
-                            selectedCategoryId === c.id ? 'text-white border-transparent' : 'bg-white border-gray-200 text-gray-600 hover:border-primary'
-                        }`}
-                        style={selectedCategoryId === c.id ? { background: 'linear-gradient(135deg, #00D4AA, #00b894)' } : undefined}
-                    >
-                        <span className="w-7 h-7 rounded-full flex items-center justify-center text-xs text-white font-bold" style={{ background: categoryAccent(i) }}>
-                            {c.name.charAt(0).toUpperCase()}
-                        </span>
-                        {c.name}
-                    </button>
+            {/* Trust row */}
+            <div className="grid grid-cols-4 gap-2">
+                {TRUST_ITEMS.map((item) => (
+                    <div key={item.label} className="flex flex-col items-center gap-1.5">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: '#d0f9f1' }}>
+                            <svg className="w-5 h-5 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
+                            </svg>
+                        </div>
+                        <span className="text-[10px] font-medium text-gray-500 text-center leading-tight">{item.label}</span>
+                    </div>
                 ))}
             </div>
 
             {/* Section header */}
-            <div className="flex items-center justify-between pt-2">
-                <h2 className="text-xl font-black text-gray-900">{productsCount === 0 ? 'Explore' : 'For You'}</h2>
-                <span className="text-sm text-gray-500">{productsCount} item{productsCount === 1 ? '' : 's'}</span>
+            <div className="flex items-center justify-between pt-1">
+                <h2 className="text-lg font-black text-gray-900">{selectedCategoryId ? 'Category' : 'For You'}</h2>
+                <span className="text-xs text-gray-500">{totalCount} item{totalCount === 1 ? '' : 's'}</span>
             </div>
 
-            {/* Product grid */}
+            {/* Single-column feed (Instagram/Twitter style) */}
             {loading ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                        <div key={i} className="bg-white rounded-2xl border border-gray-200 animate-pulse h-72" />
+                <div className="space-y-4">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="bg-white rounded-2xl border border-gray-200 animate-pulse h-80" />
                     ))}
                 </div>
             ) : products.length === 0 ? (
-                <div className="card empty-state">
-                    <div className="empty-state-icon">
+                <div className="bg-white rounded-2xl border border-gray-200 py-12 text-center">
+                    <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
                         <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
                     </div>
-                    <h2 className="text-xl font-bold text-gray-800 mb-1">No products found</h2>
-                    <p className="text-gray-500">Try a different category or check back soon.</p>
+                    <h2 className="text-lg font-bold text-gray-800 mb-1">No products found</h2>
+                    <p className="text-sm text-gray-500">Try a different category or check back soon.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="space-y-4 pb-4">
                     {products.map(product => (
                         <ProductCard key={product.id} product={product} />
                     ))}
