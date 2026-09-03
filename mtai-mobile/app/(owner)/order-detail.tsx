@@ -19,6 +19,7 @@ import Header from '../../src/components/Header';
 import LoadingScreen from '../../src/components/LoadingScreen';
 import PriceTag from '../../src/components/PriceTag';
 import { COLORS, FONTS, SPACING } from '../../src/constants/theme';
+import { saveReceiptPdf, PdfReceipt } from '../../src/utils/pdf';
 
 interface OrderItem {
   id: number;
@@ -43,12 +44,12 @@ interface OrderDetail extends Omit<Order, 'delivery'> {
 
 const STATUS_COLORS: Record<string, string> = {
   pending: COLORS.warning,
-  confirmed: '#5B8DEF',
-  accepted: '#5B8DEF',
-  processing: '#5B8DEF',
+  confirmed: COLORS.info,
+  accepted: COLORS.info,
+  processing: COLORS.info,
   preparing: COLORS.warning,
-  shipped: '#8B5CF6',
-  out_for_delivery: '#8B5CF6',
+  shipped: COLORS.primaryDark,
+  out_for_delivery: COLORS.primaryDark,
   delivered: COLORS.success,
   completed: COLORS.success,
   cancelled: COLORS.error,
@@ -143,7 +144,7 @@ export default function OwnerOrderDetailScreen() {
       if (!order || updating) return;
       setUpdating(true);
       try {
-        const res = await api.patch(`/orders/${order.id}/status`, { status: newStatus });
+        const res = await api.post(`/owner/orders/${order.id}/status`, { status: newStatus });
         const updated = unwrap<OrderDetail>(res.data);
         setOrder((prev) => (prev ? { ...prev, ...updated, status: updated.status ?? newStatus } : prev));
         Alert.alert('Status Updated', `Order #${order.order_number} is now ${newStatus}.`);
@@ -260,28 +261,46 @@ export default function OwnerOrderDetailScreen() {
           ) : null}
         </ScrollView>
 
-        {(isPending || isProcessing) ? (
-          <View style={styles.footer}>
-            {isPending ? (
-              <Button
-                title="Mark Processing"
-                size="lg"
-                onPress={() => updateStatus('processing')}
-                loading={updating}
-              />
-            ) : null}
-            {isPending || isProcessing ? (
-              <Button
-                title="Mark Completed"
-                size="lg"
-                variant={isPending ? 'secondary' : 'primary'}
-                onPress={() => updateStatus('completed')}
-                loading={updating}
-                disabled={updating}
-              />
-            ) : null}
-          </View>
-        ) : null}
+        <View style={styles.footer}>
+          {order ? (
+            <Button
+              title="Share Receipt PDF"
+              size="lg"
+              variant="outline"
+              onPress={async () => {
+                try {
+                  const rcRes = await api.get(`/orders/${order.id}/receipt`);
+                  const rcBody = rcRes.data as { receipt?: PdfReceipt } | null;
+                  if (rcBody?.receipt) {
+                    await saveReceiptPdf(rcBody.receipt);
+                  } else {
+                    Alert.alert('Receipt', 'Receipt data is unavailable for PDF generation.');
+                  }
+                } catch {
+                  Alert.alert('Receipt', 'Could not generate the receipt PDF.');
+                }
+              }}
+            />
+          ) : null}
+          {isPending ? (
+            <Button
+              title="Mark Processing"
+              size="lg"
+              onPress={() => updateStatus('processing')}
+              loading={updating}
+            />
+          ) : null}
+          {isPending || isProcessing ? (
+            <Button
+              title="Mark Completed"
+              size="lg"
+              variant={isPending ? 'secondary' : 'primary'}
+              onPress={() => updateStatus('completed')}
+              loading={updating}
+              disabled={updating}
+            />
+          ) : null}
+        </View>
       </SafeAreaView>
     </View>
   );
@@ -299,13 +318,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: SPACING.sm,
   },
-  orderNumber: { fontSize: FONTS.size.xl, fontWeight: '800', color: COLORS.text },
+  orderNumber: { fontSize: FONTS.size.xl, fontFamily: FONTS.bold, color: COLORS.text },
   orderDate: { fontSize: FONTS.size.sm, color: COLORS.textLight, marginTop: 2 },
   card: { gap: SPACING.sm + 2 },
-  cardTitle: { fontSize: FONTS.size.lg, fontWeight: '700', color: COLORS.text },
+  cardTitle: { fontSize: FONTS.size.lg, fontFamily: FONTS.bold, color: COLORS.text },
   customerRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm + 2 },
   customerInfo: { flex: 1 },
-  customerName: { fontSize: FONTS.size.md, fontWeight: '600', color: COLORS.text },
+  customerName: { fontSize: FONTS.size.md, fontFamily: FONTS.semibold, color: COLORS.text },
   customerPhone: { fontSize: FONTS.size.sm, color: COLORS.textLight, marginTop: 2 },
   customerEmail: { fontSize: FONTS.size.sm, color: COLORS.textLight },
   itemsHeaderRow: {
@@ -317,13 +336,13 @@ const styles = StyleSheet.create({
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm + 2 },
   itemThumb: {
     width: 40, height: 40, borderRadius: 10,
-    backgroundColor: COLORS.primaryLight, justifyContent: 'center', alignItems: 'center',
+    backgroundColor: COLORS.teal[50], justifyContent: 'center', alignItems: 'center',
   },
-  itemThumbText: { fontSize: FONTS.size.md, fontWeight: '800', color: COLORS.primaryDark },
+  itemThumbText: { fontSize: FONTS.size.md, fontFamily: FONTS.bold, color: COLORS.primaryDark },
   itemInfo: { flex: 1, gap: 2 },
-  itemName: { fontSize: FONTS.size.md, fontWeight: '600', color: COLORS.text },
+  itemName: { fontSize: FONTS.size.md, fontFamily: FONTS.semibold, color: COLORS.text },
   itemQty: { fontSize: FONTS.size.sm, color: COLORS.textLight },
-  itemTotal: { fontSize: FONTS.size.md, fontWeight: '600', color: COLORS.text },
+  itemTotal: { fontSize: FONTS.size.md, fontFamily: FONTS.semibold, color: COLORS.text },
   divider: {
     height: StyleSheet.hairlineWidth, backgroundColor: COLORS.gray[200], marginTop: SPACING.xs,
   },
@@ -331,8 +350,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: SPACING.xs,
   },
   totalLabel: { fontSize: FONTS.size.md, color: COLORS.textLight },
-  totalValue: { fontSize: FONTS.size.md, fontWeight: '600', color: COLORS.text },
-  grandTotalLabel: { fontSize: FONTS.size.md, fontWeight: '700', color: COLORS.text },
+  totalValue: { fontSize: FONTS.size.md, fontFamily: FONTS.semibold, color: COLORS.text },
+  grandTotalLabel: { fontSize: FONTS.size.md, fontFamily: FONTS.bold, color: COLORS.text },
   notes: { fontSize: FONTS.size.md, color: COLORS.textLight, lineHeight: 22 },
   footer: {
     paddingHorizontal: SPACING.md, paddingBottom: SPACING.md, paddingTop: SPACING.sm,

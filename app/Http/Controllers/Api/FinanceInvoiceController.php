@@ -7,7 +7,7 @@ use App\Models\Business;
 use App\Models\Currency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Barryvdh\Dompdf\Facade\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class FinanceInvoiceController extends Controller
 {
@@ -233,6 +233,7 @@ class FinanceInvoiceController extends Controller
         $balance = $e(number_format($invoice->total - $invoice->amount_paid, 2));
 
         $notesBlock = $notes ? "<div class='footer'><strong>Notes:</strong> {$notes}</div>" : '';
+        $logo = \App\Helpers\Branding::logoImgHtml(80, 'left');
 
         return <<<HTML
 <!DOCTYPE html>
@@ -243,6 +244,7 @@ class FinanceInvoiceController extends Controller
         .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .header-left h1 { margin: 0 0 5px 0; font-size: 20px; color: #2563eb; }
         .header-left p { margin: 2px 0; font-size: 12px; color: #666; }
+        .logo-wrap { margin-bottom: 8px; }
         .header-right { text-align: right; }
         .header-right .invoice-label { font-size: 28px; font-weight: bold; color: #2563eb; text-transform: uppercase; }
         .info-grid { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 15px; background: #f9fafb; border-radius: 6px; }
@@ -268,6 +270,7 @@ class FinanceInvoiceController extends Controller
 <body>
     <div class="header">
         <div class="header-left">
+            <div class="logo-wrap">{$logo}</div>
             <h1>{$businessName}</h1>
             <p>{$businessCode}</p>
             <p>{$businessAddress}</p>

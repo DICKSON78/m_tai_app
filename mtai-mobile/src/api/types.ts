@@ -16,7 +16,7 @@ export interface Product {
   compare_at_price?: number;
   sku?: string;
   barcode?: string;
-  stock_quantity: number;
+  quantity: number;
   images?: { id: number; url: string }[];
   category?: { id: number; name: string };
   business?: { id: number; name: string };

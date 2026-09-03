@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
   },
   brand: {
     fontSize: FONTS.size.xxl + 6,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     letterSpacing: 2,
     color: COLORS.text,
   },
@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontSize: FONTS.size.md,
+    fontFamily: FONTS.regular,
     color: COLORS.textLight,
     marginTop: SPACING.md,
   },

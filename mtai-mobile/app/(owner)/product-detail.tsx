@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,7 +15,6 @@ import Header from '../../src/components/Header';
 import LoadingScreen from '../../src/components/LoadingScreen';
 import PriceTag from '../../src/components/PriceTag';
 import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
-import { useAuthStore } from '../../src/store/authStore';
 
 interface OwnerProduct {
   id: number;
@@ -44,22 +42,18 @@ function unwrap<T>(payload: unknown): T {
   return payload as T;
 }
 
-function extractId(body: any): string | null {
-  if (!body || typeof body !== 'object') return null;
-  const data = body.data && typeof body.data === 'object' ? body.data : body;
-  const id = data.id ?? data.business_id;
-  return id != null ? String(id) : null;
-}
-
 interface StockStatus {
   label: string;
   bg: string;
   text: string;
 }
 
+const LOW_STOCK_BG = 'rgba(245, 158, 11, 0.14)';
+const LOW_STOCK_TEXT = '#92400E';
+
 function getStockStatus(quantity: number, threshold: number): StockStatus {
   if (quantity <= 0) return { label: 'Out of Stock', bg: COLORS.red[100], text: COLORS.red[700] };
-  if (quantity <= threshold) return { label: 'Low Stock', bg: '#FEF3C7', text: '#B45309' };
+  if (quantity <= threshold) return { label: 'Low Stock', bg: LOW_STOCK_BG, text: LOW_STOCK_TEXT };
   return { label: 'In Stock', bg: COLORS.green[100], text: COLORS.green[700] };
 }
 
@@ -68,13 +62,9 @@ export default function OwnerProductDetailScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const productId = Array.isArray(params.id) ? params.id[0] : params.id;
 
-  const user = useAuthStore((state) => state.user);
-  const userBusinessId = user?.current_business_id;
-
   const [product, setProduct] = useState<OwnerProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [businessId, setBusinessId] = useState<string | null>(null);
 
   const fetchProduct = useCallback(async () => {
     if (!productId) {
@@ -85,17 +75,7 @@ export default function OwnerProductDetailScreen() {
     setLoading(true);
     setError(null);
     try {
-      let bizId = businessId || (userBusinessId ? String(userBusinessId) : null);
-      if (!bizId) {
-        const profileRes = await api.get('/business/profile');
-        bizId = extractId(profileRes.data);
-      }
-      if (!bizId) {
-        throw new Error('Could not determine business ID.');
-      }
-      setBusinessId(bizId);
-
-      const res = await api.get(`/owner/businesses/${bizId}/products/${productId}`);
+      const res = await api.get(`/owner/products/${productId}`);
       setProduct(unwrap<OwnerProduct>(res.data));
     } catch (err: any) {
       setError(
@@ -107,7 +87,7 @@ export default function OwnerProductDetailScreen() {
     } finally {
       setLoading(false);
     }
-  }, [productId, businessId, userBusinessId]);
+  }, [productId]);
 
   useEffect(() => {
     fetchProduct();
@@ -212,7 +192,7 @@ export default function OwnerProductDetailScreen() {
             <View style={styles.divider} />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Quantity</Text>
-              <Text style={[styles.infoValue, { fontWeight: '800', fontSize: FONTS.size.lg }]}>
+              <Text style={[styles.infoValue, { fontFamily: FONTS.bold, fontSize: FONTS.size.lg }]}>
                 {product.quantity}
               </Text>
             </View>
@@ -242,15 +222,15 @@ const styles = StyleSheet.create({
   nameRow: {
     flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: SPACING.sm,
   },
-  name: { flex: 1, fontSize: FONTS.size.xl, fontWeight: '700', color: COLORS.text },
+  name: { flex: 1, fontSize: FONTS.size.xl, fontFamily: FONTS.bold, color: COLORS.text },
   selfStart: { alignSelf: 'flex-start' },
   card: { gap: SPACING.sm + 2 },
-  cardTitle: { fontSize: FONTS.size.lg, fontWeight: '700', color: COLORS.text },
+  cardTitle: { fontSize: FONTS.size.lg, fontFamily: FONTS.bold, color: COLORS.text },
   infoRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
   },
   infoLabel: { fontSize: FONTS.size.md, color: COLORS.textLight },
-  infoValue: { fontSize: FONTS.size.md, fontWeight: '600', color: COLORS.text },
+  infoValue: { fontSize: FONTS.size.md, fontFamily: FONTS.semibold, color: COLORS.text },
   divider: { height: StyleSheet.hairlineWidth, backgroundColor: COLORS.gray[200], marginVertical: SPACING.xs },
   stockBar: {
     height: 8, borderRadius: RADIUS.full, backgroundColor: COLORS.gray[100], overflow: 'hidden',

@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import api from '../../src/api/client';
 import Avatar from '../../src/components/Avatar';
 import Badge from '../../src/components/Badge';
@@ -255,7 +256,7 @@ export default function AdminBusinessesScreen() {
     }
     return (
       <EmptyState
-        icon={<Text style={styles.emptyIcon}>🏢</Text>}
+        icon={<MaterialIcons name="business" size={32} color={COLORS.gray[400]} />}
         title="No businesses yet"
         subtitle="Businesses registered on M-TAI will appear here."
         style={styles.empty}
@@ -345,7 +346,7 @@ const styles = StyleSheet.create({
   },
   businessName: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   ownerLine: {
@@ -378,8 +379,5 @@ const styles = StyleSheet.create({
   empty: {
     flex: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
 });

@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   },
   orderNumber: {
     fontSize: FONTS.size.xl,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   etaText: {
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FONTS.size.sm,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.textLight,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   },
   stepLabelActive: {
     color: COLORS.primaryDark,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
   },
   mapPreview: {
     alignItems: 'center',
@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
   addressTagText: {
     color: COLORS.white,
     fontSize: FONTS.size.xs,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     letterSpacing: 0.5,
   },
   addressText: {
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
   },
   transporterName: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   transporterPhone: {
@@ -482,7 +482,7 @@ const styles = StyleSheet.create({
   infoValue: {
     flex: 1,
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
     textAlign: 'right',
     marginLeft: SPACING.lg,
@@ -512,7 +512,7 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
 });

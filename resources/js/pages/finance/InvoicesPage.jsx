@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
-import { FileText, Plus, Search, Eye, DollarSign, X } from 'lucide-react';
+import { FileText, Plus, Search, Eye, DollarSign, X, Download, Printer } from 'lucide-react';
+import { downloadPdf, printPdf } from '../../lib/utils';
 import Pagination from '../../components/Pagination';
 
 const STATUS_CLASSES = { draft: 'bg-gray-100 text-gray-700', sent: 'bg-blue-100 text-blue-700', paid: 'bg-green-100 text-green-700', partial: 'bg-yellow-100 text-yellow-700', overdue: 'bg-red-100 text-red-700', cancelled: 'bg-gray-100 text-gray-500' };
@@ -137,7 +138,13 @@ export default function InvoicesPage() {
                                         <td className="px-6 py-3 text-sm text-gray-600 text-right">TZS {Number(inv.amount_paid).toLocaleString()}</td>
                                         <td className="px-6 py-3 text-sm font-semibold text-gray-900 text-right">TZS {Number(inv.total - inv.amount_paid).toLocaleString()}</td>
                                         <td className="px-6 py-3"><span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_CLASSES[inv.status] || ''}`}>{inv.status}</span></td>
-                                        <td className="px-6 py-3 text-right">{inv.status !== 'paid' && inv.status !== 'cancelled' && <button onClick={() => { setShowPayModal(inv); setPayAmount(String(Number(inv.total) - Number(inv.amount_paid))); }} className="px-3 py-1.5 text-xs font-medium text-white bg-[#00D4AA] rounded-lg hover:bg-[#00b894]">Pay</button>}</td>
+                                        <td className="px-6 py-3 text-right">
+                                            <div className="flex items-center justify-end gap-1.5">
+                                                <button title="Download PDF" onClick={() => { downloadPdf(`/owner/finance/invoices/${inv.id}/pdf`, `invoice-${inv.invoice_number}.pdf`).catch(e => alert(e.message)); }} className="p-1.5 text-gray-500 hover:text-[#00D4AA] transition-colors"><Download size={16} /></button>
+                                                <button title="Print" onClick={() => { printPdf(`/owner/finance/invoices/${inv.id}/print`).catch(() => alert('Could not open print view')); }} className="p-1.5 text-gray-500 hover:text-[#00D4AA] transition-colors"><Printer size={16} /></button>
+                                                {inv.status !== 'paid' && inv.status !== 'cancelled' && <button onClick={() => { setShowPayModal(inv); setPayAmount(String(Number(inv.total) - Number(inv.amount_paid))); }} className="px-3 py-1.5 text-xs font-medium text-white bg-[#00D4AA] rounded-lg hover:bg-[#00b894]">Pay</button>}
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

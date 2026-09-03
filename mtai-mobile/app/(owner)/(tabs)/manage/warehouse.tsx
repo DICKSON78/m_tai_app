@@ -8,12 +8,14 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import api from '../../src/api/client';
-import Badge from '../../src/components/Badge';
-import Card from '../../src/components/Card';
-import EmptyState from '../../src/components/EmptyState';
-import Header from '../../src/components/Header';
-import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
+import { router } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+import api from '../../../../src/api/client';
+import Badge from '../../../../src/components/Badge';
+import Card from '../../../../src/components/Card';
+import EmptyState from '../../../../src/components/EmptyState';
+import Header from '../../../../src/components/Header';
+import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../../../src/constants/theme';
 
 interface Warehouse {
   id: number;
@@ -75,12 +77,12 @@ function getTransferStatus(status: string): { label: string; bg: string; text: s
     case 'completed':
       return { label: 'Completed', bg: COLORS.green[100], text: COLORS.green[700] };
     case 'in_transit':
-      return { label: 'In Transit', bg: 'rgba(91, 141, 239, 0.14)', text: '#5B8DEF' };
+      return { label: 'In Transit', bg: 'rgba(91, 141, 239, 0.14)', text: COLORS.info };
     case 'cancelled':
       return { label: 'Cancelled', bg: COLORS.red[100], text: COLORS.red[700] };
     case 'pending':
     default:
-      return { label: 'Pending', bg: '#FEF3C7', text: '#B45309' };
+      return { label: 'Pending', bg: 'rgba(245, 158, 11, 0.14)', text: '#92400E' };
   }
 }
 
@@ -97,43 +99,36 @@ export default function WarehouseScreen() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [businessId, setBusinessId] = useState<string | null>(null);
   const requestSeqRef = useRef(0);
 
   const fetchData = useCallback(async () => {
     requestSeqRef.current += 1;
     const requestId = requestSeqRef.current;
 
-    try {
-      let bizId = businessId;
-      if (!bizId) {
-        const profileRes = await api.get('/business/profile');
-        bizId = extractId(profileRes.data);
-        if (!bizId) throw new Error('Could not determine business ID.');
-        if (requestId !== requestSeqRef.current) return;
-        setBusinessId(bizId);
-      }
+    const [whRes, trRes] = await Promise.allSettled([
+      api.get('/owner/warehouses'),
+      api.get('/owner/warehouses/transfers/list'),
+    ]);
 
-      const [whRes, trRes] = await Promise.all([
-        api.get(`/owner/businesses/${bizId}/warehouses`),
-        api.get(`/owner/businesses/${bizId}/warehouse-transfers`),
-      ]);
+    if (requestId !== requestSeqRef.current) return;
 
-      if (requestId !== requestSeqRef.current) return;
-
-      setWarehouses(extractArray(whRes.data).map(normalizeWarehouse).filter(Boolean) as Warehouse[]);
-      setTransfers(extractArray(trRes.data).map(normalizeTransfer).filter(Boolean) as Transfer[]);
-      setError(null);
-    } catch (err: any) {
-      if (requestId !== requestSeqRef.current) return;
-      setError(err?.response?.data?.message || err?.message || 'Failed to load warehouse data.');
-    } finally {
-      if (requestId === requestSeqRef.current) {
-        setInitialLoading(false);
-        setRefreshing(false);
-      }
+    if (whRes.status === 'fulfilled') {
+      setWarehouses(extractArray(whRes.value.data).map(normalizeWarehouse).filter(Boolean) as Warehouse[]);
+    } else {
+      setError((whRes.reason as any)?.response?.data?.message || 'Failed to load warehouses.');
     }
-  }, [businessId]);
+    if (trRes.status === 'fulfilled') {
+      setTransfers(extractArray(trRes.value.data).map(normalizeTransfer).filter(Boolean) as Transfer[]);
+    } else {
+      setError((trRes.reason as any)?.response?.data?.message || 'Failed to load stock transfers.');
+    }
+    if (whRes.status === 'rejected' && trRes.status === 'rejected') {
+      setError((whRes.reason as any)?.response?.data?.message || 'Failed to load warehouse data.');
+    }
+
+    setInitialLoading(false);
+    setRefreshing(false);
+  }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -162,7 +157,7 @@ export default function WarehouseScreen() {
   if (initialLoading) {
     return (
       <SafeAreaView style={styles.safe} edges={['top']}>
-        <Header title="Warehouse" />
+        <Header title="Warehouse" onBack={() => router.back()} />
         <View style={styles.center}>
           <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.loadingText}>Loading…</Text>
@@ -173,7 +168,7 @@ export default function WarehouseScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header title="Warehouse" subtitle={`${warehouses.length} warehouse${warehouses.length === 1 ? '' : 's'} · ${transfers.length} transfer${transfers.length === 1 ? '' : 's'}`} />
+      <Header title="Warehouse" subtitle={`${warehouses.length} warehouse${warehouses.length === 1 ? '' : 's'} · ${transfers.length} transfer${transfers.length === 1 ? '' : 's'}`} onBack={() => router.back()} />
       <FlatList
         data={transfers}
         keyExtractor={(item) => String(item.id)}
@@ -193,7 +188,7 @@ export default function WarehouseScreen() {
                   <Card key={String(wh.id)} style={styles.card}>
                     <View style={styles.cardRow}>
                       <View style={styles.whIcon}>
-                        <Text style={styles.whIconText}>🏪</Text>
+                        <MaterialIcons name="home-work" size={22} color={COLORS.primaryDark} />
                       </View>
                       <View style={styles.cardInfo}>
                         <Text style={styles.cardTitle} numberOfLines={1}>{wh.name}</Text>
@@ -216,7 +211,7 @@ export default function WarehouseScreen() {
         ListEmptyComponent={
           !error ? (
             <EmptyState
-              icon={<Text style={styles.emptyIcon}>🏭</Text>}
+              icon={<MaterialIcons name="factory" size={32} color={COLORS.gray[400]} />}
               title="No warehouse data"
               subtitle="Warehouses and transfers will appear here."
               style={styles.empty}
@@ -237,16 +232,14 @@ const styles = StyleSheet.create({
   loadingText: { fontSize: FONTS.size.sm, color: COLORS.textLight },
   listContent: { paddingBottom: SPACING.xl, flexGrow: 1 },
   sectionWrap: { paddingHorizontal: SPACING.md, paddingTop: SPACING.md },
-  sectionTitle: { fontSize: FONTS.size.lg, fontWeight: '700', color: COLORS.text, marginBottom: SPACING.sm + 2 },
+  sectionTitle: { fontSize: FONTS.size.lg, fontFamily: FONTS.bold, color: COLORS.text, marginBottom: SPACING.sm + 2 },
   card: { marginBottom: SPACING.sm + 4 },
   cardRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   cardInfo: { flex: 1, gap: SPACING.xs },
-  cardTitle: { fontSize: FONTS.size.md, fontWeight: '700', color: COLORS.text },
+  cardTitle: { fontSize: FONTS.size.md, fontFamily: FONTS.bold, color: COLORS.text },
   cardMeta: { fontSize: FONTS.size.sm, color: COLORS.textLight },
   whIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.gray[100], justifyContent: 'center', alignItems: 'center' },
-  whIconText: { fontSize: FONTS.size.lg },
   errorBanner: { backgroundColor: COLORS.red[100], borderRadius: RADIUS.md, paddingVertical: SPACING.sm, paddingHorizontal: SPACING.md, marginBottom: SPACING.sm },
   errorText: { color: COLORS.red[700], fontSize: FONTS.size.sm },
   empty: { flex: 1, justifyContent: 'center' },
-  emptyIcon: { fontSize: 32 },
 });

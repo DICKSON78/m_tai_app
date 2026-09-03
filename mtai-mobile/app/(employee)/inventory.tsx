@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import api from '../../src/api/client';
 import Badge from '../../src/components/Badge';
 import Card from '../../src/components/Card';
@@ -42,7 +43,7 @@ function getStockStatus(quantity: number): StockStatus {
     return { label: 'Out of Stock', bg: COLORS.red[100], text: COLORS.red[700] };
   }
   if (quantity <= LOW_STOCK_THRESHOLD) {
-    return { label: 'Low Stock', bg: '#FEF3C7', text: '#B45309' };
+    return { label: 'Low Stock', bg: 'rgba(245, 158, 11, 0.14)', text: '#92400E' };
   }
   return { label: 'In Stock', bg: COLORS.green[100], text: COLORS.green[700] };
 }
@@ -212,7 +213,12 @@ export default function InventoryScreen() {
             ) : null}
             {item.location ? (
               <View style={[styles.metaChip, styles.locationChip]}>
-                <Text style={styles.locationIcon}>📍</Text>
+                <MaterialIcons
+                  name="location-on"
+                  size={12}
+                  color={COLORS.primaryDark}
+                  style={{ marginRight: 3 }}
+                />
                 <Text style={styles.locationText} numberOfLines={1}>
                   {item.location}
                 </Text>
@@ -245,7 +251,7 @@ export default function InventoryScreen() {
     if (items.length === 0) {
       return (
         <EmptyState
-          icon={<Text style={styles.emptyIcon}>🏷</Text>}
+          icon={<MaterialIcons name="inventory-2" size={32} color={COLORS.gray[400]} />}
           title="No stock records"
           subtitle="Inventory data will appear here once products are added to your store."
           style={styles.empty}
@@ -254,7 +260,7 @@ export default function InventoryScreen() {
     }
     return (
       <EmptyState
-        icon={<Text style={styles.emptyIcon}>🔍</Text>}
+        icon={<MaterialIcons name="search" size={32} color={COLORS.gray[400]} />}
         title="No matches"
         subtitle={`Nothing found for “${searchText.trim()}”. Try a different name or SKU.`}
         actionTitle="Clear Search"
@@ -301,7 +307,7 @@ export default function InventoryScreen() {
                   setScanVisible(true);
                 }}
               >
-                <Text style={controls.scanIcon}>⛶</Text>
+                <MaterialIcons name="center-focus-strong" size={24} color={COLORS.white} />
               </TouchableOpacity>
             </View>
 
@@ -419,7 +425,7 @@ const styles = StyleSheet.create({
   itemName: {
     flexShrink: 1,
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   metaRow: {
@@ -441,7 +447,7 @@ const styles = StyleSheet.create({
   },
   skuText: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.gray[600],
     fontVariant: ['tabular-nums'],
   },
@@ -449,14 +455,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primaryLight,
     maxWidth: 180,
   },
-  locationIcon: {
-    fontSize: FONTS.size.xs,
-    marginRight: 3,
-  },
   locationText: {
     flexShrink: 1,
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.primaryDark,
   },
   qtyBox: {
@@ -469,19 +471,16 @@ const styles = StyleSheet.create({
   },
   qtyValue: {
     fontSize: FONTS.size.xl,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     lineHeight: 26,
   },
   qtyLabel: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   empty: {
     flex: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
   modalOverlay: {
     flex: 1,
@@ -497,7 +496,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: FONTS.size.xl,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   modalSubtitle: {
@@ -514,7 +513,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     minHeight: 52,
     fontSize: FONTS.size.lg,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   modalActions: {
@@ -531,7 +530,7 @@ const styles = StyleSheet.create({
   },
   modalSecondaryText: {
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.gray[700],
   },
   modalPrimaryButton: {
@@ -544,7 +543,7 @@ const styles = StyleSheet.create({
   },
   modalPrimaryText: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.white,
   },
 });
@@ -566,15 +565,10 @@ const controls = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.secondary,
+    backgroundColor: COLORS.primaryDark,
     justifyContent: 'center',
     alignItems: 'center',
     ...SHADOWS.sm,
-  },
-  scanIcon: {
-    fontSize: FONTS.size.xl,
-    lineHeight: FONTS.size.xxl,
-    color: COLORS.white,
   },
   summaryRow: {
     alignSelf: 'flex-start',
@@ -586,7 +580,7 @@ const controls = StyleSheet.create({
   },
   summaryText: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.textLight,
   },
 });

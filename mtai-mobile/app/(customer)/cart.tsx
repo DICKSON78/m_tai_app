@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useMemo } from 'react';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Product } from '../../src/api/types';
 import Button from '../../src/components/Button';
@@ -11,10 +12,29 @@ import PriceTag from '../../src/components/PriceTag';
 import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
 import { useCartStore } from '../../src/store/cartStore';
 
+const PLACEHOLDER_COLORS = ['#0FAE8C', '#2F80ED', '#F2994A', '#EB5757', '#9B51E0', '#27AE60'];
+
+function placeholderColor(seed: number): string {
+  return PLACEHOLDER_COLORS[Math.abs(seed) % PLACEHOLDER_COLORS.length];
+}
+
 function formatTZS(amount: number): string {
   const rounded = Math.round(amount);
   const withSeparators = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return `TZS ${withSeparators}`;
+}
+
+function stockOf(product: Product): number {
+  const value = Number(product.quantity ?? (product as any)?.stock_quantity ?? 0);
+  return Number.isNaN(value) ? 0 : value;
+}
+
+function priceOf(product: Product): number {
+  const price = Number(product.price ?? 0);
+  if (price > 0) return price;
+  const selling = Number((product as any)?.selling_price ?? 0);
+  if (selling > 0) return selling;
+  return Number((product as any)?.retail_price ?? 0);
 }
 
 export default function CartScreen() {
@@ -24,7 +44,12 @@ export default function CartScreen() {
   const removeItem = useCartStore((s) => s.removeItem);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const clearCart = useCartStore((s) => s.clearCart);
+  const loadServerCart = useCartStore((s) => s.loadServerCart);
   const getTotal = useCartStore((s) => s.getTotal);
+
+  useEffect(() => {
+    void loadServerCart();
+  }, [loadServerCart]);
 
   const total = useMemo(() => getTotal(), [getTotal, items]);
   const itemCount = useMemo(
@@ -33,19 +58,24 @@ export default function CartScreen() {
   );
 
   const handleQuantityChange = (product: Product, nextQuantity: number) => {
-    if (nextQuantity > product.stock_quantity) return;
+    if (nextQuantity > stockOf(product)) return;
     updateQuantity(product.id, nextQuantity);
   };
 
   const renderCartItem = ({ item }: { item: { product: Product; quantity: number } }) => {
     const { product, quantity } = item;
-    const outOfStock = product.stock_quantity <= 0;
-    const lineTotal = product.price * quantity;
+    const outOfStock = stockOf(product) <= 0;
+    const lineTotal = priceOf(product) * quantity;
+    const imageUri = product.images?.[0]?.url;
 
     return (
       <Card style={styles.itemCard}>
-        <View style={[styles.thumb, styles.thumbPlaceholder]}>
-          <Text style={styles.thumbInitial}>{product.name.charAt(0).toUpperCase()}</Text>
+        <View style={[styles.thumb, { backgroundColor: placeholderColor(product.id) }]}>
+          {imageUri ? (
+            <Image source={{ uri: imageUri }} style={styles.thumbImage} resizeMode="cover" />
+          ) : (
+            <Text style={styles.thumbInitial}>{product.name.charAt(0).toUpperCase()}</Text>
+          )}
         </View>
 
         <View style={styles.itemInfo}>
@@ -59,11 +89,11 @@ export default function CartScreen() {
               activeOpacity={0.6}
               style={styles.removeButton}
             >
-              <Text style={styles.removeText}>✕</Text>
+              <MaterialIcons name="close" size={20} color={COLORS.gray[400]} />
             </TouchableOpacity>
           </View>
 
-          <PriceTag price={product.price} size="sm" />
+          <PriceTag price={priceOf(product)} size="sm" />
 
           <View style={styles.itemBottomRow}>
             <View style={styles.quantitySelector}>
@@ -78,7 +108,7 @@ export default function CartScreen() {
               <TouchableOpacity
                 style={[styles.qtyButton, outOfStock && styles.qtyButtonDisabled]}
                 onPress={() => handleQuantityChange(product, quantity + 1)}
-                disabled={outOfStock || quantity >= product.stock_quantity}
+                disabled={outOfStock || quantity >= stockOf(product)}
                 activeOpacity={0.7}
               >
                 <View style={styles.qtyPlusVertical} />
@@ -101,7 +131,7 @@ export default function CartScreen() {
       <SafeAreaView style={styles.safe} edges={['top']}>
         <Header title="My Cart" onBack={() => router.back()} />
         <EmptyState
-          icon={<Text style={styles.emptyIcon}>🛒</Text>}
+          icon={<MaterialIcons name="shopping-cart" size={32} color={COLORS.gray[400]} />}
           title="Your cart is empty"
           subtitle="Browse featured products and add items to get started."
           actionTitle="Browse Products"
@@ -135,12 +165,18 @@ export default function CartScreen() {
         />
 
         <View style={styles.summaryBar}>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Total</Text>
-            <Text style={styles.summaryValue}>{formatTZS(total)}</Text>
+          <View style={styles.summaryMeta}>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Subtotal ({itemCount} item{itemCount === 1 ? '' : 's'})</Text>
+              <Text style={styles.summaryValue}>{formatTZS(total)}</Text>
+            </View>
+            <View style={styles.deliveryHint}>
+              <MaterialIcons name="local-shipping" size={14} color={COLORS.primaryDark} />
+              <Text style={styles.deliveryHintText}>Delivery calculated at checkout</Text>
+            </View>
           </View>
           <Button
-            title="Checkout"
+            title={`Checkout · ${formatTZS(total)}`}
             size="lg"
             onPress={() => router.push('/checkout')}
             disabled={itemCount === 0}
@@ -162,7 +198,7 @@ const styles = StyleSheet.create({
   },
   clearText: {
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.error,
   },
   listContent: {
@@ -180,14 +216,16 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
-  thumbPlaceholder: {
-    backgroundColor: COLORS.primaryLight,
+  thumbImage: {
+    width: '100%',
+    height: '100%',
   },
   thumbInitial: {
     fontSize: FONTS.size.xxl,
-    fontWeight: '800',
-    color: COLORS.primaryDark,
+    fontFamily: FONTS.bold,
+    color: COLORS.white,
   },
   itemInfo: {
     flex: 1,
@@ -200,7 +238,7 @@ const styles = StyleSheet.create({
   itemName: {
     flex: 1,
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
     lineHeight: 20,
   },
@@ -210,11 +248,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: SPACING.sm,
-  },
-  removeText: {
-    fontSize: FONTS.size.lg,
-    color: COLORS.gray[400],
-    fontWeight: '600',
   },
   itemBottomRow: {
     flexDirection: 'row',
@@ -228,54 +261,55 @@ const styles = StyleSheet.create({
   },
   lineTotal: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   quantitySelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
-    backgroundColor: COLORS.gray[100],
+    gap: SPACING.xs + 2,
+    backgroundColor: COLORS.white,
     borderRadius: RADIUS.md,
-    padding: 4,
+    borderWidth: 1,
+    borderColor: COLORS.gray[200],
+    padding: SPACING.xs,
   },
   qtyButton: {
-    width: 30,
-    height: 30,
-    borderRadius: RADIUS.sm,
-    backgroundColor: COLORS.white,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.teal[50],
     justifyContent: 'center',
     alignItems: 'center',
-    ...SHADOWS.sm,
   },
   qtyButtonDisabled: {
-    opacity: 0.5,
+    opacity: 0.4,
   },
   qtyMinus: {
     width: 12,
     height: 2.5,
     borderRadius: 2,
-    backgroundColor: COLORS.text,
+    backgroundColor: COLORS.primaryDark,
   },
   qtyPlusVertical: {
     position: 'absolute',
     width: 2.5,
     height: 12,
     borderRadius: 2,
-    backgroundColor: COLORS.text,
+    backgroundColor: COLORS.primaryDark,
   },
   qtyPlusHorizontal: {
     position: 'absolute',
     width: 12,
     height: 2.5,
     borderRadius: 2,
-    backgroundColor: COLORS.text,
+    backgroundColor: COLORS.primaryDark,
   },
   qtyValue: {
     minWidth: 26,
     textAlign: 'center',
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   summaryBar: {
@@ -292,13 +326,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  summaryMeta: {
+    gap: SPACING.xs,
+  },
+  deliveryHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginTop: SPACING.xs,
+  },
+  deliveryHintText: {
+    fontSize: FONTS.size.sm,
+    color: COLORS.textLight,
+    fontFamily: FONTS.regular,
+  },
   summaryLabel: {
     fontSize: FONTS.size.md,
     color: COLORS.textLight,
   },
   summaryValue: {
     fontSize: FONTS.size.xl,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   checkoutButton: {
@@ -307,8 +355,5 @@ const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
 });

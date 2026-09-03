@@ -1,22 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Alert,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import api from '../../src/api/client';
-import { useAuthStore } from '../../src/store/authStore';
-import Avatar from '../../src/components/Avatar';
-import Badge from '../../src/components/Badge';
-import Button from '../../src/components/Button';
-import Card from '../../src/components/Card';
+import AlertModal from '../../src/components/AlertModal';
 import Header from '../../src/components/Header';
-import LoadingScreen from '../../src/components/LoadingScreen';
+import { useAuthStore } from '../../src/store/authStore';
 import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
 
 interface AdminStats {
@@ -70,7 +67,15 @@ function formatMoneyCompact(amount: number): string {
   return `TZS ${formatCount(amount)}`;
 }
 
+type MenuItem = {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  subtitle?: string;
+  onPress: () => void;
+};
+
 export default function AdminProfileScreen() {
+  const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
 
@@ -78,6 +83,8 @@ export default function AdminProfileScreen() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const requestSeqRef = useRef(0);
 
@@ -110,43 +117,89 @@ export default function AdminProfileScreen() {
     await Promise.all([loadStats(), useAuthStore.getState().refreshUser()]);
   }, [loadStats]);
 
-  const handleLogout = useCallback(() => {
-    Alert.alert('Log out', 'Are you sure you want to log out of M-TAI?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Log Out',
-        style: 'destructive',
-        onPress: async () => {
-          await logout();
-          try {
-            router.replace('/(auth)/login');
-          } catch {
-            router.replace('/');
-          }
-        },
-      },
-    ]);
-  }, [logout]);
+  const performLogout = async () => {
+    setConfirmLogout(false);
+    setLoggingOut(true);
+    try {
+      await logout();
+      router.replace('/(auth)/login');
+    } catch {
+      setLoggingOut(false);
+    }
+  };
 
-  if (initialLoading) {
-    return <LoadingScreen />;
-  }
-
-  const name = user?.name ?? 'Admin';
-  const email = user?.email ?? '';
-
-  const summaryItems = [
-    { icon: '🏢', label: 'Businesses', value: formatCount(stats.totalBusinesses), tint: '#5B8DEF' },
-    { icon: '👥', label: 'Users', value: formatCount(stats.totalUsers), tint: COLORS.primaryDark },
-    { icon: '🛒', label: 'Orders', value: formatCount(stats.totalOrders), tint: '#8B5CF6' },
-    { icon: '💰', label: 'Revenue', value: formatMoneyCompact(stats.revenue), tint: COLORS.success },
+  const menuItems: MenuItem[] = [
+    {
+      icon: 'business',
+      label: 'Manage Businesses',
+      subtitle: 'Review and manage all businesses',
+      onPress: () => router.push('/(admin)/businesses'),
+    },
+    {
+      icon: 'group',
+      label: 'Manage Users',
+      subtitle: 'Accounts, roles and permissions',
+      onPress: () => router.push('/(admin)/users'),
+    },
+    {
+      icon: 'receipt-long',
+      label: 'Orders',
+      subtitle: 'All platform orders',
+      onPress: () => router.push('/(admin)/orders'),
+    },
+    {
+      icon: 'campaign',
+      label: 'Announcements',
+      subtitle: 'Broadcast messages to users',
+      onPress: () => router.push('/(admin)/announcements'),
+    },
   ];
 
+  const renderMenuRow = (item: MenuItem, last: boolean) => (
+    <TouchableOpacity
+      key={item.label}
+      activeOpacity={0.7}
+      onPress={item.onPress}
+      style={[styles.row, !last && styles.rowBorder]}
+    >
+      <View style={styles.rowIcon}>
+        <MaterialIcons name={item.icon} size={20} color={COLORS.primaryDark} />
+      </View>
+      <View style={styles.rowBody}>
+        <Text style={styles.rowLabel}>{item.label}</Text>
+        {item.subtitle ? <Text style={styles.rowSubtitle}>{item.subtitle}</Text> : null}
+      </View>
+      <MaterialIcons name="chevron-right" size={22} color={COLORS.gray[400]} />
+    </TouchableOpacity>
+  );
+
+  const statRows = [
+    { icon: 'domain' as const, label: 'Businesses', value: formatCount(stats.totalBusinesses) },
+    { icon: 'group' as const, label: 'Users', value: formatCount(stats.totalUsers) },
+    { icon: 'receipt-long' as const, label: 'Orders', value: formatCount(stats.totalOrders) },
+    { icon: 'payments' as const, label: 'Revenue', value: formatMoneyCompact(stats.revenue) },
+  ];
+
+  const name = user?.name?.trim() || 'Admin';
+
+  if (initialLoading) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+        <Header title="Profile" />
+        <View style={styles.loadingWrap}>
+          <Text style={styles.loadingText}>Loading profile…</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <Header title="Profile" subtitle="Administrator" />
+    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+      <Header title="Profile" />
+
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={styles.scroll}
+        bounces={false}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -157,146 +210,219 @@ export default function AdminProfileScreen() {
           />
         }
       >
-        <Card style={[styles.section, SHADOWS.md]}>
-          <View style={styles.identityRow}>
-            <Avatar uri={user?.avatar} name={name} size={64} />
-            <View style={styles.identityInfo}>
-              <Text style={styles.name} numberOfLines={1}>
+        <View style={styles.userCard}>
+          <View style={styles.avatarCircle}>
+            <Text style={styles.avatarInitial}>{(name.charAt(0) || 'A').toUpperCase()}</Text>
+          </View>
+          <View style={styles.userInfo}>
+            <View style={styles.nameRow}>
+              <Text style={styles.userName} numberOfLines={1}>
                 {name}
               </Text>
-              {email ? (
-                <Text style={styles.email} numberOfLines={1}>
-                  {email}
-                </Text>
-              ) : null}
+              <MaterialIcons name="verified" size={16} color={COLORS.primaryDark} />
             </View>
-            <Badge label="Admin" color={COLORS.secondary} size="sm" />
+            <Text style={styles.userRole}>Administrator</Text>
+            <Text style={styles.userEmail} numberOfLines={1}>
+              {user?.email || ''}
+            </Text>
           </View>
-        </Card>
+        </View>
 
-        <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>Platform Stats</Text>
-          {loadError ? (
-            <Text style={styles.errorText}>{loadError}</Text>
-          ) : (
-            <>
-              <View style={styles.summaryRow}>
-                {summaryItems.slice(0, 2).map((item) => (
-                  <View
-                    key={item.label}
-                    style={[styles.summaryTile, { backgroundColor: `${item.tint}14` }]}
-                  >
-                    <Text style={styles.summaryIcon}>{item.icon}</Text>
-                    <Text style={[styles.summaryValue, { color: item.tint }]} numberOfLines={1}>
-                      {item.value}
-                    </Text>
-                    <Text style={styles.summaryLabel}>{item.label}</Text>
-                  </View>
-                ))}
+        <Text style={styles.sectionTitle}>Platform Stats</Text>
+        <View style={styles.group}>
+          {statRows.map((item, i) => (
+            <View key={item.label} style={[styles.row, i < statRows.length - 1 && styles.rowBorder]}>
+              <View style={styles.rowIcon}>
+                <MaterialIcons name={item.icon} size={20} color={COLORS.primaryDark} />
               </View>
-              <View style={[styles.summaryRow, styles.summaryRowSpacing]}>
-                {summaryItems.slice(2).map((item) => (
-                  <View
-                    key={item.label}
-                    style={[styles.summaryTile, { backgroundColor: `${item.tint}14` }]}
-                  >
-                    <Text style={styles.summaryIcon}>{item.icon}</Text>
-                    <Text style={[styles.summaryValue, { color: item.tint }]} numberOfLines={1}>
-                      {item.value}
-                    </Text>
-                    <Text style={styles.summaryLabel}>{item.label}</Text>
-                  </View>
-                ))}
+              <View style={styles.rowBody}>
+                <Text style={styles.rowLabel}>{item.label}</Text>
               </View>
-            </>
-          )}
-        </Card>
+              <Text style={styles.rowValue}>{item.value}</Text>
+            </View>
+          ))}
+          {loadError ? <Text style={styles.statError}>{loadError}</Text> : null}
+        </View>
 
-        <Button
-          title="Log Out"
-          variant="danger"
-          size="lg"
-          onPress={handleLogout}
-          style={styles.logoutButton}
-        />
+        <Text style={styles.sectionTitle}>Menu</Text>
+        <View style={styles.group}>
+          {menuItems.map((item, i) => renderMenuRow(item, i === menuItems.length - 1))}
+        </View>
+
+        <Text style={styles.sectionTitle}>Account</Text>
+        <View style={styles.group}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setConfirmLogout(true)}
+            style={styles.row}
+          >
+            <View style={[styles.rowIcon, styles.logoutIcon]}>
+              <MaterialIcons name="logout" size={20} color={COLORS.red[700]} />
+            </View>
+            <View style={styles.rowBody}>
+              <Text style={[styles.rowLabel, styles.logoutText]}>Log Out</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={22} color={COLORS.gray[400]} />
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.version}>M-TAI v1.0.0</Text>
       </ScrollView>
+
+      <AlertModal
+        visible={confirmLogout}
+        title="Do you want to exit?"
+        message="You will be logged out of your account."
+        confirmText="Yes"
+        cancelText="No"
+        onConfirm={performLogout}
+        onCancel={() => setConfirmLogout(false)}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  safe: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  scrollContent: {
-    padding: SPACING.md,
-    paddingBottom: SPACING.xxl + SPACING.lg,
+  scroll: {
+    paddingBottom: SPACING.xl,
   },
-  section: {
-    marginBottom: SPACING.md,
+  loadingWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  identityRow: {
+  loadingText: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+    color: COLORS.textLight,
+  },
+  userCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+    padding: SPACING.lg,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.lg,
+    ...SHADOWS.md,
   },
-  identityInfo: {
+  avatarCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: COLORS.teal[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarInitial: {
+    fontSize: FONTS.size.xxl,
+    fontFamily: FONTS.bold,
+    color: COLORS.primaryDark,
+  },
+  userInfo: {
     flex: 1,
   },
-  name: {
-    fontSize: FONTS.size.xl,
-    fontWeight: '700',
-    color: COLORS.text,
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs + 2,
   },
-  email: {
+  userName: {
+    fontSize: FONTS.size.lg,
+    fontFamily: FONTS.bold,
+    color: COLORS.text,
+    flexShrink: 1,
+  },
+  userRole: {
     fontSize: FONTS.size.sm,
+    fontFamily: FONTS.semibold,
+    color: COLORS.primaryDark,
+    marginTop: 2,
+  },
+  userEmail: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
     color: COLORS.textLight,
     marginTop: 2,
   },
   sectionTitle: {
-    fontSize: FONTS.size.sm,
-    fontWeight: '700',
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.bold,
     color: COLORS.textLight,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.sm,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    marginBottom: SPACING.md,
   },
-  errorText: {
-    fontSize: FONTS.size.sm,
-    color: COLORS.red[700],
-    lineHeight: 19,
+  group: {
+    marginHorizontal: SPACING.lg,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.lg,
+    overflow: 'hidden',
+    ...SHADOWS.sm,
   },
-  summaryRow: {
+  row: {
     flexDirection: 'row',
-    gap: SPACING.md,
-  },
-  summaryRowSpacing: {
-    marginTop: SPACING.md,
-  },
-  summaryTile: {
-    flex: 1,
-    borderRadius: RADIUS.md,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.md,
     alignItems: 'center',
-    gap: SPACING.xs,
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
   },
-  summaryIcon: {
-    fontSize: FONTS.size.xl,
+  rowBorder: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: COLORS.gray[200],
   },
-  summaryValue: {
-    fontSize: FONTS.size.lg,
-    fontWeight: '800',
+  rowIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.teal[50],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  summaryLabel: {
-    fontSize: FONTS.size.xs,
-    fontWeight: '600',
+  logoutIcon: {
+    backgroundColor: COLORS.red[100],
+  },
+  rowBody: {
+    flex: 1,
+  },
+  rowLabel: {
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.semibold,
+    color: COLORS.text,
+  },
+  rowSubtitle: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
     color: COLORS.textLight,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    marginTop: 2,
   },
-  logoutButton: {
-    marginTop: SPACING.sm,
+  rowValue: {
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.bold,
+    color: COLORS.primaryDark,
+  },
+  logoutText: {
+    color: COLORS.red[700],
+  },
+  statError: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+    color: COLORS.red[700],
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.md,
+  },
+  version: {
+    textAlign: 'center',
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+    color: COLORS.textLight,
+    marginTop: SPACING.lg,
   },
 });

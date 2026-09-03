@@ -11,17 +11,19 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
 import api from '../../src/api/client';
 import { Delivery } from '../../src/api/types';
 import Avatar from '../../src/components/Avatar';
 import Badge from '../../src/components/Badge';
 import Button from '../../src/components/Button';
 import Card from '../../src/components/Card';
+import DeliveryMap from '../../src/components/DeliveryMap';
 import EmptyState from '../../src/components/EmptyState';
 import Header from '../../src/components/Header';
 import LoadingScreen from '../../src/components/LoadingScreen';
 import PriceTag from '../../src/components/PriceTag';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
 
 const STATUS_FLOW = ['assigned', 'picked_up', 'in_transit', 'delivered'] as const;
 
@@ -41,8 +43,8 @@ const NEXT_ACTION: Record<
 const STATUS_META: Record<string, { label: string; color: string }> = {
   pending: { label: 'Pending', color: COLORS.gray[500] },
   available: { label: 'Available', color: COLORS.primary },
-  assigned: { label: 'Assigned', color: '#5B8DEF' },
-  picked_up: { label: 'Picked Up', color: '#8B5CF6' },
+  assigned: { label: 'Assigned', color: COLORS.info },
+  picked_up: { label: 'Picked Up', color: COLORS.primaryDark },
   in_transit: { label: 'In Transit', color: COLORS.warning },
   delivered: { label: 'Delivered', color: COLORS.success },
   cancelled: { label: 'Cancelled', color: COLORS.red[500] },
@@ -135,6 +137,7 @@ export default function DeliveryDetailScreen() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
   const [accepting, setAccepting] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchDelivery = useCallback(async () => {
@@ -204,6 +207,33 @@ export default function DeliveryDetailScreen() {
       setAccepting(false);
     }
   }, [delivery, accepting, fetchDelivery]);
+
+  const handleReject = useCallback(async () => {
+    if (!delivery || rejecting) return;
+    Alert.alert(
+      'Reject this delivery?',
+      `You will no longer be offered order ${orderLabel(delivery)}.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reject',
+          style: 'destructive',
+          onPress: async () => {
+            setRejecting(true);
+            try {
+              await api.post(`/transporter/deliveries/${delivery.id}/reject`);
+              await fetchDelivery();
+              Alert.alert('Delivery rejected', 'This delivery has been released back to the pool.');
+            } catch (error) {
+              Alert.alert('Could not reject', extractErrorMessage(error, 'Please try again.'));
+            } finally {
+              setRejecting(false);
+            }
+          },
+        },
+      ]
+    );
+  }, [delivery, rejecting, fetchDelivery]);
 
   const openDirections = useCallback((latitude: number, longitude: number) => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=driving`;
@@ -313,29 +343,37 @@ export default function DeliveryDetailScreen() {
 
         <Card style={styles.section}>
           <Text style={styles.sectionTitle}>Location</Text>
-          <TouchableOpacity
-            activeOpacity={destinationCoords ? 0.85 : 1}
-            disabled={!destinationCoords}
-            style={styles.mapPreview}
-            onPress={() =>
-              destinationCoords && openDirections(destinationCoords.latitude, destinationCoords.longitude)
-            }
-          >
-            <View style={styles.mapPin}>
-              <View style={styles.mapPinInner} />
-            </View>
-            <Text style={styles.mapPreviewAddress} numberOfLines={2}>
-              {delivery.delivery_address}
-            </Text>
-            {destinationCoords ? (
-              <Text style={styles.mapPreviewCoords}>
-                {destinationCoords.latitude.toFixed(5)}, {destinationCoords.longitude.toFixed(5)}
+          {destinationCoords ? (
+            <>
+              <DeliveryMap
+                coordinate={destinationCoords}
+                address={delivery.delivery_address}
+                onNavigate={() =>
+                  openDirections(destinationCoords.latitude, destinationCoords.longitude)
+                }
+              />
+              <View style={styles.mapAddressBlock}>
+                <Text style={styles.mapAddressText} numberOfLines={2}>
+                  {delivery.delivery_address}
+                </Text>
+                <Text style={styles.mapAddressCoords}>
+                  {destinationCoords.latitude.toFixed(5)}, {destinationCoords.longitude.toFixed(5)}
+                </Text>
+              </View>
+            </>
+          ) : (
+            <View style={styles.mapPreview}>
+              <View style={styles.mapPin}>
+                <View style={styles.mapPinInner} />
+              </View>
+              <Text style={styles.mapPreviewAddress} numberOfLines={2}>
+                {delivery.delivery_address}
               </Text>
-            ) : null}
-            <Text style={styles.mapPreviewHint}>
-              {destinationCoords ? 'Tap to open directions' : 'Interactive map coming soon'}
-            </Text>
-          </TouchableOpacity>
+              <Text style={styles.mapPreviewHint}>
+                No location coordinates have been set for this delivery yet.
+              </Text>
+            </View>
+          )}
         </Card>
 
         <Card style={styles.section}>
@@ -387,12 +425,23 @@ export default function DeliveryDetailScreen() {
             <Text style={styles.completedNoteText}>Delivery complete — nothing more to do.</Text>
           </View>
         ) : isPendingLike ? (
-          <Button
-            title="Accept Delivery"
-            size="lg"
-            onPress={handleAccept}
-            loading={accepting}
-          />
+          <View style={styles.footerActions}>
+            <Button
+              title="Reject"
+              variant="outline"
+              size="lg"
+              style={styles.footerActionHalf}
+              loading={rejecting}
+              onPress={handleReject}
+            />
+            <Button
+              title="Accept Delivery"
+              size="lg"
+              style={styles.footerActionHalf}
+              onPress={handleAccept}
+              loading={accepting}
+            />
+          </View>
         ) : nextAction ? (
           <Button
             title={nextAction.label}
@@ -443,7 +492,7 @@ const styles = StyleSheet.create({
   },
   orderNumber: {
     fontSize: FONTS.size.xl,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   etaText: {
@@ -453,7 +502,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FONTS.size.sm,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.textLight,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -506,9 +555,23 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     textAlign: 'center',
   },
-  stepLabelActive: {
-    color: COLORS.primaryDark,
-    fontWeight: '700',
+   stepLabelActive: {
+     color: COLORS.primaryDark,
+     fontFamily: FONTS.bold,
+   },
+   mapAddressBlock: {
+    marginTop: SPACING.sm,
+    gap: 2,
+  },
+  mapAddressText: {
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.semibold,
+    color: COLORS.text,
+  },
+  mapAddressCoords: {
+    fontSize: FONTS.size.sm,
+    color: COLORS.textLight,
+    fontVariant: ['tabular-nums'],
   },
   mapPreview: {
     alignItems: 'center',
@@ -537,7 +600,7 @@ const styles = StyleSheet.create({
   },
   mapPreviewAddress: {
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
     textAlign: 'center',
   },
@@ -566,7 +629,7 @@ const styles = StyleSheet.create({
   addressTagText: {
     color: COLORS.white,
     fontSize: FONTS.size.xs,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     letterSpacing: 0.5,
   },
   addressText: {
@@ -590,7 +653,7 @@ const styles = StyleSheet.create({
   infoValue: {
     flex: 1,
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
     textAlign: 'right',
     marginLeft: SPACING.lg,
@@ -603,7 +666,7 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   customerRow: {
@@ -616,7 +679,7 @@ const styles = StyleSheet.create({
   },
   customerName: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   customerPhone: {
@@ -635,6 +698,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingTop: SPACING.md,
   },
+  footerActions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  footerActionHalf: {
+    flex: 1,
+  },
   completedNote: {
     backgroundColor: COLORS.green[100],
     borderRadius: RADIUS.md,
@@ -643,12 +713,12 @@ const styles = StyleSheet.create({
   },
   completedNoteText: {
     color: COLORS.green[700],
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     fontSize: FONTS.size.md,
   },
   footerNoteCancelled: {
     color: COLORS.red[700],
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     textAlign: 'center',
     paddingVertical: SPACING.sm,
   },

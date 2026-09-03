@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import api from '../../src/api/client';
 import { User } from '../../src/api/types';
 import Avatar from '../../src/components/Avatar';
@@ -19,9 +20,9 @@ import SearchBar from '../../src/components/SearchBar';
 import { COLORS, FONTS, SPACING } from '../../src/constants/theme';
 
 const ROLE_COLORS: Record<string, string> = {
-  admin: COLORS.secondary,
-  business_owner: '#8B5CF6',
-  employee: '#5B8DEF',
+  admin: COLORS.primaryDark,
+  business_owner: COLORS.primaryDark,
+  employee: COLORS.info,
   transporter: COLORS.warning,
   customer: COLORS.success,
 };
@@ -213,7 +214,7 @@ export default function AdminUsersScreen() {
     }
     return (
       <EmptyState
-        icon={<Text style={styles.emptyIcon}>👥</Text>}
+        icon={<MaterialIcons name="people" size={32} color={COLORS.gray[400]} />}
         title="No users yet"
         subtitle="People who join M-TAI will appear here."
         style={styles.empty}
@@ -305,7 +306,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   userEmail: {
@@ -336,8 +337,5 @@ const styles = StyleSheet.create({
   empty: {
     flex: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
 });

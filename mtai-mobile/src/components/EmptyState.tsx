@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
-import { COLORS, SPACING, RADIUS, FONTS } from '../constants/theme';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { COLORS, FONTS, SPACING } from '../constants/theme';
+import Button from './Button';
 
 interface Props {
   icon?: React.ReactNode;
@@ -27,13 +28,12 @@ export default function EmptyState({
       <Text style={styles.title}>{title}</Text>
       {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       {showAction ? (
-        <TouchableOpacity
-          onPress={onAction}
-          activeOpacity={0.8}
+        <Button
+          title={actionTitle ?? ''}
+          onPress={onAction as () => void}
+          size="md"
           style={styles.action}
-        >
-          <Text style={styles.actionText}>{actionTitle}</Text>
-        </TouchableOpacity>
+        />
       ) : null}
     </View>
   );
@@ -43,41 +43,33 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: SPACING.xxl,
+    paddingVertical: SPACING.xl,
     paddingHorizontal: SPACING.lg,
   },
   iconWrap: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: COLORS.primaryLight,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.gray[100],
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.md,
   },
   title: {
-    fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontSize: 16,
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: FONTS.size.md,
+    fontSize: 13,
+    fontFamily: FONTS.regular,
     color: COLORS.textLight,
     textAlign: 'center',
-    marginTop: SPACING.xs + 2,
+    marginTop: 6,
     lineHeight: 20,
   },
   action: {
     marginTop: SPACING.lg,
-    backgroundColor: COLORS.primary,
-    borderRadius: RADIUS.full,
-    paddingVertical: SPACING.sm + 4,
-    paddingHorizontal: SPACING.lg + 4,
-  },
-  actionText: {
-    fontSize: FONTS.size.md,
-    fontWeight: '600',
-    color: COLORS.white,
   },
 });

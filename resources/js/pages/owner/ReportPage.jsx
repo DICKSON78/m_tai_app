@@ -4,7 +4,7 @@ import PageHeader from '../../components/casfeta/PageHeader';
 import SectionHeader from '../../components/casfeta/SectionHeader';
 import SummaryBox from '../../components/casfeta/SummaryBox';
 import EmptyState from '../../components/casfeta/EmptyState';
-import { BarChart3, DollarSign, ShoppingCart, TrendingUp, Package, Users, Calendar, Clock } from 'lucide-react';
+import { BarChart3, DollarSign, ShoppingCart, TrendingUp, Package, Users, Calendar, Clock, Printer, FileDown } from 'lucide-react';
 
 const REPORT_TABS = [
     { key: 'kpis', label: 'KPIs' },
@@ -47,6 +47,32 @@ export default function ReportPage() {
     useEffect(() => { fetchReport(); }, [fetchReport]);
 
     const formatCurrency = (val) => `TZS ${Number(val || 0).toLocaleString()}`;
+
+    const exportCurrentReport = () => {
+        const el = document.getElementById('report-results');
+        if (!el) return;
+        const win = window.open('', '_blank');
+        if (!win) return;
+        const tab = REPORT_TABS.find(t => t.key === activeTab)?.label || activeTab;
+        win.document.write(`<html><head><title>${tab} Report</title><style>
+            body{font-family:'Poppins',sans-serif;color:#333;padding:24px;}
+            h1{font-size:20px;margin:0 0 4px;} .sub{color:#666;font-size:12px;margin-bottom:16px;}
+            table{width:100%;border-collapse:collapse;margin-top:12px;} td,th{padding:8px;border-bottom:1px solid #eee;text-align:left;font-size:13px;}
+            th{background:#f5f5f5;} .stat{display:inline-block;margin-right:16px;margin-bottom:12px;}
+            .stat .lbl{font-size:11px;color:#999;} .stat .val{font-size:18px;font-weight:700;}
+        </style></head><body>
+            <h1>${tab} Report</h1>
+            <div class="sub">${formatCurrency(reportData?.total_sales) !== 'TZS 0' || activeTab !== 'sales' ? '' : ''}Period: ${reportData?.date_from || 'N/A'} → ${reportData?.date_to || 'N/A'} · Generated: ${new Date().toLocaleString()}</div>
+            <div id="report-copy"></div>
+            <script>document.addEventListener('DOMContentLoaded',init);function init(){
+                var src=opener.document.getElementById('report-results').cloneNode(true);
+                src.querySelectorAll('input,select,button').forEach(function(b){b.remove()});
+                document.getElementById('report-copy').appendChild(src);
+                setTimeout(function(){window.print()},700); }
+            <\/script>
+        </body></html>`);
+        win.document.close();
+    };
 
     const renderBarChart = (items, valueKey, labelKey, color = 'bg-[#00D4AA]') => {
         if (!items || items.length === 0) return <p className="text-gray-400 text-sm">No data available.</p>;
@@ -112,6 +138,12 @@ export default function ReportPage() {
                 <EmptyState title="No report data" description="No report data available for the selected period." />
             ) : (
                 <>
+                    <div className="flex items-center justify-end mb-2">
+                        <button onClick={exportCurrentReport} className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all">
+                            <FileDown size={16} /> Print / Save as PDF
+                        </button>
+                    </div>
+                    <div id="report-results">
                     {activeTab === 'kpis' && (() => {
                         const k = reportData?.kpis || reportData || {};
                         const kpiDefs = [
@@ -269,6 +301,7 @@ export default function ReportPage() {
                             )}
                         </div>
                     )}
+                    </div>
                 </>
             )}
         </div>

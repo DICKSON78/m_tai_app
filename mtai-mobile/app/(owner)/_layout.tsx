@@ -1,80 +1,16 @@
-import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
+import { Stack } from 'expo-router';
 
-const TAB_COLOR_ACTIVE = '#00D4AA';
-const TAB_COLOR_INACTIVE = '#9CA3AF';
-
-function TabIcon({ icon, focused }: { icon: string; focused: boolean }) {
+export default function OwnerRootLayout() {
   return (
-    <Text style={{ fontSize: 18, lineHeight: 22, opacity: focused ? 1 : 0.55 }}>
-      {icon}
-    </Text>
-  );
-}
-
-export default function OwnerLayout() {
-  return (
-    <Tabs
+    <Stack
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: TAB_COLOR_ACTIVE,
-        tabBarInactiveTintColor: TAB_COLOR_INACTIVE,
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
-        },
-        tabBarStyle: {
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 6,
-        },
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Dashboard',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="📊" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="orders"
-        options={{
-          title: 'Orders',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="📦" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="reports"
-        options={{
-          title: 'Reports',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="📈" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="👤" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen name="inventory" options={{ title: 'Inventory', href: null }} />
-      <Tabs.Screen name="order-detail" options={{ title: 'Order Detail', href: null }} />
-      <Tabs.Screen name="product-detail" options={{ title: 'Product Detail', href: null }} />
-      <Tabs.Screen name="finance" options={{ title: 'Finance', href: null }} />
-      <Tabs.Screen name="purchases" options={{ title: 'Purchases', href: null }} />
-      <Tabs.Screen name="manufacturing" options={{ href: null }} />
-      <Tabs.Screen name="crm" options={{ href: null }} />
-      <Tabs.Screen name="warehouse" options={{ href: null }} />
-      <Tabs.Screen name="hr" options={{ title: 'HR', href: null }} />
-    </Tabs>
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="order-detail" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="product-detail" options={{ animation: 'slide_from_right' }} />
+    </Stack>
   );
 }

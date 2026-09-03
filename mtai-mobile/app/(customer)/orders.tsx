@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import api from '../../src/api/client';
 import { Order } from '../../src/api/types';
@@ -220,7 +221,7 @@ export default function OrdersScreen() {
     }
     return (
       <EmptyState
-        icon={<Text style={styles.emptyIcon}>📦</Text>}
+        icon={<MaterialIcons name="inventory-2" size={32} color={COLORS.gray[400]} />}
         title="No orders yet"
         subtitle="When you place an order it will show up here."
         actionTitle="Start Shopping"
@@ -284,7 +285,7 @@ const styles = StyleSheet.create({
   orderNumber: {
     flexShrink: 1,
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   orderMetaRow: {
@@ -301,7 +302,7 @@ const styles = StyleSheet.create({
   },
   metaLabel: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     color: COLORS.gray[400],
@@ -309,7 +310,7 @@ const styles = StyleSheet.create({
   },
   metaValue: {
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   footer: {
@@ -323,8 +324,5 @@ const styles = StyleSheet.create({
   empty: {
     flex: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
 });

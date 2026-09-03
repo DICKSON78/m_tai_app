@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -20,6 +19,7 @@ import Button from '../../src/components/Button';
 import EmptyState from '../../src/components/EmptyState';
 import Header from '../../src/components/Header';
 import PriceTag from '../../src/components/PriceTag';
+import TransporterMap, { TransporterMapHandle } from '../../src/components/TransporterMap';
 import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
 
 interface Coordinates {
@@ -27,7 +27,7 @@ interface Coordinates {
   longitude: number;
 }
 
-const DEFAULT_REGION: Region = {
+const DEFAULT_REGION = {
   latitude: -6.7924,
   longitude: 39.2083,
   latitudeDelta: 0.08,
@@ -37,8 +37,8 @@ const DEFAULT_REGION: Region = {
 const ACTIVE_STATUSES = new Set(['assigned', 'picked_up', 'in_transit']);
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
-  assigned: { label: 'Assigned', color: '#5B8DEF' },
-  picked_up: { label: 'Picked Up', color: '#8B5CF6' },
+  assigned: { label: 'Assigned', color: COLORS.info },
+  picked_up: { label: 'Picked Up', color: COLORS.primaryDark },
   in_transit: { label: 'In Transit', color: COLORS.warning },
 };
 
@@ -97,7 +97,7 @@ function hasCoordinates(delivery: Delivery): delivery is DeliverableWithCoords {
 
 export default function ActiveMapScreen() {
   const insets = useSafeAreaInsets();
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<TransporterMapHandle>(null);
 
   const [deliveries, setDeliveries] = useState<DeliverableWithCoords[]>([]);
   const [userCoords, setUserCoords] = useState<Coordinates | null>(null);
@@ -196,38 +196,17 @@ export default function ActiveMapScreen() {
 
   return (
     <View style={styles.container}>
-      <MapView
+      <TransporterMap
         ref={mapRef}
-        style={StyleSheet.absoluteFill}
         initialRegion={DEFAULT_REGION}
-        showsUserLocation
-        showsMyLocationButton={false}
-        loadingEnabled={loading}
-        toolbarEnabled={false}
-      >
-        {userCoords ? (
-          <Marker coordinate={userCoords} anchor={{ x: 0.5, y: 0.5 }}>
-            <View style={styles.userMarker}>
-              <View style={styles.userMarkerCore} />
-            </View>
-          </Marker>
-        ) : null}
-        {deliveries.map((delivery) => {
-          const isSelected = selected?.id === delivery.id;
-          return (
-            <Marker
-              key={delivery.id}
-              coordinate={{
-                latitude: delivery.latitude,
-                longitude: delivery.longitude,
-              }}
-              pinColor={isSelected ? COLORS.primary : statusMeta(delivery.status).color}
-              onPress={() => setSelectedId(delivery.id)}
-              description={`${orderLabel(delivery)} · ${delivery.delivery_address}`}
-            />
-          );
-        })}
-      </MapView>
+        userCoords={userCoords}
+        deliveries={deliveries}
+        selectedId={selectedId}
+        onSelectId={setSelectedId}
+        loading={loading}
+        statusColor={(s) => statusMeta(s).color}
+        onNavigate={openNavigation}
+      />
 
       <View style={[styles.headerOverlay, { paddingTop: insets.top }]}>
         <Header title="Active Map" onBack={() => router.back()} />
@@ -349,7 +328,7 @@ const styles = StyleSheet.create({
   noticeRetry: {
     color: COLORS.primary,
     fontSize: FONTS.size.sm,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
   },
   userMarker: {
     width: 26,
@@ -363,7 +342,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#5B8DEF',
+    backgroundColor: COLORS.info,
     borderWidth: 2,
     borderColor: COLORS.white,
   },
@@ -422,7 +401,7 @@ const styles = StyleSheet.create({
   },
   sheetOrderNumber: {
     fontSize: FONTS.size.xl,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
     marginTop: SPACING.sm,
   },

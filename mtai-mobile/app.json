@@ -17,7 +17,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundColor": "#00D4AA"
+        "backgroundColor": "#FFFFFF"
       },
       "package": "com.mtai.app",
       "permissions": [
@@ -32,6 +32,7 @@
           "locationAlwaysAndWhenInUsePermission": "Allow M-TAI to track your location for deliveries."
         }
       ],
+      "expo-local-authentication",
       [
         "expo-notifications",
         {
@@ -44,15 +45,11 @@
         {
           "image": "./assets/splash-icon.png",
           "resizeMode": "contain",
-          "backgroundColor": "#00D4AA"
+          "backgroundColor": "#FFFFFF"
         }
-      ],
-      "expo-status-bar"
+      ]
     ],
     "extra": {
-      "eas": {
-        "projectId": "mtai-app"
-      },
       "apiUrl": "https://mtai-app-903291264005.africa-south1.run.app"
     }
   }

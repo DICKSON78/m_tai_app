@@ -262,7 +262,7 @@ export default function TransporterProfileScreen() {
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={[styles.statValue, { color: '#5B8DEF' }]}>{activeDeliveries}</Text>
+              <Text style={[styles.statValue, { color: COLORS.info }]}>{activeDeliveries}</Text>
               <Text style={styles.statLabel}>Active</Text>
             </View>
             <View style={styles.statDivider} />
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: FONTS.size.xl,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   contactLine: {
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   },
   availabilityTitle: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   availabilitySubtitle: {
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FONTS.size.sm,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.textLight,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -459,11 +459,11 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: FONTS.size.xxl,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
   },
   statLabel: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.textLight,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   },
   detailValue: {
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   linksCard: {
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: FONTS.size.lg,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   linkChevron: {
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: FONTS.size.xl,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   modalSubtitle: {

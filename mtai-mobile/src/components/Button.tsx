@@ -1,11 +1,17 @@
 import React from 'react';
-import { TouchableOpacity, Text, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
-import { COLORS, FONTS, RADIUS, SPACING } from '../constants/theme';
+import {
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
+import { COLORS, FONTS, RADIUS } from '../constants/theme';
 
 interface Props {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   disabled?: boolean;
@@ -14,26 +20,38 @@ interface Props {
   icon?: React.ReactNode;
 }
 
+const HEIGHTS: Record<NonNullable<Props['size']>, number> = { sm: 36, md: 44, lg: 48 };
+const RADII = { sm: RADIUS.sm, md: RADIUS.md, lg: RADIUS.md };
+const FS = { sm: 12, md: 14, lg: 16 };
+
 export default function Button({
-  title, onPress, variant = 'primary', size = 'md', loading, disabled, style, textStyle, icon,
+  title,
+  onPress,
+  variant = 'primary',
+  size = 'md',
+  loading,
+  disabled,
+  style,
+  textStyle,
+  icon,
 }: Props) {
+  const isOutline = variant === 'outline';
+  const isGhost = variant === 'ghost';
   const bg = {
     primary: COLORS.primary,
     secondary: COLORS.gray[100],
     outline: 'transparent',
     danger: COLORS.red[500],
+    ghost: 'transparent',
   }[variant];
 
   const textColor = {
     primary: COLORS.white,
     secondary: COLORS.gray[700],
-    outline: COLORS.primary,
+    outline: COLORS.primaryDark,
     danger: COLORS.white,
+    ghost: COLORS.primaryDark,
   }[variant];
-
-  const py = { sm: 8, md: 12, lg: 16 }[size];
-  const px = { sm: 12, md: 16, lg: 20 }[size];
-  const fs = { sm: 12, md: 14, lg: 16 }[size];
 
   return (
     <TouchableOpacity
@@ -42,15 +60,15 @@ export default function Button({
       activeOpacity={0.7}
       style={{
         backgroundColor: bg,
-        paddingVertical: py,
-        paddingHorizontal: px,
-        borderRadius: RADIUS.md,
+        height: HEIGHTS[size],
+        paddingHorizontal: size === 'sm' ? 14 : 20,
+        borderRadius: RADII[size],
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: SPACING.sm,
-        borderWidth: variant === 'outline' ? 1.5 : 0,
-        borderColor: COLORS.primary,
+        gap: 8,
+        borderWidth: isOutline ? 1 : 0,
+        borderColor: isOutline ? COLORS.border : undefined,
         opacity: disabled ? 0.5 : 1,
         ...style,
       }}
@@ -60,7 +78,18 @@ export default function Button({
       ) : (
         <>
           {icon}
-          <Text style={{ color: textColor, fontSize: fs, fontWeight: '600' }}>{title}</Text>
+          <Text
+            style={[
+              {
+                color: textColor,
+                fontSize: FS[size],
+                fontFamily: FONTS.semibold,
+              },
+              textStyle,
+            ]}
+          >
+            {title}
+          </Text>
         </>
       )}
     </TouchableOpacity>

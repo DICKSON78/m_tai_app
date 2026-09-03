@@ -8,10 +8,12 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import api from '../../src/api/client';
-import Card from '../../src/components/Card';
-import Header from '../../src/components/Header';
-import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
+import { router } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+import api from '../../../../src/api/client';
+import Card from '../../../../src/components/Card';
+import Header from '../../../../src/components/Header';
+import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../../../src/constants/theme';
 
 interface Account {
   id: number;
@@ -106,12 +108,15 @@ const ACCOUNT_TYPE_LABELS: Record<string, string> = {
   expense: 'Expenses',
 };
 
-const ACCOUNT_TYPE_COLORS: Record<string, { bg: string; text: string }> = {
-  asset: { bg: 'rgba(91, 141, 239, 0.14)', text: '#5B8DEF' },
-  liability: { bg: COLORS.red[100], text: COLORS.red[700] },
-  equity: { bg: 'rgba(139, 92, 246, 0.14)', text: '#8B5CF6' },
-  revenue: { bg: COLORS.green[100], text: COLORS.green[700] },
-  expense: { bg: '#FEF3C7', text: '#B45309' },
+const ACCOUNT_TYPE_STYLES: Record<
+  string,
+  { icon: keyof typeof MaterialIcons.glyphMap; bg: string; text: string }
+> = {
+  asset: { icon: 'account-balance', bg: COLORS.teal[50], text: COLORS.primaryDark },
+  liability: { icon: 'credit-card', bg: COLORS.red[100], text: COLORS.red[700] },
+  equity: { icon: 'pie-chart', bg: COLORS.teal[100] ?? COLORS.teal[50], text: COLORS.primaryDark },
+  revenue: { icon: 'trending-up', bg: COLORS.green[100], text: COLORS.green[700] },
+  expense: { icon: 'payments', bg: COLORS.red[50], text: COLORS.red[700] },
 };
 
 export default function OwnerFinanceScreen() {
@@ -125,8 +130,8 @@ export default function OwnerFinanceScreen() {
     setError(null);
     try {
       const [accountsRes, entriesRes] = await Promise.allSettled([
-        api.get('/owner/finance/chart-of-accounts'),
-        api.get('/owner/finance/journal-entries'),
+        api.get('/owner/finance/accounts'),
+        api.get('/owner/finance/journal'),
       ]);
 
       if (accountsRes.status === 'fulfilled') {
@@ -188,7 +193,7 @@ export default function OwnerFinanceScreen() {
   if (initialLoading) {
     return (
       <SafeAreaView style={styles.safe} edges={['top']}>
-        <Header title="Finance" />
+        <Header title="Finance" onBack={() => router.back()} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.loadingText}>Loading finance data…</Text>
@@ -199,7 +204,7 @@ export default function OwnerFinanceScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header title="Finance" subtitle="Financial overview" />
+      <Header title="Finance" subtitle="Financial overview" onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -218,71 +223,92 @@ export default function OwnerFinanceScreen() {
           </View>
         ) : null}
 
-        <View style={styles.summaryGrid}>
-          <Card style={styles.summaryCard}>
-            <View style={[styles.summaryIcon, { backgroundColor: 'rgba(91, 141, 239, 0.14)' }]}>
-              <Text style={styles.summaryIconText}>🏦</Text>
+        <View style={styles.heroCard}>
+          <View style={styles.heroCircleOne} />
+          <View style={styles.heroCircleTwo} />
+          <View style={styles.heroTopRow}>
+            <Text style={styles.heroLabel}>TOTAL EQUITY</Text>
+            <MaterialIcons name="verified-user" size={16} color="rgba(255,255,255,0.9)" />
+          </View>
+          <Text
+            style={styles.heroBalance}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.5}
+          >
+            {formatTZS(summary.totalEquity)}
+          </Text>
+
+          <View style={styles.heroFlowRow}>
+            <View style={styles.heroFlowItem}>
+              <View style={[styles.heroFlowIcon, { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
+                <MaterialIcons name="north-east" size={18} color={COLORS.white} />
+              </View>
+              <View style={styles.heroFlowText}>
+                <Text style={styles.heroFlowLabel}>Assets</Text>
+                <Text style={styles.heroFlowValue} numberOfLines={1}>
+                  {formatTZS(summary.totalAssets)}
+                </Text>
+              </View>
             </View>
-            <Text style={[styles.summaryValue, { color: '#5B8DEF' }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
-              {formatTZS(summary.totalAssets)}
-            </Text>
-            <Text style={styles.summaryLabel}>Total Assets</Text>
-          </Card>
-          <Card style={styles.summaryCard}>
-            <View style={[styles.summaryIcon, { backgroundColor: COLORS.red[100] }]}>
-              <Text style={styles.summaryIconText}>📋</Text>
+            <View style={styles.heroStatDivider} />
+            <View style={styles.heroFlowItem}>
+              <View style={[styles.heroFlowIcon, { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
+                <MaterialIcons name="south-west" size={18} color={COLORS.white} />
+              </View>
+              <View style={styles.heroFlowText}>
+                <Text style={styles.heroFlowLabel}>Liabilities</Text>
+                <Text style={styles.heroFlowValue} numberOfLines={1}>
+                  {formatTZS(summary.totalLiabilities)}
+                </Text>
+              </View>
             </View>
-            <Text style={[styles.summaryValue, { color: COLORS.red[700] }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
-              {formatTZS(summary.totalLiabilities)}
-            </Text>
-            <Text style={styles.summaryLabel}>Total Liabilities</Text>
-          </Card>
-          <Card style={styles.summaryCard}>
-            <View style={[styles.summaryIcon, { backgroundColor: 'rgba(139, 92, 246, 0.14)' }]}>
-              <Text style={styles.summaryIconText}>💎</Text>
-            </View>
-            <Text style={[styles.summaryValue, { color: '#8B5CF6' }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
-              {formatTZS(summary.totalEquity)}
-            </Text>
-            <Text style={styles.summaryLabel}>Total Equity</Text>
-          </Card>
+          </View>
         </View>
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recent Journal Entries</Text>
+          <Text style={styles.sectionTitle}>Transactions</Text>
+          <Text style={styles.sectionCount}>{entries.length}</Text>
         </View>
         {entries.length === 0 ? (
           <Card style={styles.emptyCard}>
             <Text style={styles.emptyText}>No journal entries recorded yet.</Text>
           </Card>
         ) : (
-          entries.slice(0, 10).map((entry) => (
-            <Card key={entry.id} style={styles.entryCard}>
-              <View style={styles.entryTopRow}>
-                <Text style={styles.entryDate}>{formatDate(entry.date)}</Text>
-                {entry.reference ? (
-                  <Text style={styles.entryRef}>Ref: {entry.reference}</Text>
-                ) : null}
-              </View>
-              <Text style={styles.entryDescription} numberOfLines={2}>
-                {entry.description}
-              </Text>
-              <View style={styles.entryAmounts}>
-                <View style={styles.amountChip}>
-                  <Text style={styles.amountLabel}>Debit</Text>
-                  <Text style={[styles.amountValue, { color: COLORS.primaryDark }]}>
-                    {formatTZS(entry.total_debit)}
+          <Card style={styles.listCard}>
+            {entries.slice(0, 10).map((entry, index) => {
+              const isOut = entry.total_debit > 0;
+              return (
+                <View
+                  key={entry.id}
+                  style={[styles.statementRow, index < Math.min(entries.length, 10) - 1 && styles.statementDivider]}
+                >
+                  <View style={[styles.statementIcon, isOut ? styles.statementIconOut : styles.statementIconIn]}>
+                    <MaterialIcons
+                      name={isOut ? 'arrow-upward' : 'arrow-downward'}
+                      size={18}
+                      color={isOut ? COLORS.red[700] : COLORS.primaryDark}
+                    />
+                  </View>
+                  <View style={styles.statementInfo}>
+                    <Text style={styles.statementDesc} numberOfLines={1}>
+                      {entry.description || 'Journal entry'}
+                    </Text>
+                    <View style={styles.statementMeta}>
+                      <Text style={styles.statementDate}>{formatDate(entry.date)}</Text>
+                      {entry.reference ? (
+                        <Text style={styles.statementRef}> · {entry.reference}</Text>
+                      ) : null}
+                    </View>
+                  </View>
+                  <Text style={[styles.statementAmount, isOut ? styles.amountOut : styles.amountIn]}>
+                    {isOut ? '−' : '+'}
+                    {formatTZS(Math.abs(isOut ? entry.total_debit : entry.total_credit))}
                   </Text>
                 </View>
-                <View style={styles.amountChip}>
-                  <Text style={styles.amountLabel}>Credit</Text>
-                  <Text style={[styles.amountValue, { color: COLORS.red[700] }]}>
-                    {formatTZS(entry.total_credit)}
-                  </Text>
-                </View>
-              </View>
-            </Card>
-          ))
+              );
+            })}
+          </Card>
         )}
 
         <View style={styles.sectionHeader}>
@@ -294,13 +320,18 @@ export default function OwnerFinanceScreen() {
           </Card>
         ) : (
           Object.entries(groupedAccounts).map(([type, accts]) => {
-            const colors = ACCOUNT_TYPE_COLORS[type] ?? { bg: COLORS.gray[100], text: COLORS.gray[700] };
+            const acctStyle = ACCOUNT_TYPE_STYLES[type] ?? {
+              icon: 'account-balance' as const,
+              bg: COLORS.gray[100],
+              text: COLORS.gray[700],
+            };
             const label = ACCOUNT_TYPE_LABELS[type] ?? type;
             return (
               <Card key={type} style={styles.groupCard}>
                 <View style={styles.groupHeader}>
-                  <View style={[styles.groupBadge, { backgroundColor: colors.bg }]}>
-                    <Text style={[styles.groupBadgeText, { color: colors.text }]}>{label}</Text>
+                  <View style={[styles.groupBadge, { backgroundColor: acctStyle.bg }]}>
+                    <MaterialIcons name={acctStyle.icon} size={14} color={acctStyle.text} />
+                    <Text style={[styles.groupBadgeText, { color: acctStyle.text }]}>{label}</Text>
                   </View>
                 </View>
                 {accts.map((a, idx) => (
@@ -339,6 +370,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
     color: COLORS.textLight,
   },
   scrollContent: {
@@ -355,47 +387,166 @@ const styles = StyleSheet.create({
   errorText: {
     color: COLORS.red[700],
     fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
   },
-  summaryGrid: {
+  heroCard: {
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.primaryDark,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.lg,
+    overflow: 'hidden',
+    ...SHADOWS.md,
+  },
+  heroCircleOne: {
+    position: 'absolute',
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    right: -50,
+    top: -70,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+  },
+  heroCircleTwo: {
+    position: 'absolute',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    right: 50,
+    bottom: -40,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  heroTopRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  heroLabel: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.bold,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+  },
+  heroBalance: {
+    color: COLORS.white,
+    fontSize: 34,
+    fontFamily: FONTS.bold,
+    marginTop: SPACING.xs,
+  },
+  heroFlowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.lg,
+  },
+  heroFlowItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: SPACING.sm,
   },
-  summaryCard: {
-    flexBasis: '31%',
-    flexGrow: 1,
-  },
-  summaryIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  heroFlowIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  summaryIconText: {
-    fontSize: FONTS.size.lg,
+  heroFlowText: {
+    flex: 1,
   },
-  summaryValue: {
-    fontSize: FONTS.size.md,
-    fontWeight: '800',
-    marginTop: SPACING.sm,
-  },
-  summaryLabel: {
+  heroFlowLabel: {
+    color: 'rgba(255,255,255,0.8)',
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.medium,
+  },
+  heroFlowValue: {
+    color: COLORS.white,
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.bold,
+    marginTop: 1,
+  },
+  heroStatDivider: {
+    width: StyleSheet.hairlineWidth,
+    height: 34,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    marginHorizontal: SPACING.sm,
+  },
+  listCard: {
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+  },
+  statementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm + 2,
+    paddingVertical: SPACING.sm + 4,
+  },
+  statementDivider: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: COLORS.gray[200],
+  },
+  statementIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statementIconIn: {
+    backgroundColor: COLORS.teal[50],
+  },
+  statementIconOut: {
+    backgroundColor: COLORS.red[100],
+  },
+  statementInfo: {
+    flex: 1,
+  },
+  statementDesc: {
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.semibold,
+    color: COLORS.text,
+  },
+  statementMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  statementDate: {
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.regular,
     color: COLORS.textLight,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginTop: SPACING.xs,
+  },
+  statementRef: {
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.regular,
+    color: COLORS.gray[400],
+  },
+  statementAmount: {
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.bold,
+  },
+  amountIn: {
+    color: COLORS.primaryDark,
+  },
+  amountOut: {
+    color: COLORS.red[700],
   },
   sectionHeader: {
-    marginTop: SPACING.xl,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: SPACING.md + 4,
     marginBottom: SPACING.sm + 2,
   },
   sectionTitle: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
+  },
+  sectionCount: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.bold,
+    color: COLORS.gray[400],
   },
   emptyCard: {
     paddingVertical: SPACING.lg,
@@ -403,52 +554,8 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
     color: COLORS.textLight,
-  },
-  entryCard: {
-    marginBottom: SPACING.sm + 4,
-  },
-  entryTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.xs + 2,
-  },
-  entryDate: {
-    fontSize: FONTS.size.sm,
-    fontWeight: '600',
-    color: COLORS.primaryDark,
-  },
-  entryRef: {
-    fontSize: FONTS.size.xs,
-    color: COLORS.textLight,
-  },
-  entryDescription: {
-    fontSize: FONTS.size.sm,
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  entryAmounts: {
-    flexDirection: 'row',
-    gap: SPACING.md,
-  },
-  amountChip: {
-    flex: 1,
-    backgroundColor: COLORS.gray[50],
-    borderRadius: RADIUS.sm,
-    paddingVertical: SPACING.xs + 2,
-    paddingHorizontal: SPACING.sm,
-  },
-  amountLabel: {
-    fontSize: FONTS.size.xs,
-    fontWeight: '600',
-    color: COLORS.textLight,
-    textTransform: 'uppercase',
-  },
-  amountValue: {
-    fontSize: FONTS.size.sm,
-    fontWeight: '700',
-    marginTop: 2,
   },
   groupCard: {
     marginBottom: SPACING.sm + 4,
@@ -458,13 +565,16 @@ const styles = StyleSheet.create({
   },
   groupBadge: {
     alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs + 2,
     borderRadius: RADIUS.full,
     paddingVertical: SPACING.xs,
     paddingHorizontal: SPACING.sm + 4,
   },
   groupBadgeText: {
     fontSize: FONTS.size.xs,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -482,17 +592,17 @@ const styles = StyleSheet.create({
   },
   accountCode: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.textLight,
   },
   accountName: {
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
     marginTop: 1,
   },
   accountBalance: {
     fontSize: FONTS.size.sm,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
   },
 });

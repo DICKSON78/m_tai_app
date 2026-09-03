@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import api from '../../src/api/client';
 import { Product } from '../../src/api/types';
 import Button from '../../src/components/Button';
@@ -23,6 +24,7 @@ import SearchBar from '../../src/components/SearchBar';
 import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/store/authStore';
 import { useCartStore } from '../../src/store/cartStore';
+import { saveReceiptPdf, PdfReceipt } from '../../src/utils/pdf';
 
 const SEARCH_DEBOUNCE_MS = 350;
 
@@ -111,7 +113,7 @@ export default function PosScreen() {
 
   const addProductToCart = useCallback(
     (product: Product) => {
-      if (product.stock_quantity <= 0) {
+      if (product.quantity <= 0) {
         Alert.alert('Out of Stock', `“${product.name}” has no stock available.`);
         return false;
       }
@@ -181,11 +183,32 @@ export default function PosScreen() {
 
       clearCart();
       setSearchText('');
+
+      const orderId = order?.id;
+      const orderLabel = order?.order_number ? `Order #${order.order_number}` : 'The sale';
+
       Alert.alert(
         'Sale Complete',
-        order?.order_number
-          ? `Order #${order.order_number} recorded successfully.`
-          : 'The sale was recorded successfully.'
+        `${orderLabel} was recorded successfully.`,
+        [
+          { text: 'OK', style: 'cancel' },
+          {
+            text: 'Share Receipt PDF',
+            onPress: async () => {
+              try {
+                const rcRes = await api.get(`/orders/${orderId}/receipt`);
+                const rcBody = rcRes.data as { receipt?: PdfReceipt } | null;
+                if (rcBody?.receipt) {
+                  await saveReceiptPdf(rcBody.receipt);
+                } else {
+                  Alert.alert('Receipt', 'Receipt data is unavailable for PDF generation.');
+                }
+              } catch {
+                Alert.alert('Receipt', 'Could not generate the receipt PDF.');
+              }
+            },
+          },
+        ]
       );
     } catch (err: any) {
       Alert.alert(
@@ -193,7 +216,7 @@ export default function PosScreen() {
         err?.response?.data?.message ||
           err?.response?.data?.error ||
           err?.message ||
-          'We could not record this sale. Please try again.'
+        'We could not record this sale. Please try again.'
       );
     } finally {
       setCompleting(false);
@@ -206,7 +229,7 @@ export default function PosScreen() {
         activeOpacity={0.8}
         style={styles.resultCard}
         onPress={() => addProductToCart(item)}
-        disabled={item.stock_quantity <= 0}
+        disabled={item.quantity <= 0}
       >
         <Text style={styles.resultName} numberOfLines={2}>
           {item.name}
@@ -215,12 +238,12 @@ export default function PosScreen() {
         <Text
           style={[
             styles.resultStock,
-            { color: item.stock_quantity > 0 ? COLORS.textLight : COLORS.error },
+            { color: item.quantity > 0 ? COLORS.textLight : COLORS.error },
           ]}
         >
-          {item.stock_quantity > 0 ? `${item.stock_quantity} in stock` : 'Out of stock'}
+          {item.quantity > 0 ? `${item.quantity} in stock` : 'Out of stock'}
         </Text>
-        <View style={[styles.resultAdd, item.stock_quantity <= 0 && { opacity: 0.4 }]}>
+        <View style={[styles.resultAdd, item.quantity <= 0 && { opacity: 0.4 }]}>
           <Text style={styles.resultAddText}>+ Add</Text>
         </View>
       </TouchableOpacity>
@@ -231,7 +254,7 @@ export default function PosScreen() {
   const renderCartItem = useCallback(
     ({ item }: { item: (typeof cartItems)[number] }) => {
       const atStockLimit =
-        item.product.stock_quantity > 0 && item.quantity >= item.product.stock_quantity;
+        item.product.quantity > 0 && item.quantity >= item.product.quantity;
       return (
         <View style={styles.cartRow}>
           <View style={styles.cartInfo}>
@@ -270,7 +293,7 @@ export default function PosScreen() {
               style={styles.removeButton}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Text style={styles.removeIcon}>✕</Text>
+              <MaterialIcons name="close" size={12} color={COLORS.red[700]} />
             </TouchableOpacity>
           </View>
         </View>
@@ -297,7 +320,7 @@ export default function PosScreen() {
               setScanVisible(true);
             }}
           >
-            <Text style={styles.scanIcon}>⛶</Text>
+            <MaterialIcons name="center-focus-strong" size={20} color={COLORS.white} />
             <Text style={styles.scanButtonText}>Scan</Text>
           </TouchableOpacity>
           <Text style={styles.scanHint}>Scan or type a barcode / SKU to add it instantly.</Text>
@@ -362,7 +385,7 @@ export default function PosScreen() {
             ListHeaderComponent={listHeader}
             ListEmptyComponent={
               <EmptyState
-                icon={<Text style={styles.emptyIcon}>🛒</Text>}
+                icon={<MaterialIcons name="shopping-cart" size={32} color={COLORS.gray[400]} />}
                 title="Cart is empty"
                 subtitle="Search for a product or scan a barcode to start a sale."
                 style={styles.emptyState}
@@ -489,21 +512,16 @@ const styles = StyleSheet.create({
   scanButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.secondary,
+    backgroundColor: COLORS.primaryDark,
     borderRadius: RADIUS.full,
     paddingVertical: SPACING.sm + 4,
     paddingHorizontal: SPACING.md,
     gap: SPACING.xs + 2,
     ...SHADOWS.sm,
   },
-  scanIcon: {
-    fontSize: FONTS.size.lg,
-    color: COLORS.white,
-    lineHeight: FONTS.size.xl,
-  },
   scanButtonText: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.white,
   },
   scanHint: {
@@ -526,7 +544,7 @@ const styles = StyleSheet.create({
   },
   resultsTitle: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   resultsList: {
@@ -543,7 +561,7 @@ const styles = StyleSheet.create({
   },
   resultName: {
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
     minHeight: 30,
   },
@@ -560,7 +578,7 @@ const styles = StyleSheet.create({
   },
   resultAddText: {
     fontSize: FONTS.size.xs,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.primaryDark,
   },
   noResults: {
@@ -574,12 +592,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   clearText: {
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.error,
   },
   cartRow: {
@@ -600,7 +618,7 @@ const styles = StyleSheet.create({
   },
   cartName: {
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   stepper: {
@@ -629,7 +647,7 @@ const styles = StyleSheet.create({
   stepText: {
     fontSize: FONTS.size.lg,
     lineHeight: FONTS.size.xl,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   stepPlusText: {
@@ -639,7 +657,7 @@ const styles = StyleSheet.create({
     minWidth: 26,
     textAlign: 'center',
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   cartRight: {
@@ -654,18 +672,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  removeIcon: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: COLORS.red[700],
-    lineHeight: 12,
-  },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
   bottomBar: {
     paddingHorizontal: SPACING.md,
@@ -694,7 +703,7 @@ const styles = StyleSheet.create({
   },
   paymentChipText: {
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.textLight,
   },
   paymentChipTextSelected: {
@@ -708,7 +717,7 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     color: COLORS.gray[400],
@@ -731,7 +740,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: FONTS.size.xl,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   modalSubtitle: {
@@ -748,7 +757,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     minHeight: 52,
     fontSize: FONTS.size.lg,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   modalActions: {

@@ -5,9 +5,11 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import api from '../../src/api/client';
 import EmptyState from '../../src/components/EmptyState';
@@ -29,7 +31,7 @@ interface WishlistItem {
   created_at: string;
 }
 
-const PLACEHOLDER_COLORS = ['#00D4AA', '#5B8DEF', '#F59E0B', '#EF476F', '#8B5CF6', '#10B981'];
+const PLACEHOLDER_COLORS = ['#0FAE8C', '#2F80ED', '#F2994A', '#EB5757', '#9B51E0', '#27AE60'];
 
 function placeholderColor(seed: number): string {
   return PLACEHOLDER_COLORS[Math.abs(seed) % PLACEHOLDER_COLORS.length];
@@ -79,6 +81,18 @@ export default function CustomerWishlistScreen() {
     fetchWishlist();
   }, [fetchWishlist]);
 
+  const handleRemove = useCallback(
+    async (item: WishlistItem) => {
+      try {
+        await api.delete(`/wishlist/${item.id}`);
+        setItems((prev) => prev.filter((i) => i.id !== item.id));
+      } catch (err: any) {
+        setError(err?.response?.data?.message || err?.message || 'Could not remove the item.');
+      }
+    },
+    []
+  );
+
   const renderItem = useCallback(
     ({ item }: { item: WishlistItem }) => {
       const product = item.product;
@@ -91,6 +105,14 @@ export default function CustomerWishlistScreen() {
             ) : (
               <Text style={styles.thumbInitial}>{product.name.charAt(0).toUpperCase()}</Text>
             )}
+            <TouchableOpacity
+              onPress={() => handleRemove(item)}
+              activeOpacity={0.7}
+              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+              style={styles.removeButton}
+            >
+              <MaterialIcons name="close" size={16} color={COLORS.white} />
+            </TouchableOpacity>
           </View>
           <View style={styles.cardInfo}>
             <Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
@@ -102,7 +124,7 @@ export default function CustomerWishlistScreen() {
         </View>
       );
     },
-    []
+    [handleRemove]
   );
 
   const listEmpty = useMemo(() => {
@@ -120,7 +142,7 @@ export default function CustomerWishlistScreen() {
     }
     return (
       <EmptyState
-        icon={<Text style={styles.emptyIcon}>❤️</Text>}
+        icon={<MaterialIcons name="favorite" size={32} color={COLORS.gray[400]} />}
         title="Your wishlist is empty"
         subtitle="Products you save will appear here."
         actionTitle="Start Shopping"
@@ -167,10 +189,20 @@ const styles = StyleSheet.create({
   },
   thumb: { height: 140, justifyContent: 'center', alignItems: 'center' },
   thumbImage: { width: '100%', height: '100%' },
-  thumbInitial: { fontSize: 40, fontWeight: '800', color: COLORS.white },
+  thumbInitial: { fontSize: 40, fontFamily: FONTS.bold, color: COLORS.white },
+  removeButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   cardInfo: { padding: SPACING.sm + 2, gap: 4 },
-  productName: { fontSize: FONTS.size.md, fontWeight: '600', color: COLORS.text },
+  productName: { fontSize: FONTS.size.md, fontFamily: FONTS.semibold, color: COLORS.text },
   businessName: { fontSize: FONTS.size.xs, color: COLORS.textLight },
   empty: { flex: 1, justifyContent: 'center' },
-  emptyIcon: { fontSize: 32 },
 });

@@ -9,14 +9,16 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import api from '../../src/api/client';
-import Badge from '../../src/components/Badge';
-import Card from '../../src/components/Card';
-import EmptyState from '../../src/components/EmptyState';
-import Header from '../../src/components/Header';
-import PriceTag from '../../src/components/PriceTag';
-import SearchBar from '../../src/components/SearchBar';
-import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
+import { router } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+import api from '../../../../src/api/client';
+import Badge from '../../../../src/components/Badge';
+import Card from '../../../../src/components/Card';
+import EmptyState from '../../../../src/components/EmptyState';
+import Header from '../../../../src/components/Header';
+import PriceTag from '../../../../src/components/PriceTag';
+import SearchBar from '../../../../src/components/SearchBar';
+import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../../../src/constants/theme';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -48,9 +50,9 @@ const FILTERS: { key: StatusFilter; label: string }[] = [
 const STATUS_COLORS: Record<string, string> = {
   draft: COLORS.gray[400],
   pending: COLORS.warning,
-  ordered: '#5B8DEF',
-  confirmed: '#5B8DEF',
-  shipped: '#8B5CF6',
+  ordered: COLORS.info,
+  confirmed: COLORS.info,
+  shipped: COLORS.primaryDark,
   received: COLORS.success,
   completed: COLORS.success,
   cancelled: COLORS.error,
@@ -147,7 +149,7 @@ interface Accent {
 }
 
 const ACCENTS: Record<string, Accent> = {
-  suppliers: { bg: 'rgba(91, 141, 239, 0.14)', text: '#5B8DEF' },
+  suppliers: { bg: 'rgba(91, 141, 239, 0.14)', text: COLORS.info },
   pending: { bg: 'rgba(245, 158, 11, 0.14)', text: COLORS.warning },
   spent: { bg: COLORS.primaryLight, text: COLORS.primaryDark },
 };
@@ -158,7 +160,7 @@ function SummaryCard({
   label,
   accent,
 }: {
-  icon: string;
+  icon: keyof typeof MaterialIcons.glyphMap;
   value: string;
   label: string;
   accent: Accent;
@@ -166,7 +168,7 @@ function SummaryCard({
   return (
     <Card style={styles.summaryCard}>
       <View style={[styles.summaryIcon, { backgroundColor: accent.bg }]}>
-        <Text style={styles.summaryIconText}>{icon}</Text>
+        <MaterialIcons name={icon} size={22} color={accent.text} />
       </View>
       <Text
         style={[styles.summaryValue, { color: accent.text }]}
@@ -184,7 +186,6 @@ function SummaryCard({
 export default function OwnerPurchasesScreen() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
-  const [businessId, setBusinessId] = useState<string | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -204,54 +205,45 @@ export default function OwnerPurchasesScreen() {
     requestSeqRef.current += 1;
     const requestId = requestSeqRef.current;
 
-    try {
-      let bizId = businessId;
+    const [suppliersRes, ordersRes] = await Promise.allSettled([
+      api.get('/owner/purchases/suppliers'),
+      api.get('/owner/purchases/orders'),
+    ]);
 
-      if (!bizId) {
-        const profileRes = await api.get('/business/profile');
-        bizId = extractId(profileRes.data);
-        if (!bizId) throw new Error('Could not determine business ID.');
-        if (requestId !== requestSeqRef.current) return;
-        setBusinessId(bizId);
-      }
+    if (requestId !== requestSeqRef.current) return;
 
-      const [suppliersRes, ordersRes] = await Promise.all([
-        api.get(`/owner/businesses/${bizId}/suppliers`),
-        api.get(`/owner/businesses/${bizId}/purchase-orders`),
-      ]);
-
-      if (requestId !== requestSeqRef.current) return;
-
-      const rawSuppliers = extractArray(suppliersRes.data);
+    if (suppliersRes.status === 'fulfilled') {
+      const rawSuppliers = extractArray(suppliersRes.value.data);
       const normalizedSuppliers: Supplier[] = [];
       rawSuppliers.forEach((raw) => {
         const s = normalizeSupplier(raw);
         if (s) normalizedSuppliers.push(s);
       });
       setSuppliers(normalizedSuppliers);
+    }
 
-      const rawOrders = extractArray(ordersRes.data);
+    if (ordersRes.status === 'fulfilled') {
+      const rawOrders = extractArray(ordersRes.value.data);
       const normalizedOrders: PurchaseOrder[] = [];
       rawOrders.forEach((raw) => {
         const po = normalizePurchaseOrder(raw);
         if (po) normalizedOrders.push(po);
       });
       setOrders(normalizedOrders);
-      setError(null);
-    } catch (err: unknown) {
-      if (requestId !== requestSeqRef.current) return;
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        (err as { message?: string })?.message ||
-        'Something went wrong while loading purchases.';
-      setError(message);
-    } finally {
-      if (requestId === requestSeqRef.current) {
-        setInitialLoading(false);
-        setRefreshing(false);
-      }
     }
-  }, [businessId]);
+
+    const failed = [suppliersRes, ordersRes].filter((r) => r.status === 'rejected');
+    if (failed.length > 0) {
+      const reason = failed[0].reason as { response?: { data?: { message?: string } }; message?: string };
+      setError(reason?.response?.data?.message || reason?.message || 'Something went wrong while loading purchases.');
+    } else {
+      setError(null);
+    }
+
+    setInitialLoading(false);
+    setRefreshing(false);
+  }, []);
+
 
   useEffect(() => {
     fetchData();
@@ -385,7 +377,7 @@ export default function OwnerPurchasesScreen() {
     if (orders.length === 0) {
       return (
         <EmptyState
-          icon={<Text style={styles.emptyIcon}>🛒</Text>}
+          icon={<MaterialIcons name="shopping-cart" size={28} color={COLORS.gray[400]} />}
           title="No purchase orders"
           subtitle="Purchase orders from your suppliers will appear here."
           style={styles.empty}
@@ -394,7 +386,7 @@ export default function OwnerPurchasesScreen() {
     }
     return (
       <EmptyState
-        icon={<Text style={styles.emptyIcon}>🔍</Text>}
+        icon={<MaterialIcons name="search-off" size={28} color={COLORS.gray[400]} />}
         title="No matches"
         subtitle={`Nothing found for "${searchText.trim()}". Try a different search or filter.`}
         actionTitle="Clear Search"
@@ -409,19 +401,19 @@ export default function OwnerPurchasesScreen() {
       <>
         <View style={styles.summaryGrid}>
           <SummaryCard
-            icon="🏪"
+            icon="storefront"
             value={String(summary.totalSuppliers)}
             label="Suppliers"
             accent={ACCENTS.suppliers}
           />
           <SummaryCard
-            icon="⏳"
+            icon="hourglass-empty"
             value={String(summary.pendingCount)}
             label="Pending"
             accent={ACCENTS.pending}
           />
           <SummaryCard
-            icon="💰"
+            icon="payments"
             value={formatTZS(summary.totalSpent)}
             label="Total Spent"
             accent={ACCENTS.spent}
@@ -446,7 +438,7 @@ export default function OwnerPurchasesScreen() {
   if (initialLoading) {
     return (
       <SafeAreaView style={styles.safe} edges={['top']}>
-        <Header title="Purchases" />
+        <Header title="Purchases" onBack={() => router.back()} />
         <View style={styles.initialLoading}>
           <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.initialLoadingText}>Loading purchases…</Text>
@@ -460,6 +452,7 @@ export default function OwnerPurchasesScreen() {
       <Header
         title="Purchases"
         subtitle={`${orders.length} order${orders.length === 1 ? '' : 's'} · ${suppliers.length} supplier${suppliers.length === 1 ? '' : 's'}`}
+        onBack={() => router.back()}
       />
       <FlatList
         data={filtered}
@@ -517,17 +510,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  summaryIconText: {
-    fontSize: FONTS.size.xl - 4,
-  },
   summaryValue: {
     fontSize: FONTS.size.xl - 2,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     marginTop: SPACING.sm,
   },
   summaryLabel: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.textLight,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -562,7 +552,7 @@ const styles = StyleSheet.create({
   },
   segmentText: {
     fontSize: FONTS.size.xs + 1,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.textLight,
   },
   segmentTextActive: {
@@ -594,7 +584,7 @@ const styles = StyleSheet.create({
   },
   supplierInitial: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.primaryDark,
   },
   orderInfo: {
@@ -602,7 +592,7 @@ const styles = StyleSheet.create({
   },
   supplierName: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   orderNumber: {
@@ -621,12 +611,12 @@ const styles = StyleSheet.create({
   metaDate: {
     fontSize: FONTS.size.xs,
     color: COLORS.gray[400],
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
   },
   metaItems: {
     fontSize: FONTS.size.xs,
     color: COLORS.gray[400],
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
   },
   orderTotal: {
     marginLeft: 'auto',
@@ -634,8 +624,5 @@ const styles = StyleSheet.create({
   empty: {
     flex: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
 });

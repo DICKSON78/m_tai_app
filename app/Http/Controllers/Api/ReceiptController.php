@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
-use Barryvdh\Dompdf\Facade\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReceiptController extends Controller
 {
@@ -17,7 +17,18 @@ class ReceiptController extends Controller
 
     public function generate(Request $request, Order $order)
     {
-        $user = $request->user();
+        $this->authorizeReceipt($request->user(), $order);
+
+        $receipt = $this->buildReceiptData($order);
+
+        return response()->json([
+            'receipt' => $receipt,
+            'html' => $this->buildReceiptHtml($receipt),
+        ]);
+    }
+
+    protected function authorizeReceipt($user, Order $order)
+    {
         $isOwner = $user->businesses()->where('id', $order->business_id)->exists();
         $isEmployee = $user->employees()->where('business_id', $order->business_id)->exists();
         $isCustomer = $order->customer && $order->customer->user_id === $user->id;
@@ -26,13 +37,6 @@ class ReceiptController extends Controller
         if (!$isOwner && !$isEmployee && !$isCustomer && !$isAdmin) {
             abort(403);
         }
-
-        $receipt = $this->buildReceiptData($order);
-
-        return response()->json([
-            'receipt' => $receipt,
-            'html' => $this->buildReceiptHtml($receipt),
-        ]);
     }
 
     protected function buildReceiptHtml($receipt)
@@ -71,6 +75,7 @@ class ReceiptController extends Controller
         $amountPaid = $e($receipt['amount_paid']);
         $change = $e($receipt['change']);
         $footer = $e($receipt['footer']);
+        $logo = \App\Helpers\Branding::logoImgHtml(90, 'center');
 
         return <<<HTML
 <!DOCTYPE html>
@@ -80,6 +85,7 @@ class ReceiptController extends Controller
         body { font-family: monospace; font-size: 12px; max-width: 300px; margin: 0 auto; }
         .center { text-align: center; }
         .bold { font-weight: bold; }
+        .logo { margin-bottom: 6px; }
         table { width: 100%; border-collapse: collapse; }
         td { padding: 2px 0; }
         .border-top { border-top: 1px dashed #000; margin: 8px 0; }
@@ -87,6 +93,7 @@ class ReceiptController extends Controller
     </style>
 </head>
 <body>
+    <div class="center logo">{$logo}</div>
     <div class="center bold">{$businessName}</div>
     <div class="center">{$businessCode}</div>
     <div class="center">{$businessPhone}</div>
@@ -117,20 +124,25 @@ class ReceiptController extends Controller
 HTML;
     }
 
-    public function generatePdf(Order $order)
+    public function generatePdf(Request $request, Order $order)
     {
+        $this->authorizeReceipt($request->user(), $order);
+
         $receipt = $this->buildReceiptData($order);
         $html = $this->buildReceiptHtml($receipt);
 
         $pdf = Pdf::loadHtml($html)
             ->setPaper('a5', 'portrait')
-            ->setOption('isRemoteEnabled', true);
+            ->setOption('isRemoteEnabled', true)
+            ->setOption('isHtml5ParserEnabled', true);
 
         return $pdf->download("receipt-{$order->transaction_code}.pdf");
     }
 
-    public function printReceipt(Order $order)
+    public function printReceipt(Request $request, Order $order)
     {
+        $this->authorizeReceipt($request->user(), $order);
+
         $receipt = $this->buildReceiptData($order);
         $html = $this->buildReceiptHtml($receipt);
 

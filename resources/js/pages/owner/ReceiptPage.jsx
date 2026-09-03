@@ -5,7 +5,8 @@ import SectionHeader from '../../components/casfeta/SectionHeader';
 import FormField from '../../components/casfeta/FormField';
 import EmptyState from '../../components/casfeta/EmptyState';
 import ActionBar from '../../components/casfeta/ActionBar';
-import { ReceiptText, Hash, Printer, Loader2 } from 'lucide-react';
+import { ReceiptText, Hash, Printer, Loader2, Download } from 'lucide-react';
+import { downloadPdf } from '../../lib/utils';
 
 export default function ReceiptPage() {
     const [orderId, setOrderId] = useState('');
@@ -61,9 +62,14 @@ export default function ReceiptPage() {
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                     <div className="flex items-center justify-between mb-6">
                         <SectionHeader icon={<ReceiptText size={18} />} title={`Receipt for Order #${orderId}`} />
+                        <div className="flex items-center gap-2">
                         <button onClick={handlePrint} className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all">
                             <Printer size={16} /> Print
                         </button>
+                        <button onClick={() => { downloadPdf(`/orders/${orderId}/receipt/pdf`, `receipt-${orderId}.pdf`).catch(e => setError(e.message)); }} className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all">
+                            <Download size={16} /> Download PDF
+                        </button>
+                    </div>
                     </div>
                     <div id="receipt-content">
                         {receipt.receipt_image || receipt.image ? (

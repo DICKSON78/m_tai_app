@@ -7,11 +7,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
+import AlertModal from '../../src/components/AlertModal';
 import Input from '../../src/components/Input';
 import Button from '../../src/components/Button';
 import { useAuthStore } from '../../src/store/authStore';
@@ -27,6 +27,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [alertError, setAlertError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const clearError = (field: string) => {
@@ -65,7 +66,7 @@ export default function RegisterScreen() {
         (err?.response?.status === 422
           ? 'Validation failed. Please check your input.'
           : 'Unable to connect. Please check your connection and try again.');
-      Alert.alert('Registration Failed', message);
+      setAlertError(message);
     } finally {
       setSubmitting(false);
     }
@@ -87,11 +88,14 @@ export default function RegisterScreen() {
         >
           {/* Branding */}
           <View style={styles.brandSection}>
-            <View style={[styles.decoCircle, styles.decoCircleLarge]} />
-            <View style={[styles.decoCircle, styles.decoCircleSmall]} />
-            <Text style={styles.logo}>
-              M<Text style={styles.logoAccent}>-</Text>TAI
-            </Text>
+            <View style={styles.logoBadge}>
+              <MaterialIcons name="storefront" size={30} color={COLORS.primary} />
+            </View>
+            <View style={styles.logoTextRow}>
+              <Text style={styles.logo}>
+                M<Text style={styles.logoAccent}>-</Text>TAI
+              </Text>
+            </View>
             <Text style={styles.tagline}>Marketplace at your fingertips</Text>
           </View>
 
@@ -111,7 +115,7 @@ export default function RegisterScreen() {
               }}
               placeholder="John Doe"
               error={errors.name}
-              icon={<MaterialCommunityIcons name="account-outline" size={20} color={iconColor} />}
+              icon={<MaterialIcons name="person-outline" size={20} color={iconColor} />}
               style={styles.fieldSpacing}
             />
 
@@ -125,7 +129,7 @@ export default function RegisterScreen() {
               placeholder="you@example.com"
               keyboardType="email-address"
               error={errors.email}
-              icon={<MaterialCommunityIcons name="email-outline" size={20} color={iconColor} />}
+              icon={<MaterialIcons name="alternate-email" size={20} color={iconColor} />}
               style={styles.fieldSpacing}
             />
 
@@ -139,7 +143,7 @@ export default function RegisterScreen() {
               placeholder="+255 7XX XXX XXX"
               keyboardType="phone-pad"
               error={errors.phone}
-              icon={<MaterialCommunityIcons name="phone-outline" size={20} color={iconColor} />}
+              icon={<MaterialIcons name="phone" size={20} color={iconColor} />}
               style={styles.fieldSpacing}
             />
 
@@ -153,7 +157,7 @@ export default function RegisterScreen() {
               placeholder="Minimum 8 characters"
               secureTextEntry
               error={errors.password}
-              icon={<MaterialCommunityIcons name="lock-outline" size={20} color={iconColor} />}
+              icon={<MaterialIcons name="lock" size={20} color={iconColor} />}
               style={styles.fieldSpacing}
             />
 
@@ -167,7 +171,7 @@ export default function RegisterScreen() {
               placeholder="Re-enter your password"
               secureTextEntry
               error={errors.confirmPassword}
-              icon={<MaterialCommunityIcons name="lock-check-outline" size={20} color={iconColor} />}
+              icon={<MaterialIcons name="verified-user" size={20} color={iconColor} />}
               style={styles.fieldSpacing}
             />
 
@@ -191,6 +195,15 @@ export default function RegisterScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <AlertModal
+        visible={alertError !== null}
+        type="error"
+        title="Registration Failed"
+        message={alertError ?? ''}
+        confirmText="Try Again"
+        onConfirm={() => setAlertError(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -207,70 +220,57 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   brandSection: {
-    backgroundColor: COLORS.primary,
-    borderBottomLeftRadius: RADIUS.xl + 8,
-    borderBottomRightRadius: RADIUS.xl + 8,
+    alignItems: 'center',
+    paddingTop: SPACING.xl + SPACING.lg,
+    paddingBottom: SPACING.lg,
+  },
+  logoBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.teal[50],
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: SPACING.xl + SPACING.md,
-    paddingBottom: SPACING.xl,
-    overflow: 'hidden',
-    shadowColor: COLORS.primaryDark,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 8,
+    marginBottom: SPACING.md,
   },
-  decoCircle: {
-    position: 'absolute',
-    borderRadius: RADIUS.full,
-    backgroundColor: COLORS.primaryDark,
-    opacity: 0.45,
-  },
-  decoCircleLarge: {
-    width: 220,
-    height: 220,
-    top: -110,
-    right: -70,
-  },
-  decoCircleSmall: {
-    width: 140,
-    height: 140,
-    bottom: -80,
-    left: -40,
-    opacity: 0.3,
+  logoTextRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   logo: {
-    fontSize: FONTS.size.xxxl,
-    fontWeight: '800',
-    letterSpacing: 3,
-    color: COLORS.white,
+    fontSize: FONTS.size.xxl + 4,
+    fontFamily: FONTS.bold,
+    letterSpacing: 2,
+    color: COLORS.text,
   },
   logoAccent: {
-    color: COLORS.secondary,
+    color: COLORS.primary,
   },
   tagline: {
     fontSize: FONTS.size.md,
-    color: COLORS.white,
-    opacity: 0.9,
-    marginTop: SPACING.sm,
+    fontFamily: FONTS.regular,
+    color: COLORS.textLight,
+    marginTop: SPACING.xs + 2,
   },
   formSection: {
     flex: 1,
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.xl,
+    paddingTop: SPACING.lg,
     paddingBottom: SPACING.xl,
   },
   welcomeTitle: {
+    textAlign: 'center',
     fontSize: FONTS.size.xxl - 2,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   welcomeSubtitle: {
+    textAlign: 'center',
     fontSize: FONTS.size.md,
+    fontFamily: FONTS.regular,
     color: COLORS.textLight,
     marginTop: SPACING.xs + 2,
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.xl,
   },
   fieldSpacing: {
     marginBottom: SPACING.md,
@@ -285,11 +285,12 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: FONTS.size.md,
+    fontFamily: FONTS.regular,
     color: COLORS.textLight,
   },
   loginText: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.semibold,
     color: COLORS.primary,
   },
 });

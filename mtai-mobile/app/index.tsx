@@ -21,7 +21,7 @@ export default function RoleRouter() {
     if (isLoading) return;
 
     if (!isAuthenticated) {
-      router.replace('/(auth)/login');
+      router.replace('/(auth)/onboarding');
       return;
     }
 

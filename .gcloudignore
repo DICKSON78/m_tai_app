@@ -8,6 +8,12 @@
 .nova
 .zed
 node_modules
+!public/build/assets/node_modules/
+!public/build/assets/node_modules/**
+/mtai-mobile/android/app/build/
+/mtai-mobile/android/app/.cxx/
+/mtai-mobile/android/build/
+/mtai-mobile/android/.gradle/
 vendor
 Phermex/
 Mtai.docx

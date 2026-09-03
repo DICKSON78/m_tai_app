@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { TrendingUp, ShoppingCart, Store, Users, UserCheck, Calendar } from 'lucide-react';
+import { TrendingUp, ShoppingCart, Store, Users, UserCheck, Calendar, Printer } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import PageHeader from '../../components/casfeta/PageHeader';
 import InfoCard from '../../components/casfeta/InfoCard';
 import DataItem from '../../components/casfeta/DataItem';
+import { printElementAsPdf } from '../../lib/utils';
 
 export default function AdminReportsPage() {
     const [stats, setStats] = useState({
@@ -54,7 +55,9 @@ export default function AdminReportsPage() {
                 subtitle="Overview of your platform performance"
                 icon={<TrendingUp size={20} />}
                 actions={
-                    <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => printElementAsPdf('report-results-root', 'Platform Report')} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 border border-gray-200 bg-white hover:bg-gray-50"><Printer size={16} /> Print / Save as PDF</button>
+                        <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
                         {[
                             { value: 'this_week', label: 'This Week' },
                             { value: 'this_month', label: 'This Month' },
@@ -66,10 +69,12 @@ export default function AdminReportsPage() {
                                 {opt.label}
                             </button>
                         ))}
+                        </div>
                     </div>
                 }
             />
 
+            <div id="report-results-root">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="stat-card bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
                     <div className="flex items-center justify-between">
@@ -209,6 +214,7 @@ export default function AdminReportsPage() {
                         <DataItem label="Total Users" value={stats.total_users} icon={<Users size={14} />} />
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     );

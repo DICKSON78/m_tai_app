@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import api from '../../src/api/client';
 import Badge from '../../src/components/Badge';
 import Button from '../../src/components/Button';
@@ -260,7 +260,7 @@ export default function ExpenseScreen() {
     if (expenses.length === 0) {
       return (
         <EmptyState
-          icon={<Text style={styles.emptyIcon}>💰</Text>}
+          icon={<MaterialIcons name="receipt-long" size={32} color={COLORS.gray[400]} />}
           title="No expenses yet"
           subtitle="Submit your first expense report using the button below."
           style={styles.empty}
@@ -269,7 +269,7 @@ export default function ExpenseScreen() {
     }
     return (
       <EmptyState
-        icon={<Text style={styles.emptyIcon}>🔍</Text>}
+        icon={<MaterialIcons name="search" size={32} color={COLORS.gray[400]} />}
         title="No matches"
         subtitle={`Nothing found for "${searchText.trim()}".`}
         actionTitle="Clear Search"
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     fontSize: FONTS.size.xl,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.white,
     lineHeight: 22,
   },
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
   },
   expenseDescription: {
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   expenseCategory: {
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
   },
   expenseAmount: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.primaryDark,
   },
   expenseDate: {
@@ -465,9 +465,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  emptyIcon: {
-    fontSize: 32,
-  },
   modalOverlay: {
     flex: 1,
     backgroundColor: COLORS.overlay,
@@ -482,7 +479,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: FONTS.size.xl,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   modalSubtitle: {
@@ -497,7 +494,7 @@ const styles = StyleSheet.create({
   },
   categoryLabel: {
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
     marginBottom: SPACING.sm - 2,
   },
@@ -521,7 +518,7 @@ const styles = StyleSheet.create({
   },
   categoryChipText: {
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.gray[600],
   },
   categoryChipTextSelected: {

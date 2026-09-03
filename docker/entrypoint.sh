@@ -30,9 +30,10 @@ php artisan config:clear 2>/dev/null || true
 php artisan route:clear 2>/dev/null || true
 php artisan view:clear 2>/dev/null || true
 
+echo "Running idempotent migrations..."
+php artisan migrate --force || true
+
 if [ "$RUN_MIGRATIONS" = "true" ]; then
-    echo "Running database migrations..."
-    php artisan migrate --force || true
     echo "Seeding database..."
     php artisan db:seed --force || true
 fi

@@ -8,17 +8,18 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import api from '../../src/api/client';
-import { Order } from '../../src/api/types';
-import Avatar from '../../src/components/Avatar';
-import Badge from '../../src/components/Badge';
-import Card from '../../src/components/Card';
-import EmptyState from '../../src/components/EmptyState';
-import Header from '../../src/components/Header';
-import LoadingScreen from '../../src/components/LoadingScreen';
-import PriceTag from '../../src/components/PriceTag';
-import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
+import api from '../../../src/api/client';
+import { Order } from '../../../src/api/types';
+import Avatar from '../../../src/components/Avatar';
+import Badge from '../../../src/components/Badge';
+import Card from '../../../src/components/Card';
+import EmptyState from '../../../src/components/EmptyState';
+import Header from '../../../src/components/Header';
+import LoadingScreen from '../../../src/components/LoadingScreen';
+import PriceTag from '../../../src/components/PriceTag';
+import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../../src/constants/theme';
 
 type StatusFilter = 'all' | 'pending' | 'processing' | 'completed';
 
@@ -31,16 +32,16 @@ const FILTERS: { key: StatusFilter; label: string }[] = [
 
 const STATUS_COLORS: Record<string, string> = {
   pending: COLORS.warning,
-  confirmed: '#5B8DEF',
-  accepted: '#5B8DEF',
-  processing: '#5B8DEF',
+  confirmed: COLORS.info,
+  accepted: COLORS.info,
+  processing: COLORS.info,
   preparing: COLORS.warning,
-  packed: '#5B8DEF',
-  ready: '#5B8DEF',
-  shipped: '#8B5CF6',
-  out_for_delivery: '#8B5CF6',
-  en_route: '#8B5CF6',
-  delivering: '#8B5CF6',
+  packed: COLORS.info,
+  ready: COLORS.info,
+  shipped: COLORS.primaryDark,
+  out_for_delivery: COLORS.primaryDark,
+  en_route: COLORS.primaryDark,
+  delivering: COLORS.primaryDark,
   delivered: COLORS.success,
   completed: COLORS.success,
   received: COLORS.success,
@@ -292,7 +293,7 @@ export default function OwnerOrdersScreen() {
     const copy = EMPTY_COPY[filter];
     return (
       <EmptyState
-        icon={<Text style={styles.emptyIcon}>📦</Text>}
+        icon={<MaterialIcons name="inventory-2" size={32} color={COLORS.gray[400]} />}
         title={copy.title}
         subtitle={copy.subtitle}
         actionTitle="Refresh"
@@ -311,6 +312,7 @@ export default function OwnerOrdersScreen() {
       <Header
         title="Orders"
         subtitle={totalCount > 0 ? `${totalCount} ${totalCount === 1 ? 'order' : 'orders'}` : undefined}
+        onBack={() => router.back()}
       />
       <FlatList
         data={orders}
@@ -365,7 +367,7 @@ const styles = StyleSheet.create({
   },
   segmentText: {
     fontSize: FONTS.size.xs + 1,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.textLight,
   },
   segmentTextActive: {
@@ -392,7 +394,7 @@ const styles = StyleSheet.create({
   },
   orderNumber: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   customerName: {
@@ -411,12 +413,12 @@ const styles = StyleSheet.create({
   metaDate: {
     fontSize: FONTS.size.xs,
     color: COLORS.gray[400],
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
   },
   metaItems: {
     fontSize: FONTS.size.xs,
     color: COLORS.gray[400],
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
   },
   orderTotal: {
     marginLeft: 'auto',
@@ -432,8 +434,5 @@ const styles = StyleSheet.create({
   empty: {
     flex: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
 });

@@ -1,18 +1,42 @@
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { COLORS, FONTS } from '../../src/constants/theme';
 
-const TAB_COLOR_ACTIVE = '#00D4AA';
+const TAB_COLOR_ACTIVE = COLORS.primaryDark;
 const TAB_COLOR_INACTIVE = '#9CA3AF';
+const TAB_BAR_HEIGHT = 62;
 
-function TabIcon({ icon, focused }: { icon: string; focused: boolean }) {
+function TabIcon({
+  icon,
+  focused,
+}: {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  focused: boolean;
+}) {
   return (
-    <Text style={{ fontSize: 18, lineHeight: 22, opacity: focused ? 1 : 0.55 }}>
-      {icon}
-    </Text>
+    <MaterialIcons
+      name={icon}
+      size={22}
+      color={focused ? TAB_COLOR_ACTIVE : TAB_COLOR_INACTIVE}
+    />
   );
 }
 
+function useTabBarStyle() {
+  const insets = useSafeAreaInsets();
+  return {
+    height: TAB_BAR_HEIGHT + insets.bottom,
+    paddingBottom: Math.max(8, insets.bottom),
+    paddingTop: 6,
+    backgroundColor: COLORS.white,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.gray[200],
+  };
+}
+
 export default function AdminLayout() {
+  const tabBarStyle = useTabBarStyle();
   return (
     <Tabs
       screenOptions={{
@@ -21,58 +45,44 @@ export default function AdminLayout() {
         tabBarInactiveTintColor: TAB_COLOR_INACTIVE,
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: '600',
+          fontFamily: FONTS.medium,
         },
-        tabBarStyle: {
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 6,
-        },
+        tabBarStyle,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Dashboard',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="🧭" focused={focused} />
-          ),
+          tabBarIcon: ({ focused }) => <TabIcon icon="dashboard" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="businesses"
         options={{
           title: 'Businesses',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="🏢" focused={focused} />
-          ),
+          tabBarIcon: ({ focused }) => <TabIcon icon="business" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="users"
         options={{
           title: 'Users',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="👥" focused={focused} />
-          ),
+          tabBarIcon: ({ focused }) => <TabIcon icon="group" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="announcements"
         options={{
-          title: 'Announcements',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="📣" focused={focused} />
-          ),
+          title: 'Announce',
+          tabBarIcon: ({ focused }) => <TabIcon icon="campaign" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="👤" focused={focused} />
-          ),
+          tabBarIcon: ({ focused }) => <TabIcon icon="person-outline" focused={focused} />,
         }}
       />
       <Tabs.Screen

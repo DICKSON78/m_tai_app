@@ -7,9 +7,11 @@ interface Props {
   subtitle?: string;
   onBack?: () => void;
   rightAction?: React.ReactNode;
+  titleColor?: string;
+  titleSize?: number;
 }
 
-export default function Header({ title, subtitle, onBack, rightAction }: Props) {
+export default function Header({ title, subtitle, onBack, rightAction, titleColor, titleSize }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
@@ -46,7 +48,14 @@ export default function Header({ title, subtitle, onBack, rightAction }: Props) 
           ) : null}
         </View>
         <View style={styles.center}>
-          <Text style={styles.title} numberOfLines={1}>
+          <Text
+            style={[
+              styles.title,
+              titleColor ? { color: titleColor } : null,
+              titleSize ? { fontSize: titleSize } : null,
+            ]}
+            numberOfLines={1}
+          >
             {title}
           </Text>
           {subtitle ? (
@@ -63,11 +72,10 @@ export default function Header({ title, subtitle, onBack, rightAction }: Props) 
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.background,
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm + 6,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: COLORS.gray[200],
+    paddingTop: SPACING.sm + 4,
+    paddingBottom: SPACING.sm,
   },
   row: {
     flexDirection: 'row',
@@ -85,7 +93,7 @@ const styles = StyleSheet.create({
   },
   center: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: SPACING.xs,
   },
   backButton: {
@@ -117,12 +125,13 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '45deg' }],
   },
   title: {
-    fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontSize: FONTS.size.xl,
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   subtitle: {
     fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
     color: COLORS.textLight,
     marginTop: 2,
   },

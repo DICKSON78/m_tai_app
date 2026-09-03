@@ -662,7 +662,7 @@ class AdminController extends Controller
 
     public function finance(Request $request)
     {
-        $period = $request->period ?? 'this_month';
+        $period = $request->period ?? 'all_time';
         $since = match ($period) {
             'this_week' => now()->startOfWeek(),
             'this_month' => now()->startOfMonth(),
@@ -694,7 +694,11 @@ class AdminController extends Controller
             ->where('created_at', '>=', $since)
             ->select('method', DB::raw('SUM(amount) as total'))
             ->groupBy('method')
-            ->get();
+            ->get()
+            ->map(fn ($row) => [
+                'method' => $row->method,
+                'total' => (float) $row->total,
+            ]);
 
         $recentPayments = \App\Models\Payment::with('order:id,business_id')
             ->where('status', 'confirmed')

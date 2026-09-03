@@ -654,7 +654,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/expenses', [EmployeeDataController::class, 'expenses']);
         Route::post('/expenses', [EmployeeDataController::class, 'storeExpense'])->middleware('permission:manage_expenses');
         Route::get('/attendance', [HrAttendanceController::class, 'employeeIndex']);
-        Route::post('/attendance', [HrAttendanceController::class, 'employeeStore'])->middleware('permission:manage_attendance');
+        Route::post('/attendance', [HrAttendanceController::class, 'employeeStore']);
         Route::get('/orders', [OrderController::class, 'employeeOrders']);
     });
 

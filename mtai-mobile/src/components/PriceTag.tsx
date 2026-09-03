@@ -50,16 +50,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   price: {
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.primaryDark,
   },
   priceLg: {
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   compare: {
     color: COLORS.gray[400],
     textDecorationLine: 'line-through',
     marginLeft: 6,
+    fontFamily: FONTS.regular,
   },
 });

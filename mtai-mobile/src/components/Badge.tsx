@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
-import { COLORS, SPACING, RADIUS, FONTS } from '../constants/theme';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { COLORS, FONTS } from '../constants/theme';
 
 interface Props {
   label: string;
@@ -8,28 +8,33 @@ interface Props {
   textColor?: string;
   size?: 'sm' | 'md';
   style?: ViewStyle;
+  filled?: boolean;
 }
 
+// Tinted status pill (matches Vantage StatusBadge): ~15% alpha bg, same-hue
+// darkened text, fully rounded.
 export default function Badge({
   label,
   color,
-  textColor = COLORS.white,
+  textColor,
   size = 'md',
   style,
+  filled,
 }: Props) {
+  const resolvedText = textColor ?? color;
   return (
     <View
       style={[
         styles.badge,
         size === 'sm' ? styles.badgeSm : styles.badgeMd,
-        { backgroundColor: color },
+        { backgroundColor: filled ? color : hexToAlpha(color, 0.15) },
         style,
       ]}
     >
       <Text
         style={[
           size === 'sm' ? styles.textSm : styles.textMd,
-          { color: textColor },
+          { color: filled ? COLORS.white : resolvedText },
         ]}
       >
         {label}
@@ -38,25 +43,34 @@ export default function Badge({
   );
 }
 
+function hexToAlpha(hex: string, alpha: number): string {
+  const clean = hex.replace('#', '');
+  const full = clean.length === 3 ? clean.replace(/./g, (c) => c + c) : clean;
+  const r = parseInt(full.substring(0, 2), 16);
+  const g = parseInt(full.substring(2, 4), 16);
+  const b = parseInt(full.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 const styles = StyleSheet.create({
   badge: {
     alignSelf: 'flex-start',
-    borderRadius: RADIUS.full,
+    borderRadius: 999,
   },
   badgeSm: {
-    paddingVertical: SPACING.xs - 1,
-    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: 3,
+    paddingHorizontal: 10,
   },
   badgeMd: {
-    paddingVertical: SPACING.xs + 2,
-    paddingHorizontal: SPACING.sm + 4,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
   },
   textMd: {
-    fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontSize: 12,
+    fontFamily: FONTS.semibold,
   },
   textSm: {
-    fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontSize: 11,
+    fontFamily: FONTS.semibold,
   },
 });

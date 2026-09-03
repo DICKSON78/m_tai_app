@@ -39,8 +39,8 @@ const ACTIVE_STATUSES = new Set(['assigned', 'picked_up', 'in_transit']);
 const STATUS_META: Record<string, { label: string; color: string }> = {
   pending: { label: 'Pending', color: COLORS.gray[500] },
   available: { label: 'Available', color: COLORS.primary },
-  assigned: { label: 'Assigned', color: '#5B8DEF' },
-  picked_up: { label: 'Picked Up', color: '#8B5CF6' },
+  assigned: { label: 'Assigned', color: COLORS.info },
+  picked_up: { label: 'Picked Up', color: COLORS.primaryDark },
   in_transit: { label: 'In Transit', color: COLORS.warning },
   delivered: { label: 'Delivered', color: COLORS.success },
   cancelled: { label: 'Cancelled', color: COLORS.red[500] },
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   mapLinkText: {
     color: COLORS.primaryDark,
     fontSize: FONTS.size.sm,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
   },
   errorBanner: {
     flexDirection: 'row',
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   retryText: {
     color: COLORS.red[700],
     fontSize: FONTS.size.sm,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
   },
   segmentWrap: {
     paddingHorizontal: SPACING.md,
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
   },
   segmentText: {
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.textLight,
   },
   segmentTextActive: {
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
   },
   orderNumber: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   businessName: {
@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
   },
   distanceText: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.gray[600],
   },
   metaText: {

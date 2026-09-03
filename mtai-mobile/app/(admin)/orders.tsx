@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import api from '../../src/api/client';
 import Badge from '../../src/components/Badge';
 import Card from '../../src/components/Card';
@@ -36,7 +37,7 @@ const STATUS_COLORS: Record<string, string> = {
   completed: COLORS.success,
   cancelled: COLORS.error,
   delivered: COLORS.success,
-  processing: '#5B8DEF',
+  processing: COLORS.info,
 };
 
 function getStatusMeta(status?: string): { label: string; color: string } {
@@ -247,7 +248,7 @@ export default function AdminOrdersScreen() {
     }
     return (
       <EmptyState
-        icon={<Text style={styles.emptyIcon}>🛒</Text>}
+        icon={<MaterialIcons name="shopping-cart" size={32} color={COLORS.gray[400]} />}
         title="No orders yet"
         subtitle="Platform orders will appear here as they come in."
         style={styles.empty}
@@ -363,7 +364,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.textLight,
   },
   filterChipTextActive: {
@@ -389,7 +390,7 @@ const styles = StyleSheet.create({
   },
   orderNumber: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   customerName: {
@@ -407,7 +408,7 @@ const styles = StyleSheet.create({
   },
   orderTotal: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   orderDate: {
@@ -425,8 +426,5 @@ const styles = StyleSheet.create({
   empty: {
     flex: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
 });

@@ -7,8 +7,9 @@ import {
   ViewStyle,
   TextStyle,
   KeyboardTypeOptions,
-  TextInputProps,
+  TouchableOpacity,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, FONTS } from '../constants/theme';
 
 interface Props {
@@ -39,19 +40,7 @@ export default function Input({
   style,
 }: Props) {
   const [focused, setFocused] = useState(false);
-
-  const inputProps: TextInputProps = {
-    value,
-    onChangeText,
-    placeholder,
-    placeholderTextColor: COLORS.gray[400],
-    secureTextEntry,
-    multiline,
-    keyboardType,
-    autoCapitalize,
-    onFocus: () => setFocused(true),
-    onBlur: () => setFocused(false),
-  };
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   return (
     <View style={style}>
@@ -66,9 +55,31 @@ export default function Input({
       >
         {icon ? <View style={styles.icon}>{icon}</View> : null}
         <TextInput
-          {...inputProps}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={COLORS.gray[400]}
+          secureTextEntry={secureTextEntry && !passwordVisible}
+          multiline={multiline}
+          keyboardType={keyboardType}
+          autoCapitalize={autoCapitalize}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           style={[styles.input, multiline && styles.inputMultiline]}
         />
+        {secureTextEntry ? (
+          <TouchableOpacity
+            onPress={() => setPasswordVisible((prev) => !prev)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            style={styles.eyeButton}
+          >
+            <MaterialIcons
+              name={passwordVisible ? 'visibility-off' : 'visibility'}
+              size={22}
+              color={COLORS.gray[400]}
+            />
+          </TouchableOpacity>
+        ) : null}
       </View>
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
@@ -77,18 +88,18 @@ export default function Input({
 
 const styles = StyleSheet.create({
   label: {
-    fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
-    marginBottom: SPACING.sm - 2,
+    marginBottom: SPACING.xs + 2,
   },
   field: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.white,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: COLORS.gray[200],
-    borderRadius: RADIUS.md,
+    borderRadius: RADIUS.sm,
     paddingHorizontal: SPACING.md,
     minHeight: 48,
   },
@@ -108,9 +119,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  eyeButton: {
+    marginLeft: SPACING.sm + 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 2,
+  },
   input: {
     flex: 1,
     fontSize: FONTS.size.md,
+    fontFamily: FONTS.regular,
     color: COLORS.text,
     paddingVertical: SPACING.sm + 2,
   } as TextStyle,
@@ -119,6 +137,7 @@ const styles = StyleSheet.create({
   },
   error: {
     fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
     color: COLORS.error,
     marginTop: SPACING.xs + 2,
   },

@@ -8,14 +8,17 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import api from '../../src/api/client';
-import Button from '../../src/components/Button';
-import Card from '../../src/components/Card';
-import Header from '../../src/components/Header';
-import Input from '../../src/components/Input';
-import LoadingScreen from '../../src/components/LoadingScreen';
-import PriceTag from '../../src/components/PriceTag';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { router } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+import api from '../../../src/api/client';
+import Button from '../../../src/components/Button';
+import Card from '../../../src/components/Card';
+import Header from '../../../src/components/Header';
+import Input from '../../../src/components/Input';
+import LoadingScreen from '../../../src/components/LoadingScreen';
+import PriceTag from '../../../src/components/PriceTag';
+import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../../src/constants/theme';
+import { useAuthStore } from '../../../src/store/authStore';
 
 type RangeKey = 'today' | 'week' | 'month' | 'custom';
 
@@ -37,6 +40,17 @@ function extractErrorMessage(error: unknown, fallback: string): string {
     if (message) return message;
   }
   return fallback;
+}
+
+function extractBusinessId(body: unknown): string | null {
+  if (!body || typeof body !== 'object') return null;
+  const raw = body as { data?: unknown };
+  const data =
+    raw.data && typeof raw.data === 'object' && !Array.isArray(raw.data)
+      ? (raw.data as Record<string, unknown>)
+      : (body as Record<string, unknown>);
+  const id = data.id ?? data.business_id;
+  return id != null ? String(id) : null;
 }
 
 function normalizeObject(payload: unknown): Record<string, unknown> {
@@ -77,9 +91,21 @@ function formatTZS(amount: number): string {
   return `TZS ${withSeparators}`;
 }
 
+function formatCompact(amount: number): string {
+  const abs = Math.abs(amount);
+  const trimZeros = (value: number) => value.toFixed(1).replace(/\.0$/, '');
+  if (abs >= 1_000_000) return `TZS ${trimZeros(amount / 1_000_000)}M`;
+  if (abs >= 10_000) return `TZS ${trimZeros(amount / 1_000)}K`;
+  return `TZS ${formatTZS(amount)}`;
+}
+
 function formatPercent(value: number): string {
   if (!Number.isFinite(value)) return '0%';
   return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
+}
+
+function formatMoneyCompact(amount: number): string {
+  return formatCompact(amount);
 }
 
 function toISODate(date: Date): string {
@@ -132,29 +158,91 @@ function getProductRevenue(item: Record<string, unknown>): number {
   return pickNumber(item, ['revenue', 'total_sales', 'total_revenue', 'sales', 'total']);
 }
 
-interface MetricProps {
-  label: string;
-  value: string;
-  color?: string;
+function ProfitDonut({ percent, size = 96, color = COLORS.primaryDark }: { percent: number; size?: number; color?: string }) {  const clamped = Math.max(0, Math.min(100, percent));
+  const radius = (size - 12) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const arc = (clamped / 100) * circumference;
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: COLORS.white,
+        overflow: 'hidden',
+        ...SHADOWS.sm,
+      }}
+    >
+      <View
+        style={{
+          position: 'absolute',
+          top: 6,
+          left: 6,
+          width: radius * 2,
+          height: radius * 2,
+          borderRadius: radius,
+          borderColor: COLORS.gray[100],
+          borderWidth: 12,
+        }}
+      />
+      <View
+        style={{
+          position: 'absolute',
+          top: 6,
+          left: 6,
+          width: radius * 2,
+          height: radius * 2,
+          borderRadius: radius,
+          borderColor: color,
+          borderWidth: 12,
+          borderRightColor: arc > 0 && arc < circumference ? COLORS.gray[100] : color,
+          borderBottomColor: arc > 0 && arc < circumference ? COLORS.gray[100] : color,
+          transform: [
+            { rotate: `${270 + (arc / circumference) * 180}deg` },
+            { translateX: 0 },
+            { translateY: 0 },
+          ],
+        }}
+      />
+      <Text style={styles.donutValue}>{formatPercent(percent)}</Text>
+    </View>
+  );
 }
 
-function Metric({ label, value, color }: MetricProps) {
+function CompositionBar({
+  total,
+  cost,
+  profit,
+}: {
+  total: number;
+  cost: number;
+  profit: number;
+}) {
+  if (total <= 0) {
+    return (
+      <View style={styles.compositionTrack}>
+        <View style={[styles.compositionFill, { width: '100%', backgroundColor: COLORS.gray[200] }]} />
+      </View>
+    );
+  }
+  const costShare = Math.max(0, Math.min(1, cost / total));
+  const profitShare = Math.max(0, Math.min(1, profit / total));
   return (
-    <View style={styles.metric}>
-      <Text style={styles.metricLabel}>{label}</Text>
-      <Text
-        style={[styles.metricValue, color ? { color } : null]}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.6}
-      >
-        {value}
-      </Text>
+    <View style={styles.compositionTrack}>
+      <View style={[styles.compositionFill, { width: `${costShare * 100}%`, backgroundColor: COLORS.gray[300] }]} />
+      <View style={[styles.compositionFill, { width: `${profitShare * 100}%`, backgroundColor: COLORS.primaryDark }]} />
     </View>
   );
 }
 
 export default function OwnerReportsScreen() {
+  const user = useAuthStore((state) => state.user);
+  const [businessId, setBusinessId] = useState<string | null>(
+    user?.current_business_id != null ? String(user.current_business_id) : null
+  );
+
   const [range, setRange] = useState<RangeKey>('today');
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
@@ -173,24 +261,24 @@ export default function OwnerReportsScreen() {
   const buildParams = useCallback((): Record<string, string> => {
     const params: Record<string, string> = {};
     if (range === 'today') {
-      params.period = 'today';
+      params.period = 'daily';
       const today = toISODate(new Date());
-      params.from = today;
-      params.to = today;
+      params.date_from = today;
+      params.date_to = today;
     } else if (range === 'week') {
-      params.period = 'week';
+      params.period = 'weekly';
       const [from, to] = weekBounds();
-      params.from = from;
-      params.to = to;
+      params.date_from = from;
+      params.date_to = to;
     } else if (range === 'month') {
-      params.period = 'month';
+      params.period = 'monthly';
       const [from, to] = monthBounds();
-      params.from = from;
-      params.to = to;
+      params.date_from = from;
+      params.date_to = to;
     } else if (appliedCustom) {
-      params.period = 'custom';
-      params.from = appliedCustom.from;
-      params.to = appliedCustom.to;
+      params.period = 'daily';
+      params.date_from = appliedCustom.from;
+      params.date_to = appliedCustom.to;
     }
     return params;
   }, [range, appliedCustom]);
@@ -200,9 +288,27 @@ export default function OwnerReportsScreen() {
     setSalesError(null);
     setProfitError(null);
     const config = { params: buildParams() };
+    let bizId = businessId;
+    if (!bizId) {
+      try {
+        const profileRes = await api.get('/business/profile');
+        bizId = extractBusinessId(profileRes.data);
+        if (bizId) setBusinessId(bizId);
+      } catch {
+        bizId = null;
+      }
+    }
+    if (!bizId) {
+      setSalesData(null);
+      setTopProducts([]);
+      setProfitData(null);
+      setSalesError('Could not determine your business account. Please pull to refresh.');
+      setProfitError('Could not determine your business account. Please pull to refresh.');
+      return;
+    }
     const [salesRes, profitRes] = await Promise.allSettled([
-      api.get('/owner/reports/sales', config),
-      api.get('/owner/reports/profit', config),
+      api.get(`/owner/businesses/${bizId}/reports/sales`, config),
+      api.get(`/owner/businesses/${bizId}/reports/profit`, config),
     ]);
     if (salesRes.status === 'fulfilled') {
       const body = normalizeObject(salesRes.value.data);
@@ -223,7 +329,7 @@ export default function OwnerReportsScreen() {
         extractErrorMessage(profitRes.reason, 'Could not load the profit and loss report.')
       );
     }
-  }, [range, appliedCustom, buildParams]);
+  }, [range, appliedCustom, buildParams, businessId]);
 
   useEffect(() => {
     loadReports().finally(() => setInitialLoading(false));
@@ -327,7 +433,7 @@ export default function OwnerReportsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <Header title="Reports" subtitle="Business performance" />
+      <Header title="Reports" subtitle="Business performance" onBack={() => router.back()} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -340,6 +446,48 @@ export default function OwnerReportsScreen() {
           />
         }
       >
+        {salesError && profitError ? (
+          <Text style={styles.globalError}>
+            {salesError || profitError || 'Could not load reports.'}
+          </Text>
+        ) : null}
+
+        <View style={styles.heroCard}>
+          <View style={styles.heroCircleOne} />
+          <View style={styles.heroCircleTwo} />
+          <Text style={styles.heroLabel}>TOTAL SALES</Text>
+          <Text style={styles.heroBalance} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
+            {formatTZS(salesMetrics.totalSales)}
+          </Text>
+          <View style={styles.heroStatsRow}>
+            <View style={styles.heroStat}>
+              <MaterialIcons name="shopping-bag" size={15} color="rgba(255,255,255,0.9)" />
+              <Text style={styles.heroStatValue}>{salesMetrics.ordersCount}</Text>
+              <Text style={styles.heroStatLabel}>Orders</Text>
+            </View>
+            <View style={styles.heroStatDivider} />
+            <View style={styles.heroStat}>
+              <MaterialIcons name="local-offer" size={15} color="rgba(255,255,255,0.9)" />
+              <Text style={styles.heroStatValue}>{salesMetrics.itemsSold}</Text>
+              <Text style={styles.heroStatLabel}>Items Sold</Text>
+            </View>
+            <View style={styles.heroStatDivider} />
+            <View style={styles.heroStat}>
+              <MaterialIcons name="compare-arrows" size={15} color="rgba(255,255,255,0.9)" />
+              <Text style={styles.heroStatValue}>{formatMoneyCompact(salesMetrics.avgOrder)}</Text>
+              <Text style={styles.heroStatLabel}>Avg Order</Text>
+            </View>
+          </View>
+          <View style={styles.heroDivider} />
+          {range === 'custom' && appliedCustom ? (
+            <Text style={styles.heroDate}>{appliedCustom.from} → {appliedCustom.to}</Text>
+          ) : (
+            <Text style={styles.heroDate}>
+              {RANGES.find((r) => r.key === range)?.label ?? 'Period'} overview
+            </Text>
+          )}
+        </View>
+
         <View style={styles.chipRow}>
           {RANGES.map(({ key, label }) => {
             const isActive = range === key;
@@ -378,70 +526,114 @@ export default function OwnerReportsScreen() {
           </Card>
         ) : null}
 
-        <Card style={styles.reportCard}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardIcon}>💰</Text>
-            <Text style={styles.cardTitle}>Sales Summary</Text>
-          </View>
-          {salesError ? (
-            <Text style={styles.sectionError}>{salesError}</Text>
-          ) : (
-            <>
-              <View style={styles.metricGrid}>
-                <Metric
-                  label="Total Sales"
-                  value={formatTZS(salesMetrics.totalSales)}
-                  color={COLORS.primaryDark}
-                />
-                <Metric label="Orders" value={String(salesMetrics.ordersCount)} />
-                <Metric label="Avg Order Value" value={formatTZS(salesMetrics.avgOrder)} />
-                <Metric label="Items Sold" value={String(salesMetrics.itemsSold)} />
+        {!salesError ? (
+          <Card style={styles.reportCard}>
+            <View style={styles.cardHeader}>
+              <View style={[styles.cardIconCircle, { backgroundColor: COLORS.teal[50] }]}>
+                <MaterialIcons name="insights" size={18} color={COLORS.primaryDark} />
               </View>
-              {range === 'custom' && appliedCustom ? (
-                <Text style={styles.rangeNote}>
-                  {appliedCustom.from} → {appliedCustom.to}
-                </Text>
-              ) : null}
-            </>
-          )}
-        </Card>
-
-        <Card style={styles.reportCard}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardIcon}>📊</Text>
-            <Text style={styles.cardTitle}>Profit &amp; Loss</Text>
-          </View>
-          {profitError ? (
-            <Text style={styles.sectionError}>{profitError}</Text>
-          ) : (
-            <View style={styles.metricGrid}>
-              <Metric label="Revenue" value={formatTZS(profitMetrics.revenue)} />
-              <Metric label="Cost of Goods" value={formatTZS(profitMetrics.cost)} />
-              <Metric
-                label="Gross Profit"
-                value={formatTZS(profitMetrics.grossProfit)}
-                color={COLORS.success}
-              />
-              <Metric
-                label="Margin"
-                value={formatPercent(profitMetrics.margin)}
-                color={COLORS.success}
-              />
+              <View>
+                <Text style={styles.cardTitle}>Sales Breakdown</Text>
+                <Text style={styles.cardSubtitle}>Where your sales came from</Text>
+              </View>
             </View>
-          )}
-        </Card>
+            <View style={styles.breakdownRow}>
+              <View style={styles.breakdownItem}>
+                <View style={[styles.breakdownDot, { backgroundColor: COLORS.primaryDark }]} />
+                <Text style={styles.breakdownLabel}>Gross Profit</Text>
+                <Text style={[styles.breakdownValue, { color: COLORS.primaryDark }]}>
+                  {formatTZS(profitMetrics.grossProfit)}
+                </Text>
+              </View>
+              <View style={styles.breakdownItem}>
+                <View style={[styles.breakdownDot, { backgroundColor: COLORS.gray[300] }]} />
+                <Text style={styles.breakdownLabel}>Cost of Goods</Text>
+                <Text style={[styles.breakdownValue, { color: COLORS.text }]}>
+                  {formatTZS(profitMetrics.cost)}
+                </Text>
+              </View>
+            </View>
+            {profitError ? (
+              <Text style={styles.sectionError}>{profitError}</Text>
+            ) : (
+              <CompositionBar
+                total={profitMetrics.revenue}
+                cost={profitMetrics.cost}
+                profit={profitMetrics.grossProfit}
+              />
+            )}
+          </Card>
+        ) : (
+          <Card style={styles.reportCard}>
+            <View style={styles.cardHeader}>
+              <View style={[styles.cardIconCircle, { backgroundColor: COLORS.teal[50] }]}>
+                <MaterialIcons name="payments" size={18} color={COLORS.primaryDark} />
+              </View>
+              <Text style={styles.cardTitle}>Sales Summary</Text>
+            </View>
+            <Text style={styles.sectionError}>{salesError}</Text>
+          </Card>
+        )}
+
+        {!profitError ? (
+          <Card style={styles.reportCard}>
+            <View style={styles.cardHeader}>
+              <View style={[styles.cardIconCircle, { backgroundColor: COLORS.teal[50] }]}>
+                <MaterialIcons name="donut-large" size={18} color={COLORS.primaryDark} />
+              </View>
+              <View>
+                <Text style={styles.cardTitle}>Profit Margin</Text>
+                <Text style={styles.cardSubtitle}>Revenue vs profit efficiency</Text>
+              </View>
+            </View>
+            <View style={styles.donutWrap}>
+              <ProfitDonut percent={profitMetrics.margin} />
+              <View style={styles.donutLegend}>
+                <View style={styles.donutLegendRow}>
+                  <Text style={styles.donutLegendLabel}>Revenue</Text>
+                  <Text style={styles.donutLegendValue}>{formatTZS(profitMetrics.revenue)}</Text>
+                </View>
+                <View style={styles.donutLegendRow}>
+                  <Text style={styles.donutLegendLabel}>Cost of Goods</Text>
+                  <Text style={styles.donutLegendValue}>{formatTZS(profitMetrics.cost)}</Text>
+                </View>
+                <View style={styles.donutLegendRow}>
+                  <Text style={styles.donutLegendLabel}>Gross Profit</Text>
+                  <Text style={[styles.donutLegendValue, { color: COLORS.success }]}>
+                    {formatTZS(profitMetrics.grossProfit)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </Card>
+        ) : (
+          <Card style={styles.reportCard}>
+            <View style={styles.cardHeader}>
+              <View style={[styles.cardIconCircle, { backgroundColor: COLORS.teal[50] }]}>
+                <MaterialIcons name="donut-large" size={18} color={COLORS.primaryDark} />
+              </View>
+              <Text style={styles.cardTitle}>Profit &amp; Loss</Text>
+            </View>
+            <Text style={styles.sectionError}>{profitError}</Text>
+          </Card>
+        )}
 
         <Card style={styles.reportCard}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardIcon}>🏆</Text>
-            <Text style={styles.cardTitle}>Top Products</Text>
+            <View style={[styles.cardIconCircle, { backgroundColor: COLORS.teal[50] }]}>
+              <MaterialIcons name="emoji-events" size={18} color={COLORS.primaryDark} />
+            </View>
+            <View>
+              <Text style={styles.cardTitle}>Top Products</Text>
+              <Text style={styles.cardSubtitle}>Best sellers this period</Text>
+            </View>
           </View>
           {topProducts.length === 0 ? (
             <Text style={styles.emptyProducts}>
               No product sales recorded for this period yet.
             </Text>
           ) : (
-            topProducts.slice(0, 10).map((item, index) => (
+            topProducts.slice(0, 6).map((item, index) => (
               <View
                 key={
                   typeof item.product_id === 'number' || typeof item.id === 'number'
@@ -450,7 +642,7 @@ export default function OwnerReportsScreen() {
                 }
                 style={[
                   styles.productRow,
-                  index < Math.min(topProducts.length, 10) - 1 && styles.productDivider,
+                  index < Math.min(topProducts.length, 6) - 1 && styles.productDivider,
                 ]}
               >
                 <View style={[styles.rankBadge, index < 3 && styles.rankBadgeTop]}>
@@ -487,6 +679,153 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: SPACING.sm,
+    marginTop: SPACING.md,
+  },
+  heroCard: {
+    marginTop: SPACING.md,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.primaryDark,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.lg,
+    overflow: 'hidden',
+    ...SHADOWS.md,
+  },
+  heroCircleOne: {
+    position: 'absolute',
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    right: -50,
+    top: -70,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+  },
+  heroCircleTwo: {
+    position: 'absolute',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    right: 50,
+    bottom: -40,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  heroLabel: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.bold,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+  },
+  heroBalance: {
+    color: COLORS.white,
+    fontSize: 34,
+    fontFamily: FONTS.bold,
+    marginTop: SPACING.xs,
+  },
+  heroStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.lg,
+  },
+  heroStat: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+    flexWrap: 'wrap',
+  },
+  heroStatValue: {
+    color: COLORS.white,
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.bold,
+  },
+  heroStatLabel: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.medium,
+    width: '100%',
+    textAlign: 'center',
+  },
+  heroStatDivider: {
+    width: StyleSheet.hairlineWidth,
+    height: 34,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+  },
+  heroDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    marginVertical: SPACING.md,
+  },
+  heroDate: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+  },
+  breakdownRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
+  breakdownItem: {
+    flex: 1,
+  },
+  breakdownDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginBottom: SPACING.xs,
+  },
+  breakdownLabel: {
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.semibold,
+    color: COLORS.textLight,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  breakdownValue: {
+    fontSize: FONTS.size.lg,
+    fontFamily: FONTS.bold,
+    marginTop: 2,
+  },
+  compositionTrack: {
+    flexDirection: 'row',
+    height: 12,
+    borderRadius: 6,
+    overflow: 'hidden',
+    backgroundColor: COLORS.gray[100],
+    marginTop: SPACING.md + 2,
+  },
+  compositionFill: {
+    height: 12,
+  },
+  donutWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.lg,
+    marginTop: SPACING.sm,
+  },
+  donutValue: {
+    fontSize: FONTS.size.lg,
+    fontFamily: FONTS.bold,
+    color: COLORS.text,
+  },
+  donutLegend: {
+    flex: 1,
+    gap: SPACING.sm,
+  },
+  donutLegendRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  donutLegendLabel: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+    color: COLORS.textLight,
+  },
+  donutLegendValue: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.bold,
+    color: COLORS.text,
   },
   chip: {
     borderRadius: RADIUS.full,
@@ -502,7 +841,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.gray[600],
   },
   chipTextActive: {
@@ -532,45 +871,33 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     marginBottom: SPACING.md,
   },
-  cardIcon: {
-    fontSize: FONTS.size.xl - 2,
+  cardIconCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   cardTitle: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
-  metricGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    rowGap: SPACING.md,
-  },
-  metric: {
-    width: '50%',
-    paddingRight: SPACING.sm,
-  },
-  metricLabel: {
-    fontSize: FONTS.size.xs,
-    fontWeight: '600',
+  cardSubtitle: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
     color: COLORS.textLight,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 2,
+    marginTop: 1,
   },
-  metricValue: {
-    fontSize: FONTS.size.lg,
-    fontWeight: '800',
-    color: COLORS.text,
+  globalError: {
+    color: COLORS.red[700],
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+    marginTop: SPACING.md,
   },
   sectionError: {
     fontSize: FONTS.size.sm,
     color: COLORS.red[700],
-  },
-  rangeNote: {
-    marginTop: SPACING.md,
-    fontSize: FONTS.size.sm,
-    fontWeight: '500',
-    color: COLORS.textLight,
   },
   emptyProducts: {
     fontSize: FONTS.size.sm,
@@ -590,7 +917,7 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: COLORS.gray[100],
+    backgroundColor: COLORS.teal[50],
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -599,8 +926,8 @@ const styles = StyleSheet.create({
   },
   rankText: {
     fontSize: FONTS.size.sm,
-    fontWeight: '700',
-    color: COLORS.gray[600],
+    fontFamily: FONTS.bold,
+    color: COLORS.primaryDark,
   },
   rankTextTop: {
     color: COLORS.primaryDark,
@@ -610,7 +937,7 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   productQty: {

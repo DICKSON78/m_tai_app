@@ -1,17 +1,21 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
 import api from '../../src/api/client';
 import { Delivery, Order } from '../../src/api/types';
 import Avatar from '../../src/components/Avatar';
 import Badge from '../../src/components/Badge';
+import Button from '../../src/components/Button';
 import Card from '../../src/components/Card';
 import EmptyState from '../../src/components/EmptyState';
 import Header from '../../src/components/Header';
 import LoadingScreen from '../../src/components/LoadingScreen';
 import PriceTag from '../../src/components/PriceTag';
-import { COLORS, FONTS, SPACING } from '../../src/constants/theme';
+import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
+import { saveReceiptPdf, PdfReceipt } from '../../src/utils/pdf';
+import * as Print from 'expo-print';
 
 interface OrderItem {
   id: number;
@@ -31,6 +35,38 @@ interface OrderDetail extends Omit<Order, 'delivery'> {
   subtotal?: number;
   delivery_fee?: number;
   delivery?: Delivery;
+}
+
+interface ReceiptItem {
+  name: string;
+  quantity: number;
+  price: string;
+  total: string;
+}
+
+interface ReceiptData {
+  business?: { name?: string; code?: string; address?: string; phone?: string };
+  order?: {
+    transaction_code?: string;
+    date?: string;
+    status?: string;
+    payment_method?: string;
+  };
+  items?: ReceiptItem[];
+  subtotal?: string;
+  discount?: string;
+  tax?: string;
+  total?: string;
+  amount_paid?: string;
+  change?: string;
+  footer?: string;
+}
+
+function receiptLine(label: string, value?: string | number): string {
+  const v = value ?? '';
+  if (v === '' || v === null || v === undefined) return '';
+  const text = String(v);
+  return `${label}  ${' '.repeat(Math.max(1, 28 - label.length - text.length))}${text}`;
 }
 
 const TIMELINE_STEPS = [
@@ -123,6 +159,39 @@ export default function OrderDetailScreen() {
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+
+  const [receiptVisible, setReceiptVisible] = useState(false);
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
+  const [receiptLoading, setReceiptLoading] = useState(false);
+  const [receiptError, setReceiptError] = useState<string | null>(null);
+
+  const fetchReceipt = useCallback(async () => {
+    if (!orderId) return;
+    setReceiptLoading(true);
+    setReceiptError(null);
+    try {
+      const res = await api.get(`/orders/${orderId}/receipt`);
+      const body = res.data as { receipt?: ReceiptData } | null;
+      setReceipt(body?.receipt ?? null);
+    } catch (err: any) {
+      setReceiptError(
+        err?.response?.status === 403
+          ? 'You do not have access to this receipt.'
+          : err?.response?.data?.message ||
+              err?.message ||
+              'Could not load the receipt.'
+      );
+      setReceipt(null);
+    } finally {
+      setReceiptLoading(false);
+    }
+  }, [orderId]);
+
+  const openReceipt = useCallback(() => {
+    setReceiptVisible(true);
+    fetchReceipt();
+  }, [fetchReceipt]);
 
   const fetchOrder = useCallback(async () => {
     if (!orderId) {
@@ -153,6 +222,39 @@ export default function OrderDetailScreen() {
     fetchOrder();
   }, [fetchOrder]);
 
+  const handleCancelOrder = useCallback(async () => {
+    if (!order || cancelling) return;
+    Alert.alert(
+      'Cancel order?',
+      `This will cancel order #${order.order_number}. This cannot be undone.`,
+      [
+        { text: 'Keep Order', style: 'cancel' },
+        {
+          text: 'Cancel Order',
+          style: 'destructive',
+          onPress: async () => {
+            setCancelling(true);
+            try {
+              await api.post(`/customer/orders/${order.id}/cancel`);
+              await fetchOrder();
+              Alert.alert(
+                'Order cancelled',
+                `Order #${order.order_number} has been cancelled.`
+              );
+            } catch (err: any) {
+              Alert.alert(
+                'Could not cancel order',
+                err?.response?.data?.message || err?.message || 'Please try again.'
+              );
+            } finally {
+              setCancelling(false);
+            }
+          },
+        },
+      ]
+    );
+  }, [order, cancelling, fetchOrder]);
+
   const statusMeta = useMemo(() => {
     const raw = (order?.status || '').toLowerCase();
     const cancelled = CANCELLED_STATUSES.includes(raw);
@@ -170,6 +272,8 @@ export default function OrderDetailScreen() {
   }, [order?.status]);
 
   const currentStep = useMemo(() => getStepIndex(order?.status || ''), [order?.status]);
+
+  const canCancel = !statusMeta.cancelled && currentStep <= 0;
 
   const items = useMemo(() => order?.items ?? [], [order]);
 
@@ -288,11 +392,29 @@ export default function OrderDetailScreen() {
                           <Text style={styles.timelineHint}>{step.hint}</Text>
                         ) : null}
                       </View>
-                    </View>
-                  );
+</View>
+                );
                 })}
               </View>
             )}
+            {canCancel ? (
+              <Button
+                title="Cancel Order"
+                variant="danger"
+                size="md"
+                loading={cancelling}
+                onPress={handleCancelOrder}
+              />
+            ) : null}
+
+            <View style={styles.summaryActions}>
+              <Button
+                title="View Receipt"
+                variant="outline"
+                size="md"
+                onPress={openReceipt}
+              />
+            </View>
           </Card>
 
           {deliveryMeta && order.delivery ? (
@@ -406,8 +528,151 @@ export default function OrderDetailScreen() {
             </Card>
           ) : null}
         </ScrollView>
+
+        <ReceiptModal
+          visible={receiptVisible}
+          loading={receiptLoading}
+          error={receiptError}
+          receipt={receipt}
+          onClose={() => setReceiptVisible(false)}
+          onRetry={fetchReceipt}
+        />
       </SafeAreaView>
     </View>
+  );
+}
+
+function ReceiptModal({
+  visible,
+  loading,
+  error,
+  receipt,
+  onClose,
+  onRetry,
+}: {
+  visible: boolean;
+  loading: boolean;
+  error: string | null;
+  receipt: ReceiptData | null;
+  onClose: () => void;
+  onRetry: () => void;
+}) {
+  const renderReceiptBody = () => {
+    if (loading) {
+      return <Text style={styles.receiptStatus}>Loading receipt…</Text>;
+    }
+    if (error) {
+      return (
+        <View style={styles.receiptErrorWrap}>
+          <Text style={styles.receiptStatus}>{error}</Text>
+          <Button title="Retry" variant="outline" size="sm" onPress={onRetry} />
+        </View>
+      );
+    }
+    if (!receipt) {
+      return (
+        <Text style={styles.receiptStatus}>Receipt details are unavailable.</Text>
+      );
+    }
+
+    const business = receipt.business ?? {};
+    const orderMeta = receipt.order ?? {};
+    const items = receipt.items ?? [];
+
+    const lines: string[] = [];
+    if (orderMeta.transaction_code) lines.push(receiptLine('Transaction', orderMeta.transaction_code));
+    if (orderMeta.date) lines.push(receiptLine('Date', orderMeta.date));
+    if (orderMeta.payment_method) lines.push(receiptLine('Payment', orderMeta.payment_method));
+
+    return (
+      <View style={styles.receiptBody}>
+        {business.name || business.code || business.phone ? (
+          <View style={styles.receiptBusiness}>
+            {business.name ? <Text style={styles.receiptBusinessName}>{business.name}</Text> : null}
+            {business.code ? <Text style={styles.receiptBusinessCode}>{business.code}</Text> : null}
+            {business.phone ? <Text style={styles.receiptMono}>{business.phone}</Text> : null}
+          </View>
+        ) : null}
+
+        {lines.length > 0 ? (
+          <View style={styles.receiptMetaBlock}>
+            {lines.map((line) => (
+              <Text key={line} style={styles.receiptMono}>
+                {line}
+              </Text>
+            ))}
+          </View>
+        ) : null}
+
+        <View style={styles.receiptDivider} />
+
+        {items.length > 0 ? (
+          <View style={styles.receiptItems}>
+            {items.map((item, index) => (
+              <View key={`${item.name}-${index}`} style={styles.receiptItemRow}>
+                <View style={styles.receiptItemInfo}>
+                  <Text style={styles.receiptMono} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.receiptItemQty}>
+                    {receiptLine('Qty', item.quantity)}
+                  </Text>
+                </View>
+                <Text style={styles.receiptMono}>{receiptLine('Price', item.price)}</Text>
+                <Text style={styles.receiptMono}>{receiptLine('Total', item.total)}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        <View style={styles.receiptDivider} />
+
+        <View style={styles.receiptTotals}>
+          <Text style={styles.receiptMono}>{receiptLine('Subtotal', receipt.subtotal)}</Text>
+          {receipt.discount && Number(receipt.discount) > 0 ? (
+            <Text style={styles.receiptMono}>
+              {receiptLine('Discount', `-${receipt.discount}`)}
+            </Text>
+          ) : null}
+          <Text style={styles.receiptMono}>{receiptLine('Tax', receipt.tax)}</Text>
+          <Text style={styles.receiptMono}>
+            {receiptLine('TOTAL', receipt.total)}
+          </Text>
+          <Text style={styles.receiptMono}>{receiptLine('Paid', receipt.amount_paid)}</Text>
+          <Text style={styles.receiptMono}>{receiptLine('Change', receipt.change)}</Text>
+        </View>
+
+        {receipt.footer ? (
+          <View style={styles.receiptFooter}>
+            <Text style={styles.receiptFooterText}>{receipt.footer}</Text>
+          </View>
+        ) : null}
+      </View>
+    );
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <View style={styles.receiptBackdrop}>
+        <TouchableOpacity style={styles.receiptBackdropTouch} activeOpacity={1} onPress={onClose} />
+        <View style={styles.receiptCard}>
+          <View style={styles.receiptCardHeader}>
+            <Text style={styles.receiptCardTitle}>Receipt</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              {receipt && !loading ? (
+                <TouchableOpacity onPress={() => saveReceiptPdf(receipt as PdfReceipt).catch(() => Alert.alert('Error', 'Could not generate PDF.'))} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <MaterialIcons name="picture-as-pdf" size={22} color="#00D4AA" />
+                </TouchableOpacity>
+              ) : null}
+              <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <MaterialIcons name="close" size={22} color={COLORS.gray[400]} />
+              </TouchableOpacity>
+            </View>
+          </View>
+          {renderReceiptBody()}
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -431,6 +696,9 @@ const styles = StyleSheet.create({
   summaryCard: {
     gap: SPACING.md,
   },
+  summaryActions: {
+    gap: SPACING.sm,
+  },
   summaryHeaderRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -439,7 +707,7 @@ const styles = StyleSheet.create({
   },
   orderNumber: {
     fontSize: FONTS.size.lg,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   orderDate: {
@@ -486,7 +754,7 @@ const styles = StyleSheet.create({
   },
   timelineCheck: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.primaryDark,
     marginTop: -1,
   },
@@ -508,7 +776,7 @@ const styles = StyleSheet.create({
   },
   timelineLabel: {
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.gray[400],
   },
   timelineLabelDone: {
@@ -516,7 +784,7 @@ const styles = StyleSheet.create({
   },
   timelineLabelActive: {
     color: COLORS.primaryDark,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
   },
   timelineHint: {
     fontSize: FONTS.size.sm,
@@ -528,7 +796,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   itemsHeaderRow: {
@@ -559,7 +827,7 @@ const styles = StyleSheet.create({
   },
   itemThumbInitial: {
     fontSize: FONTS.size.lg,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     color: COLORS.primaryDark,
   },
   itemInfo: {
@@ -568,7 +836,7 @@ const styles = StyleSheet.create({
   },
   itemName: {
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   itemQty: {
@@ -592,12 +860,12 @@ const styles = StyleSheet.create({
   },
   totalValue: {
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   grandTotalLabel: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   deliveryBadge: {
@@ -614,7 +882,7 @@ const styles = StyleSheet.create({
   },
   transporterName: {
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   transporterRole: {
@@ -623,7 +891,7 @@ const styles = StyleSheet.create({
   },
   transporterPhone: {
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.primaryDark,
   },
   addressBlock: {
@@ -631,7 +899,7 @@ const styles = StyleSheet.create({
   },
   addressLabel: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     color: COLORS.gray[400],
@@ -652,7 +920,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.textLight,
     minWidth: 72,
   },
@@ -660,12 +928,119 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'right',
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   infoValueFlexible: {
     textAlign: undefined,
     flex: 1,
     textAlignVertical: 'top',
+  },
+  receiptBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(15,23,42,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  receiptBackdropTouch: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  receiptCard: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg,
+    gap: SPACING.md,
+    ...SHADOWS.lg,
+  },
+  receiptCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  receiptCardTitle: {
+    fontSize: FONTS.size.lg,
+    fontFamily: FONTS.bold,
+    color: COLORS.text,
+  },
+  receiptStatus: {
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.regular,
+    color: COLORS.textLight,
+    textAlign: 'center',
+  },
+  receiptErrorWrap: {
+    gap: SPACING.sm,
+    alignItems: 'center',
+  },
+  receiptBody: {
+    gap: SPACING.xs,
+  },
+  receiptBusiness: {
+    alignItems: 'center',
+    gap: 2,
+    marginBottom: SPACING.xs,
+  },
+  receiptBusinessName: {
+    fontSize: FONTS.size.lg,
+    fontFamily: FONTS.bold,
+    color: COLORS.text,
+    textAlign: 'center',
+  },
+  receiptBusinessCode: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.semibold,
+    color: COLORS.textLight,
+    textAlign: 'center',
+  },
+  receiptMetaBlock: {
+    gap: 2,
+  },
+  receiptDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: COLORS.gray[300],
+    marginVertical: SPACING.xs,
+  },
+  receiptMono: {
+    fontFamily: Platform.select({ android: 'monospace', default: 'Courier' }),
+    fontSize: FONTS.size.sm,
+    color: COLORS.text,
+  },
+  receiptItems: {
+    gap: SPACING.xs + 2,
+  },
+  receiptItemRow: {
+    gap: 2,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: COLORS.gray[100],
+    paddingBottom: SPACING.xs + 2,
+  },
+  receiptItemInfo: {
+    gap: 1,
+  },
+  receiptItemQty: {
+    fontSize: FONTS.size.sm,
+  },
+  receiptTotals: {
+    gap: 2,
+  },
+  receiptFooter: {
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.gray[300],
+    alignItems: 'center',
+  },
+  receiptFooterText: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+    color: COLORS.textLight,
+    textAlign: 'center',
   },
 });

@@ -27,3 +27,9 @@ Thumbs.db
 Phermex/
 mtai-mobile/node_modules/
 mtai-mobile/.expo/
+
+# Build artifacts / runtime caches
+*.apk
+/storage/fonts
+/storage/dompdf
+/mtai-mobile-web

@@ -9,14 +9,15 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import api from '../../src/api/client';
-import Badge from '../../src/components/Badge';
-import Card from '../../src/components/Card';
-import EmptyState from '../../src/components/EmptyState';
-import Header from '../../src/components/Header';
-import SearchBar from '../../src/components/SearchBar';
-import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
+import api from '../../../../src/api/client';
+import Badge from '../../../../src/components/Badge';
+import Card from '../../../../src/components/Card';
+import EmptyState from '../../../../src/components/EmptyState';
+import Header from '../../../../src/components/Header';
+import SearchBar from '../../../../src/components/SearchBar';
+import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../../../src/constants/theme';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -74,7 +75,7 @@ function getStatusMeta(status: string): { label: string; bg: string; text: strin
       return { label: 'Active', bg: COLORS.green[100], text: COLORS.green[700] };
     case 'on_leave':
     case 'on leave':
-      return { label: 'On Leave', bg: '#FEF3C7', text: '#B45309' };
+      return { label: 'On Leave', bg: 'rgba(245, 158, 11, 0.14)', text: '#92400E' };
     case 'inactive':
     case 'terminated':
       return { label: 'Inactive', bg: COLORS.red[100], text: COLORS.red[700] };
@@ -150,11 +151,7 @@ export default function OwnerHRScreen() {
   }, [employees]);
 
   const goToAttendance = useCallback(() => {
-    router.push('/(owner)/hr/attendance');
-  }, []);
-
-  const goToPayroll = useCallback(() => {
-    router.push('/(owner)/hr/payroll');
+    router.push('/(employee)/attendance');
   }, []);
 
   const renderItem = useCallback(
@@ -204,7 +201,7 @@ export default function OwnerHRScreen() {
     if (employees.length === 0) {
       return (
         <EmptyState
-          icon={<Text style={styles.emptyIcon}>👥</Text>}
+          icon={<MaterialIcons name="people" size={32} color={COLORS.gray[400]} />}
           title="No employees"
           subtitle="Employee records will appear here once added."
           style={styles.empty}
@@ -213,7 +210,7 @@ export default function OwnerHRScreen() {
     }
     return (
       <EmptyState
-        icon={<Text style={styles.emptyIcon}>🔍</Text>}
+        icon={<MaterialIcons name="search" size={32} color={COLORS.gray[400]} />}
         title="No matches"
         subtitle={`Nothing found for "${searchText.trim()}". Try a different name or department.`}
         actionTitle="Clear Search"
@@ -226,7 +223,7 @@ export default function OwnerHRScreen() {
   if (initialLoading) {
     return (
       <SafeAreaView style={styles.safe} edges={['top']}>
-        <Header title="HR" />
+        <Header title="HR" onBack={() => router.back()} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.loadingText}>Loading employees…</Text>
@@ -237,7 +234,7 @@ export default function OwnerHRScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header title="HR" subtitle={`${employees.length} employee${employees.length === 1 ? '' : 's'}`} />
+      <Header title="HR" subtitle={`${employees.length} employee${employees.length === 1 ? '' : 's'}`} onBack={() => router.back()} />
       <FlatList
         data={filtered}
         keyExtractor={(item) => String(item.id)}
@@ -261,19 +258,15 @@ export default function OwnerHRScreen() {
                 <Text style={styles.statLabel}>Active</Text>
               </Card>
               <Card style={styles.statCard}>
-                <Text style={[styles.statValue, { color: '#B45309' }]}>{stats.onLeave}</Text>
+                <Text style={[styles.statValue, { color: '#92400E' }]}>{stats.onLeave}</Text>
                 <Text style={styles.statLabel}>On Leave</Text>
               </Card>
             </View>
 
             <View style={styles.actionsRow}>
               <TouchableOpacity style={styles.actionButton} activeOpacity={0.8} onPress={goToAttendance}>
-                <Text style={styles.actionIcon}>📅</Text>
+                <MaterialIcons name="event" size={20} color={COLORS.white} />
                 <Text style={styles.actionLabel}>View Attendance</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton} activeOpacity={0.8} onPress={goToPayroll}>
-                <Text style={styles.actionIcon}>💵</Text>
-                <Text style={styles.actionLabel}>View Payroll</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -327,12 +320,12 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: FONTS.size.xl,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   statLabel: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.textLight,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -353,12 +346,9 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     ...SHADOWS.sm,
   },
-  actionIcon: {
-    fontSize: FONTS.size.lg,
-  },
   actionLabel: {
     fontSize: FONTS.size.sm,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.white,
   },
   listContent: {
@@ -378,7 +368,7 @@ const styles = StyleSheet.create({
   employeeName: {
     flexShrink: 1,
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   employeePosition: {
@@ -396,14 +386,11 @@ const styles = StyleSheet.create({
   },
   deptText: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.primaryDark,
   },
   empty: {
     flex: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
 });

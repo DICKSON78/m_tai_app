@@ -7,10 +7,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AlertModal from '../../src/components/AlertModal';
 import Input from '../../src/components/Input';
 import Button from '../../src/components/Button';
 import { COLORS, SPACING, FONTS, RADIUS } from '../../src/constants/theme';
@@ -20,25 +20,33 @@ export default function ForgotPasswordScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [alert, setAlert] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
 
   const handleSubmit = async () => {
     if (!email.trim()) {
-      Alert.alert('Error', 'Please enter your email address');
+      setAlert({ type: 'error', message: 'Please enter your email address' });
       return;
     }
     setSubmitting(true);
     try {
       await api.post('/forgot-password', { email: email.trim() });
-      Alert.alert('Sent', 'Check your email for password reset instructions.', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
+      setAlert({
+        type: 'success',
+        message: 'Check your email for password reset instructions.',
+      });
     } catch {
-      Alert.alert('Sent', 'If an account exists with that email, you will receive reset instructions.', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
+      setAlert({
+        type: 'success',
+        message: 'If an account exists with that email, you will receive reset instructions.',
+      });
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const confirmSent = () => {
+    setAlert(null);
+    router.back();
   };
 
   return (
@@ -79,6 +87,15 @@ export default function ForgotPasswordScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <AlertModal
+        visible={alert !== null}
+        type={alert?.type === 'success' ? 'success' : 'error'}
+        title={alert?.type === 'success' ? 'Email Sent' : 'Error'}
+        message={alert?.message ?? ''}
+        confirmText="OK"
+        onConfirm={confirmSent}
+      />
     </SafeAreaView>
   );
 }
@@ -89,10 +106,20 @@ const styles = StyleSheet.create({
   scrollContent: { flexGrow: 1 },
   content: { flex: 1, padding: SPACING.lg, justifyContent: 'center' },
   backButton: { marginBottom: SPACING.xl },
-  backText: { color: COLORS.primary, fontSize: FONTS.size.sm },
+  backText: { color: COLORS.primary, fontSize: FONTS.size.sm, fontFamily: FONTS.semibold },
   headerSection: { marginBottom: SPACING.xl },
-  title: { fontSize: FONTS.size.xl, fontWeight: '700', color: COLORS.text, marginBottom: SPACING.sm },
-  subtitle: { fontSize: FONTS.size.sm, color: COLORS.textLight, lineHeight: 20 },
+  title: {
+    fontSize: FONTS.size.xl,
+    fontFamily: FONTS.bold,
+    color: COLORS.text,
+    marginBottom: SPACING.sm,
+  },
+  subtitle: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+    color: COLORS.textLight,
+    lineHeight: 20,
+  },
   inputIcon: { fontSize: 16 },
   submitButton: { marginTop: SPACING.lg },
 });

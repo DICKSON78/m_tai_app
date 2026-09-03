@@ -10,6 +10,9 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
+import * as LocalAuthentication from 'expo-local-authentication';
 import api from '../../src/api/client';
 import Badge from '../../src/components/Badge';
 import Card from '../../src/components/Card';
@@ -141,7 +144,7 @@ export default function AttendanceScreen() {
     const requestId = requestSeqRef.current;
 
     try {
-      const res = await api.get('/owner/hr/attendance');
+      const res = await api.get('/employee/attendance');
       if (requestId !== requestSeqRef.current) return;
 
       const normalized = normalizeAttendancePayload(res.data);
@@ -196,11 +199,62 @@ export default function AttendanceScreen() {
 
     setSubmitting(true);
     try {
-      await api.post('/owner/hr/attendance', {
+      let latitude: number | null = null;
+      let longitude: number | null = null;
+      let locationLabel: string | null = null;
+
+      try {
+        const { granted } = await Location.requestForegroundPermissionsAsync();
+        if (granted) {
+          const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+          latitude = pos.coords.latitude;
+          longitude = pos.coords.longitude;
+
+          try {
+            const geocode = await Location.reverseGeocodeAsync(pos.coords);
+            if (geocode && geocode.length > 0) {
+              const g = geocode[0];
+              locationLabel =
+                [g.street, g.city, g.region, g.country].filter(Boolean).join(', ') || null;
+            }
+          } catch {
+            locationLabel = null;
+          }
+        }
+      } catch {
+        latitude = null;
+        longitude = null;
+        locationLabel = null;
+      }
+
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const enrolled = await LocalAuthentication.isEnrolledAsync();
+      if (hasHardware && enrolled) {
+        const result = await LocalAuthentication.authenticateAsync({
+          promptMessage: isClockedIn ? 'Confirm with fingerprint to clock out' : 'Confirm with fingerprint to clock in',
+          cancelLabel: 'Cancel',
+          fallbackLabel: 'Use passcode',
+          disableDeviceFallback: false,
+        });
+        if (!result.success) {
+          Alert.alert(
+            'Authentication Failed',
+            'Fingerprint verification did not complete. Your time was not recorded.'
+          );
+          return;
+        }
+      }
+
+      const payload: Record<string, unknown> = {
         action,
         type: isClockedIn ? 'out' : 'in',
         timestamp: new Date().toISOString(),
-      });
+      };
+      if (latitude != null) payload.latitude = latitude;
+      if (longitude != null) payload.longitude = longitude;
+      if (locationLabel) payload.location = locationLabel;
+
+      await api.post('/employee/attendance', payload);
       await fetchAttendance();
     } catch (err: any) {
       Alert.alert(
@@ -344,7 +398,11 @@ export default function AttendanceScreen() {
                 <ActivityIndicator color={COLORS.white} size="large" />
               ) : (
                 <>
-                  <Text style={styles.clockButtonIcon}>{isClockedIn ? '⏹' : '▶'}</Text>
+                  <MaterialIcons
+                    name={isClockedIn ? 'stop' : 'play-arrow'}
+                    size={28}
+                    color={COLORS.white}
+                  />
                   <Text style={styles.clockButtonText}>
                     {isClockedIn ? 'Clock Out' : 'Clock In'}
                   </Text>
@@ -361,8 +419,13 @@ export default function AttendanceScreen() {
             </TouchableOpacity>
 
             {error ? (
-              <TouchableOpacity onPress={() => fetchAttendance()} activeOpacity={0.8}>
-                <Text style={styles.errorBanner}>⚠ {error} — tap to retry</Text>
+              <TouchableOpacity
+                onPress={() => fetchAttendance()}
+                activeOpacity={0.8}
+                style={styles.errorRow}
+              >
+                <MaterialIcons name="warning" size={16} color={COLORS.red[700]} />
+                <Text style={styles.errorBanner}>{error} — tap to retry</Text>
               </TouchableOpacity>
             ) : null}
 
@@ -374,7 +437,7 @@ export default function AttendanceScreen() {
         }
         ListEmptyComponent={
           <EmptyState
-            icon={<Text style={styles.emptyIcon}>🕐</Text>}
+            icon={<MaterialIcons name="schedule" size={32} color={COLORS.gray[400]} />}
             title="No attendance yet"
             subtitle="Your recent shift history will show up here."
             style={styles.emptyState}
@@ -428,7 +491,7 @@ const styles = StyleSheet.create({
   },
   elapsed: {
     fontSize: FONTS.size.sm,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.primaryDark,
     fontVariant: ['tabular-nums'],
   },
@@ -446,7 +509,7 @@ const styles = StyleSheet.create({
   },
   todayLabel: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     color: COLORS.gray[400],
@@ -454,7 +517,7 @@ const styles = StyleSheet.create({
   },
   todayValue: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   todayDivider: {
@@ -475,25 +538,27 @@ const styles = StyleSheet.create({
   clockButtonOut: {
     backgroundColor: COLORS.red[500],
   },
-  clockButtonIcon: {
-    fontSize: FONTS.size.xxl,
-    lineHeight: FONTS.size.xxxl - 4,
-    color: COLORS.white,
-  },
   clockButtonText: {
     fontSize: FONTS.size.xl,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     letterSpacing: 0.5,
     color: COLORS.white,
   },
   clockButtonSub: {
     fontSize: FONTS.size.sm,
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
     color: 'rgba(255, 255, 255, 0.85)',
+  },
+  errorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 2,
   },
   errorBanner: {
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.error,
     textAlign: 'center',
     lineHeight: 19,
@@ -503,7 +568,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   sectionCaption: {
@@ -528,7 +593,7 @@ const styles = StyleSheet.create({
   historyDate: {
     flex: 1.3,
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   historyTime: {
@@ -541,7 +606,7 @@ const styles = StyleSheet.create({
     width: 64,
     textAlign: 'right',
     fontSize: FONTS.size.sm,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.primaryDark,
   },
   historyWorkedActive: {
@@ -553,8 +618,5 @@ const styles = StyleSheet.create({
   emptyState: {
     flexGrow: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
 });

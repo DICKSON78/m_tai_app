@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import api from '../../src/api/client';
 import Badge from '../../src/components/Badge';
@@ -187,7 +188,7 @@ export default function DeliveriesScreen() {
     }
     return (
       <EmptyState
-        icon={<Text style={styles.emptyIcon}>🚚</Text>}
+        icon={<MaterialIcons name="local-shipping" size={32} color={COLORS.gray[400]} />}
         title="No deliveries yet"
         subtitle="Your deliveries will appear here once an order is shipped."
         style={styles.empty}
@@ -248,7 +249,7 @@ const styles = StyleSheet.create({
   },
   orderNumber: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   addressRow: {
@@ -258,7 +259,7 @@ const styles = StyleSheet.create({
   },
   addressLabel: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     textTransform: 'uppercase',
     color: COLORS.gray[400],
   },
@@ -275,13 +276,13 @@ const styles = StyleSheet.create({
   },
   etaLabel: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     textTransform: 'uppercase',
     color: COLORS.gray[400],
   },
   etaValue: {
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
   footer: {
@@ -295,8 +296,5 @@ const styles = StyleSheet.create({
   empty: {
     flex: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
 });

@@ -10,7 +10,7 @@ export default function AdminFinancePage() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [period, setPeriod] = useState('this_month');
+    const [period, setPeriod] = useState('all_time');
 
     const fetchFinance = async () => {
         setLoading(true);
@@ -107,6 +107,12 @@ export default function AdminFinancePage() {
                         </div>
                     </div>
                     <div className="p-6">
+                        {(d.monthly_revenue || []).length === 0 ? (
+                            <div className="h-72 flex flex-col items-center justify-center text-gray-400">
+                                <TrendingUp size={40} className="mb-3 opacity-40" />
+                                <p className="text-sm">No revenue data for this period</p>
+                            </div>
+                        ) : (
                         <div className="h-72">
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={d.monthly_revenue || []}>
@@ -118,6 +124,7 @@ export default function AdminFinancePage() {
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
+                        )}
                     </div>
                 </div>
 
@@ -132,6 +139,12 @@ export default function AdminFinancePage() {
                         </div>
                     </div>
                     <div className="p-6">
+                        {(d.revenue_by_payment || []).length === 0 ? (
+                            <div className="h-72 flex flex-col items-center justify-center text-gray-400">
+                                <Banknote size={40} className="mb-3 opacity-40" />
+                                <p className="text-sm">No payment data for this period</p>
+                            </div>
+                        ) : (
                         <div className="h-72">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
@@ -142,6 +155,7 @@ export default function AdminFinancePage() {
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
+                        )}
                     </div>
                 </div>
             </div>

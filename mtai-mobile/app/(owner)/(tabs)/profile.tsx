@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Alert,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -9,46 +8,22 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import api from '../../src/api/client';
-import { User } from '../../src/api/types';
-import { useAuthStore } from '../../src/store/authStore';
-import Avatar from '../../src/components/Avatar';
-import Badge from '../../src/components/Badge';
-import Button from '../../src/components/Button';
-import Card from '../../src/components/Card';
-import Header from '../../src/components/Header';
-import LoadingScreen from '../../src/components/LoadingScreen';
-import { COLORS, FONTS, RADIUS, SPACING } from '../../src/constants/theme';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import api from '../../../src/api/client';
+import AlertModal from '../../../src/components/AlertModal';
+import Header from '../../../src/components/Header';
+import { useAuthStore } from '../../../src/store/authStore';
+import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../../src/constants/theme';
 
-type ExtendedUser = User & {
+type ExtendedUser = {
+  name?: string;
+  email?: string;
+  phone?: string;
+  avatar?: string;
   business_name?: string;
-  business?: { id?: number; name?: string } | null;
+  business?: { name?: string } | null;
 };
-
-interface StatTile {
-  icon: string;
-  value: string;
-  label: string;
-  color: string;
-}
-
-const QUICK_LINKS: { icon: string; label: string; path: string }[] = [
-  { icon: '📊', label: 'Dashboard', path: '/(owner)' },
-  { icon: '📦', label: 'Orders', path: '/(owner)/orders' },
-  { icon: '📈', label: 'Reports', path: '/(owner)/reports' },
-];
-
-function extractErrorMessage(error: unknown, fallback: string): string {
-  if (error && typeof error === 'object') {
-    const response = (error as { response?: { data?: unknown } }).response;
-    const data = response?.data;
-    if (typeof data === 'string' && data.length > 0) return data;
-    const message = (data as { message?: string } | undefined)?.message;
-    if (message) return message;
-  }
-  return fallback;
-}
 
 function normalizeObject(payload: unknown): Record<string, unknown> {
   if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
@@ -80,15 +55,29 @@ function pickString(source: Record<string, unknown>, keys: string[]): string | u
   return undefined;
 }
 
-function formatTZS(amount: number): string {
-  const rounded = Math.round(amount);
-  const withSeparators = rounded
+function formatCount(value: number): string {
+  return Math.round(value)
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  return `TZS ${withSeparators}`;
 }
 
+function formatMoneyCompact(amount: number): string {
+  const abs = Math.abs(amount);
+  const trimZeros = (value: number) => value.toFixed(1).replace(/\.0$/, '');
+  if (abs >= 1_000_000) return `TZS ${trimZeros(amount / 1_000_000)}M`;
+  if (abs >= 10_000) return `TZS ${trimZeros(amount / 1_000)}K`;
+  return `TZS ${formatCount(amount)}`;
+}
+
+type MenuItem = {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  subtitle?: string;
+  onPress: () => void;
+};
+
 export default function OwnerProfileScreen() {
+  const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
 
@@ -97,12 +86,12 @@ export default function OwnerProfileScreen() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const extendedUser = user as ExtendedUser | null;
 
   const loadData = useCallback(async () => {
-    setLoadError(null);
     const [profileRes, statsRes] = await Promise.allSettled([
       api.get('/business/profile'),
       api.get('/business/stats'),
@@ -118,9 +107,9 @@ export default function OwnerProfileScreen() {
       setStatsData(null);
     }
     if (profileRes.status === 'rejected' && statsRes.status === 'rejected') {
-      setLoadError(
-        extractErrorMessage(profileRes.reason, 'Could not load your business details.')
-      );
+      setLoadError('Could not load your business details. Pull down to retry.');
+    } else {
+      setLoadError(null);
     }
   }, []);
 
@@ -134,34 +123,20 @@ export default function OwnerProfileScreen() {
     setRefreshing(false);
   }, [loadData]);
 
-  const performLogout = useCallback(async () => {
+  const performLogout = async () => {
+    setConfirmLogout(false);
     setLoggingOut(true);
     try {
       await logout();
       router.replace('/(auth)/login');
     } catch {
-      Alert.alert('Error', 'Failed to log out. Please try again.');
-    } finally {
       setLoggingOut(false);
     }
-  }, [logout]);
-
-  const handleLogout = useCallback(() => {
-    Alert.alert('Log Out', 'Are you sure you want to log out of M-TAI?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Log Out', style: 'destructive', onPress: performLogout },
-    ]);
-  }, [performLogout]);
-
-  if (initialLoading) {
-    return <LoadingScreen />;
-  }
+  };
 
   const name =
-    pickString(profileData ?? {}, ['owner_name']) ?? extendedUser?.name ?? 'Business Owner';
+    pickString(profileData ?? {}, ['owner_name']) ?? extendedUser?.name?.trim() ?? 'Business Owner';
   const email = extendedUser?.email ?? '';
-  const phone = extendedUser?.phone ?? '';
-  const avatarUri = extendedUser?.avatar;
   const businessName =
     pickString(profileData ?? {}, ['business_name', 'businessName', 'name']) ??
     extendedUser?.business_name ??
@@ -177,36 +152,99 @@ export default function OwnerProfileScreen() {
     'low_stock',
   ]);
 
-  const statTiles: StatTile[] = [
-    { icon: '🏷️', value: String(productsCount), label: 'Products', color: COLORS.primaryDark },
-    { icon: '🧾', value: String(ordersCount), label: 'Orders', color: '#5B8DEF' },
-    { icon: '💰', value: formatTZS(revenueTotal), label: 'Revenue', color: COLORS.success },
+  const statRows = [
+    { icon: 'inventory-2' as const, label: 'Products', value: formatCount(productsCount) },
+    { icon: 'receipt-long' as const, label: 'Orders', value: formatCount(ordersCount) },
+    { icon: 'payments' as const, label: 'Revenue', value: formatMoneyCompact(revenueTotal) },
+    { icon: 'warning' as const, label: 'Low Stock', value: formatCount(lowStockCount), warn: lowStockCount > 0 },
+  ];
+
+  const menuItems: MenuItem[] = [
     {
-      icon: '⚠️',
-      value: String(lowStockCount),
-      label: 'Low Stock',
-      color: lowStockCount > 0 ? COLORS.red[700] : COLORS.gray[500],
+      icon: 'receipt-long',
+      label: 'Orders',
+      subtitle: 'Manage all your orders',
+      onPress: () => router.push('/orders'),
+    },
+    {
+      icon: 'inventory',
+      label: 'Inventory',
+      subtitle: 'Products and stock levels',
+      onPress: () => router.push('/manage/inventory'),
+    },
+    {
+      icon: 'bar-chart',
+      label: 'Reports',
+      subtitle: 'Sales and performance analytics',
+      onPress: () => router.push('/reports'),
+    },
+    {
+      icon: 'account-balance',
+      label: 'Finance',
+      subtitle: 'Revenue and payouts',
+      onPress: () => router.push('/manage/finance'),
+    },
+    {
+      icon: 'factory',
+      label: 'Manufacturing',
+      subtitle: 'Production and recipes',
+      onPress: () => router.push('/manage/manufacturing'),
+    },
+    {
+      icon: 'warehouse',
+      label: 'Warehouse',
+      subtitle: 'Locations and suppliers',
+      onPress: () => router.push('/manage/warehouse'),
+    },
+    {
+      icon: 'people',
+      label: 'CRM',
+      subtitle: 'Customers and relationships',
+      onPress: () => router.push('/manage/crm'),
+    },
+    {
+      icon: 'badge',
+      label: 'HR',
+      subtitle: 'Employees and attendance',
+      onPress: () => router.push('/manage/hr'),
     },
   ];
 
-  const infoRows: { label: string; value: string }[] = [
-    { label: 'Email', value: email || '—' },
-    ...(phone ? [{ label: 'Phone', value: phone }] : []),
-    ...(extendedUser?.current_business_id
-      ? [{ label: 'Business ID', value: `#${extendedUser.current_business_id}` }]
-      : []),
-  ];
+  const renderMenuRow = (item: MenuItem, last: boolean) => (
+    <TouchableOpacity
+      key={item.label}
+      activeOpacity={0.7}
+      onPress={item.onPress}
+      style={[styles.row, !last && styles.rowBorder]}
+    >
+      <View style={styles.rowIcon}>
+        <MaterialIcons name={item.icon} size={20} color={COLORS.primaryDark} />
+      </View>
+      <View style={styles.rowBody}>
+        <Text style={styles.rowLabel}>{item.label}</Text>
+        {item.subtitle ? <Text style={styles.rowSubtitle}>{item.subtitle}</Text> : null}
+      </View>
+      <MaterialIcons name="chevron-right" size={22} color={COLORS.gray[400]} />
+    </TouchableOpacity>
+  );
+
+  if (initialLoading) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+        <Header title="Profile" />
+        <View style={styles.loadingWrap}>
+          <Text style={styles.loadingText}>Loading profile…</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <Header title="Profile" subtitle="Business Owner" />
-      {loadError ? (
-        <View style={styles.errorBanner}>
-          <Text style={styles.errorText}>{loadError}</Text>
-        </View>
-      ) : null}
+    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+      <Header title="Profile" />
+
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -217,286 +255,239 @@ export default function OwnerProfileScreen() {
           />
         }
       >
-        <Card style={styles.section}>
-          <View style={styles.identityRow}>
-            <Avatar uri={avatarUri} name={name} size={64} />
-            <View style={styles.identityInfo}>
-              <Text style={styles.name} numberOfLines={1}>
+        <View style={styles.userCard}>
+          <View style={styles.avatarCircle}>
+            <Text style={styles.avatarInitial}>{(name.charAt(0) || 'O').toUpperCase()}</Text>
+          </View>
+          <View style={styles.userInfo}>
+            <View style={styles.nameRow}>
+              <Text style={styles.userName} numberOfLines={1}>
                 {name}
               </Text>
-              {email ? (
-                <Text style={styles.contactLine} numberOfLines={1}>
-                  {email}
-                </Text>
-              ) : null}
-              {phone ? (
-                <Text style={styles.contactLine} numberOfLines={1}>
-                  {phone}
-                </Text>
-              ) : null}
+              <MaterialIcons name="verified" size={16} color={COLORS.primaryDark} />
             </View>
-            <Badge label="Owner" color={COLORS.primaryDark} size="sm" />
-          </View>
-        </Card>
-
-        <Card style={styles.section}>
-          <View style={styles.businessRow}>
-            <View style={styles.businessIconCircle}>
-              <Text style={styles.businessIcon}>🏪</Text>
-            </View>
-            <View style={styles.businessInfo}>
-              <Text style={styles.businessLabel}>Business</Text>
-              <Text style={styles.businessName} numberOfLines={1}>
-                {businessName || 'My Business'}
+            <Text style={styles.userRole}>Business Owner</Text>
+            {businessName ? (
+              <Text style={styles.userBusiness} numberOfLines={1}>
+                {businessName}
               </Text>
-            </View>
+            ) : null}
+            <Text style={styles.userEmail} numberOfLines={1}>
+              {email || ''}
+            </Text>
           </View>
+        </View>
 
-          <View style={styles.statsGrid}>
-            {statTiles.map((tile) => (
-              <View key={tile.label} style={styles.statTile}>
-                <Text style={styles.statIcon}>{tile.icon}</Text>
-                <Text
-                  style={[styles.statValue, { color: tile.color }]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.6}
-                >
-                  {tile.value}
-                </Text>
-                <Text style={styles.statLabel}>{tile.label}</Text>
+        <Text style={styles.sectionTitle}>Business Stats</Text>
+        <View style={styles.group}>
+          {statRows.map((item, i) => (
+            <View key={item.label} style={[styles.row, i < statRows.length - 1 && styles.rowBorder]}>
+              <View style={[styles.rowIcon, item.warn && styles.warnIcon]}>
+                <MaterialIcons
+                  name={item.icon}
+                  size={20}
+                  color={item.warn ? COLORS.warning : COLORS.primaryDark}
+                />
               </View>
-            ))}
-          </View>
-        </Card>
-
-        <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>Account Information</Text>
-          {infoRows.map((row) => (
-            <View key={row.label} style={styles.infoRow}>
-              <Text style={styles.infoLabel}>{row.label}</Text>
-              <Text style={styles.infoValue} numberOfLines={1}>
-                {row.value}
-              </Text>
+              <View style={styles.rowBody}>
+                <Text style={styles.rowLabel}>{item.label}</Text>
+              </View>
+              <Text style={[styles.rowValue, item.warn && styles.warnValue]}>{item.value}</Text>
             </View>
           ))}
-        </Card>
+          {loadError ? <Text style={styles.statError}>{loadError}</Text> : null}
+        </View>
 
-        <Card style={[styles.section, styles.linksCard]}>
-          {QUICK_LINKS.map((link, index) => (
-            <React.Fragment key={link.label}>
-              {index > 0 ? <View style={styles.linkDivider} /> : null}
-              <TouchableOpacity
-                style={styles.linkRow}
-                activeOpacity={0.7}
-                onPress={() => router.push(link.path as any)}
-              >
-                <View style={styles.linkRowLeft}>
-                  <View style={styles.linkIconCircle}>
-                    <Text style={styles.linkIcon}>{link.icon}</Text>
-                  </View>
-                  <Text style={styles.linkText}>{link.label}</Text>
-                </View>
-                <Text style={styles.linkChevron}>{'>'}</Text>
-              </TouchableOpacity>
-            </React.Fragment>
-          ))}
-        </Card>
+        <Text style={styles.sectionTitle}>Menu</Text>
+        <View style={styles.group}>
+          {menuItems.map((item, i) => renderMenuRow(item, i === menuItems.length - 1))}
+        </View>
 
-        <Button
-          title="Log Out"
-          variant="danger"
-          size="lg"
-          onPress={handleLogout}
-          loading={loggingOut}
-          disabled={loggingOut}
-          style={styles.logoutButton}
-        />
+        <Text style={styles.sectionTitle}>Account</Text>
+        <View style={styles.group}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setConfirmLogout(true)}
+            style={styles.row}
+          >
+            <View style={[styles.rowIcon, styles.logoutIcon]}>
+              <MaterialIcons name="logout" size={20} color={COLORS.red[700]} />
+            </View>
+            <View style={styles.rowBody}>
+              <Text style={[styles.rowLabel, styles.logoutText]}>Log Out</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={22} color={COLORS.gray[400]} />
+          </TouchableOpacity>
+        </View>
 
         <Text style={styles.version}>M-TAI v1.0.0</Text>
       </ScrollView>
+
+      <AlertModal
+        visible={confirmLogout}
+        title="Do you want to exit?"
+        message="You will be logged out of your account."
+        confirmText="Yes"
+        cancelText="No"
+        onConfirm={performLogout}
+        onCancel={() => setConfirmLogout(false)}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  safe: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  errorBanner: {
-    backgroundColor: COLORS.red[100],
-    marginHorizontal: SPACING.md,
-    marginTop: SPACING.sm,
-    borderRadius: RADIUS.md,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
+  scroll: {
+    paddingBottom: SPACING.xl,
   },
-  errorText: {
-    color: COLORS.red[700],
-    fontSize: FONTS.size.sm,
-  },
-  scrollContent: {
-    padding: SPACING.md,
-    paddingBottom: SPACING.xxl + SPACING.lg,
-  },
-  section: {
-    marginBottom: SPACING.md,
-  },
-  identityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-  },
-  identityInfo: {
+  loadingWrap: {
     flex: 1,
-  },
-  name: {
-    fontSize: FONTS.size.xl,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  contactLine: {
-    fontSize: FONTS.size.sm,
-    color: COLORS.textLight,
-    marginTop: 2,
-  },
-  businessRow: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
-    paddingBottom: SPACING.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: COLORS.gray[200],
-  },
-  businessIconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: COLORS.primaryLight,
     justifyContent: 'center',
+  },
+  loadingText: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+    color: COLORS.textLight,
+  },
+  userCard: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: SPACING.md,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+    padding: SPACING.lg,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.lg,
+    ...SHADOWS.md,
   },
-  businessIcon: {
-    fontSize: FONTS.size.xl - 2,
+  avatarCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: COLORS.teal[50],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  businessInfo: {
+  avatarInitial: {
+    fontSize: FONTS.size.xxl,
+    fontFamily: FONTS.bold,
+    color: COLORS.primaryDark,
+  },
+  userInfo: {
     flex: 1,
   },
-  businessLabel: {
-    fontSize: FONTS.size.xs,
-    fontWeight: '600',
-    color: COLORS.textLight,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  businessName: {
-    fontSize: FONTS.size.lg,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginTop: 2,
-  },
-  statsGrid: {
+  nameRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    rowGap: SPACING.md,
-    paddingTop: SPACING.md,
-  },
-  statTile: {
-    width: '25%',
     alignItems: 'center',
-    paddingHorizontal: SPACING.xs,
+    gap: SPACING.xs + 2,
   },
-  statIcon: {
+  userName: {
     fontSize: FONTS.size.lg,
+    fontFamily: FONTS.bold,
+    color: COLORS.text,
+    flexShrink: 1,
   },
-  statValue: {
-    fontSize: FONTS.size.lg,
-    fontWeight: '800',
-    marginTop: SPACING.xs,
-  },
-  statLabel: {
-    fontSize: FONTS.size.xs,
-    fontWeight: '600',
-    color: COLORS.textLight,
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
+  userRole: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.semibold,
+    color: COLORS.primaryDark,
     marginTop: 2,
-    textAlign: 'center',
+  },
+  userBusiness: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.medium,
+    color: COLORS.textLight,
+    marginTop: 2,
+  },
+  userEmail: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+    color: COLORS.textLight,
+    marginTop: 2,
   },
   sectionTitle: {
-    fontSize: FONTS.size.sm,
-    fontWeight: '700',
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.bold,
     color: COLORS.textLight,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.sm,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    marginBottom: SPACING.sm + 2,
   },
-  infoRow: {
+  group: {
+    marginHorizontal: SPACING.lg,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.lg,
+    overflow: 'hidden',
+    ...SHADOWS.sm,
+  },
+  row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: SPACING.sm + 2,
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+  },
+  rowBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: COLORS.gray[200],
   },
-  infoLabel: {
-    fontSize: FONTS.size.md,
-    color: COLORS.textLight,
-  },
-  infoValue: {
-    flexShrink: 1,
-    marginLeft: SPACING.md,
-    fontSize: FONTS.size.md,
-    fontWeight: '600',
-    color: COLORS.text,
-    textAlign: 'right',
-  },
-  linksCard: {
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.md,
-  },
-  linkRow: {
-    flexDirection: 'row',
+  rowIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.teal[50],
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: SPACING.sm + 4,
-  },
-  linkRowLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm + 2,
-  },
-  linkIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.gray[100],
     justifyContent: 'center',
-    alignItems: 'center',
   },
-  linkIcon: {
-    fontSize: FONTS.size.lg - 2,
+  warnIcon: {
+    backgroundColor: 'rgba(245, 158, 11, 0.14)',
   },
-  linkText: {
-    fontSize: FONTS.size.lg,
-    fontWeight: '600',
+  logoutIcon: {
+    backgroundColor: COLORS.red[100],
+  },
+  rowBody: {
+    flex: 1,
+  },
+  rowLabel: {
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
   },
-  linkChevron: {
-    fontSize: FONTS.size.xl,
-    color: COLORS.gray[400],
+  rowSubtitle: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+    color: COLORS.textLight,
+    marginTop: 2,
   },
-  linkDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: COLORS.gray[200],
+  rowValue: {
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.bold,
+    color: COLORS.primaryDark,
   },
-  logoutButton: {
-    marginTop: SPACING.sm,
+  warnValue: {
+    color: COLORS.warning,
+  },
+  logoutText: {
+    color: COLORS.red[700],
+  },
+  statError: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+    color: COLORS.red[700],
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.md,
   },
   version: {
     textAlign: 'center',
     fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
     color: COLORS.textLight,
     marginTop: SPACING.lg,
   },

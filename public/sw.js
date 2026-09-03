@@ -1,6 +1,6 @@
-const CACHE_NAME = 'mtai-v1';
-const STATIC_CACHE = 'mtai-static-v1';
-const DYNAMIC_CACHE = 'mtai-dynamic-v1';
+const CACHE_NAME = 'mtai-v2';
+const STATIC_CACHE = 'mtai-static-v2';
+const DYNAMIC_CACHE = 'mtai-dynamic-v2';
 
 const STATIC_ASSETS = [
     '/',

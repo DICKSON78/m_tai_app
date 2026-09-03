@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import api from '../../src/api/client';
 import { User } from '../../src/api/types';
@@ -154,8 +155,8 @@ export default function EmployeeProfileScreen() {
     setStatsLoading(true);
 
     const results = await Promise.allSettled([
-      api.get('/owner/hr/attendance'),
-      api.get('/customer/orders', { params: { page: 1, per_page: 100 } }),
+      api.get('/employee/attendance'),
+      api.get('/employee/orders', { params: { page: 1, per_page: 100 } }),
     ]);
 
     const nextStats: EmployeeStats = { attendanceRate: null, salesThisMonth: null };
@@ -198,9 +199,9 @@ export default function EmployeeProfileScreen() {
 
   const quickLinks = useMemo(
     () => [
-      { icon: '🧾', label: 'POS', route: '/' as const },
-      { icon: '🏷', label: 'Inventory', route: '/inventory' as const },
-      { icon: '🕐', label: 'Attendance', route: '/attendance' as const },
+      { icon: 'point-of-sale' as const, label: 'POS', route: '/' as const },
+      { icon: 'inventory-2' as const, label: 'Inventory', route: '/inventory' as const },
+      { icon: 'schedule' as const, label: 'Attendance', route: '/attendance' as const },
     ],
     []
   );
@@ -280,7 +281,9 @@ export default function EmployeeProfileScreen() {
               style={styles.linkTile}
               onPress={() => router.navigate(link.route)}
             >
-              <Text style={styles.linkIcon}>{link.icon}</Text>
+              <View style={styles.linkIconCircle}>
+                <MaterialIcons name={link.icon} size={20} color={COLORS.primaryDark} />
+              </View>
               <Text style={styles.linkLabel}>{link.label}</Text>
             </TouchableOpacity>
           ))}
@@ -386,7 +389,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: FONTS.size.xxl - 4,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     color: COLORS.white,
     marginTop: SPACING.md,
   },
@@ -399,13 +402,13 @@ const styles = StyleSheet.create({
   },
   roleBadgeText: {
     fontSize: FONTS.size.sm,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.white,
     letterSpacing: 0.3,
   },
   position: {
     fontSize: FONTS.size.sm,
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
     color: 'rgba(255, 255, 255, 0.85)',
     marginTop: SPACING.xs + 2,
   },
@@ -421,7 +424,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     color: COLORS.gray[400],
@@ -433,7 +436,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: FONTS.size.xl,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   statValuePrimary: {
@@ -449,7 +452,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.sm + 2,
   },
@@ -469,7 +472,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     marginLeft: SPACING.md,
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
     textAlign: 'right',
   },
@@ -488,13 +491,17 @@ const styles = StyleSheet.create({
     gap: SPACING.xs + 2,
     ...SHADOWS.sm,
   },
-  linkIcon: {
-    fontSize: FONTS.size.xxl,
-    lineHeight: FONTS.size.xxxl - 6,
+  linkIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.teal[50],
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   linkLabel: {
     fontSize: FONTS.size.xs,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.gray[700],
   },
   logoutButton: {
@@ -549,7 +556,7 @@ const styles = StyleSheet.create({
   },
   dialogTitle: {
     fontSize: FONTS.size.xl,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   dialogMessage: {

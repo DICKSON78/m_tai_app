@@ -16,7 +16,6 @@ const TYPE_OPTIONS = [
 ];
 
 export default function AdminShopsPage() {
-    document.title = 'Shops - M-Tai Admin';
     const [shops, setShops] = useState([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
@@ -46,6 +45,7 @@ export default function AdminShopsPage() {
     }, [currentPage, search, businessType]);
 
     useEffect(() => { fetchShops(); }, [fetchShops]);
+    useEffect(() => { document.title = 'Shops - M-Tai Admin'; }, []);
     useEffect(() => { setCurrentPage(1); }, [search, businessType]);
 
     const handleDelete = async () => {

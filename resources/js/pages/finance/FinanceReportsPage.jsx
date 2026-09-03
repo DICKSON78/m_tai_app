@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
-import { BarChart3, TrendingUp, TrendingDown, Wallet, Scale, FileText, Download, RefreshCw } from 'lucide-react';
+import { BarChart3, TrendingUp, TrendingDown, Wallet, Scale, FileText, Download, RefreshCw, Printer } from 'lucide-react';
+import { printElementAsPdf } from '../../lib/utils';
 
 const TABS = [
     { key: 'profit-loss', label: 'Profit & Loss', icon: TrendingUp },
@@ -180,7 +181,7 @@ export default function FinanceReportsPage() {
     return (
         <div className="space-y-6">
             <PageHeader title="Financial Reports" subtitle="View detailed financial statements and reports" icon={<BarChart3 size={20} />}
-                actions={<button onClick={fetchReport} disabled={loading} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Refresh</button>} />
+                actions={<div className="flex items-center gap-2"><button onClick={() => printElementAsPdf('report-results-root', `${activeTab.replace('-', ' ')} Report`)} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 border border-gray-200 bg-white hover:bg-gray-50"><Printer size={16} /> Print / Save as PDF</button><button onClick={fetchReport} disabled={loading} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Refresh</button></div>} />
 
             <div className="flex flex-wrap gap-2">
                 {TABS.map(tab => (
@@ -214,12 +215,12 @@ export default function FinanceReportsPage() {
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00D4AA]"></div>
                 </div>
             ) : (
-                <>
+                <div id="report-results-root">
                     {activeTab === 'profit-loss' && renderProfitLoss()}
                     {activeTab === 'balance-sheet' && renderBalanceSheet()}
                     {activeTab === 'cash-flow' && renderCashFlow()}
                     {activeTab === 'trial-balance' && renderTrialBalance()}
-                </>
+                </div>
             )}
         </div>
     );

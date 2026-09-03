@@ -8,12 +8,14 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import api from '../../src/api/client';
-import Badge from '../../src/components/Badge';
-import Card from '../../src/components/Card';
-import EmptyState from '../../src/components/EmptyState';
-import Header from '../../src/components/Header';
-import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
+import { router } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+import api from '../../../../src/api/client';
+import Badge from '../../../../src/components/Badge';
+import Card from '../../../../src/components/Card';
+import EmptyState from '../../../../src/components/EmptyState';
+import Header from '../../../../src/components/Header';
+import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../../../src/constants/theme';
 
 interface BOMItem {
   id: number;
@@ -69,14 +71,14 @@ function normalizeWorkOrder(raw: any): WorkOrder | null {
 function getWOStatus(status: string): { label: string; bg: string; text: string } {
   switch (status.toLowerCase()) {
     case 'in_progress':
-      return { label: 'In Progress', bg: 'rgba(91, 141, 239, 0.14)', text: '#5B8DEF' };
+      return { label: 'In Progress', bg: 'rgba(91, 141, 239, 0.14)', text: COLORS.info };
     case 'completed':
       return { label: 'Completed', bg: COLORS.green[100], text: COLORS.green[700] };
     case 'cancelled':
       return { label: 'Cancelled', bg: COLORS.red[100], text: COLORS.red[700] };
     case 'pending':
     default:
-      return { label: 'Pending', bg: '#FEF3C7', text: '#B45309' };
+      return { label: 'Pending', bg: 'rgba(245, 158, 11, 0.14)', text: '#92400E' };
   }
 }
 
@@ -90,43 +92,42 @@ export default function ManufacturingScreen() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [businessId, setBusinessId] = useState<string | null>(null);
   const requestSeqRef = useRef(0);
 
   const fetchData = useCallback(async () => {
     requestSeqRef.current += 1;
     const requestId = requestSeqRef.current;
 
-    try {
-      let bizId = businessId;
-      if (!bizId) {
-        const profileRes = await api.get('/business/profile');
-        bizId = extractId(profileRes.data);
-        if (!bizId) throw new Error('Could not determine business ID.');
-        if (requestId !== requestSeqRef.current) return;
-        setBusinessId(bizId);
-      }
+    const [bomsRes, woRes] = await Promise.allSettled([
+      api.get('/owner/manufacturing/boms'),
+      api.get('/owner/manufacturing/work-orders'),
+    ]);
 
-      const [bomsRes, woRes] = await Promise.all([
-        api.get(`/owner/businesses/${bizId}/bill-of-materials`),
-        api.get(`/owner/businesses/${bizId}/work-orders`),
-      ]);
+    if (requestId !== requestSeqRef.current) return;
 
-      if (requestId !== requestSeqRef.current) return;
-
-      setBoms(extractArray(bomsRes.data).map(normalizeBOM).filter(Boolean) as BOMItem[]);
-      setWorkOrders(extractArray(woRes.data).map(normalizeWorkOrder).filter(Boolean) as WorkOrder[]);
-      setError(null);
-    } catch (err: any) {
-      if (requestId !== requestSeqRef.current) return;
-      setError(err?.response?.data?.message || err?.message || 'Failed to load manufacturing data.');
-    } finally {
-      if (requestId === requestSeqRef.current) {
-        setInitialLoading(false);
-        setRefreshing(false);
-      }
+    if (bomsRes.status === 'fulfilled') {
+      setBoms(extractArray(bomsRes.value.data).map(normalizeBOM).filter(Boolean) as BOMItem[]);
+    } else {
+      setError(
+        (bomsRes.reason as any)?.response?.data?.message || 'Failed to load the bill of materials.'
+      );
     }
-  }, [businessId]);
+    if (woRes.status === 'fulfilled') {
+      setWorkOrders(
+        extractArray(woRes.value.data).map(normalizeWorkOrder).filter(Boolean) as WorkOrder[]
+      );
+    } else {
+      setError(
+        (woRes.reason as any)?.response?.data?.message || 'Failed to load work orders.'
+      );
+    }
+    if (bomsRes.status === 'rejected' && woRes.status === 'rejected') {
+      setError((bomsRes.reason as any)?.response?.data?.message || 'Failed to load manufacturing data.');
+    }
+
+    setInitialLoading(false);
+    setRefreshing(false);
+  }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -165,7 +166,7 @@ export default function ManufacturingScreen() {
   if (initialLoading) {
     return (
       <SafeAreaView style={styles.safe} edges={['top']}>
-        <Header title="Manufacturing" />
+        <Header title="Manufacturing" onBack={() => router.back()} />
         <View style={styles.center}>
           <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.loadingText}>Loading…</Text>
@@ -176,7 +177,7 @@ export default function ManufacturingScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header title="Manufacturing" subtitle={`${boms.length} BOM${boms.length === 1 ? '' : 's'} · ${workOrders.length} work order${workOrders.length === 1 ? '' : 's'}`} />
+      <Header title="Manufacturing" subtitle={`${boms.length} BOM${boms.length === 1 ? '' : 's'} · ${workOrders.length} work order${workOrders.length === 1 ? '' : 's'}`} onBack={() => router.back()} />
       <FlatList
         data={workOrders}
         keyExtractor={(item) => String(item.id)}
@@ -204,7 +205,7 @@ export default function ManufacturingScreen() {
         ListEmptyComponent={
           !error ? (
             <EmptyState
-              icon={<Text style={styles.emptyIcon}>🏭</Text>}
+              icon={<MaterialIcons name="factory" size={32} color={COLORS.gray[400]} />}
               title="No manufacturing data"
               subtitle="BOMs and work orders will appear here."
               style={styles.empty}
@@ -225,14 +226,13 @@ const styles = StyleSheet.create({
   loadingText: { fontSize: FONTS.size.sm, color: COLORS.textLight },
   listContent: { paddingBottom: SPACING.xl, flexGrow: 1 },
   sectionWrap: { paddingHorizontal: SPACING.md, paddingTop: SPACING.md },
-  sectionTitle: { fontSize: FONTS.size.lg, fontWeight: '700', color: COLORS.text, marginBottom: SPACING.sm + 2 },
+  sectionTitle: { fontSize: FONTS.size.lg, fontFamily: FONTS.bold, color: COLORS.text, marginBottom: SPACING.sm + 2 },
   card: { marginBottom: SPACING.sm + 4 },
   cardRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   cardInfo: { flex: 1, gap: SPACING.xs },
-  cardTitle: { fontSize: FONTS.size.md, fontWeight: '700', color: COLORS.text },
+  cardTitle: { fontSize: FONTS.size.md, fontFamily: FONTS.bold, color: COLORS.text },
   cardMeta: { fontSize: FONTS.size.sm, color: COLORS.textLight },
   errorBanner: { backgroundColor: COLORS.red[100], borderRadius: RADIUS.md, paddingVertical: SPACING.sm, paddingHorizontal: SPACING.md, marginBottom: SPACING.sm },
   errorText: { color: COLORS.red[700], fontSize: FONTS.size.sm },
   empty: { flex: 1, justifyContent: 'center' },
-  emptyIcon: { fontSize: 32 },
 });

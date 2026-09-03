@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import api from '../../src/api/client';
 import Card from '../../src/components/Card';
@@ -162,9 +163,11 @@ export default function AdminAnnouncementsScreen() {
             disabled={deletingId === item.id}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Text style={[styles.deleteBtn, deletingId === item.id && styles.deleteDisabled]}>
-              {deletingId === item.id ? '…' : '✕'}
-            </Text>
+            {deletingId === item.id ? (
+              <Text style={[styles.deleteBtn, styles.deleteDisabled]}>…</Text>
+            ) : (
+              <MaterialIcons name="close" size={18} color={COLORS.red[500]} />
+            )}
           </TouchableOpacity>
         </View>
         <Text style={styles.cardBody} numberOfLines={3}>
@@ -216,7 +219,7 @@ export default function AdminAnnouncementsScreen() {
         ListEmptyComponent={
           !error ? (
             <EmptyState
-              icon={<Text style={styles.emptyIcon}>📣</Text>}
+              icon={<MaterialIcons name="campaign" size={32} color={COLORS.gray[400]} />}
               title="No announcements"
               subtitle="Create an announcement to broadcast to all users."
               style={styles.empty}
@@ -306,7 +309,7 @@ const styles = StyleSheet.create({
   errorRetry: {
     color: COLORS.red[700],
     fontSize: FONTS.size.sm,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
   },
   listContent: {
     padding: SPACING.md,
@@ -326,13 +329,13 @@ const styles = StyleSheet.create({
   cardTitle: {
     flex: 1,
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   deleteBtn: {
     fontSize: FONTS.size.lg,
     color: COLORS.red[500],
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     padding: 4,
   },
   deleteDisabled: {
@@ -350,15 +353,12 @@ const styles = StyleSheet.create({
   },
   headerCreate: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.primary,
   },
   empty: {
     flex: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
   /* Modal */
   modalSafe: {
@@ -380,12 +380,12 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   modalSend: {
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.primary,
   },
   modalSendDisabled: {

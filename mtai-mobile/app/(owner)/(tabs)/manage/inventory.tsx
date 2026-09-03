@@ -10,13 +10,15 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import api from '../../src/api/client';
-import Badge from '../../src/components/Badge';
-import Card from '../../src/components/Card';
-import EmptyState from '../../src/components/EmptyState';
-import Header from '../../src/components/Header';
-import SearchBar from '../../src/components/SearchBar';
-import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
+import { router } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+import api from '../../../../src/api/client';
+import Badge from '../../../../src/components/Badge';
+import Card from '../../../../src/components/Card';
+import EmptyState from '../../../../src/components/EmptyState';
+import Header from '../../../../src/components/Header';
+import SearchBar from '../../../../src/components/SearchBar';
+import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../../../src/constants/theme';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -40,7 +42,7 @@ function getStockStatus(quantity: number, threshold: number): StockStatus {
     return { label: 'Out of Stock', bg: COLORS.red[100], text: COLORS.red[700] };
   }
   if (quantity <= threshold) {
-    return { label: 'Low Stock', bg: '#FEF3C7', text: '#B45309' };
+    return { label: 'Low Stock', bg: 'rgba(245, 158, 11, 0.14)', text: '#92400E' };
   }
   return { label: 'In Stock', bg: COLORS.green[100], text: COLORS.green[700] };
 }
@@ -165,11 +167,12 @@ export default function OwnerInventoryScreen() {
       const newQty = product.quantity + delta;
       if (newQty < 0) return;
 
-      if (!businessId) return;
+      if (delta === 0) return;
 
       try {
-        await api.post(`/owner/businesses/${businessId}/products/${product.id}/adjust-stock`, {
-          quantity: delta,
+        await api.post(`/owner/products/${product.id}/stock`, {
+          quantity: Math.abs(delta),
+          action: delta > 0 ? 'add' : 'subtract',
         });
         setItems((prev) =>
           prev.map((item) =>
@@ -183,7 +186,7 @@ export default function OwnerInventoryScreen() {
         );
       }
     },
-    [businessId]
+    []
   );
 
   const filtered = useMemo(() => {
@@ -230,7 +233,12 @@ export default function OwnerInventoryScreen() {
                 ) : null}
                 {item.location ? (
                   <View style={[styles.metaChip, styles.locationChip]}>
-                    <Text style={styles.locationIcon}>📍</Text>
+                    <MaterialIcons
+                      name="location-on"
+                      size={12}
+                      color={COLORS.primaryDark}
+                      style={{ marginRight: 3 }}
+                    />
                     <Text style={styles.locationText} numberOfLines={1}>
                       {item.location}
                     </Text>
@@ -288,7 +296,7 @@ export default function OwnerInventoryScreen() {
     if (items.length === 0) {
       return (
         <EmptyState
-          icon={<Text style={styles.emptyIcon}>🏷</Text>}
+          icon={<MaterialIcons name="inventory-2" size={32} color={COLORS.gray[400]} />}
           title="No products"
           subtitle="Inventory will appear here once products are added to your business."
           style={styles.empty}
@@ -297,7 +305,7 @@ export default function OwnerInventoryScreen() {
     }
     return (
       <EmptyState
-        icon={<Text style={styles.emptyIcon}>🔍</Text>}
+        icon={<MaterialIcons name="search" size={32} color={COLORS.gray[400]} />}
         title="No matches"
         subtitle={`Nothing found for "${searchText.trim()}". Try a different name or SKU.`}
         actionTitle="Clear Search"
@@ -310,7 +318,7 @@ export default function OwnerInventoryScreen() {
   if (initialLoading) {
     return (
       <SafeAreaView style={styles.safe} edges={['top']}>
-        <Header title="Inventory" />
+        <Header title="Inventory" onBack={() => router.back()} />
         <View style={styles.initialLoading}>
           <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.initialLoadingText}>Loading inventory…</Text>
@@ -324,6 +332,7 @@ export default function OwnerInventoryScreen() {
       <Header
         title="Inventory"
         subtitle={`${items.length} product${items.length === 1 ? '' : 's'} tracked`}
+        onBack={() => router.back()}
       />
 
       <FlatList
@@ -406,7 +415,7 @@ const styles = StyleSheet.create({
   itemName: {
     flexShrink: 1,
     fontSize: FONTS.size.md,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.text,
   },
   metaRow: {
@@ -428,7 +437,7 @@ const styles = StyleSheet.create({
   },
   skuText: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.gray[600],
     fontVariant: ['tabular-nums'],
   },
@@ -436,14 +445,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primaryLight,
     maxWidth: 180,
   },
-  locationIcon: {
-    fontSize: FONTS.size.xs,
-    marginRight: 3,
-  },
   locationText: {
     flexShrink: 1,
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.primaryDark,
   },
   qtySection: {
@@ -460,12 +465,12 @@ const styles = StyleSheet.create({
   },
   qtyValue: {
     fontSize: FONTS.size.xl,
-    fontWeight: '800',
+    fontFamily: FONTS.bold,
     lineHeight: 26,
   },
   qtyLabel: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
   },
   adjustRow: {
     flexDirection: 'row',
@@ -484,16 +489,13 @@ const styles = StyleSheet.create({
   },
   adjustBtnText: {
     fontSize: FONTS.size.lg,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     color: COLORS.white,
     lineHeight: 20,
   },
   empty: {
     flex: 1,
     justifyContent: 'center',
-  },
-  emptyIcon: {
-    fontSize: 32,
   },
 });
 
@@ -515,7 +517,7 @@ const controls = StyleSheet.create({
   },
   summaryText: {
     fontSize: FONTS.size.xs,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.textLight,
   },
 });

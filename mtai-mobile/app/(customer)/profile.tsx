@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Card from '../../src/components/Card';
-import Button from '../../src/components/Button';
-import Avatar from '../../src/components/Avatar';
+import { MaterialIcons } from '@expo/vector-icons';
+import AlertModal from '../../src/components/AlertModal';
+import Header from '../../src/components/Header';
 import { useAuthStore } from '../../src/store/authStore';
 import usePushNotifications from '../../src/hooks/usePushNotifications';
-import { COLORS, SPACING, FONTS, RADIUS } from '../../src/constants/theme';
+import { COLORS, SPACING, FONTS, RADIUS, SHADOWS } from '../../src/constants/theme';
 import { User } from '../../src/api/types';
 
 const ROLE_LABELS: Record<User['role'], string> = {
@@ -18,86 +18,130 @@ const ROLE_LABELS: Record<User['role'], string> = {
   admin: 'Administrator',
 };
 
+type MenuItem = {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  subtitle?: string;
+  onPress: () => void;
+};
+
 export default function ProfileScreen() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
-  const [loggingOut, setLoggingOut] = useState(false);
   const [enablingNotifications, setEnablingNotifications] = useState(false);
+  const [errorAlert, setErrorAlert] = useState<string | null>(null);
+  const [infoAlert, setInfoAlert] = useState<string | null>(null);
   const { pushToken, requestPermission } = usePushNotifications();
-
-  const handleLogout = () => {
-    Alert.alert('Log Out', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Log Out', style: 'destructive', onPress: performLogout },
-    ]);
-  };
-
-  const performLogout = async () => {
-    setLoggingOut(true);
-    try {
-      await logout();
-      router.replace('/(auth)/login');
-    } catch {
-      Alert.alert('Error', 'Failed to log out. Please try again.');
-    } finally {
-      setLoggingOut(false);
-    }
-  };
 
   const handleEnableNotifications = async () => {
     setEnablingNotifications(true);
     try {
       const token = await requestPermission();
       if (!token) {
-        Alert.alert('Notifications', 'Push notifications are not available on this device.');
+        setInfoAlert('Push notifications are not available on this device.');
       }
     } catch {
-      Alert.alert('Error', 'Failed to enable push notifications. Please try again.');
+      setErrorAlert('Failed to enable push notifications. Please try again.');
     } finally {
       setEnablingNotifications(false);
     }
   };
 
-  const infoRows: { label: string; value: string }[] = [
-    { label: 'Full Name', value: user?.name || '—' },
-    { label: 'Email', value: user?.email || '—' },
-    ...(user?.phone ? [{ label: 'Phone', value: user.phone }] : []),
-    { label: 'Role', value: user ? ROLE_LABELS[user.role] ?? user.role : '—' },
+  const handleContactSupport = () => {
+    router.push('/contact-support');
+  };
+
+  const menuItems: MenuItem[] = [
+    {
+      icon: 'receipt-long',
+      label: 'My Orders',
+      subtitle: 'Track all your purchases',
+      onPress: () => router.push('/orders'),
+    },
+    {
+      icon: 'favorite-border',
+      label: 'Wishlist',
+      subtitle: 'Products you saved for later',
+      onPress: () => router.push('/wishlist'),
+    },
+    {
+      icon: 'local-shipping',
+      label: 'Deliveries',
+      subtitle: 'Lives orders in transit',
+      onPress: () => router.push('/deliveries'),
+    },
+    {
+      icon: 'settings',
+      label: 'Settings',
+      subtitle: 'Notifications, support, privacy & more',
+      onPress: () => router.push('/settings'),
+    },
   ];
+
+  const renderMenuRow = (item: MenuItem, last: boolean) => (
+    <TouchableOpacity
+      key={item.label}
+      activeOpacity={0.7}
+      onPress={item.onPress}
+      style={[styles.row, !last && styles.rowBorder]}
+    >
+      <View style={styles.rowIcon}>
+        <MaterialIcons name={item.icon} size={20} color={COLORS.primaryDark} />
+      </View>
+      <View style={styles.rowBody}>
+        <Text style={styles.rowLabel}>{item.label}</Text>
+        {item.subtitle ? <Text style={styles.rowSubtitle}>{item.subtitle}</Text> : null}
+      </View>
+      <MaterialIcons name="chevron-right" size={22} color={COLORS.gray[400]} />
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
-      <ScrollView contentContainerStyle={styles.scroll} bounces={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Avatar name={user?.name || '?'} uri={user?.avatar} size={80} />
-          <Text style={styles.name}>{user?.name || 'Guest'}</Text>
-          <View style={styles.roleBadge}>
-            <Text style={styles.roleBadgeText}>
+      <Header title="Profile" />
+
+      <ScrollView contentContainerStyle={styles.scroll} bounces={false} showsVerticalScrollIndicator={false}>
+        <View style={styles.userCard}>
+          <View style={styles.avatarCircle}>
+            <Text style={styles.avatarInitial}>
+              {(user?.name?.trim()?.charAt(0) || '?').toUpperCase()}
+            </Text>
+          </View>
+          <View style={styles.userInfo}>
+            <View style={styles.nameRow}>
+              <Text style={styles.userName} numberOfLines={1}>
+                {user?.name || 'Guest'}
+              </Text>
+              <MaterialIcons name="verified" size={16} color="#1D9BF0" />
+            </View>
+            <Text style={styles.userRole}>
               {user ? ROLE_LABELS[user.role] ?? user.role : '—'}
+            </Text>
+            <Text style={styles.userEmail} numberOfLines={1}>
+              {user?.email || ''}
             </Text>
           </View>
         </View>
 
-        {/* Account details */}
-        <Card style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Account Information</Text>
-          {infoRows.map((row) => (
-            <View key={row.label} style={styles.infoRow}>
-              <Text style={styles.infoLabel}>{row.label}</Text>
-              <Text style={styles.infoValue} numberOfLines={1}>
-                {row.value}
-              </Text>
-            </View>
-          ))}
-        </Card>
+        <Text style={styles.sectionTitle}>Menu</Text>
+        <View style={styles.group}>
+          {menuItems.map((item, i) => renderMenuRow(item, i === menuItems.length - 1))}
+        </View>
 
-        {/* Notifications */}
-        <Card style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Notifications</Text>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Push Notifications</Text>
+        <Text style={styles.sectionTitle}>Notifications</Text>
+        <View style={styles.group}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={handleEnableNotifications}
+            style={styles.row}
+          >
+            <View style={styles.rowIcon}>
+              <MaterialIcons name="notifications-active" size={20} color={COLORS.primaryDark} />
+            </View>
+            <View style={styles.rowBody}>
+              <Text style={styles.rowLabel}>Push Notifications</Text>
+              <Text style={styles.rowSubtitle}>Get instant order & delivery updates</Text>
+            </View>
             <View
               style={[
                 styles.statusBadge,
@@ -113,31 +157,42 @@ export default function ProfileScreen() {
                 {pushToken ? 'Enabled' : 'Disabled'}
               </Text>
             </View>
-          </View>
-          {!pushToken && (
-            <Button
-              title="Enable Notifications"
-              variant="secondary"
-              onPress={handleEnableNotifications}
-              loading={enablingNotifications}
-              size="sm"
-              style={styles.notificationButton}
-            />
-          )}
-        </Card>
+          </TouchableOpacity>
+        </View>
 
-        {/* Actions */}
-        <Button
-          title="Log Out"
-          variant="danger"
-          onPress={handleLogout}
-          loading={loggingOut}
-          size="lg"
-          style={styles.logoutButton}
-        />
+        <Text style={styles.sectionTitle}>Support</Text>
+        <View style={styles.group}>
+          <TouchableOpacity activeOpacity={0.7} onPress={handleContactSupport} style={styles.row}>
+            <View style={styles.rowIcon}>
+              <MaterialIcons name="headset-mic" size={20} color={COLORS.primaryDark} />
+            </View>
+            <View style={styles.rowBody}>
+              <Text style={styles.rowLabel}>Contact Support</Text>
+              <Text style={styles.rowSubtitle}>We usually reply within 24 hours</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={22} color={COLORS.gray[400]} />
+          </TouchableOpacity>
+        </View>
 
         <Text style={styles.version}>M-TAI v1.0.0</Text>
       </ScrollView>
+
+      <AlertModal
+        visible={errorAlert !== null}
+        type="error"
+        title="Error"
+        message={errorAlert ?? ''}
+        confirmText="OK"
+        onConfirm={() => setErrorAlert(null)}
+      />
+      <AlertModal
+        visible={infoAlert !== null}
+        type="info"
+        title="M-TAI"
+        message={infoAlert ?? ''}
+        confirmText="OK"
+        onConfirm={() => setInfoAlert(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -148,65 +203,107 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   scroll: {
-    flexGrow: 1,
     paddingBottom: SPACING.xl,
   },
-  header: {
-    backgroundColor: COLORS.primary,
+  userCard: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: SPACING.xl,
-    paddingBottom: SPACING.lg + SPACING.md,
-    borderBottomLeftRadius: RADIUS.xl + 8,
-    borderBottomRightRadius: RADIUS.xl + 8,
-  },
-  name: {
-    fontSize: FONTS.size.xxl - 4,
-    fontWeight: '700',
-    color: COLORS.white,
-    marginTop: SPACING.md,
-  },
-  roleBadge: {
-    marginTop: SPACING.sm + 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    borderRadius: RADIUS.full,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs + 2,
-  },
-  roleBadgeText: {
-    fontSize: FONTS.size.sm,
-    fontWeight: '600',
-    color: COLORS.white,
-    letterSpacing: 0.3,
-  },
-  sectionCard: {
+    gap: SPACING.md,
     marginHorizontal: SPACING.lg,
-    marginTop: SPACING.lg,
+    marginTop: SPACING.md,
+    padding: SPACING.lg,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.lg,
+    ...SHADOWS.md,
+  },
+  avatarCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: COLORS.teal[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarInitial: {
+    fontSize: FONTS.size.xxl,
+    fontFamily: FONTS.bold,
+    color: COLORS.primaryDark,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs + 2,
+  },
+  userName: {
+    fontSize: FONTS.size.lg,
+    fontFamily: FONTS.bold,
+    color: COLORS.text,
+    flexShrink: 1,
+  },
+  userRole: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.semibold,
+    color: COLORS.primaryDark,
+    marginTop: 2,
+  },
+  userEmail: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+    color: COLORS.textLight,
+    marginTop: 2,
   },
   sectionTitle: {
-    fontSize: FONTS.size.lg,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: SPACING.md,
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.bold,
+    color: COLORS.textLight,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.sm,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
-  infoRow: {
+  group: {
+    marginHorizontal: SPACING.lg,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.lg,
+    overflow: 'hidden',
+    ...SHADOWS.sm,
+  },
+  row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: SPACING.sm + 2,
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+  },
+  rowBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: COLORS.gray[200],
   },
-  infoLabel: {
-    fontSize: FONTS.size.md,
-    color: COLORS.textLight,
+  rowIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.teal[50],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  infoValue: {
-    flexShrink: 1,
-    marginLeft: SPACING.md,
+  rowBody: {
+    flex: 1,
+  },
+  rowLabel: {
     fontSize: FONTS.size.md,
-    fontWeight: '600',
+    fontFamily: FONTS.semibold,
     color: COLORS.text,
-    textAlign: 'right',
+  },
+  rowSubtitle: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
+    color: COLORS.textLight,
+    marginTop: 2,
   },
   statusBadge: {
     borderRadius: RADIUS.full,
@@ -214,14 +311,14 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xs,
   },
   statusEnabled: {
-    backgroundColor: COLORS.green[100],
+    backgroundColor: COLORS.green[50],
   },
   statusDisabled: {
     backgroundColor: COLORS.gray[100],
   },
   statusText: {
     fontSize: FONTS.size.xs,
-    fontWeight: '700',
+    fontFamily: FONTS.bold,
     letterSpacing: 0.3,
   },
   statusTextEnabled: {
@@ -230,17 +327,10 @@ const styles = StyleSheet.create({
   statusTextDisabled: {
     color: COLORS.gray[500],
   },
-  notificationButton: {
-    marginTop: SPACING.md,
-    alignSelf: 'flex-start',
-  },
-  logoutButton: {
-    marginHorizontal: SPACING.lg,
-    marginTop: SPACING.lg,
-  },
   version: {
     textAlign: 'center',
     fontSize: FONTS.size.sm,
+    fontFamily: FONTS.regular,
     color: COLORS.textLight,
     marginTop: SPACING.lg,
   },
