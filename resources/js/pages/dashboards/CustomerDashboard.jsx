@@ -146,10 +146,10 @@ export default function CustomerDashboard() {
 
     return (
         <div className="w-full space-y-5">
-            {/* Greeting + categories — pinned (no card bg/border; scrolled content fades out above a thin line) */}
-            <div className="sticky top-0 z-20">
+            {/* Greeting + categories — static (sticky, opaque, like the app) */}
+            <div className="sticky top-0 z-20 bg-[#f5f7f5] pb-2 pt-1 border-b border-gray-200">
             {/* Greeting */}
-            <div className="flex items-center gap-3 bg-[#f5f7f5] pt-1">
+            <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full flex items-center justify-center text-lg font-bold text-white shrink-0" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
                     {userName.charAt(0).toUpperCase()}
                 </div>
@@ -161,7 +161,7 @@ export default function CustomerDashboard() {
             </div>
 
             {/* Category chips — tile style (like the app) */}
-            <div className="flex gap-2.5 overflow-x-auto pb-1 px-1 mt-3 bg-[#f5f7f5]" style={{ scrollbarWidth: 'none' }}>
+            <div className="flex gap-2.5 overflow-x-auto pb-0.5 -mx-1 px-1 mt-3" style={{ scrollbarWidth: 'none' }}>
                 {chipList.map((c) => {
                     const active = selectedCategoryId === c.id;
                     return (
@@ -183,9 +183,6 @@ export default function CustomerDashboard() {
                     );
                 })}
             </div>
-            {/* Fade strip: scrolled content disappears here with a gap before the line */}
-            <div className="h-5 relative z-10" style={{ background: 'linear-gradient(to bottom, #f5f7f5 0%, rgba(245,247,245,0) 100%)' }} />
-            <div className="h-px bg-gray-300" />
             </div>
 
             {/* Banner */}
