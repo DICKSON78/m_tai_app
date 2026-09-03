@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import PageHeader from '../../components/casfeta/PageHeader';
+import ShimmerProductGrid from '../../components/ShimmerProductGrid';
+import { Heart } from 'lucide-react';
 
 export default function WishlistPage() {
     const [items, setItems] = useState([]);
@@ -62,25 +65,15 @@ export default function WishlistPage() {
 
     return (
         <div>
-            <h1 className="text-xl font-black text-gray-900 mb-1">My Wishlist</h1>
-            {totalItems > 0 && (
-                <p className="text-sm text-gray-500 mb-4">{totalItems} products in wishlist</p>
-            )}
+            <PageHeader
+                title="Wishlist"
+                subtitle={totalItems > 0 ? `${totalItems} products in wishlist` : 'Your saved products'}
+                icon={<Heart size={20} />}
+            />
 
-            <div className="mt-2 pb-6">
+            <div className="pb-6">
                 {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {[...Array(8)].map((_, i) => (
-                            <div key={i} className="bg-white rounded-2xl border border-gray-200 overflow-hidden animate-pulse">
-                                <div className="aspect-square bg-gray-200" />
-                                <div className="p-4 space-y-3">
-                                    <div className="h-4 bg-gray-200 rounded w-3/4" />
-                                    <div className="h-4 bg-gray-200 rounded w-1/2" />
-                                    <div className="h-8 bg-gray-200 rounded w-full" />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <ShimmerProductGrid />
                 ) : items.length === 0 ? (
                     <div className="card empty-state">
                         <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">

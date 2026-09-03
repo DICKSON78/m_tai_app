@@ -2,12 +2,34 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import ProductCard from '../../components/ProductCard';
+import ShimmerProductGrid from '../../components/ShimmerProductGrid';
 
 const TRUST_ITEMS = [
     { label: 'Fast Delivery', icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0' },
     { label: 'Secure Payment', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
     { label: '24/7 Support', icon: 'M18 9.5v9m2-9a2 2 0 00-2-2m-8 1V5a2 2 0 00-2-2H8m5 7v3m0 0a2 2 0 11-4 0 2 2 0 014 0zm-1 6v1m2-5h-2m-2 0a2 2 0 11-4 0 2 2 0 014 0zm4.5 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z' },
     { label: 'Easy Returns', icon: 'M4 4v5h5M20 20v-5h-5m-9.07 3A8 8 0 1011.93 4M4 4l2.5.5m0 0L6.5 3M16 12a2 2 0 11-4 0 2 2 0 014 0z' },
+];
+
+const BANNER_SLIDES = [
+    {
+        title: 'Shop the freshest',
+        subtitle: 'Farm produce delivered straight to your door.',
+        icon: 'M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5zM2 2l7.586 7.586M6 14l7-7',
+        bg: 'linear-gradient(135deg, #0FAE8C, #00D4AA)',
+    },
+    {
+        title: 'Flash Sale Today',
+        subtitle: 'Up to 50% off everyday essentials.',
+        icon: 'M13 2L3 14h7l-1 8 10-12h-7l1-8z',
+        bg: 'linear-gradient(135deg, #F2994A, #EB5757)',
+    },
+    {
+        title: 'Best prices on M-TAI',
+        subtitle: 'Compare shops and save on everything you need.',
+        icon: 'M11 3h2v18h-2zM5.5 8h13l-1 8h-11l-1-8zM7 12h10',
+        bg: 'linear-gradient(135deg, #2F80ED, #9B51E0)',
+    },
 ];
 
 const BANNER_FALLBACKS = [
@@ -58,7 +80,11 @@ function BannerCarousel({ slides }) {
                         {slide.url ? (
                             <img src={slide.url} alt={slide.title} className="w-full h-full object-cover" />
                         ) : (
-                            <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }} />
+                            <div className="w-full h-full flex items-center justify-center" style={{ background: slide.bg || 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
+                                <svg className="w-14 h-14 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.4} d={slide.icon || 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'} />
+                                </svg>
+                            </div>
                         )}
                         <div className="absolute inset-0 bg-black/25" />
                         <div className="absolute bottom-5 left-5 right-5 text-white">
@@ -138,7 +164,14 @@ export default function CustomerDashboard() {
             }
             if (withImages.length >= 3) break;
         }
-        return withImages.length >= 3 ? withImages : BANNER_FALLBACKS;
+        const ads = BANNER_SLIDES.slice();
+        const merged = withImages.reduce((acc, img, i) => {
+            acc.push(img);
+            if (ads.length) acc.push(ads.shift());
+            return acc;
+        }, []);
+        while (merged.length < 3 && ads.length) merged.push(ads.shift());
+        return merged.length ? merged : BANNER_FALLBACKS;
     }, [products]);
 
     const categoryAccent = (c) => CATEGORY_ACCENTS[Math.abs(c.id) % CATEGORY_ACCENTS.length];
@@ -149,7 +182,7 @@ export default function CustomerDashboard() {
             {/* Greeting + categories — static (sticky, opaque, like the app) */}
             <div className="sticky top-0 z-20 bg-[#f5f7f5] pb-2 pt-1 border-b border-gray-200">
             {/* Greeting */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 pl-4">
                 <div className="w-11 h-11 rounded-full flex items-center justify-center text-lg font-bold text-white shrink-0" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
                     {userName.charAt(0).toUpperCase()}
                 </div>
@@ -161,7 +194,7 @@ export default function CustomerDashboard() {
             </div>
 
             {/* Category chips — tile style (like the app) */}
-            <div className="flex gap-2.5 overflow-x-auto pb-0.5 -mx-1 px-1 mt-3" style={{ scrollbarWidth: 'none' }}>
+            <div className="flex gap-2.5 overflow-x-auto pb-0.5 px-4 mt-3" style={{ scrollbarWidth: 'none' }}>
                 {chipList.map((c) => {
                     const active = selectedCategoryId === c.id;
                     return (
@@ -204,17 +237,20 @@ export default function CustomerDashboard() {
 
             {/* Section header */}
             <div className="flex items-center justify-between pt-1">
-                <h2 className="text-lg font-black text-gray-900">{selectedCategoryId ? 'Category' : 'For You'}</h2>
+                <div className="flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#d0f9f1' }}>
+                        <svg className="w-4 h-4 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                    </span>
+                    <h2 className="text-lg font-black text-gray-900">{selectedCategoryId ? 'Category' : 'For You'}</h2>
+                </div>
                 <span className="text-xs text-gray-500">{totalCount} item{totalCount === 1 ? '' : 's'}</span>
             </div>
 
             {/* Product grid (e-commerce layout, fills width) */}
             {loading ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="bg-white rounded-2xl border border-gray-200 animate-pulse h-72" />
-                    ))}
-                </div>
+                <ShimmerProductGrid count={10} columns="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3" />
             ) : products.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-gray-200 py-12 text-center">
                     <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">

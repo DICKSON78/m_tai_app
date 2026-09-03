@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { X, RotateCcw, CheckCircle } from 'lucide-react';
+import PageHeader from '../../components/casfeta/PageHeader';
+import { FileText } from 'lucide-react';
 
 const STATUS_CONFIG = {
     pending: { label: 'Pending', badge: 'badge badge-yellow', icon: '⏳' },
@@ -29,6 +31,7 @@ const PAYMENT_METHOD_LABELS = {
 
 export default function OrderDetailPage() {
     const { id } = useParams();
+    const navigate = useNavigate();
 
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -144,6 +147,11 @@ export default function OrderDetailPage() {
 
     return (
         <div>
+            <PageHeader
+                title={order.transaction_code || order.code || `Order #${order.id}`}
+                subtitle={`Created: ${formatDate(order.created_at || order.date)}`}
+                icon={<FileText size={20} />}
+            />
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-4">
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Link to="/customer/orders" className="hover:text-primary transition">Orders</Link>
@@ -187,6 +195,14 @@ export default function OrderDetailPage() {
                             {reordering ? 'Adding...' : 'Reorder'}
                         </button>
                     )}
+                    <button
+                        onClick={() => navigate(`/customer/orders/${id}/invoice`)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white rounded-lg transition-colors"
+                        style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}
+                    >
+                        <FileText size={14} />
+                        Invoice
+                    </button>
                 </div>
 
                 {message && (

@@ -78,7 +78,7 @@ export default function ProductCard({ product }) {
                 </span>
                 <div className="flex-1 min-w-0 mr-1">
                     <div className="flex items-center gap-1">
-                        <span className="text-sm font-semibold text-gray-900 truncate group-hover:text-primary transition-colors">{shopName}</span>
+                        <span className="text-sm font-semibold text-primary-dark truncate">{shopName}</span>
                         <VerifiedIcon />
                     </div>
                     {product.category?.name ? (
@@ -115,7 +115,7 @@ export default function ProductCard({ product }) {
                 <p className="text-[15px] font-semibold text-gray-900 leading-snug line-clamp-2">{product.name}</p>
                 <div className="flex items-center justify-between pt-0.5">
                     <div className="flex items-baseline gap-1 min-w-0">
-                        <span className="text-[15px] font-bold text-gray-900 whitespace-nowrap">{formatPrice(price)}</span>
+                        <span className="text-[15px] font-bold text-primary-dark whitespace-nowrap">{formatPrice(price)}</span>
                         {compareAt > price ? (
                             <span className="text-[11px] text-gray-400 line-through whitespace-nowrap">{formatPrice(compareAt)}</span>
                         ) : null}

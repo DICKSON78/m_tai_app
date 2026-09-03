@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import PageHeader from '../../components/casfeta/PageHeader';
+import { ShoppingCart } from 'lucide-react';
 
 export default function CartPage() {
     const navigate = useNavigate();
@@ -82,7 +84,7 @@ export default function CartPage() {
 
     return (
         <div>
-            <h1 className="text-xl font-black text-gray-900 mb-4">My Cart</h1>
+            <PageHeader title="My Cart" subtitle="Review your products before checkout" icon={<ShoppingCart size={20} />} />
 
             <div className="pb-6">
                 {items.length === 0 ? (

@@ -139,6 +139,7 @@ import CartPage from './pages/customer/CartPage';
 import CheckoutPage from './pages/customer/CheckoutPage';
 import OrderHistoryPage from './pages/customer/OrderHistoryPage';
 import CustomerOrderDetailPage from './pages/customer/OrderDetailPage';
+import InvoicePage from './pages/customer/InvoicePage';
 import CustomerDeliveriesPage from './pages/customer/CustomerDeliveriesPage';
 import WishlistPage from './pages/customer/WishlistPage';
 import ReviewFormPage from './pages/customer/ReviewFormPage';
@@ -355,6 +356,7 @@ function AppRoutes() {
             <Route path="/customer/checkout" element={<ProtectedRoute roles={['customer']}><CheckoutPage /></ProtectedRoute>} />
             <Route path="/customer/orders" element={<ProtectedRoute roles={['customer']}><OrderHistoryPage /></ProtectedRoute>} />
             <Route path="/customer/orders/:id" element={<ProtectedRoute roles={['customer']}><CustomerOrderDetailPage /></ProtectedRoute>} />
+            <Route path="/customer/orders/:id/invoice" element={<ProtectedRoute roles={['customer']}><InvoicePage /></ProtectedRoute>} />
             <Route path="/customer/deliveries" element={<ProtectedRoute roles={['customer']}><CustomerDeliveriesPage /></ProtectedRoute>} />
             <Route path="/customer/wishlist" element={<ProtectedRoute roles={['customer']}><WishlistPage /></ProtectedRoute>} />
             <Route path="/customer/reviews/:productId" element={<ProtectedRoute roles={['customer']}><ReviewFormPage /></ProtectedRoute>} />

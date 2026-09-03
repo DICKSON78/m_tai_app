@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
+import PageHeader from '../../components/casfeta/PageHeader';
+import ShimmerProductGrid from '../../components/ShimmerProductGrid';
+import { Store } from 'lucide-react';
 
 export default function ShopSearchPage() {
     const navigate = useNavigate();
@@ -68,11 +71,8 @@ export default function ShopSearchPage() {
 
     return (
         <div>
-            {/* Compact heading + clean search (no banner) */}
-            <div className="pb-3">
-                <div className="flex items-center gap-2 mb-3">
-                    <h1 className="text-xl font-black text-gray-900">Shops</h1>
-                </div>
+            <PageHeader title="Shops" subtitle="Browse and search available shops" icon={<Store size={20} />} />
+            <div className="-mt-2 pb-3">
                 <form onSubmit={handleSearch}>
                     <div className="flex items-center bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm focus-within:border-primary/60">
                         <div className="pl-3 text-gray-400">
@@ -107,9 +107,7 @@ export default function ShopSearchPage() {
                 )}
 
                 {loading ? (
-                    <div className="flex items-center justify-center h-64">
-                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-                    </div>
+                    <ShimmerProductGrid count={6} columns="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" />
                 ) : !hasSearched ? (
                     <div className="card empty-state">
                         <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">

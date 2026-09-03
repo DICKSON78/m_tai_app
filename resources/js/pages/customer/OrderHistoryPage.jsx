@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
+import PageHeader from '../../components/casfeta/PageHeader';
+import { ShoppingCart } from 'lucide-react';
 
 const STATUS_CONFIG = {
     pending: { label: 'Pending', badge: 'badge badge-yellow' },
@@ -80,12 +82,13 @@ export default function OrderHistoryPage() {
 
     return (
         <div>
-            <h1 className="text-xl font-black text-gray-900 mb-1">Order History</h1>
-            {totalOrders > 0 && (
-                <p className="text-sm text-gray-500 mb-4">Total orders: {totalOrders}</p>
-            )}
+            <PageHeader
+                title="Order History"
+                subtitle={totalOrders > 0 ? `Total orders: ${totalOrders}` : 'View your order history and track deliveries'}
+                icon={<ShoppingCart size={20} />}
+            />
 
-            <div className="mt-2 pb-6">
+            <div className="pb-6">
                 <div className="mb-6">
                     <div className="tab-nav">
                         <button

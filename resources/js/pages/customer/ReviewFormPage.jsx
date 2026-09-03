@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import PageHeader from '../../components/casfeta/PageHeader';
+import { Star } from 'lucide-react';
 
 export default function ReviewFormPage() {
     const { productId } = useParams();
@@ -94,7 +96,7 @@ export default function ReviewFormPage() {
 
     return (
         <div>
-            <h1 className="text-xl font-black text-gray-900 mb-4">Write Review</h1>
+            <PageHeader title="Write Review" subtitle="Share your experience with this product" icon={<Star size={20} />} />
 
             <div className="max-w-2xl mx-auto pb-6">
                 {product ? (

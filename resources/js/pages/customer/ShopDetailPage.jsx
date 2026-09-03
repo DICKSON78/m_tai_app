@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
+import PageHeader from '../../components/casfeta/PageHeader';
+import { Store } from 'lucide-react';
 
 export default function ShopDetailPage() {
     const { id } = useParams();
@@ -148,6 +150,8 @@ export default function ShopDetailPage() {
                     <span className="text-sm font-medium">{toast}</span>
                 </div>
             )}
+
+            <PageHeader title={shop?.business_name || 'Shop'} subtitle={shop?.code || ''} icon={<Store size={20} />} />
 
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-4">
                 <div className="flex items-center gap-2 text-sm text-gray-500">

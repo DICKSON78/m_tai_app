@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import PageHeader from '../../components/casfeta/PageHeader';
+import { CreditCard } from 'lucide-react';
 
 const PAYMENT_METHODS = [
     {
@@ -236,12 +238,7 @@ export default function CheckoutPage() {
 
     return (
         <div>
-            <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-1">
-                <Link to="/customer/cart" className="hover:text-primary transition">Cart</Link>
-                <span>/</span>
-                <span className="text-gray-900 font-medium">Payment</span>
-            </nav>
-            <h1 className="text-xl font-black text-gray-900 mb-4">Payment</h1>
+            <PageHeader title="Payment" subtitle="Complete your checkout securely" icon={<CreditCard size={20} />} />
 
             <div className="pb-6">
                 {error && (

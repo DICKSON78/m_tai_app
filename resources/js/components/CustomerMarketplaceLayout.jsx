@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-import { Avatar, AvatarFallback } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import CustomerSidebar from './CustomerSidebar';
 import CustomerRightRail from './CustomerRightRail';
@@ -13,6 +12,9 @@ export default function CustomerMarketplaceLayout({ children }) {
     const [cartCount, setCartCount] = useState(0);
     const [search, setSearch] = useState('');
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [filterOpen, setFilterOpen] = useState(false);
+    const [filterMin, setFilterMin] = useState('');
+    const [filterMax, setFilterMax] = useState('');
     const counterRef = useRef(0);
 
     const refreshCartCount = useCallback(async () => {
@@ -43,7 +45,14 @@ export default function CustomerMarketplaceLayout({ children }) {
         else navigate('/customer/shops');
     };
 
-    const userInitials = (user?.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    const applyFilter = () => {
+        const params = new URLSearchParams();
+        const min = filterMin.trim();
+        const max = filterMax.trim();
+        if (min) params.set('min', min);
+        if (max) params.set('max', max);
+        navigate(`/customer/shops${params.toString() ? `?${params.toString()}` : ''}`);
+    };
 
     return (
         <div className="h-screen flex flex-col bg-surface overflow-hidden">
@@ -73,7 +82,7 @@ export default function CustomerMarketplaceLayout({ children }) {
                         </Link>
 
                         {/* Search */}
-                        <form onSubmit={handleSearch} className="flex-1 min-w-0 max-w-3xl mx-2 lg:mx-6">
+                        <form onSubmit={handleSearch} className="relative flex-1 min-w-0 max-w-3xl mx-2 lg:mx-6">
                             <div className="flex items-center bg-white rounded-xl overflow-hidden border border-primary focus-within:ring-2 focus-within:ring-primary/50 shadow-sm">
                                 <div className="pl-4 text-gray-400 shrink-0">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,13 +95,78 @@ export default function CustomerMarketplaceLayout({ children }) {
                                     placeholder="Search products, shops..."
                                     className="flex-1 px-3 py-2.5 text-sm text-gray-800 outline-none bg-transparent min-w-0"
                                 />
+                                <span className="w-px h-5 bg-gray-200 shrink-0" />
+                                <button
+                                    type="button"
+                                    onClick={() => setFilterOpen(v => !v)}
+                                    className={`px-2.5 py-2.5 shrink-0 transition-colors ${filterOpen ? 'text-primary-dark' : 'text-gray-400 hover:text-primary-dark'}`}
+                                    aria-label="Filter"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4 2 2 0 000-4zM4 6h4m4 0h8m-8 12a2 2 0 100 4 2 2 0 000-4zM4 18h4m10 0h2m-2-4a2 2 0 100 4 2 2 0 000-4z" />
+                                    </svg>
+                                </button>
                                 <button type="submit" className="px-5 py-2.5 text-sm font-bold text-white shrink-0" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
                                     Search
                                 </button>
                             </div>
+
+                            {/* Filter panel */}
+                            {filterOpen && (
+                                <div className="absolute left-0 right-0 top-full z-50 mt-2 bg-white rounded-xl shadow-lg border border-gray-100 p-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <p className="text-sm font-bold text-gray-900">Filter Products</p>
+                                        <button onClick={() => setFilterOpen(false)} className="text-gray-400 hover:text-gray-600" aria-label="Close">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <p className="text-xs font-semibold text-gray-500 mb-1.5">Price Range (TZS)</p>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                                            <span className="px-2.5 text-xs font-semibold text-gray-400 bg-gray-50 self-stretch flex items-center">Min</span>
+                                            <input
+                                                value={filterMin}
+                                                onChange={(e) => setFilterMin(e.target.value)}
+                                                type="number"
+                                                min="0"
+                                                placeholder="0"
+                                                className="flex-1 min-w-0 px-2 py-2 text-sm outline-none"
+                                            />
+                                        </div>
+                                        <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                                            <span className="px-2.5 text-xs font-semibold text-gray-400 bg-gray-50 self-stretch flex items-center">Max</span>
+                                            <input
+                                                value={filterMax}
+                                                onChange={(e) => setFilterMax(e.target.value)}
+                                                type="number"
+                                                min="0"
+                                                placeholder="Any"
+                                                className="flex-1 min-w-0 px-2 py-2 text-sm outline-none"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-end gap-2 mt-3">
+                                        <button
+                                            onClick={() => { setFilterMin(''); setFilterMax(''); setFilterOpen(false); navigate('/customer/shops'); }}
+                                            className="px-3 py-1.5 text-sm font-semibold text-gray-600 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+                                        >
+                                            Clear
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setFilterOpen(false); applyFilter(); }}
+                                            className="px-4 py-1.5 text-sm font-bold text-white rounded-lg" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}
+                                        >
+                                            Apply
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </form>
 
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        <div className="flex items-center gap-1 shrink-0">
                             {/* Cart */}
                             <Link
                                 to="/customer/cart"
@@ -111,13 +185,9 @@ export default function CustomerMarketplaceLayout({ children }) {
                             {/* User */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <button className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-full hover:bg-white/10 transition-colors">
-                                        <Avatar className="h-8 w-8 border-2 border-primary/40">
-                                            <AvatarFallback className="text-white text-xs font-bold" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
-                                                {userInitials}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <svg className="w-4 h-4 text-white/60 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <button className="flex items-center gap-1.5 px-3 py-1 rounded-full hover:bg-white/10 transition-colors">
+                                        <span className="text-sm font-bold text-white hidden md:block max-w-[120px] truncate">{(user?.name || 'Customer')}</span>
+                                        <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </button>
