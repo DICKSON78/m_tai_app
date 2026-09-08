@@ -172,6 +172,7 @@ class ImportGoodController extends Controller
             [
                 'business_id' => $business->id,
                 'name' => $importGood->item_name,
+                'slug' => \Illuminate\Support\Str::slug($importGood->item_name) . '-' . \Illuminate\Support\Str::random(5),
                 'buying_price' => $unitCost,
                 'selling_price' => $importGood->selling_price,
                 'wholesale_price' => $importGood->selling_price,

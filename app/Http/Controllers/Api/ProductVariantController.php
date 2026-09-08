@@ -65,6 +65,12 @@ class ProductVariantController extends Controller
 
     public function show(ProductVariant $variant)
     {
+        $business = $variant->product->business;
+
+        if ($business->user_id !== request()->user()->id) {
+            abort(403, 'Huna ruhusa');
+        }
+
         $variant->load('product');
 
         return response()->json($variant);
