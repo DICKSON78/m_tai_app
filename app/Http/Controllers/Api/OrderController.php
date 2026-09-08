@@ -256,8 +256,7 @@ class OrderController extends Controller
 
         $query = Order::whereHas('customer', function ($q) use ($user) {
             $q->where('user_id', $user->id);
-        })
-            ->where('status', 'completed');
+        });
 
         if ($period) {
             match ($period) {

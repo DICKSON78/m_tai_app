@@ -104,7 +104,7 @@ class CouponController extends Controller
         ]);
     }
 
-    public function destroy(Business $business, Coupon $coupon)
+    public function destroy(Request $request, Business $business, Coupon $coupon)
     {
         if ($business->user_id !== $request->user()->id) {
             abort(403);

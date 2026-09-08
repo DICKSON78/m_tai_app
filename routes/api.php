@@ -124,7 +124,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/businesses/{business}', [BusinessController::class, 'show']);
         Route::put('/businesses/{business}', [BusinessController::class, 'update']);
         Route::delete('/businesses/{business}', [BusinessController::class, 'destroy']);
-        Route::post('/businesses/{business}/switch', [BusinessController::class, 'switch']);
+        Route::post('/businesses/{business}/switch', [BusinessController::class, 'switch'])->middleware([
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+        ]);
         Route::get('/businesses/{business}/stats', [BusinessController::class, 'stats']);
 
         // Capital
@@ -672,7 +676,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/orders', [OrderController::class, 'myOrders']);
         Route::get('/orders/{order}', [OrderController::class, 'show']);
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancelOrder']);
-        Route::get('/orders/{order}/reorder', [OrderController::class, 'reorder']);
+        Route::get('/orders/{order}/reorder', [OrderController::class, 'reorder'])->middleware([
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+        ]);
         Route::get('/deliveries', [DeliveryController::class, 'customerDeliveries']);
         Route::get('/deliveries/{delivery}', [DeliveryController::class, 'show']);
         Route::get('/wishlist', [WishlistController::class, 'index']);
@@ -684,12 +692,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:transporter')->prefix('transporter')->group(function () {
         Route::get('/dashboard', [DashboardApiController::class, 'transporterDashboard']);
         Route::get('/deliveries', [TransporterController::class, 'myDeliveries']);
+        Route::get('/deliveries/available', [DeliveryController::class, 'available']);
         Route::get('/deliveries/{delivery}', [DeliveryController::class, 'show']);
         Route::post('/deliveries/{delivery}/status', [TransporterController::class, 'updateDeliveryStatus']);
         Route::post('/deliveries/{delivery}/accept', [DeliveryController::class, 'acceptDelivery']);
         Route::post('/deliveries/{delivery}/reject', [DeliveryController::class, 'rejectDelivery']);
         Route::post('/deliveries/{delivery}/negotiate', [DeliveryController::class, 'negotiateDelivery']);
-        Route::get('/deliveries/available', [DeliveryController::class, 'available']);
         Route::get('/profile', [TransporterController::class, 'profile']);
         Route::put('/profile', [TransporterController::class, 'updateProfile']);
     });
@@ -739,15 +747,25 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/audit-logs/{auditLog}', [AuditLogController::class, 'destroy']);
     });
 
-    // Cart
-    Route::get('/cart', [CartController::class, 'index']);
-    Route::post('/cart', [CartController::class, 'add']);
-    Route::put('/cart/{key}', [CartController::class, 'update']);
-    Route::delete('/cart/{key}', [CartController::class, 'remove']);
-    Route::delete('/cart', [CartController::class, 'clear']);
+    // Cart (session-based - must start session)
+    Route::middleware([
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+    ])->group(function () {
+        Route::get('/cart', [CartController::class, 'index']);
+        Route::post('/cart', [CartController::class, 'add']);
+        Route::put('/cart/{key}', [CartController::class, 'update']);
+        Route::delete('/cart/{key}', [CartController::class, 'remove']);
+        Route::delete('/cart', [CartController::class, 'clear']);
+    });
 
     // Orders - Customer
-    Route::post('/orders/checkout', [OrderController::class, 'checkout']);
+    Route::post('/orders/checkout', [OrderController::class, 'checkout'])->middleware([
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+    ]);
     Route::get('/orders', [OrderController::class, 'myOrders']);
     Route::get('/orders/{order}', [OrderController::class, 'show']);
 
