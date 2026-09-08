@@ -7,8 +7,8 @@
     <div class="w-full max-w-2xl">
         {{-- Header --}}
         <div class="text-center mb-10">
-            <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg overflow-hidden">
-                <img src="/icons/icon-96x96.png" alt="M-TAI" class="w-14 h-14 object-contain" />
+            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg overflow-hidden">
+                <img src="/icons/icon-96x96.png?v=2" alt="M-TAI" class="w-14 h-14 rounded-full object-cover" />
             </div>
             <h1 class="text-2xl font-bold text-gray-800">Chagua Aina ya Usajili</h1>
             <p class="text-gray-500 mt-2">Chagua jinsi unavyotaka kutumia M-TAI</p>

@@ -64,8 +64,8 @@ export default function LoginPage() {
             <div className="w-full max-w-2xl">
                 <div className="text-center mb-12">
                     <div className="flex items-center justify-center gap-3 mb-8">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden border border-gray-100 shadow-sm">
-                            <img src="/icons/icon-96x96.png" alt="M-TAI" className="w-10 h-10 object-contain" />
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden border border-gray-100 shadow-sm">
+                            <img src="/icons/icon-96x96.png?v=2" alt="M-TAI" className="w-10 h-10 rounded-full object-cover" />
                         </div>
                         <span className="text-gray-600 font-black text-3xl">M-TAI</span>
                     </div>

@@ -75,8 +75,8 @@ export default function CustomerMarketplaceLayout({ children }) {
 
                         {/* Logo */}
                         <Link to="/customer/dashboard" className="flex items-center gap-2 shrink-0">
-                            <div className="w-9 h-9 rounded-lg overflow-hidden bg-white flex items-center justify-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>
-                                <img src="/icons/icon-96x96.png" alt="M-TAI" className="w-8 h-8 object-contain" />
+                            <div className="w-9 h-9 rounded-full overflow-hidden bg-white flex items-center justify-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>
+                                <img src="/icons/icon-96x96.png?v=2" alt="M-TAI" className="w-8 h-8 rounded-full object-cover" />
                             </div>
                             <span className="hidden sm:block text-white font-black text-xl tracking-tight">M-TAI</span>
                         </Link>

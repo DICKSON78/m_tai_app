@@ -27,20 +27,20 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="M-TAI - Smart Business Platform">
     <meta property="og:description" content="Buy, sell, and manage your business from your phone.">
-    <meta property="og:image" content="/icons/icon-192x192.png">
+    <meta property="og:image" content="/icons/icon-192x192.png?v=2">
     <meta property="og:site_name" content="M-TAI">
 
     <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" href="/icons/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-128x128.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="/icons/icon-72x72.png">
+    <link rel="apple-touch-icon" href="/icons/icon-152x152.png?v=2">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png?v=2">
+    <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-128x128.png?v=2">
+    <link rel="apple-touch-icon" sizes="76x76" href="/icons/icon-72x72.png?v=2">
 
     <!-- Favicon -->
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/icons/icon-96x96.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-72x72.png">
+    <link rel="icon" href="/favicon.ico?v=3" sizes="any">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png?v=2">
+    <link rel="icon" type="image/png" sizes="96x96" href="/icons/icon-96x96.png?v=2">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-72x72.png?v=2">
 
     <!-- Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -105,8 +105,8 @@
                     container.innerHTML = `
                         <div class="pwa-install-banner show" id="pwa-install-banner">
                             <div style="max-width:640px;margin:0 auto;display:flex;align-items:center;gap:12px;">
-                                <div style="width:40px;height:40px;background:#ffffff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid #e5e7eb;">
-                                    <img src="/icons/icon-96x96.png" alt="M-TAI" style="width:32px;height:32px;object-fit:contain;" />
+                                <div style="width:40px;height:40px;background:#ffffff;border-radius:999px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid #e5e7eb;">
+                                    <img src="/icons/icon-96x96.png?v=2" alt="M-TAI" style="width:32px;height:32px;object-fit:cover;border-radius:999px;" />
                                 </div>
                                 <div style="flex:1;min-width:0;">
                                     <p style="font-weight:600;font-size:14px;color:#111827;">Install M-TAI</p>

@@ -7,8 +7,8 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10">
           <div className="col-span-2 md:col-span-4 lg:col-span-1 mb-4 lg:mb-0">
             <Link to="/" className="flex items-center gap-2 mb-5">
-              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg shadow-black/20 overflow-hidden">
-                <img src="/icons/icon-96x96.png" alt="M-TAI" className="w-7 h-7 object-contain" />
+              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg shadow-black/20 overflow-hidden">
+                <img src="/icons/icon-96x96.png?v=2" alt="M-TAI" className="w-7 h-7 rounded-full object-cover" />
               </div>
               <span className="text-white font-black text-xl tracking-tight">M-TAI</span>
             </Link>
