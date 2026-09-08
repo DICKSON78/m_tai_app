@@ -38,11 +38,16 @@ class BusinessController extends Controller
             'working_hours' => 'nullable|array',
             'payment_code' => 'nullable|string|max:50',
             'bank_account_number' => 'nullable|string|max:50',
+            'business_logo' => 'nullable|image|max:2048',
         ]);
 
         $validated['user_id'] = $request->user()->id;
         $validated['business_code'] = Business::generateBusinessCode($validated['district']);
         $validated['status'] = 'pending';
+
+        if ($request->hasFile('business_logo')) {
+            $validated['business_logo'] = $request->file('business_logo')->store('businesses', 'public');
+        }
 
         $business = Business::create($validated);
 

@@ -5,7 +5,7 @@ import ProductCard from '../../components/ProductCard';
 import ShimmerProductGrid from '../../components/ShimmerProductGrid';
 
 const TRUST_ITEMS = [
-    { label: 'Fast Delivery', icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0' },
+    { label: 'Get Fast', icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0' },
     { label: 'Secure Payment', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
     { label: '24/7 Support', icon: 'M18 9.5v9m2-9a2 2 0 00-2-2m-8 1V5a2 2 0 00-2-2H8m5 7v3m0 0a2 2 0 11-4 0 2 2 0 014 0zm-1 6v1m2-5h-2m-2 0a2 2 0 11-4 0 2 2 0 014 0zm4.5 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z' },
     { label: 'Easy Returns', icon: 'M4 4v5h5M20 20v-5h-5m-9.07 3A8 8 0 1011.93 4M4 4l2.5.5m0 0L6.5 3M16 12a2 2 0 11-4 0 2 2 0 014 0z' },

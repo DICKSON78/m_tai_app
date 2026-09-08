@@ -5,7 +5,7 @@ import PageHeader from '../../components/casfeta/PageHeader';
 import SectionHeader from '../../components/casfeta/SectionHeader';
 import FormField from '../../components/casfeta/FormField';
 import ActionBar from '../../components/casfeta/ActionBar';
-import { Store, Tag, MapPin, Clock, CreditCard } from 'lucide-react';
+import { Store, Tag, MapPin, Clock, CreditCard, Image as ImageIcon, Upload } from 'lucide-react';
 
 const TANZANIAN_REGIONS = [
     'Arusha', 'Dar es Salaam', 'Dodoma', 'Geita', 'Iringa',
@@ -23,6 +23,15 @@ const BUSINESS_TYPES = [
     { value: 'Engineering', label: 'Engineering' },
     { value: 'Service', label: 'Services' },
     { value: 'Other', label: 'Other' },
+];
+
+const SHOP_TEMPLATES = [
+    { id: 'retail', name: 'Duka la Rejareja', emoji: '🛒', type: 'Duka', category: 'General Retail', working_hours_start: '08:00', working_hours_end: '21:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+    { id: 'restaurant', name: 'Mgahawa', emoji: '🍽️', type: 'Hoteli', category: 'Food & Restaurant', working_hours_start: '07:00', working_hours_end: '22:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+    { id: 'pharmacy', name: 'Pharmacy', emoji: '💊', type: 'Pharmacy', category: 'Health & Pharmacy', working_hours_start: '08:00', working_hours_end: '20:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+    { id: 'salon', name: 'Saluni', emoji: '💇', type: 'Vitolani', category: 'Beauty & Salon', working_hours_start: '09:00', working_hours_end: '19:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+    { id: 'grocery', name: 'Grocery', emoji: '🥬', type: 'Duka', category: 'Groceries', working_hours_start: '07:00', working_hours_end: '21:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+    { id: 'electronics', name: 'Electronics', emoji: '📱', type: 'Duka', category: 'Electronics', working_hours_start: '09:00', working_hours_end: '20:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
 ];
 
 const WORKING_DAYS = [
@@ -62,6 +71,9 @@ export default function BusinessFormPage() {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(isEditing);
+    const [logoFile, setLogoFile] = useState(null);
+    const [logoPreview, setLogoPreview] = useState(null);
+    const [templateId, setTemplateId] = useState('');
 
     useEffect(() => {
         if (isEditing) {
@@ -83,6 +95,9 @@ export default function BusinessFormPage() {
                         payment_code: biz.payment_code || '',
                         bank_account_number: biz.bank_account_number || '',
                     });
+                    if (biz.business_logo) {
+                        setLogoPreview(biz.business_logo.startsWith('http') ? biz.business_logo : `/storage/${biz.business_logo}`);
+                    }
                 })
                 .catch((error) => { console.error('Failed to fetch business:', error); alert('Failed to load business information.'); navigate('/owner/businesses'); })
                 .finally(() => setFetching(false));
@@ -103,12 +118,62 @@ export default function BusinessFormPage() {
         if (errors.working_days) setErrors(prev => ({ ...prev, working_days: null }));
     };
 
+    const handleLogoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setLogoFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => setLogoPreview(reader.result);
+            reader.readAsDataURL(file);
+            if (errors.business_logo) setErrors(prev => ({ ...prev, business_logo: null }));
+        }
+    };
+
+    const removeLogo = () => {
+        setLogoFile(null);
+        setLogoPreview(null);
+    };
+
+    const handleTemplateSelect = (template) => {
+        setForm(prev => ({
+            ...prev,
+            business_type: template.type,
+            business_category: template.category,
+            working_hours_start: template.working_hours_start,
+            working_hours_end: template.working_hours_end,
+            working_days: template.working_days,
+        }));
+        setTemplateId(template.id);
+        setErrors({});
+    };
+
+    const buildFormData = () => {
+        const fd = new FormData();
+        fd.append('business_name', form.business_name);
+        fd.append('business_type', form.business_type);
+        fd.append('business_category', form.business_category);
+        fd.append('region', form.region);
+        fd.append('district', form.district);
+        fd.append('ward', form.ward);
+        fd.append('street', form.street);
+        fd.append('road', form.road);
+        fd.append('working_hours_start', form.working_hours_start);
+        fd.append('working_hours_end', form.working_hours_end);
+        form.working_days.forEach(d => fd.append('working_days[]', d));
+        fd.append('payment_code', form.payment_code);
+        fd.append('bank_account_number', form.bank_account_number);
+        if (logoFile) fd.append('business_logo', logoFile);
+        if (isEditing) fd.append('_method', 'PUT');
+        return fd;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true); setErrors({});
         try {
-            if (isEditing) { await api.put(`/owner/businesses/${id}`, form); }
-            else { await api.post('/owner/businesses', form); }
+            const fd = buildFormData();
+            if (isEditing) { await api.post(`/owner/businesses/${id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } }); }
+            else { await api.post('/owner/businesses', fd, { headers: { 'Content-Type': 'multipart/form-data' } }); }
             navigate('/owner/businesses');
         } catch (err) { console.error('Failed to save business:', err);
             if (err.response?.status === 422) setErrors(err.response.data.errors || {});
@@ -129,6 +194,30 @@ export default function BusinessFormPage() {
                 backTo="/owner/businesses"
             />
 
+            {!isEditing && (
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-5">
+                    <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                        <SectionHeader icon={<Store size={18} />} title="Anza Kutoka Template" subtitle="Chagua template la duka lako ili kuanza haraka" />
+                    </div>
+                    <div className="p-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
+                            {SHOP_TEMPLATES.map(template => (
+                                <button
+                                    key={template.id}
+                                    type="button"
+                                    onClick={() => handleTemplateSelect(template)}
+                                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border transition cursor-pointer ${templateId === template.id ? 'border-[#00D4AA] bg-[#00D4AA]/10 ring-2 ring-[#00D4AA]/30' : 'border-gray-200 hover:border-[#00D4AA] hover:bg-[#00D4AA]/5'}`}
+                                >
+                                    <span className="text-3xl">{template.emoji}</span>
+                                    <span className="text-sm font-semibold text-gray-800">{template.name}</span>
+                                    <span className="text-xs text-gray-500">{template.category}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <form onSubmit={handleSubmit}>
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-5">
                     <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
@@ -147,6 +236,28 @@ export default function BusinessFormPage() {
                             </FormField>
                             <FormField label="Category" icon={<Tag size={16} />}>
                                 <input type="text" name="business_category" value={form.business_category} onChange={handleChange} className={inputClasses} placeholder="e.g. Food, Medicine, etc." />
+                            </FormField>
+                        </div>
+                        <div className="mt-6">
+                            <FormField label="Shop Logo" icon={<ImageIcon size={16} />} error={errors.business_logo?.[0]}>
+                                {logoPreview ? (
+                                    <div className="flex items-center gap-4">
+                                        <img src={logoPreview} alt="Shop logo preview" className="w-20 h-20 object-cover rounded-lg border border-gray-200" />
+                                        <div className="flex flex-col gap-2">
+                                            <button type="button" onClick={removeLogo} className="inline-flex items-center gap-1.5 px-3 py-2 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition">Remove</button>
+                                            <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 text-sm text-[#00D4AA] bg-[#00D4AA]/10 rounded-lg hover:bg-[#00D4AA]/20 transition">
+                                                <Upload size={14} /> Change
+                                                <input type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <label className="flex flex-col items-center justify-center w-40 h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#00D4AA] hover:bg-[#00D4AA]/5 transition">
+                                        <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                                        <span className="text-xs text-gray-500">Click to upload logo</span>
+                                        <input type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
+                                    </label>
+                                )}
                             </FormField>
                         </div>
                     </div>

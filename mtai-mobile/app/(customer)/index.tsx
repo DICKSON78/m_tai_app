@@ -34,7 +34,7 @@ const PLACEHOLDER_COLORS = ['#0FAE8C', '#2F80ED', '#F2994A', '#EB5757', '#9B51E0
 const SEARCH_DEBOUNCE_MS = 400;
 
 const TRUST_ITEMS = [
-  { icon: 'local-shipping' as const, label: 'Fast Delivery' },
+  { icon: 'local-shipping' as const, label: 'Get Fast' },
   { icon: 'verified-user' as const, label: 'Secure Payment' },
   { icon: 'support-agent' as const, label: '24/7 Support' },
   { icon: 'autorenew' as const, label: 'Easy Returns' },

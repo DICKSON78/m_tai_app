@@ -7,7 +7,7 @@ import { COLORS, SPACING, FONTS, RADIUS, SHADOWS } from '../../src/constants/the
 
 const FEATURES: { icon: keyof typeof MaterialIcons.glyphMap; label: string; value: string }[] = [
   { icon: 'storefront', label: 'Wide Marketplace', value: 'Connect with trusted local businesses' },
-  { icon: 'local-shipping', label: 'Fast Delivery', value: 'Track your orders in real time' },
+  { icon: 'local-shipping', label: 'Get Fast', value: 'Track your orders in real time' },
   { icon: 'verified-user', label: 'Secure Payments', value: 'Encrypted and protected transactions' },
   { icon: 'support-agent', label: '24/7 Support', value: 'We are always here to help' },
 ];

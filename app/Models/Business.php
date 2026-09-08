@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Business extends Model
 {
     use HasFactory;
+
+    protected $appends = ['logo', 'logo_url'];
 
     protected $fillable = [
         'user_id', 'business_name', 'business_logo', 'business_code',
@@ -133,5 +136,23 @@ class Business extends Model
         $number = $last ? intval(substr($last->business_code, -5)) + 1 : 1;
 
         return $prefix.str_pad($number, 5, '0', STR_PAD_LEFT);
+    }
+
+    protected function logo(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->business_logo,
+        );
+    }
+
+    protected function logoUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->business_logo
+                ? (str_starts_with($this->business_logo, 'http')
+                    ? $this->business_logo
+                    : url('storage/'.$this->business_logo))
+                : null,
+        );
     }
 }
