@@ -321,7 +321,6 @@ class AuthApiController extends Controller
             'email' => $validated['email'],
             'phone' => $validated['phone'],
             'password' => Hash::make($validated['password']),
-            'region' => $validated['region'] ?? null,
             'role' => 'transporter',
             'user_code' => User::generateUserCode(),
         ]);
