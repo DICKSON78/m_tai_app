@@ -72,6 +72,11 @@ class AdminController extends Controller
         ]);
 
         $validated['business_code'] = Business::generateBusinessCode($validated['district'] ?? 'HQ');
+        $validated['business_category'] = $validated['business_category'] ?? $validated['business_type'];
+        $validated['region'] = $validated['region'] ?? 'Tanzania';
+        $validated['district'] = $validated['district'] ?? 'HQ';
+        $validated['ward'] = $validated['ward'] ?? 'HQ';
+        $validated['payment_code'] = $validated['payment_code'] ?? 'PAY-' . strtoupper(Str::random(8));
         $validated['status'] = 'active';
 
         $business = Business::create($validated);
