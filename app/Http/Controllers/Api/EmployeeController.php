@@ -7,6 +7,7 @@ use App\Models\Business;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class EmployeeController extends Controller
 {
@@ -59,6 +60,8 @@ class EmployeeController extends Controller
                 $user = User::create([
                     'name' => $validated['name'],
                     'phone' => $validated['phone'],
+                    'email' => $validated['phone'] . '@m-tai.local',
+                    'password' => Hash::make('password'),
                     'role' => 'employee',
                     'user_code' => User::generateUserCode(),
                     'is_active' => true,
