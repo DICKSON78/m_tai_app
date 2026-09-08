@@ -53,14 +53,15 @@ class CustomerController extends Controller
 
         $user = null;
 
-        if ($validated['phone']) {
+        if (!empty($validated['email']) && $validated['phone']) {
             $user = User::where('phone', $validated['phone'])->first();
 
             if (!$user) {
                 $user = User::create([
                     'name' => $validated['full_name'],
                     'phone' => $validated['phone'],
-                    'email' => $validated['email'] ?? null,
+                    'email' => $validated['email'],
+                    'password' => bcrypt(\Illuminate\Support\Str::random(16)),
                     'role' => 'customer',
                     'user_code' => User::generateUserCode(),
                     'is_active' => true,

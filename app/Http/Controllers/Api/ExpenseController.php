@@ -73,26 +73,20 @@ class ExpenseController extends Controller
         ], 201);
     }
 
-    public function show(Request $request, Business $business, Expense $expense)
+    public function show(Request $request, Expense $expense)
     {
+        $business = $expense->business;
         $this->authorizeBusiness($request, $business);
-
-        if ($expense->business_id !== $business->id) {
-            abort(403, 'Huna ruhusa ya kuona matumizi hii.');
-        }
 
         $expense->load('recordedBy:id,name');
 
         return response()->json($expense);
     }
 
-    public function update(Request $request, Business $business, Expense $expense)
+    public function update(Request $request, Expense $expense)
     {
+        $business = $expense->business;
         $this->authorizeBusiness($request, $business);
-
-        if ($expense->business_id !== $business->id) {
-            abort(403, 'Huna ruhusa ya kubadilisha matumizi hii.');
-        }
 
         $validated = $request->validate([
             'category' => 'sometimes|in:breakfast,lunch,dinner,transport,drinks,rent,salaries,water,electricity,security,taxes,internet,charity,maintenance,other',
@@ -110,13 +104,10 @@ class ExpenseController extends Controller
         ]);
     }
 
-    public function destroy(Request $request, Business $business, Expense $expense)
+    public function destroy(Request $request, Expense $expense)
     {
+        $business = $expense->business;
         $this->authorizeBusiness($request, $business);
-
-        if ($expense->business_id !== $business->id) {
-            abort(403, 'Huna ruhusa ya kufuta matumizi hii.');
-        }
 
         $expense->delete();
 

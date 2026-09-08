@@ -43,6 +43,7 @@ class BusinessController extends Controller
 
         $validated['user_id'] = $request->user()->id;
         $validated['business_code'] = Business::generateBusinessCode($validated['district']);
+        $validated['payment_code'] = $validated['payment_code'] ?? 'PAY-'.strtoupper(\Illuminate\Support\Str::random(8));
         $validated['status'] = 'pending';
 
         if ($request->hasFile('business_logo')) {
