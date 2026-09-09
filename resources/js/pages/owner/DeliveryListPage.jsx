@@ -96,7 +96,7 @@ export default function DeliveryListPage() {
 
     useEffect(() => {
         if (selectedBusiness && (createModalOpen || assignModalOpen)) {
-            api.get(`/owner/businesses/${selectedBusiness}/customers`, { params: { per_page: 200 } }).then(res => setCustomers(res.data?.data || res.data || [])).catch((error) => { console.error('Failed to fetch customers:', error); setCustomers([]); });
+            api.get(`/owner/businesses/${selectedBusiness}/customers`, { params: { per_page: 100 } }).then(res => setCustomers(res.data?.data || res.data || [])).catch((error) => { console.error('Failed to fetch customers:', error); setCustomers([]); });
         }
     }, [selectedBusiness, createModalOpen, assignModalOpen]);
 
