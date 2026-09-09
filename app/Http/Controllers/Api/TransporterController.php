@@ -144,7 +144,7 @@ class TransporterController extends Controller
             'delivery' => $delivery->fresh()->load([
                 'order:id,transaction_code,total',
                 'business:id,business_name',
-                'customer:id,name,phone',
+                'customer:id,full_name,phone',
             ]),
         ]);
     }
