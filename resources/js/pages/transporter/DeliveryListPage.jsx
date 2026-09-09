@@ -70,7 +70,7 @@ export default function DeliveryListPage() {
         if (!statusDelivery || !statusAction) return;
         setStatusUpdating(true);
         try {
-            await api.put(`/transporter/deliveries/${statusDelivery.id}/status`, { status: statusAction });
+            await api.post(`/transporter/deliveries/${statusDelivery.id}/status`, { status: statusAction });
             setStatusModalOpen(false); setStatusDelivery(null); setStatusAction('');
             fetchDeliveries();
         } catch (error) { console.error('Failed to update delivery status:', error); alert(error?.response?.data?.message || 'Failed to update delivery status. Please try again.'); } finally { setStatusUpdating(false); }
