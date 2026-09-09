@@ -88,10 +88,10 @@ export default function CustomerListPage() {
     const openEdit = (customer) => {
         setEditing(customer);
         setForm({
-            name: customer.name || '',
+            name: customer.full_name || customer.name || '',
             phone: customer.phone || '',
             email: customer.email || '',
-            address: customer.address || '',
+            address: customer.location || customer.address || '',
         });
         setErrors({});
         setModalOpen(true);
@@ -120,7 +120,12 @@ export default function CustomerListPage() {
             if (editing) {
                 await api.put(`/owner/customers/${editing.id}`, form);
             } else {
-                await api.post(`/owner/businesses/${selectedBusiness}/customers`, form);
+                await api.post(`/owner/businesses/${selectedBusiness}/customers`, {
+                    full_name: form.name,
+                    phone: form.phone,
+                    email: form.email || null,
+                    location: form.address || null,
+                });
             }
             closeModal();
             fetchCustomers();
@@ -146,7 +151,7 @@ export default function CustomerListPage() {
 
     const confirmDeleteCustomer = (customer) => {
         setDeleteId(customer.id);
-        setDeleteName(customer.name || '');
+        setDeleteName(customer.full_name || customer.name || '');
         setConfirmOpen(true);
     };
 
@@ -280,9 +285,9 @@ export default function CustomerListPage() {
                                         <td className="px-6 py-3">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-9 h-9 rounded-full bg-[#00D4AA]/10 text-[#00D4AA] flex items-center justify-center text-xs font-bold uppercase">
-                                                    {(row.name || '?')[0]?.toUpperCase()}
+                                                    {(row.full_name || row.name || '?')[0]?.toUpperCase()}
                                                 </div>
-                                                <span className="font-medium text-gray-800">{row.name}</span>
+                                                <span className="font-medium text-gray-800">{row.full_name || row.name}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-3">

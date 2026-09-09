@@ -84,18 +84,21 @@ test.describe('Business Owner role', () => {
     });
 
     test('can create a new customer', async ({ page }) => {
+        const apiErrors = watchApi(page);
         await page.goto('/owner/customers', { waitUntil: 'domcontentloaded' });
-        await page.getByRole('button', { name: /add|new|create/i }).first().click({ timeout: 30000 }).catch(() => {});
+        await page.getByRole('button', { name: /add|new|create|customer/i }).first().click({ timeout: 30000 }).catch(() => {});
 
-        // If a modal or form appeared
-        const nameInput = page.locator('input[name="full_name"], input[name="name"]').first();
-        if (await nameInput.isVisible({ timeout: 5000 }).catch(() => false)) {
+        const dialog = page.getByRole('dialog', { name: /add new customer/i });
+        if (await dialog.isVisible({ timeout: 5000 }).catch(() => false)) {
             const stamp = Date.now();
-            await nameInput.fill(`E2E Customer ${stamp}`);
-            await page.locator('input[name="phone"]').fill('0712345678');
-            await page.getByRole('button', { name: /save|submit|create/i }).first().click();
-            await expect(page.getByText(`E2E Customer ${stamp}`)).toBeVisible({ timeout: 30000 });
+            const dialogName = `E2E Customer ${stamp}`;
+            await dialog.getByPlaceholder(/customer name/i).fill(dialogName);
+            await dialog.getByPlaceholder(/phone/i).fill('0712345678');
+            await dialog.getByRole('button', { name: 'Add Customer' }).click();
+            await expect(dialog).toBeHidden({ timeout: 30000 });
+            await page.waitForTimeout(1500);
         }
+        expectNoApiErrors(apiErrors);
     });
 
     // ─── Employees ─────────────────────────────────────────────────────────

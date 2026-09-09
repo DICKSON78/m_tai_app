@@ -64,19 +64,23 @@ test.describe('Admin role', () => {
     });
 
     test('can create and publish an announcement', async ({ page }) => {
+        const apiErrors = watchApi(page);
         await page.goto('/admin/announcements/new', { waitUntil: 'domcontentloaded' });
-        await expect(page.getByRole('heading', { name: /announcement/i })).toBeVisible({ timeout: 30000 });
+        await expect(page.getByRole('heading', { name: 'New Announcement' })).toBeVisible({ timeout: 30000 });
 
         const stamp = Date.now();
         const title = `E2E Announcement ${stamp}`;
 
         await page.fill('input[name="title"]', title);
         await page.fill('textarea[name="message"]', 'Test announcement from Playwright E2E');
-        await page.selectOption('select[name="type"]', { index: 1 });
-        await page.selectOption('select[name="target"]', { index: 1 });
+        await page.selectOption('select[name="target_role"]', { index: 1 });
 
-        await page.getByRole('button', { name: /publish|submit|save/i }).click();
-        await expect(page.getByText(title)).toBeVisible({ timeout: 60000 });
+        await page.getByRole('button', { name: 'Create' }).click();
+        await expect(page.getByText('created successfully').first()).toBeVisible({ timeout: 60000 });
+        await page.waitForURL(/\/admin\/announcements$/, { timeout: 30000 });
+        await expect(page.getByText(title)).toBeVisible({ timeout: 30000 });
+        await page.waitForTimeout(1500);
+        expectNoApiErrors(apiErrors);
     });
 
     // ─── Subscriptions ───────────────────────────────────────────────────
@@ -112,12 +116,15 @@ test.describe('Admin role', () => {
     // ─── Settings ────────────────────────────────────────────────────────
     test('can view and update admin settings', async ({ page }) => {
         await assertReachable(page, '/admin/settings');
-        await page.fill('input[name="app_name"]', 'M-TAI E2E Test');
-        await page.getByRole('button', { name: /save|update/i }).click();
+        await expect(page.getByRole('heading', { name: 'Platform Settings' })).toBeVisible({ timeout: 30000 });
+        const appNameInput = page.getByRole('textbox').first();
+        await appNameInput.fill('M-TAI E2E Test');
+        await page.getByRole('button', { name: 'Save Settings' }).first().click();
         await expect(page.getByText(/saved|updated|success/i)).toBeVisible({ timeout: 30000 });
         // Restore original value
-        await page.fill('input[name="app_name"]', 'M-TAI');
-        await page.getByRole('button', { name: /save|update/i }).click();
+        await appNameInput.fill('M-TAI');
+        await page.getByRole('button', { name: 'Save Settings' }).first().click();
+        await expect(page.getByText(/saved|updated|success/i)).toBeVisible({ timeout: 30000 });
     });
 
     // ─── Profile ─────────────────────────────────────────────────────────
