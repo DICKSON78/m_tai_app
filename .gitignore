@@ -33,3 +33,8 @@ mtai-mobile/.expo/
 /storage/fonts
 /storage/dompdf
 /mtai-mobile-web
+
+# Playwright
+/test-results
+/playwright-report
+/blob-report
