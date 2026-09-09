@@ -175,6 +175,27 @@ class ProductController extends Controller
         ]);
     }
 
+    public function togglePublish(Request $request, Product $product)
+    {
+        $business = $product->business;
+
+        if ($business->user_id !== $request->user()->id) {
+            abort(403, 'Huna ruhusa');
+        }
+
+        $wasPublished = (bool) $product->is_published;
+
+        $product->update([
+            'is_published' => !$wasPublished,
+            'is_draft' => $wasPublished,
+        ]);
+
+        return response()->json([
+            'message' => $product->is_published ? 'Bidhaa imechapishwa.' : 'Bidhaa imewekwa kama rasimu.',
+            'product' => $product->fresh(),
+        ]);
+    }
+
     public function stock(Request $request, Product $product)
     {
         $business = $product->business;

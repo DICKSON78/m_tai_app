@@ -150,6 +150,33 @@ class ProductTest extends TestCase
         ]);
     }
 
+    public function test_owner_can_toggle_publish_product(): void
+    {
+        $product = Product::factory()->create([
+            'business_id' => $this->business->id,
+            'is_published' => false,
+            'is_draft' => true,
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->postJson("/api/owner/products/{$product->id}/toggle-publish");
+
+        $response->assertOk()
+            ->assertJsonPath('product.is_published', true);
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'is_published' => true,
+            'is_draft' => false,
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->postJson("/api/owner/products/{$product->id}/toggle-publish");
+
+        $response->assertOk()
+            ->assertJsonPath('product.is_published', false);
+    }
+
     public function test_owner_can_delete_product(): void
     {
         $product = Product::factory()->create([

@@ -94,6 +94,7 @@ export default function ProductListPage() {
             await api.post(`/owner/products/${product.id}/toggle-publish`);
             fetchProducts();
         } catch (error) { console.error('Failed to toggle publish status:', error); alert(error?.response?.data?.message || 'Failed to update product. Please try again.'); } finally {
+            setTogglingId(null);
         }
     };
 
