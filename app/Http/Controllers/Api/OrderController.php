@@ -360,18 +360,33 @@ class OrderController extends Controller
 
     public function verify(Request $request)
     {
-        $validated = $request->validate([
-            'transaction_code' => 'required|string|exists:orders,transaction_code',
-            'customer_name' => 'required|string|max:255',
-            'customer_code' => 'nullable|string|max:255',
-            'amount' => 'required|numeric|min:0',
-        ]);
-
-        $order = Order::where('transaction_code', $validated['transaction_code'])
-            ->with(['business', 'items.product'])
-            ->firstOrFail();
-
         $user = $request->user();
+
+        if ($request->filled('transaction_code')) {
+            $validated = $request->validate([
+                'transaction_code' => 'required|string|exists:orders,transaction_code',
+                'customer_name' => 'required|string|max:255',
+                'customer_code' => 'nullable|string|max:255',
+                'amount' => 'required|numeric|min:0',
+            ]);
+
+            $order = Order::where('transaction_code', $validated['transaction_code'])
+                ->with(['business', 'items.product'])
+                ->firstOrFail();
+
+            $amount = (float) $validated['amount'];
+        } elseif ($orderId = $request->route('order')) {
+            $order = Order::with(['business', 'items.product'])->find($orderId);
+
+            if (! $order) {
+                return response()->json(['message' => 'Order not found.'], 404);
+            }
+
+            $amount = (float) $order->total;
+        } else {
+            return response()->json(['message' => 'Transaction code is required.'], 422);
+        }
+
         $businessIds = $user->businesses()->pluck('id');
         $employeeBusinessIds = $user->employees()->pluck('business_id');
 
@@ -385,7 +400,7 @@ class OrderController extends Controller
             return response()->json(['message' => 'Agizo hili tayari limethibitishwa.'], 422);
         }
 
-        if ((float) $validated['amount'] !== (float) $order->total) {
+        if ($request->filled('transaction_code') && $amount !== (float) $order->total) {
             return response()->json([
                 'message' => 'Kiasi hakilingani na jumla ya agizo. Ikilingani ni '.number_format($order->total, 2),
                 'expected' => $order->total,

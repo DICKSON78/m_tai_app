@@ -327,4 +327,60 @@ class OrderTest extends TestCase
             'status' => 'cancelled',
         ]);
     }
+
+    public function test_owner_can_verify_order_by_id(): void
+    {
+        $customer = Customer::create([
+            'business_id' => $this->business->id,
+            'full_name' => 'John Doe',
+            'phone' => '0712345678',
+            'customer_code' => 'CTM-000001',
+        ]);
+
+        $order = Order::create([
+            'business_id' => $this->business->id,
+            'customer_id' => $customer->id,
+            'transaction_code' => Order::generateTransactionCode(),
+            'subtotal' => 10000,
+            'discount' => 0,
+            'tax' => 0,
+            'total' => 10000,
+            'status' => 'pending',
+            'payment_status' => 'unpaid',
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->postJson("/api/owner/orders/{$order->id}/verify");
+
+        $response->assertOk()
+            ->assertJsonPath('order.status', 'completed');
+
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'status' => 'completed',
+            'payment_status' => 'paid',
+        ]);
+    }
+
+    public function test_owner_cannot_verify_other_owners_order(): void
+    {
+        $otherOwner = User::factory()->create(['role' => 'owner', 'is_active' => true]);
+        $otherBusiness = Business::factory()->create(['user_id' => $otherOwner->id]);
+
+        $order = Order::create([
+            'business_id' => $otherBusiness->id,
+            'transaction_code' => Order::generateTransactionCode(),
+            'subtotal' => 10000,
+            'discount' => 0,
+            'tax' => 0,
+            'total' => 10000,
+            'status' => 'pending',
+            'payment_status' => 'unpaid',
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->postJson("/api/owner/orders/{$order->id}/verify");
+
+        $response->assertStatus(403);
+    }
 }
