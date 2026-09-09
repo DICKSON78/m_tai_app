@@ -96,7 +96,7 @@ class OrderController extends Controller
 
         try {
             foreach ($grouped as $businessId => $items) {
-                $business = Business::with('settings')->find($businessId);
+                $business = Business::find($businessId);
 
                 $subtotal = 0;
                 $orderItemsData = [];
