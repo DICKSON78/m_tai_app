@@ -76,7 +76,7 @@ class TransporterController extends Controller
             ->with([
                 'order:id,transaction_code,total',
                 'business:id,business_name',
-                'customer:id,name,phone',
+                'customer:id,full_name,phone',
             ]);
 
         if ($request->has('status')) {

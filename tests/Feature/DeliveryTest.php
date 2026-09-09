@@ -141,6 +141,39 @@ class DeliveryTest extends TestCase
         $response->assertStatus(422);
     }
 
+    public function test_transporter_can_list_their_assigned_deliveries(): void
+    {
+        $transporterUser = User::factory()->create(['role' => 'transporter', 'is_active' => true]);
+        $transporter = Transporter::create([
+            'user_id' => $transporterUser->id,
+            'full_name' => 'Driver One',
+            'phone' => '0755000000',
+            'vehicle_type' => 'Bajaj',
+            'plate_number' => 'T123ABC',
+            'is_active' => true,
+        ]);
+
+        Delivery::create([
+            'business_id' => $this->business->id,
+            'customer_id' => $this->customer->id,
+            'goods_category' => 'sealed',
+            'item_description' => 'Assigned item',
+            'quantity' => 1,
+            'pickup_location' => 'Dar',
+            'destination' => 'Arusha',
+            'offered_price' => 10000,
+            'status' => 'accepted',
+            'transporter_id' => $transporter->id,
+        ]);
+
+        $response = $this->actingAs($transporterUser)
+            ->getJson('/api/transporter/deliveries');
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.status', 'accepted');
+    }
+
     public function test_transporter_can_see_available_deliveries(): void
     {
         $transporterUser = User::factory()->create(['role' => 'transporter', 'is_active' => true]);
