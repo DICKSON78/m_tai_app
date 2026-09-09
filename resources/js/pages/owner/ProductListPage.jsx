@@ -223,7 +223,7 @@ export default function ProductListPage() {
                                     </tr>
                                 ) : products.map((row) => {
                                     const qty = Number(row.quantity || 0);
-                                    const isPublished = row.status === 'published';
+                                    const isPublished = row.is_published || row.status === 'published';
                                     return (
                                         <tr key={row.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-3">
