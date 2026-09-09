@@ -15,7 +15,7 @@ class FinanceInvoiceController extends Controller
     {
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
         $invoices = Invoice::where('business_id', $businessId)
-            ->with('customer:id,name')
+            ->with('customer:id,full_name')
             ->when($request->status, fn($q, $v) => $q->where('status', $v))
             ->when($request->search, fn($q, $v) => $q->where('invoice_number', 'like', "%{$v}%"))
             ->orderBy('date', 'desc')
@@ -201,7 +201,7 @@ class FinanceInvoiceController extends Controller
         $invoiceDate = $e($invoice->date->format('d/m/Y'));
         $dueDate = $e($invoice->due_date->format('d/m/Y'));
         $status = $e(ucfirst($invoice->status));
-        $customerName = $e($invoice->customer->name ?? 'N/A');
+        $customerName = $e($invoice->customer->full_name ?? 'N/A');
         $notes = $e($invoice->notes ?? '');
 
         $rows = '';

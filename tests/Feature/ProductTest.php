@@ -43,6 +43,25 @@ class ProductTest extends TestCase
         ]);
     }
 
+    public function test_owner_can_create_product_without_business_id_body_field(): void
+    {
+        $response = $this->actingAs($this->owner)
+            ->postJson("/api/owner/businesses/{$this->business->id}/products", [
+                'name' => 'UI Created Product',
+                'buying_price' => 1200,
+                'selling_price' => 1800,
+                'quantity' => 20,
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('name', 'UI Created Product');
+
+        $this->assertDatabaseHas('products', [
+            'business_id' => $this->business->id,
+            'name' => 'UI Created Product',
+        ]);
+    }
+
     public function test_owner_can_list_products(): void
     {
         Product::factory()->count(3)->create([
@@ -50,7 +69,7 @@ class ProductTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->owner)
-            ->getJson("/api/owner/businesses/{$this->business->id}/products?business_id={$this->business->id}");
+            ->getJson("/api/owner/businesses/{$this->business->id}/products");
 
         $response->assertOk()
             ->assertJsonCount(3, 'data');

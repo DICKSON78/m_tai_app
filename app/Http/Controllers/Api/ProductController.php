@@ -11,18 +11,15 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, Business $business)
     {
         $request->validate([
-            'business_id' => 'required|integer|exists:businesses,id',
             'category' => 'nullable|integer|exists:categories,id',
             'search' => 'nullable|string|max:255',
             'status' => 'nullable|in:published,draft,all',
             'low_stock' => 'nullable|boolean',
-            'per_page' => 'nullable|integer|min:1|max:100',
+            'per_page' => 'nullable|integer|min:1|max:200',
         ]);
-
-        $business = Business::findOrFail($request->business_id);
 
         if ($business->user_id !== $request->user()->id) {
             abort(403, 'Huna ruhusa');
@@ -46,10 +43,10 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, Business $business)
     {
         $validated = $request->validate([
-            'business_id' => 'required|integer|exists:businesses,id',
+            'business_id' => 'nullable|integer|exists:businesses,id',
             'category_id' => 'nullable|integer|exists:categories,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
@@ -68,12 +65,13 @@ class ProductController extends Controller
             'location' => 'nullable|string|max:255',
         ]);
 
-        $business = Business::findOrFail($validated['business_id']);
+        $business = $request->input('business_id') ? Business::findOrFail($request->input('business_id')) : $business;
 
         if ($business->user_id !== $request->user()->id) {
             abort(403, 'Huna ruhusa');
         }
 
+        $validated['business_id'] = $business->id;
         $validated['user_id'] = $request->user()->id;
         $validated['is_published'] = false;
         $validated['is_draft'] = true;

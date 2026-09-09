@@ -137,6 +137,35 @@ class FinanceTest extends TestCase
         ]);
     }
 
+    public function test_list_invoices_with_customer(): void
+    {
+        $customer = \App\Models\Customer::create([
+            'business_id' => $this->business->id,
+            'customer_code' => 'CUS-001',
+            'full_name' => 'Halima Hassan',
+            'phone' => '0712345678',
+        ]);
+
+        Invoice::create([
+            'business_id' => $this->business->id,
+            'customer_id' => $customer->id,
+            'invoice_number' => 'INV-002',
+            'date' => now()->toDateString(),
+            'due_date' => now()->addDays(14)->toDateString(),
+            'subtotal' => 2000,
+            'tax_amount' => 0,
+            'total' => 2000,
+            'status' => 'draft',
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->getJson('/api/owner/finance/invoices');
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.invoice_number', 'INV-002');
+    }
+
     public function test_finance_report_profit_loss(): void
     {
         $response = $this->actingAs($this->owner)
