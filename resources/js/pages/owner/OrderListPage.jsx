@@ -87,13 +87,14 @@ export default function OrderListPage() {
             const params = {
                 page: currentPage,
                 per_page: 15,
+                business_id: selectedBusiness,
             };
             if (dateFrom) params.date_from = dateFrom;
             if (dateTo) params.date_to = dateTo;
             if (status) params.status = status;
             if (paymentStatus) params.payment_status = paymentStatus;
 
-            const res = await api.get(`/owner/businesses/${selectedBusiness}/orders`, { params });
+            const res = await api.get(`/owner/orders`, { params });
             const data = res.data?.data || [];
             setOrders(data);
             setCurrentPage(res.data?.current_page || 1);

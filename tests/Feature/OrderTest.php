@@ -244,6 +244,33 @@ class OrderTest extends TestCase
             ->assertJsonCount(2, 'data');
     }
 
+    public function test_owner_orders_can_be_filtered_by_business(): void
+    {
+        $otherBusiness = Business::factory()->create(['user_id' => $this->owner->id]);
+
+        $createOrder = fn (Business $business) => Order::create([
+            'business_id' => $business->id,
+            'customer_id' => null,
+            'transaction_code' => Order::generateTransactionCode(),
+            'subtotal' => 1000,
+            'discount' => 0,
+            'tax' => 0,
+            'total' => 1000,
+            'status' => 'pending',
+            'payment_status' => 'unpaid',
+        ]);
+
+        $createOrder($this->business);
+        $createOrder($otherBusiness);
+
+        $response = $this->actingAs($this->owner)
+            ->getJson('/api/owner/orders?business_id='.$this->business->id);
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.business_id', $this->business->id);
+    }
+
     public function test_unauthenticated_users_cannot_access_orders(): void
     {
         $response = $this->getJson('/api/orders');

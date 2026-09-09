@@ -325,11 +325,20 @@ class OrderController extends Controller
     {
         $user = $request->user();
 
+        $validated = $request->validate([
+            'business_id' => 'sometimes|nullable|integer',
+        ]);
+
         $businessIds = $user->businesses()->pluck('id');
 
-        $orders = Order::whereIn('business_id', $businessIds)
-            ->with(['customer', 'items.product'])
-            ->orderBy('created_at', 'desc')
+        $query = Order::whereIn('business_id', $businessIds)
+            ->with(['customer', 'items.product']);
+
+        if (! empty($validated['business_id'])) {
+            $query->where('business_id', $validated['business_id']);
+        }
+
+        $orders = $query->orderBy('created_at', 'desc')
             ->paginate(15);
 
         return response()->json($orders);
