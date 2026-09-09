@@ -123,7 +123,8 @@ export default function CheckoutPage() {
                 payload.coupon_code = couponCode.trim();
             }
             const res = await api.post('/orders/checkout', payload);
-            setOrderSuccess(res.data.data || res.data);
+            const data = res.data.data || res.data;
+            setOrderSuccess((data.orders && data.orders[0]) || data);
         } catch (err) {
             const msg = err.response?.data?.message || 'An error occurred. Please try again.';
             setError(msg);
