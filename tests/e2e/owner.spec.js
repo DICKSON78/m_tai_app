@@ -92,8 +92,9 @@ test.describe('Business Owner role', () => {
         if (await dialog.isVisible({ timeout: 5000 }).catch(() => false)) {
             const stamp = Date.now();
             const dialogName = `E2E Customer ${stamp}`;
+            const dialogPhone = `07${String(stamp).slice(-8)}`;
             await dialog.getByPlaceholder(/customer name/i).fill(dialogName);
-            await dialog.getByPlaceholder(/phone/i).fill('0712345678');
+            await dialog.getByPlaceholder(/phone/i).fill(dialogPhone);
             await dialog.getByRole('button', { name: 'Add Customer' }).click();
             await expect(dialog).toBeHidden({ timeout: 30000 });
             await page.waitForTimeout(1500);
