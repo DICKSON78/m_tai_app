@@ -7,7 +7,7 @@ import HeroBanner from '../../components/casfeta/HeroBanner';
 import InfoCard from '../../components/casfeta/InfoCard';
 import DataItem from '../../components/casfeta/DataItem';
 import StatBox from '../../components/casfeta/StatBox';
-import { Store, Edit, Pencil, User, Hash, Tag, Calendar, MapPin, Phone, Package } from 'lucide-react';
+import { Store, Edit, Pencil, User, Hash, Tag, Calendar, MapPin, Phone, Package, BadgeCheck } from 'lucide-react';
 
 const TYPE_BADGES = { shop: 'badge badge-green', restaurant: 'badge badge-blue', pharmacy: 'badge badge-purple', supermarket: 'badge badge-yellow' };
 
@@ -16,10 +16,22 @@ export default function AdminShopShowPage() {
     const navigate = useNavigate();
     const [shop, setShop] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [verifying, setVerifying] = useState(false);
 
     useEffect(() => {
         api.get(`/admin/businesses/${id}`).then(res => setShop(res.data)).catch((error) => { console.error('Failed to fetch shop:', error); navigate('/admin/shops'); }).finally(() => setLoading(false));
     }, [id, navigate]);
+
+    const handleVerify = async () => {
+        try {
+            const res = await api.post(`/admin/businesses/${id}/verify`);
+            setShop(res.data?.business || res.data);
+            setVerifying(true);
+            setTimeout(() => setVerifying(false), 2000);
+        } catch (error) {
+            alert(error?.response?.data?.message || 'Failed to verify shop. Please try again.');
+        }
+    };
 
     if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]"></div></div>;
     if (!shop) return null;
@@ -35,9 +47,15 @@ export default function AdminShopShowPage() {
                 backTo="/admin/shops"
                 icon={<Store className="w-5 h-5" />}
                 actions={
-                    <Link to={`/admin/shops/${id}/edit`} className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#00D4AA] text-white font-medium rounded-lg hover:bg-[#00B894] transition-all duration-200 text-sm shadow-md">
-                        <Pencil className="w-4 h-4" /> Edit Shop
-                    </Link>
+                    shop.status === 'pending' ? (
+                        <button onClick={handleVerify} disabled={verifying} className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#00D4AA] text-white font-medium rounded-lg hover:bg-[#00B894] transition-all duration-200 text-sm shadow-md">
+                            <BadgeCheck className="w-4 h-4" /> {verifying ? 'Verifying...' : 'Verify Shop'}
+                        </button>
+                    ) : (
+                        <Link to={`/admin/shops/${id}/edit`} className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#00D4AA] text-white font-medium rounded-lg hover:bg-[#00B894] transition-all duration-200 text-sm shadow-md">
+                            <Pencil className="w-4 h-4" /> Edit Shop
+                        </Link>
+                    )
                 }
             />
 

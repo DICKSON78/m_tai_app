@@ -138,7 +138,40 @@ class CustomerTest extends TestCase
 
     public function test_owner_can_get_customer_stats(): void
     {
-        // Uses a HAVING clause that is incompatible with the SQLite test database.
-        $this->markTestSkipped('stats endpoint uses MySQL HAVING syntax not supported on SQLite.');
+        $business = Business::factory()->create(['user_id' => $this->owner->id]);
+
+        $high = Customer::create([
+            'business_id' => $business->id,
+            'customer_code' => 'CUS-001',
+            'full_name' => 'Halima Hassan',
+            'phone' => '0712345678',
+        ]);
+        $none = Customer::create([
+            'business_id' => $business->id,
+            'customer_code' => 'CUS-002',
+            'full_name' => 'Neema John',
+            'phone' => '0723456789',
+        ]);
+
+        \App\Models\Order::create([
+            'business_id' => $business->id,
+            'customer_id' => $high->id,
+            'transaction_code' => 'TXN-100000001',
+            'subtotal' => 20000,
+            'discount' => 0,
+            'tax' => 0,
+            'total' => 20000,
+            'status' => 'completed',
+            'payment_status' => 'paid',
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->getJson("/api/owner/businesses/{$business->id}/customers/stats");
+
+        $response->assertOk()
+            ->assertJsonPath('total_customers', 2)
+            ->assertJsonCount(1, 'top_by_spending')
+            ->assertJsonPath('top_by_spending.0.full_name', 'Halima Hassan')
+            ->assertJsonPath('top_by_spending.0.total_orders', 1);
     }
 }

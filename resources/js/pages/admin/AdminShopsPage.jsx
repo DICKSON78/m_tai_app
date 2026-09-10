@@ -5,7 +5,7 @@ import Pagination from '../../components/Pagination';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import Modal from '../../components/Modal';
 import PageHeader from '../../components/casfeta/PageHeader';
-import { Store, Search, Eye, Pencil, Trash2, Plus, Package, Tag, SlidersHorizontal, X } from 'lucide-react';
+import { Store, Search, Eye, Pencil, Trash2, Plus, Package, Tag, SlidersHorizontal, X, BadgeCheck } from 'lucide-react';
 
 const TYPE_OPTIONS = [
     { value: '', label: 'All Types' },
@@ -52,6 +52,30 @@ export default function AdminShopsPage() {
         if (!deleteId) return;
         try { await api.delete(`/admin/businesses/${deleteId}`); setSuccessModal(true); setTimeout(() => setSuccessModal(false), 2000); fetchShops();         } catch (error) { console.error('Failed to delete shop:', error); alert(error?.response?.data?.message || 'Failed to delete shop. Please try again.'); }
         setDeleteId(null); setConfirmOpen(false);
+    };
+
+    const handleVerify = async (id) => {
+        try {
+            await api.post(`/admin/businesses/${id}/verify`);
+            fetchShops();
+        } catch (error) {
+            console.error('Failed to verify shop:', error);
+            alert(error?.response?.data?.message || 'Failed to verify shop. Please try again.');
+        }
+    };
+
+    const statusBadge = (status) => {
+        const styles = {
+            pending: 'bg-amber-100 text-amber-700',
+            active: 'bg-green-100 text-green-700',
+            suspended: 'bg-red-100 text-red-700',
+            closed: 'bg-gray-100 text-gray-600',
+        };
+        return (
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] || styles.active}`}>
+                {(status || 'active').replace(/^./, (c) => c.toUpperCase())}
+            </span>
+        );
     };
 
     return (
@@ -160,6 +184,7 @@ export default function AdminShopsPage() {
                                         <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Owner</th>
                                         <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Code</th>
                                         <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Type</th>
+                                        <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Status</th>
                                         <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Created</th>
                                         <th className="text-right px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Actions</th>
                                     </tr>
@@ -181,9 +206,15 @@ export default function AdminShopsPage() {
                                             <td className="px-6 py-3 text-sm text-gray-600">{row.owner?.name || row.user?.name || row.owner_name || '-'}</td>
                                             <td className="px-6 py-3"><span className="font-mono text-sm text-gray-700 bg-gray-100 px-2 py-0.5 rounded">{row.code || row.business_code || '-'}</span></td>
                                             <td className="px-6 py-3"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#00D4AA]/10 text-[#00D4AA]">{row.business_type || row.type || '-'}</span></td>
+                                            <td className="px-6 py-3">{statusBadge(row.status)}</td>
                                             <td className="px-6 py-3 text-sm text-gray-500">{row.created_at ? new Date(row.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}</td>
                                             <td className="px-6 py-3">
                                                 <div className="flex items-center justify-end gap-1">
+                                                    {row.status === 'pending' && (
+                                                        <button onClick={() => handleVerify(row.id)} className="h-8 w-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#00D4AA] hover:bg-[#00D4AA]/10 transition-all" title="Verify">
+                                                            <BadgeCheck className="w-4 h-4" />
+                                                        </button>
+                                                    )}
                                                     <Link to={`/admin/shops/${row.id}`} className="h-8 w-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#00D4AA] hover:bg-[#00D4AA]/10 transition-all" title="View">
                                                         <Eye className="w-4 h-4" />
                                                     </Link>

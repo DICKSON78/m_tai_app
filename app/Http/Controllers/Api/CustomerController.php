@@ -213,18 +213,25 @@ class CustomerController extends Controller
             ->count();
 
         $topBySpending = $business->customers()
-            ->withSum('orders', 'total')
-            ->withCount('orders')
-            ->having('orders_sum_total', '>', 0)
-            ->orderByDesc('orders_sum_total')
+            ->leftJoinSub(
+                \App\Models\Order::selectRaw('customer_id, SUM(total) as order_total, COUNT(*) as order_count')
+                    ->where('business_id', $business->id)
+                    ->groupBy('customer_id'),
+                'order_stats',
+                'order_stats.customer_id',
+                '=',
+                'customers.id'
+            )
+            ->where(fn ($q) => $q->where('order_stats.order_total', '>', 0))
+            ->orderByDesc('order_stats.order_total')
             ->limit(10)
-            ->get()
+            ->get(['customers.*', 'order_stats.order_total', 'order_stats.order_count'])
             ->map(fn ($c) => [
                 'id' => $c->id,
                 'full_name' => $c->full_name,
                 'phone' => $c->phone,
-                'total_spent' => (float) ($c->orders_sum_total ?? 0),
-                'total_orders' => $c->orders_count,
+                'total_spent' => (float) ($c->order_total ?? 0),
+                'total_orders' => (int) ($c->order_count ?? 0),
             ]);
 
         return response()->json([

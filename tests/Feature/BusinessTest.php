@@ -43,13 +43,29 @@ class BusinessTest extends TestCase
 
     public function test_owner_can_list_businesses(): void
     {
-        Business::factory()->create(['user_id' => $this->owner->id]);
+        $first = Business::factory()->create(['user_id' => $this->owner->id]);
         Business::factory()->create(['user_id' => $this->owner->id]);
 
         $this->actingAs($this->owner)
             ->getJson('/api/owner/businesses')
             ->assertOk()
-            ->assertJsonCount(2);
+            ->assertJsonCount(2)
+            ->assertJsonPath('0.name', $first->business_name);
+    }
+
+    public function test_business_serializes_name_attribute(): void
+    {
+        $business = Business::factory()->create([
+            'user_id' => $this->owner->id,
+            'business_name' => 'Duka La Mataifa',
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->getJson("/api/owner/businesses/{$business->id}");
+
+        $response->assertOk()
+            ->assertJsonPath('name', 'Duka La Mataifa')
+            ->assertJsonPath('business_name', 'Duka La Mataifa');
     }
 
     public function test_owner_can_update_business(): void

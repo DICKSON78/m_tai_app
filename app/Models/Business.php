@@ -10,7 +10,7 @@ class Business extends Model
 {
     use HasFactory;
 
-    protected $appends = ['logo', 'logo_url'];
+    protected $appends = ['logo', 'logo_url', 'name'];
 
     protected $fillable = [
         'user_id', 'business_name', 'business_logo', 'business_code',
@@ -142,6 +142,13 @@ class Business extends Model
     {
         return Attribute::make(
             get: fn () => $this->business_logo,
+        );
+    }
+
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->business_name,
         );
     }
 
