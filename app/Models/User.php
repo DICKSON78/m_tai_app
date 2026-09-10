@@ -99,9 +99,16 @@ class User extends Authenticatable
 
     public static function generateUserCode(): string
     {
-        $last = static::whereNotNull('user_code')->latest('id')->first();
-        $number = $last ? intval(substr($last->user_code, -6)) + 1 : 1;
+        $prefix = 'CTVK-';
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $last = static::where('user_code', 'like', $prefix . '%')->orderByDesc('user_code')->first();
+            $number = $last ? intval(substr($last->user_code, strlen($prefix))) + 1 : 1;
+            $code = $prefix . str_pad($number, 6, '0', STR_PAD_LEFT);
+            if (! static::where('user_code', $code)->exists()) {
+                return $code;
+            }
+        }
 
-        return 'CTVK-' . str_pad($number, 6, '0', STR_PAD_LEFT);
+        return $prefix . str_pad((static::max('id') ?? 0) + 1, 6, '0', STR_PAD_LEFT);
     }
 }

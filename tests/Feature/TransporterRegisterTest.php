@@ -11,6 +11,17 @@ class TransporterRegisterTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_generate_user_code_never_collides_with_existing_codes(): void
+    {
+        User::factory()->create(['user_code' => 'CTVK-000002']);
+        User::factory()->create(['user_code' => 'CTVK-000001']);
+
+        $code = User::generateUserCode();
+
+        $this->assertEquals('CTVK-000003', $code);
+        $this->assertFalse(User::where('user_code', $code)->exists());
+    }
+
     public function test_register_transporter_creates_loginable_user_and_transporter(): void
     {
         $this->postJson('/api/register/transporter', [
