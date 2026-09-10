@@ -52,6 +52,7 @@ export default function DeliveryListPage() {
 
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [assignDelivery, setAssignDelivery] = useState(null);
+    const [transporters, setTransporters] = useState([]);
     const [transporterId, setTransporterId] = useState('');
     const [assignSubmitting, setAssignSubmitting] = useState(false);
 
@@ -99,6 +100,12 @@ export default function DeliveryListPage() {
             api.get(`/owner/businesses/${selectedBusiness}/customers`, { params: { per_page: 100 } }).then(res => setCustomers(res.data?.data || res.data || [])).catch((error) => { console.error('Failed to fetch customers:', error); setCustomers([]); });
         }
     }, [selectedBusiness, createModalOpen, assignModalOpen]);
+
+    useEffect(() => {
+        if (selectedBusiness && assignModalOpen) {
+            api.get(`/owner/businesses/${selectedBusiness}/transporters`).then(res => setTransporters(res.data?.data || res.data || [])).catch((error) => { console.error('Failed to fetch transporters:', error); setTransporters([]); });
+        }
+    }, [selectedBusiness, assignModalOpen]);
 
     const handleCreateChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -297,7 +304,7 @@ export default function DeliveryListPage() {
                             <div className="flex justify-between"><span className="text-sm text-gray-500">From</span><span className="text-sm text-gray-800">{assignDelivery.pickup_location || '-'}</span></div>
                             <div className="flex justify-between"><span className="text-sm text-gray-500">To</span><span className="text-sm text-gray-800">{assignDelivery.destination || '-'}</span></div>
                         </div>
-                        <div><label className="block text-sm font-semibold text-gray-900 mb-2">Transporter ID <span className="text-red-500">*</span></label><input type="text" value={transporterId} onChange={(e) => setTransporterId(e.target.value)} required placeholder="Enter transporter ID" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" /></div>
+                        <div><label className="block text-sm font-semibold text-gray-900 mb-2">Transporter <span className="text-red-500">*</span></label><select name="transporter_id" value={transporterId} onChange={(e) => setTransporterId(e.target.value)} required className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]"><option value="">-- Select Transporter --</option>{transporters.map((t) => (<option key={t.id} value={t.id}>{t.full_name}{t.phone ? ` (${t.phone})` : ''}{t.vehicle_type ? ` - ${t.vehicle_type}` : ''}</option>))}</select>{transporters.length === 0 && <p className="mt-1 text-sm text-gray-500">No active transporters available.</p>}</div>
                         <div className="flex justify-end space-x-3 pt-2">
                             <button type="button" onClick={() => { setAssignModalOpen(false); setAssignDelivery(null); setTransporterId(''); }} className="px-5 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm">Cancel</button>
                             <button type="submit" disabled={assignSubmitting} className="px-6 py-2.5 font-bold text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm shadow-md hover:shadow-lg disabled:opacity-50 bg-[#00D4AA] hover:bg-[#00B894]">{assignSubmitting ? 'Assigning...' : 'Assign'}</button>

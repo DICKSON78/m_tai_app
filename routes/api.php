@@ -265,6 +265,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/businesses/{business}/projects/{project}', [BusinessProjectController::class, 'destroy']);
 
         // Deliveries - Business Owner
+        Route::get('/businesses/{business}/transporters', [DeliveryController::class, 'transporters']);
         Route::get('/businesses/{business}/deliveries', [DeliveryController::class, 'index']);
         Route::post('/businesses/{business}/deliveries', [DeliveryController::class, 'store']);
         Route::get('/businesses/{business}/deliveries/{delivery}', [DeliveryController::class, 'show']);

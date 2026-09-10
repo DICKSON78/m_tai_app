@@ -225,6 +225,19 @@ class DeliveryController extends Controller
         ]);
     }
 
+    public function transporters(Request $request, Business $business)
+    {
+        if ($business->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $transporters = Transporter::where('is_active', true)
+            ->orderBy('full_name')
+            ->get(['id', 'full_name', 'phone', 'vehicle_type', 'plate_number']);
+
+        return response()->json(['data' => $transporters]);
+    }
+
     public function assignTransporter(Request $request, Business $business, Delivery $delivery)
     {
         if ($business->user_id !== $request->user()->id) {

@@ -259,20 +259,11 @@ test.describe.serial('Full journey: shop -> product -> purchase -> delivery', ()
 
             const assignModal = page.getByRole('dialog');
             await expect(assignModal).toBeVisible({ timeout: 15000 });
-            const assignTip = assignModal.getByPlaceholder('Enter transporter ID');
-            await expect(assignTip).toBeVisible({ timeout: 15000 });
-            for (let attempt = 0; ; attempt++) {
-                try {
-                    await assignTip.fill(journey.transporterId);
-                    break;
-                } catch (err) {
-                    if (attempt >= 2) {
-                        console.log('assign tip node:', await assignTip.evaluate((el) => (el ? el.outerHTML.slice(0, 200) : 'NULL')));
-                        throw err;
-                    }
-                    await page.waitForTimeout(1500);
-                }
-            }
+            const assignSelect = assignModal.locator('select[name="transporter_id"]');
+            await expect(assignSelect).toBeVisible({ timeout: 15000 });
+            await expect(assignSelect.locator('option')).not.toHaveCount(1, { timeout: 15000 });
+            await assignSelect.selectOption(journey.transporterId);
+            await expect(assignSelect).toHaveValue(journey.transporterId, { timeout: 10000 });
             await assignModal.getByRole('button', { name: 'Assign' }).click();
             await expect(assignModal).toBeHidden({ timeout: 30000 });
             await page.waitForTimeout(1500);

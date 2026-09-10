@@ -61,6 +61,19 @@ class AdminTest extends TestCase
         ]);
     }
 
+    public function test_unauthenticated_api_request_returns_401_not_500(): void
+    {
+        $this->get('/api/admin/businesses')
+            ->assertStatus(401);
+    }
+
+    public function test_login_route_serves_spa(): void
+    {
+        $this->get(route('login'))
+            ->assertStatus(200)
+            ->assertSee('<div id="app"', escape: false);
+    }
+
     public function test_non_admin_cannot_access_admin_routes(): void
     {
         $owner = $this->createOwner();
