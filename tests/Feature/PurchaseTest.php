@@ -128,6 +128,63 @@ class PurchaseTest extends TestCase
         ]);
     }
 
+    public function test_reception_summary(): void
+    {
+        $supplier = Supplier::create([
+            'business_id' => $this->business->id,
+            'name' => 'Acme Supplies',
+            'code' => 'SUP-001',
+        ]);
+        $product = Product::factory()->create(['business_id' => $this->business->id]);
+        $order = PurchaseOrder::create([
+            'business_id' => $this->business->id,
+            'supplier_id' => $supplier->id,
+            'po_number' => 'PO-2026-00001',
+            'status' => 'confirmed',
+            'approval_status' => 'approved',
+            'order_date' => '2026-01-15',
+        ]);
+        $orderItem = \App\Models\PurchaseOrderItem::create([
+            'business_id' => $this->business->id,
+            'purchase_order_id' => $order->id,
+            'product_id' => $product->id,
+            'description' => 'Widget A',
+            'quantity' => 100,
+            'unit_price' => 5000,
+        ]);
+        $reception = \App\Models\PurchaseReception::create([
+            'business_id' => $this->business->id,
+            'purchase_order_id' => $order->id,
+            'supplier_id' => $supplier->id,
+            'grn_number' => 'GRN-2026-00001',
+            'reception_date' => '2026-01-20',
+            'status' => 'confirmed',
+            'total_quantity' => 80,
+            'total_accepted' => 80,
+            'received_by' => $this->owner->id,
+        ]);
+        \App\Models\PurchaseReceptionItem::create([
+            'business_id' => $this->business->id,
+            'purchase_reception_id' => $reception->id,
+            'purchase_order_item_id' => $orderItem->id,
+            'product_id' => $product->id,
+            'ordered_quantity' => 100,
+            'received_quantity' => 80,
+            'accepted_quantity' => 80,
+            'rejected_quantity' => 0,
+            'inspection_status' => 'passed',
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->getJson('/api/owner/purchases/receptions/summary');
+
+        $response->assertOk()
+            ->assertJsonPath('total', 1)
+            ->assertJsonPath('confirmed', 1)
+            ->assertJsonPath('draft', 0)
+            ->assertJsonPath('total_received', 400000);
+    }
+
     public function test_unauthenticated_user_cannot_access_purchases(): void
     {
         $response = $this->getJson('/api/owner/purchases/suppliers');

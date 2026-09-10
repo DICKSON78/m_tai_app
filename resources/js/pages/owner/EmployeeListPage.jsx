@@ -86,7 +86,7 @@ export default function EmployeeListPage() {
         e.preventDefault(); setSubmitting(true); setErrors({});
         const payload = { name: form.name, phone: form.phone, email: form.email, role: form.role, salary: form.salary ? Number(form.salary) : null, is_active: form.is_active };
         try {
-            if (editing) { await api.put(`/owner/employees/${editing.id}`, payload); }
+            if (editing) { await api.put(`/owner/businesses/${selectedBusiness}/employees/${editing.id}`, payload); }
             else { await api.post(`/owner/businesses/${selectedBusiness}/employees`, payload); }
             closeModal(); fetchEmployees();
         } catch (err) { console.error('Failed to save employee:', err); if (err.response?.status === 422) setErrors(err.response.data?.errors || {}); } finally { setSubmitting(false); }
@@ -94,7 +94,7 @@ export default function EmployeeListPage() {
 
     const handleDelete = async () => {
         if (!deleteId) return;
-        try { await api.delete(`/owner/employees/${deleteId}`); setConfirmOpen(false); setDeleteId(null); setDeleteName(''); fetchEmployees(); } catch (error) { console.error('Failed to delete employee:', error); alert(error?.response?.data?.message || 'Failed to delete employee. Please try again.'); }
+        try { await api.delete(`/owner/businesses/${selectedBusiness}/employees/${deleteId}`); setConfirmOpen(false); setDeleteId(null); setDeleteName(''); fetchEmployees(); } catch (error) { console.error('Failed to delete employee:', error); alert(error?.response?.data?.message || 'Failed to delete employee. Please try again.'); }
     };
 
     const handleReset = () => { setSearch(''); setRoleFilter(''); };

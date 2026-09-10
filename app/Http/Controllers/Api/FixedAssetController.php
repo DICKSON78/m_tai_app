@@ -169,6 +169,16 @@ class FixedAssetController extends Controller
         return response()->json($fixedAsset);
     }
 
+    public function destroy(Request $request, FixedAsset $fixedAsset)
+    {
+        $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
+        if ($fixedAsset->business_id !== $businessId) abort(403);
+
+        $fixedAsset->delete();
+
+        return response()->json(['message' => 'Fixed asset deleted']);
+    }
+
     public function summary(Request $request)
     {
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;

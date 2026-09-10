@@ -133,6 +133,58 @@ class WarehouseTest extends TestCase
         ]);
     }
 
+    public function test_update_warehouse_transfer(): void
+    {
+        $warehouse1 = Warehouse::create(['business_id' => $this->business->id, 'name' => 'WH-A', 'code' => 'WH-A']);
+        $warehouse2 = Warehouse::create(['business_id' => $this->business->id, 'name' => 'WH-B', 'code' => 'WH-B']);
+        $product = Product::factory()->create(['business_id' => $this->business->id]);
+        $transfer = WarehouseTransfer::create([
+            'business_id' => $this->business->id,
+            'product_id' => $product->id,
+            'from_warehouse_id' => $warehouse1->id,
+            'to_warehouse_id' => $warehouse2->id,
+            'quantity' => 50,
+            'transfer_date' => '2026-01-15',
+            'reference_number' => 'TRF-001',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->putJson('/api/owner/warehouses/transfers/' . $transfer->id, [
+                'quantity' => 75,
+                'notes' => 'Revised quantity',
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('quantity', 75)
+            ->assertJsonPath('notes', 'Revised quantity');
+
+        $this->assertDatabaseHas('warehouse_transfers', ['id' => $transfer->id, 'quantity' => 75]);
+    }
+
+    public function test_cannot_update_non_pending_transfer(): void
+    {
+        $warehouse1 = Warehouse::create(['business_id' => $this->business->id, 'name' => 'WH-A', 'code' => 'WH-A']);
+        $warehouse2 = Warehouse::create(['business_id' => $this->business->id, 'name' => 'WH-B', 'code' => 'WH-B']);
+        $product = Product::factory()->create(['business_id' => $this->business->id]);
+        $transfer = WarehouseTransfer::create([
+            'business_id' => $this->business->id,
+            'product_id' => $product->id,
+            'from_warehouse_id' => $warehouse1->id,
+            'to_warehouse_id' => $warehouse2->id,
+            'quantity' => 50,
+            'transfer_date' => '2026-01-15',
+            'reference_number' => 'TRF-002',
+            'status' => 'received',
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->putJson('/api/owner/warehouses/transfers/' . $transfer->id, ['quantity' => 1]);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseHas('warehouse_transfers', ['id' => $transfer->id, 'quantity' => 50]);
+    }
+
     public function test_unauthenticated_user_cannot_access_warehouses(): void
     {
         $response = $this->getJson('/api/owner/warehouses/');

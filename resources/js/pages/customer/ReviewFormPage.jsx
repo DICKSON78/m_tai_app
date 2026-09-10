@@ -20,7 +20,7 @@ export default function ReviewFormPage() {
 
     useEffect(() => {
         setLoading(true);
-        api.get(`/products/${productId}`)
+        api.get(`/shop/products/${productId}`)
             .then(res => {
                 setProduct(res.data?.data || res.data);
             })

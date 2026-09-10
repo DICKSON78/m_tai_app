@@ -30,6 +30,13 @@ test('owner creates a product through the live UI', async ({ page }) => {
   await page.waitForURL('**/owner/products', { timeout: 60000 });
   expect(page.url()).toContain('/owner/products');
 
+  // The product list is scoped by business and stays blank until one is
+  // selected. Pick the same business the product was created in (index 1).
+  const listBiz = page.locator('select').first();
+  await expect(listBiz.locator('option')).not.toHaveCount(1, { timeout: 30000 });
+  await listBiz.selectOption({ index: 1 });
+  await expect(listBiz).not.toHaveValue('', { timeout: 10000 });
+
   await expect(page.getByText(name)).toBeVisible({ timeout: 30000 });
   console.log(`OK product created: ${name}`);
 });

@@ -182,6 +182,88 @@ class FinanceTest extends TestCase
             ]);
     }
 
+    public function test_delete_fixed_asset(): void
+    {
+        $categoryAsset = \App\Models\Account::create([
+            'business_id' => $this->business->id,
+            'code' => '1500',
+            'name' => 'Equipment',
+            'type' => 'asset',
+            'is_active' => true,
+        ]);
+        $deprAsset = \App\Models\Account::create([
+            'business_id' => $this->business->id,
+            'code' => '1700',
+            'name' => 'Accumulated Depreciation',
+            'type' => 'asset',
+            'is_active' => true,
+        ]);
+        $asset = \App\Models\FixedAsset::create([
+            'business_id' => $this->business->id,
+            'asset_code' => 'FA-001',
+            'name' => 'Motorbike',
+            'category_account_id' => $categoryAsset->id,
+            'depreciation_account_id' => $deprAsset->id,
+            'purchase_date' => '2026-01-01',
+            'purchase_price' => 5000000,
+            'salvage_value' => 0,
+            'useful_life_months' => 36,
+            'depreciation_method' => 'straight_line',
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->deleteJson('/api/owner/finance/fixed-assets/' . $asset->id);
+
+        $response->assertOk()
+            ->assertJsonPath('message', 'Fixed asset deleted');
+
+        $this->assertSoftDeleted('fixed_assets', ['id' => $asset->id]);
+    }
+
+    public function test_update_fiscal_period(): void
+    {
+        $period = \App\Models\FiscalPeriod::create([
+            'business_id' => $this->business->id,
+            'name' => 'Q1 2026',
+            'start_date' => '2026-01-01',
+            'end_date' => '2026-03-31',
+            'status' => 'open',
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->putJson('/api/owner/finance/fiscal-periods/' . $period->id, [
+                'name' => 'Q1 2026 Renamed',
+                'end_date' => '2026-04-01',
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('name', 'Q1 2026 Renamed')
+            ->assertJsonPath('end_date', '2026-04-01T00:00:00.000000Z');
+
+        $this->assertDatabaseHas('fiscal_periods', [
+            'id' => $period->id,
+            'name' => 'Q1 2026 Renamed',
+        ]);
+    }
+
+    public function test_cannot_update_closed_fiscal_period(): void
+    {
+        $period = \App\Models\FiscalPeriod::create([
+            'business_id' => $this->business->id,
+            'name' => 'Q4 2025',
+            'start_date' => '2025-10-01',
+            'end_date' => '2025-12-31',
+            'status' => 'closed',
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->putJson('/api/owner/finance/fiscal-periods/' . $period->id, ['name' => 'Nope']);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseHas('fiscal_periods', ['id' => $period->id, 'name' => 'Q4 2025']);
+    }
+
     public function test_unauthenticated_user_cannot_access_finance(): void
     {
         $response = $this->getJson('/api/owner/finance/accounts');

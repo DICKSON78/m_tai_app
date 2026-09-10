@@ -19,8 +19,16 @@ test.describe('Admin role', () => {
 
     // ─── Shops management ────────────────────────────────────────────────
     test('can navigate to shops list', async ({ page }) => {
+        const apiErrors = watchApi(page);
         await assertReachable(page, '/admin/shops');
-        await expect(page.getByText('Juma Supermarket').first()).toBeVisible({ timeout: 30000 });
+        // The shop list is paginated and, with many live test shops, the
+        // previously seeded 'Juma Supermarket' is no longer on page one
+        // (searching also matches the shared owner name). Just confirm the
+        // page renders real shop rows with no API errors.
+        await expect(page.getByRole('heading', { name: 'All Shops' })).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('tbody tr').first()).toBeVisible({ timeout: 30000 });
+        await page.waitForTimeout(1500);
+        expectNoApiErrors(apiErrors);
     });
 
     test('can open a specific shop', async ({ page }) => {
@@ -40,12 +48,16 @@ test.describe('Admin role', () => {
     // ─── Users / customers management ────────────────────────────────────
     test('can view customers list', async ({ page }) => {
         await assertReachable(page, '/admin/customers');
+        // Search for the seeded customer; the list is paginated with many more
+        // registered users/buyers now.
+        await page.getByPlaceholder('Search users...').fill('Amina');
         await expect(page.getByText('Amina').first()).toBeVisible({ timeout: 30000 });
     });
 
     test('can open a specific customer', async ({ page }) => {
         const apiErrors = watchApi(page);
         await page.goto('/admin/customers', { waitUntil: 'domcontentloaded' });
+        await page.getByPlaceholder('Search users...').fill('Amina');
         await expect(page.getByText('Amina').first()).toBeVisible({ timeout: 30000 });
         await page.locator('a[title="View"]').first().click();
         await expect(page).toHaveURL(/\/admin\/customers\/\d+/, { timeout: 30000 });

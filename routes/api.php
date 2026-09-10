@@ -417,6 +417,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/fixed-assets/{fixedAsset}', [FixedAssetController::class, 'update']);
         Route::post('/fixed-assets/{fixedAsset}/depreciate', [FixedAssetController::class, 'depreciate']);
         Route::post('/fixed-assets/{fixedAsset}/dispose', [FixedAssetController::class, 'dispose']);
+        Route::delete('/fixed-assets/{fixedAsset}', [FixedAssetController::class, 'destroy']);
 
         // Currencies & Exchange Rates
         Route::get('/currencies', [CurrencyController::class, 'index']);
@@ -429,6 +430,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/fiscal-periods', [FiscalPeriodController::class, 'index']);
         Route::post('/fiscal-periods', [FiscalPeriodController::class, 'store']);
         Route::get('/fiscal-periods/{fiscalPeriod}', [FiscalPeriodController::class, 'show']);
+        Route::put('/fiscal-periods/{fiscalPeriod}', [FiscalPeriodController::class, 'update']);
         Route::post('/fiscal-periods/{fiscalPeriod}/close', [FiscalPeriodController::class, 'close']);
         Route::delete('/fiscal-periods/{fiscalPeriod}', [FiscalPeriodController::class, 'destroy']);
 
@@ -478,6 +480,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Goods Received Notes (GRN)
         Route::get('/receptions', [PurchaseReceptionController::class, 'index']);
+        Route::get('/receptions/summary', [PurchaseReceptionController::class, 'summary']);
         Route::post('/receptions', [PurchaseReceptionController::class, 'store']);
         Route::get('/receptions/{purchaseReception}', [PurchaseReceptionController::class, 'show']);
         Route::post('/receptions/{purchaseReception}/confirm', [PurchaseReceptionController::class, 'confirm']);
@@ -646,6 +649,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/bins/{bin}', [WarehouseController::class, 'destroyBinLocation']);
         Route::get('/transfers/list', [WarehouseController::class, 'transfers']);
         Route::post('/transfers', [WarehouseController::class, 'storeTransfer']);
+        Route::put('/transfers/{transfer}', [WarehouseController::class, 'updateTransfer']);
         Route::post('/transfers/{transfer}/confirm', [WarehouseController::class, 'confirmTransfer']);
         Route::post('/transfers/{transfer}/cancel', [WarehouseController::class, 'cancelTransfer']);
         Route::delete('/transfers/{transfer}', [WarehouseController::class, 'destroyTransfer']);

@@ -65,6 +65,8 @@ test.describe.serial('Full journey: shop -> product -> purchase -> delivery', ()
             const bizSelect = page.locator('select').first();
             await expect(bizSelect.locator('option')).not.toHaveCount(1, { timeout: 30000 });
             await bizSelect.selectOption({ index: 1 });
+            journey.businessId = await bizSelect.inputValue();
+            expect(journey.businessId).toBeTruthy();
 
             await page.fill('input[name="name"]', journey.productName);
             await page.fill('input[name="buying_price"]', '3000');
@@ -79,10 +81,13 @@ test.describe.serial('Full journey: shop -> product -> purchase -> delivery', ()
             await page.getByRole('button', { name: 'Publish' }).click();
             await page.waitForURL('**/owner/products', { timeout: 60000 });
 
-            // Product list is scoped by business; pick the seeded active shop
-            // (first real option after "All Businesses"), then filter by name
-            // so pagination can't hide the fresh product.
-            await page.locator('select').first().selectOption({ index: 1 });
+            // Product list is scoped by business; select the same shop used to
+            // create the product (by captured id), then filter by name so
+            // pagination can't hide the fresh product.
+            const listBizSelect = page.locator('select').first();
+            await expect(listBizSelect.locator('option')).not.toHaveCount(1, { timeout: 30000 });
+            await listBizSelect.selectOption(journey.businessId);
+            await expect(listBizSelect).toHaveValue(journey.businessId, { timeout: 10000 });
             await page.getByPlaceholder('Search products...').fill(journey.productName);
             await expect(page.getByText(journey.productName)).toBeVisible({ timeout: 30000 });
 
@@ -142,10 +147,10 @@ test.describe.serial('Full journey: shop -> product -> purchase -> delivery', ()
             await page.getByRole('button', { name: 'Place Order' }).click();
 
             // Success screen shows the transaction code.
-            const txn = page.getByText(/TXN-\d{4}-\d{5}/).first();
+            const txn = page.getByText(/TXN-\d{9}/).first();
             await txn.waitFor({ state: 'visible', timeout: 60000 });
             journey.txnCode = (await txn.textContent()).trim();
-            expect(journey.txnCode).toMatch(/TXN-\d{4}-\d{5}/);
+            expect(journey.txnCode).toMatch(/TXN-\d{9}/);
             await page.waitForTimeout(1500);
             expectNoApiErrors(apiErrors);
         });
@@ -158,6 +163,13 @@ test.describe.serial('Full journey: shop -> product -> purchase -> delivery', ()
         test('owner sees the new order and verifies it', async ({ page }) => {
             const apiErrors = watchApi(page);
             await page.goto('/owner/orders', { waitUntil: 'domcontentloaded' });
+
+            // Orders are scoped by business; pick the shop the purchase was
+            // made from so the fresh order is listed.
+            const ordBizSelect = page.locator('select').first();
+            await ordBizSelect.selectOption(journey.businessId);
+            await expect(ordBizSelect).toHaveValue(journey.businessId, { timeout: 10000 });
+
             await expect(page.getByText(journey.txnCode)).toBeVisible({ timeout: 60000 });
 
             const orderRow = page.locator('tr', { hasText: journey.txnCode }).first();
@@ -167,7 +179,8 @@ test.describe.serial('Full journey: shop -> product -> purchase -> delivery', ()
             // pending -> confirmed via the Verify modal.
             await page.getByRole('button', { name: 'Verify' }).click();
             await page.getByRole('button', { name: 'Yes, Verify' }).click();
-            await expect(page.getByText('Confirmed')).toBeVisible({ timeout: 30000 });
+            // verify() marks the order completed + paid.
+            await expect(page.getByText('Completed')).toBeVisible({ timeout: 30000 });
             await page.waitForTimeout(1000);
             expectNoApiErrors(apiErrors);
         });
@@ -175,10 +188,14 @@ test.describe.serial('Full journey: shop -> product -> purchase -> delivery', ()
         test('owner creates a delivery for the order customer', async ({ page }) => {
             const apiErrors = watchApi(page);
             await page.goto('/owner/deliveries', { waitUntil: 'domcontentloaded' });
-            await expect(page.getByRole('heading', { name: /deliver/i })).toBeVisible({ timeout: 30000 });
+            await expect(page.getByText('Search Resources', { exact: true })).toBeVisible({ timeout: 30000 });
 
-            // Deliveries are scoped by business; select the seeded active shop.
-            await page.locator('select').first().selectOption({ index: 1 });
+            // Deliveries are scoped by business; select the active shop from
+            // the journey (its id was captured during product creation).
+            const delBizSelect = page.locator('select').first();
+            await expect(delBizSelect.locator('option')).not.toHaveCount(1, { timeout: 30000 });
+            await delBizSelect.selectOption(journey.businessId);
+            await expect(delBizSelect).toHaveValue(journey.businessId, { timeout: 10000 });
 
             await page.getByRole('button', { name: 'Add New' }).click();
             const modal = page.getByRole('dialog');
@@ -188,11 +205,11 @@ test.describe.serial('Full journey: shop -> product -> purchase -> delivery', ()
             await expect(customerSelect.locator('option')).not.toHaveCount(1, { timeout: 30000 });
             await customerSelect.selectOption({ index: 1 });
             await modal.locator('select[name="goods_category"]').selectOption({ index: 1 });
-            await modal.fill('input[name="item_description"]', journey.productName);
-            await modal.fill('input[name="quantity"]', '1');
-            await modal.fill('input[name="pickup_location"]', 'Dar es Salaam, Ilala');
-            await modal.fill('input[name="destination"]', 'Dar es Salaam, Kinondoni');
-            await modal.fill('input[name="offered_price"]', '2000');
+            await modal.getByPlaceholder('Describe the item').fill(journey.productName);
+            await modal.getByPlaceholder('1').fill('1');
+            await modal.getByPlaceholder('Pickup location').fill('Dar es Salaam, Ilala');
+            await modal.getByPlaceholder('Destination').fill('Dar es Salaam, Kinondoni');
+            await modal.getByPlaceholder('0').fill('2000');
 
             await modal.getByRole('button', { name: 'Submit Request' }).click();
             await expect(modal).toBeHidden({ timeout: 30000 });
@@ -232,14 +249,30 @@ test.describe.serial('Full journey: shop -> product -> purchase -> delivery', ()
             // Owner assigns via the UI.
             const apiErrors = watchApi(page);
             await page.goto('/owner/deliveries', { waitUntil: 'domcontentloaded' });
-            await page.locator('select').first().selectOption({ index: 1 });
+            const delBizSelect = page.locator('select').first();
+            await expect(delBizSelect.locator('option')).not.toHaveCount(1, { timeout: 30000 });
+            await delBizSelect.selectOption(journey.businessId);
+            await expect(delBizSelect).toHaveValue(journey.businessId, { timeout: 10000 });
             const row = page.locator('tr', { hasText: journey.productName }).first();
             await expect(row).toBeVisible({ timeout: 30000 });
             await row.locator('button[title*="Assign" i]').first().click();
 
             const assignModal = page.getByRole('dialog');
             await expect(assignModal).toBeVisible({ timeout: 15000 });
-            await assignModal.fill('input[placeholder="Enter transporter ID"]', journey.transporterId);
+            const assignTip = assignModal.getByPlaceholder('Enter transporter ID');
+            await expect(assignTip).toBeVisible({ timeout: 15000 });
+            for (let attempt = 0; ; attempt++) {
+                try {
+                    await assignTip.fill(journey.transporterId);
+                    break;
+                } catch (err) {
+                    if (attempt >= 2) {
+                        console.log('assign tip node:', await assignTip.evaluate((el) => (el ? el.outerHTML.slice(0, 200) : 'NULL')));
+                        throw err;
+                    }
+                    await page.waitForTimeout(1500);
+                }
+            }
             await assignModal.getByRole('button', { name: 'Assign' }).click();
             await expect(assignModal).toBeHidden({ timeout: 30000 });
             await page.waitForTimeout(1500);

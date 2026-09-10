@@ -271,6 +271,28 @@ class WarehouseController extends Controller
         return response()->json($transfer);
     }
 
+    public function updateTransfer(Request $request, WarehouseTransfer $transfer)
+    {
+        if ($transfer->status !== 'pending') {
+            return response()->json(['message' => 'Only pending transfers can be edited'], 422);
+        }
+
+        $v = $request->validate([
+            'product_id' => 'sometimes|exists:products,id',
+            'from_warehouse_id' => 'nullable|exists:warehouses,id',
+            'to_warehouse_id' => 'nullable|exists:warehouses,id',
+            'from_bin_location_id' => 'nullable|exists:bin_locations,id',
+            'to_bin_location_id' => 'nullable|exists:bin_locations,id',
+            'quantity' => 'sometimes|integer|min:1',
+            'transfer_date' => 'sometimes|date',
+            'notes' => 'nullable|string',
+        ]);
+
+        $transfer->update($v);
+
+        return response()->json($transfer->load('product:id,name', 'fromWarehouse:id,name', 'toWarehouse:id,name'));
+    }
+
     public function destroyTransfer(WarehouseTransfer $transfer)
     {
         $transfer->delete();

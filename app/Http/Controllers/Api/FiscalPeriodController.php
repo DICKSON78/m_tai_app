@@ -55,6 +55,26 @@ class FiscalPeriodController extends Controller
         return response()->json($fiscalPeriod);
     }
 
+    public function update(Request $request, FiscalPeriod $fiscalPeriod)
+    {
+        $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
+        if ($fiscalPeriod->business_id !== $businessId) abort(403);
+
+        if ($fiscalPeriod->status === 'closed') {
+            return response()->json(['message' => 'Cannot edit closed period'], 422);
+        }
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:100',
+            'start_date' => 'sometimes|date',
+            'end_date' => 'sometimes|date|after:start_date',
+        ]);
+
+        $fiscalPeriod->update($validated);
+
+        return response()->json($fiscalPeriod);
+    }
+
     public function close(Request $request, FiscalPeriod $fiscalPeriod)
     {
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;

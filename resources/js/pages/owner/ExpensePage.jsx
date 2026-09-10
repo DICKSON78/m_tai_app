@@ -101,7 +101,7 @@ export default function ExpensePage() {
         try {
             const payload = { category: form.category, description: form.description, amount: Number(form.amount), type: form.type, date: form.date };
             if (editingId) {
-                await api.put(`/owner/businesses/${selectedBusiness}/expenses/${editingId}`, payload);
+                await api.put(`/owner/expenses/${editingId}`, payload);
             } else {
                 await api.post(`/owner/businesses/${selectedBusiness}/expenses`, payload);
             }
@@ -111,7 +111,7 @@ export default function ExpensePage() {
 
     const handleDelete = async () => {
         if (!deleteId || !selectedBusiness) return;
-        try { await api.delete(`/owner/businesses/${selectedBusiness}/expenses/${deleteId}`); fetchExpenses(); } catch (error) { console.error('Failed to delete expense:', error); alert(error?.response?.data?.message || 'Failed to delete expense. Please try again.'); } finally { setDeleteId(null); setDeleteModalOpen(false); }
+        try { await api.delete(`/owner/expenses/${deleteId}`); fetchExpenses(); } catch (error) { console.error('Failed to delete expense:', error); alert(error?.response?.data?.message || 'Failed to delete expense. Please try again.'); } finally { setDeleteId(null); setDeleteModalOpen(false); }
     };
 
     const handleReset = () => { setFilterCategory(''); setFilterType(''); setDateFrom(''); setDateTo(''); };

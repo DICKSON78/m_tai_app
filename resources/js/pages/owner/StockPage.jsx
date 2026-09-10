@@ -225,7 +225,7 @@ export default function StockPage() {
                 .catch((error) => { console.error('Failed to fetch products:', error); setMovementProducts([]); });
         }
         if (selectedBusiness && batchModalOpen) {
-            api.get(`/owner/businesses/${selectedBusiness}/suppliers`, { params: { per_page: 200 } })
+            api.get('/owner/purchases/suppliers', { params: { per_page: 200 } })
                 .then(res => setSuppliers(res.data?.data || res.data || []))
                 .catch((error) => { console.error('Failed to fetch suppliers:', error); setSuppliers([]); });
         }

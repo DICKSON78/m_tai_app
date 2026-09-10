@@ -31,6 +31,24 @@ class PurchaseReceptionController extends Controller
         return response()->json($receptions);
     }
 
+    public function summary(Request $request)
+    {
+        $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
+        $base = PurchaseReception::where('purchase_receptions.business_id', $businessId);
+
+        $totalReceivedValue = (clone $base)
+            ->join('purchase_reception_items as pri', 'pri.purchase_reception_id', '=', 'purchase_receptions.id')
+            ->join('purchase_order_items as poi', 'poi.id', '=', 'pri.purchase_order_item_id')
+            ->sum(DB::raw('pri.accepted_quantity * poi.unit_price'));
+
+        return response()->json([
+            'total' => (clone $base)->count(),
+            'draft' => (clone $base)->where('status', 'draft')->count(),
+            'confirmed' => (clone $base)->where('status', 'confirmed')->count(),
+            'total_received' => $totalReceivedValue,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

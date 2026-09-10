@@ -106,7 +106,7 @@ export default function LoanListPage() {
         if (!amount || amount <= 0) { setPayError('Enter a valid amount.'); return; }
         if (amount > remaining) { setPayError(`Amount cannot exceed outstanding balance of TZS ${remaining.toLocaleString()}.`); return; }
         setPaySubmitting(true); setPayError('');
-        try { await api.post(`/owner/loans/${payLoan.id}/pay`, { amount }); setPayModalOpen(false); setPayLoan(null); setPayAmount(''); fetchLoans(); } catch (err) { console.error('Failed to process loan payment:', err); setPayError(err.response?.data?.message || 'Failed to process payment.'); } finally { setPaySubmitting(false); }
+        try { await api.post(`/owner/businesses/${selectedBusiness}/loans/${payLoan.id}/pay`, { amount }); setPayModalOpen(false); setPayLoan(null); setPayAmount(''); fetchLoans(); } catch (err) { console.error('Failed to process loan payment:', err); setPayError(err.response?.data?.message || 'Failed to process payment.'); } finally { setPaySubmitting(false); }
     };
 
     const handleLoanChange = (e) => {

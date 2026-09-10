@@ -118,7 +118,7 @@ export default function CustomerListPage() {
         setErrors({});
         try {
             if (editing) {
-                await api.put(`/owner/customers/${editing.id}`, form);
+                await api.put(`/owner/businesses/${selectedBusiness}/customers/${editing.id}`, form);
             } else {
                 await api.post(`/owner/businesses/${selectedBusiness}/customers`, {
                     full_name: form.name,
@@ -141,7 +141,7 @@ export default function CustomerListPage() {
     const handleDelete = async () => {
         if (!deleteId) return;
         try {
-            await api.delete(`/owner/customers/${deleteId}`);
+            await api.delete(`/owner/businesses/${selectedBusiness}/customers/${deleteId}`);
             setConfirmOpen(false);
             setDeleteId(null);
             setDeleteName('');

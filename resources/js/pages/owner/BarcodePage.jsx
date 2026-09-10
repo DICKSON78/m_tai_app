@@ -33,7 +33,7 @@ export default function BarcodePage() {
     const handleGenerateProductBarcode = async () => {
         if (!selectedBusiness || !selectedProduct) return;
         setLoading(true); setError(''); setBarcode(null);
-        try { const res = await api.get(`/owner/businesses/${selectedBusiness}/products/${selectedProduct}/barcode`); setBarcode(res.data); }
+        try { const res = await api.get(`/products/${selectedProduct}/barcode`); setBarcode(res.data); }
         catch (error) { console.error('Failed to generate barcode:', error); setError('Failed to generate barcode'); }
         finally { setLoading(false); }
     };
@@ -41,7 +41,7 @@ export default function BarcodePage() {
     const handleGenerateOrderBarcodes = async () => {
         if (!orderId) return;
         setLoading(true); setError(''); setBarcode(null);
-        try { const res = await api.post('/owner/barcodes/order', { order_id: orderId }); setBarcode(res.data); }
+        try { const res = await api.post('/barcodes/order', { order_id: orderId }); setBarcode(res.data); }
         catch (error) { console.error('Failed to generate order barcodes:', error); setError('Failed to generate order barcodes'); }
         finally { setLoading(false); }
     };
