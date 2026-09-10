@@ -10,7 +10,7 @@ import { Store, Tag, Phone, MapPin, FileText, Save, User } from 'lucide-react';
 
 export default function AdminShopFormPage() {
     const { id } = useParams();
-    const isNew = id === 'new';
+    const isNew = id === 'new' || id === undefined;
     const navigate = useNavigate();
     const [form, setForm] = useState({ name: '', business_type: '', description: '', phone: '', location: '', user_id: '', region: '', district: '' });
     const [owners, setOwners] = useState([]);
