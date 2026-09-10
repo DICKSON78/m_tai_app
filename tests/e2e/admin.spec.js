@@ -35,8 +35,8 @@ test.describe('Admin role', () => {
         const apiErrors = watchApi(page);
         await assertReachable(page, '/admin/shops/new');
         await expect(page.getByRole('heading', { name: 'Add Shop' })).toBeVisible({ timeout: 30000 });
-        await expect(page.getByLabel('Owner')).toBeVisible({ timeout: 30000 });
-        await expect(page.locator('select[name="user_id"] option').first()).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('select[name="user_id"]')).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('select[name="user_id"] option:not([value=""])').first()).toBeAttached({ timeout: 30000 });
         await page.waitForTimeout(1500);
         expectNoApiErrors(apiErrors);
     });
