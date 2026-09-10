@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Business;
 use App\Models\Customer;
 use App\Models\Delivery;
+use App\Models\Order;
 use App\Models\Transporter;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -54,6 +55,71 @@ class DeliveryTest extends TestCase
             'customer_id' => $this->customer->id,
             'status' => 'pending',
         ]);
+    }
+
+    public function test_owner_can_create_delivery_linked_to_an_order(): void
+    {
+        $order = Order::create([
+            'business_id' => $this->business->id,
+            'customer_id' => $this->customer->id,
+            'transaction_code' => 'TXN-100000001',
+            'subtotal' => 50000,
+            'total' => 50000,
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->postJson("/api/owner/businesses/{$this->business->id}/deliveries", [
+                'customer_id' => $this->customer->id,
+                'order_id' => $order->id,
+                'goods_category' => 'sealed',
+                'item_description' => 'Laptop and accessories',
+                'quantity' => 2,
+                'pickup_location' => 'Kariakoo',
+                'destination' => 'Arusha',
+                'offered_price' => 50000,
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('delivery.order_id', $order->id)
+            ->assertJsonPath('delivery.order.transaction_code', 'TXN-100000001');
+
+        $this->assertDatabaseHas('deliveries', [
+            'business_id' => $this->business->id,
+            'order_id' => $order->id,
+        ]);
+    }
+
+    public function test_order_from_another_customer_is_rejected_on_delivery_create(): void
+    {
+        $otherCustomer = Customer::create([
+            'business_id' => $this->business->id,
+            'full_name' => 'Other Customer',
+            'phone' => '0799888777',
+            'customer_code' => 'CTM-000002',
+        ]);
+
+        $order = Order::create([
+            'business_id' => $this->business->id,
+            'customer_id' => $otherCustomer->id,
+            'transaction_code' => 'TXN-100000999',
+            'subtotal' => 10000,
+            'total' => 10000,
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($this->owner)
+            ->postJson("/api/owner/businesses/{$this->business->id}/deliveries", [
+                'customer_id' => $this->customer->id,
+                'order_id' => $order->id,
+                'goods_category' => 'sealed',
+                'item_description' => 'Item',
+                'quantity' => 1,
+                'pickup_location' => 'Dar',
+                'destination' => 'Arusha',
+                'offered_price' => 10000,
+            ])
+            ->assertStatus(422);
     }
 
     public function test_owner_can_list_deliveries(): void

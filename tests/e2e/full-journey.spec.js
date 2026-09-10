@@ -204,6 +204,10 @@ test.describe.serial('Full journey: shop -> product -> purchase -> delivery', ()
             const customerSelect = modal.locator('select[name="customer_id"]');
             await expect(customerSelect.locator('option')).not.toHaveCount(1, { timeout: 30000 });
             await customerSelect.selectOption({ index: 1 });
+            const orderSelect = modal.locator('select[name="order_id"]');
+            await expect(orderSelect.locator('option')).not.toHaveCount(1, { timeout: 30000 });
+            await orderSelect.selectOption({ index: 1 });
+            await expect(orderSelect).not.toHaveValue('', { timeout: 10000 });
             await modal.locator('select[name="goods_category"]').selectOption({ index: 1 });
             await modal.getByPlaceholder('Describe the item').fill(journey.productName);
             await modal.getByPlaceholder('1').fill('1');

@@ -327,6 +327,8 @@ class OrderController extends Controller
 
         $validated = $request->validate([
             'business_id' => 'sometimes|nullable|integer',
+            'customer_id' => 'sometimes|nullable|integer',
+            'per_page' => 'sometimes|nullable|integer|max:200',
         ]);
 
         $businessIds = $user->businesses()->pluck('id');
@@ -338,8 +340,12 @@ class OrderController extends Controller
             $query->where('business_id', $validated['business_id']);
         }
 
+        if (! empty($validated['customer_id'])) {
+            $query->where('customer_id', $validated['customer_id']);
+        }
+
         $orders = $query->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->paginate($validated['per_page'] ?? 15);
 
         return response()->json($orders);
     }

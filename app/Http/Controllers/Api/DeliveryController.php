@@ -59,7 +59,7 @@ class DeliveryController extends Controller
         ]);
 
         if (! empty($validated['order_id'])) {
-            $order = $business->orders()->find($validated['order_id']);
+            $order = $business->orders()->where('id', $validated['order_id'])->where('customer_id', $validated['customer_id'])->first();
             if (! $order) {
                 return response()->json(['message' => 'Agizo hilo halihusiani na biashara hii.'], 422);
             }

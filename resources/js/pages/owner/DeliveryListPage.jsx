@@ -46,9 +46,10 @@ export default function DeliveryListPage() {
     const [statusDropdownId, setStatusDropdownId] = useState(null);
 
     const [createModalOpen, setCreateModalOpen] = useState(false);
-    const [createForm, setCreateForm] = useState({ customer_id: '', goods_category: '', item_description: '', quantity: '', pickup_location: '', destination: '', offered_price: '', is_negotiable: false });
+    const [createForm, setCreateForm] = useState({ customer_id: '', order_id: '', goods_category: '', item_description: '', quantity: '', pickup_location: '', destination: '', offered_price: '', is_negotiable: false });
     const [createErrors, setCreateErrors] = useState({});
     const [createSubmitting, setCreateSubmitting] = useState(false);
+    const [orders, setOrders] = useState([]);
 
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [assignDelivery, setAssignDelivery] = useState(null);
@@ -107,9 +108,15 @@ export default function DeliveryListPage() {
         }
     }, [selectedBusiness, assignModalOpen]);
 
+    useEffect(() => {
+        if (selectedBusiness && createModalOpen && createForm.customer_id) {
+            api.get('/owner/orders', { params: { business_id: selectedBusiness, customer_id: createForm.customer_id, per_page: 100 } }).then(res => setOrders(res.data?.data || [])).catch((error) => { console.error('Failed to fetch customer orders:', error); setOrders([]); });
+        } else setOrders([]);
+    }, [selectedBusiness, createModalOpen, createForm.customer_id]);
+
     const handleCreateChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setCreateForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+        setCreateForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value, ...(name === 'customer_id' ? { order_id: '' } : {}) }));
         if (createErrors[name]) setCreateErrors(prev => ({ ...prev, [name]: null }));
     };
 
@@ -117,9 +124,9 @@ export default function DeliveryListPage() {
         e.preventDefault();
         setCreateSubmitting(true); setCreateErrors({});
         try {
-            await api.post(`/owner/businesses/${selectedBusiness}/deliveries`, { customer_id: createForm.customer_id, goods_category: createForm.goods_category, item_description: createForm.item_description, quantity: Number(createForm.quantity) || 1, pickup_location: createForm.pickup_location, destination: createForm.destination, offered_price: Number(createForm.offered_price) || 0, is_negotiable: createForm.is_negotiable });
+            await api.post(`/owner/businesses/${selectedBusiness}/deliveries`, { customer_id: createForm.customer_id, order_id: createForm.order_id || null, goods_category: createForm.goods_category, item_description: createForm.item_description, quantity: Number(createForm.quantity) || 1, pickup_location: createForm.pickup_location, destination: createForm.destination, offered_price: Number(createForm.offered_price) || 0, is_negotiable: createForm.is_negotiable });
             setCreateModalOpen(false);
-            setCreateForm({ customer_id: '', goods_category: '', item_description: '', quantity: '', pickup_location: '', destination: '', offered_price: '', is_negotiable: false });
+            setCreateForm({ customer_id: '', order_id: '', goods_category: '', item_description: '', quantity: '', pickup_location: '', destination: '', offered_price: '', is_negotiable: false });
             fetchDeliveries();
         } catch (err) { console.error('Failed to create delivery:', err); if (err.response?.status === 422) setCreateErrors(err.response.data?.errors || {}); } finally { setCreateSubmitting(false); }
     };
@@ -280,6 +287,7 @@ export default function DeliveryListPage() {
                 <form onSubmit={handleCreateDelivery} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div><label className="block text-sm font-semibold text-gray-900 mb-2">Customer <span className="text-red-500">*</span></label><select name="customer_id" value={createForm.customer_id} onChange={handleCreateChange} required className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]"><option value="">-- Select Customer --</option>{customers.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}</select>{createErrors.customer_id && <p className="mt-1 text-sm text-red-600">{createErrors.customer_id[0]}</p>}</div>
+                    <div><label className="block text-sm font-semibold text-gray-900 mb-2">Order (optional)</label><select name="order_id" value={createForm.order_id} onChange={handleCreateChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]"><option value="">-- Select Order --</option>{orders.map((o) => (<option key={o.id} value={o.id}>{o.transaction_code || `#${o.id}`} - TZS {Number(o.total || 0).toLocaleString()}</option>))}</select>{createForm.customer_id && orders.length === 0 && <p className="mt-1 text-sm text-gray-500">No orders for this customer.</p>}</div>
                         <div><label className="block text-sm font-semibold text-gray-900 mb-2">Goods Category <span className="text-red-500">*</span></label><select name="goods_category" value={createForm.goods_category} onChange={handleCreateChange} required className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]"><option value="">-- Select Category --</option>{GOODS_CATEGORIES.map((c) => (<option key={c.value} value={c.value}>{c.label}</option>))}</select></div>
                         <div><label className="block text-sm font-semibold text-gray-900 mb-2">Item Description <span className="text-red-500">*</span></label><input type="text" name="item_description" value={createForm.item_description} onChange={handleCreateChange} required placeholder="Describe the item" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" /></div>
                         <div><label className="block text-sm font-semibold text-gray-900 mb-2">Quantity</label><input type="number" name="quantity" value={createForm.quantity} onChange={handleCreateChange} min="1" placeholder="1" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" /></div>
