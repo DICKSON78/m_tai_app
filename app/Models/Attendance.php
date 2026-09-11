@@ -15,7 +15,7 @@ class Attendance extends Model
 
     protected function casts(): array
     {
-        return ['date' => 'date', 'hours_worked' => 'decimal:2'];
+        return ['date' => 'date:Y-m-d', 'hours_worked' => 'decimal:2'];
     }
 
     public function employee()

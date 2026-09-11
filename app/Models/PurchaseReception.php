@@ -19,7 +19,7 @@ class PurchaseReception extends Model
     protected function casts(): array
     {
         return [
-            'reception_date' => 'date',
+            'reception_date' => 'date:Y-m-d',
             'total_quantity' => 'decimal:2',
             'total_accepted' => 'decimal:2',
             'total_rejected' => 'decimal:2',

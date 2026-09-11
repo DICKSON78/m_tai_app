@@ -23,7 +23,7 @@ class BusinessProject extends Model
     {
         return [
             'required_capital' => 'decimal:2',
-            'completion_date' => 'date',
+            'completion_date' => 'date:Y-m-d',
             'recommended_loan_amount' => 'decimal:2',
             'savings_plan' => 'array',
             'allocation' => 'array',

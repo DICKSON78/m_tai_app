@@ -13,7 +13,7 @@ class WarehouseTransfer extends Model
         'quantity', 'status', 'notes', 'transfer_date', 'received_date', 'stock_movement_id',
     ];
 
-    protected $casts = ['transfer_date' => 'date', 'received_date' => 'date'];
+    protected $casts = ['transfer_date' => 'date:Y-m-d', 'received_date' => 'date:Y-m-d'];
 
     public function business(): BelongsTo
     {

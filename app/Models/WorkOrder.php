@@ -16,8 +16,8 @@ class WorkOrder extends Model
 
     protected $casts = [
         'estimated_cost' => 'decimal:2', 'actual_cost' => 'decimal:2',
-        'planned_start' => 'date', 'planned_end' => 'date',
-        'actual_start' => 'date', 'actual_end' => 'date',
+        'planned_start' => 'date:Y-m-d', 'planned_end' => 'date:Y-m-d',
+        'actual_start' => 'date:Y-m-d', 'actual_end' => 'date:Y-m-d',
     ];
 
     public function business(): BelongsTo

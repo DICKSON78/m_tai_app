@@ -23,7 +23,7 @@ class PurchaseReceptionItem extends Model
             'received_quantity' => 'decimal:2',
             'accepted_quantity' => 'decimal:2',
             'rejected_quantity' => 'decimal:2',
-            'expiry_date' => 'date',
+            'expiry_date' => 'date:Y-m-d',
         ];
     }
 

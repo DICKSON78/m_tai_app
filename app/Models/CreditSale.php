@@ -21,7 +21,7 @@ class CreditSale extends Model
         return [
             'amount' => 'decimal:2',
             'amount_paid' => 'decimal:2',
-            'due_date' => 'date',
+            'due_date' => 'date:Y-m-d',
         ];
     }
 

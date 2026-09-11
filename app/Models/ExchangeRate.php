@@ -15,7 +15,7 @@ class ExchangeRate extends Model
     {
         return [
             'rate' => 'decimal:8',
-            'effective_date' => 'date',
+            'effective_date' => 'date:Y-m-d',
             'is_active' => 'boolean',
         ];
     }

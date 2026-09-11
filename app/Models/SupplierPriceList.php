@@ -21,8 +21,8 @@ class SupplierPriceList extends Model
             'unit_price' => 'decimal:2',
             'min_quantity' => 'decimal:2',
             'discount_percent' => 'decimal:2',
-            'valid_from' => 'date',
-            'valid_to' => 'date',
+            'valid_from' => 'date:Y-m-d',
+            'valid_to' => 'date:Y-m-d',
             'is_active' => 'boolean',
         ];
     }

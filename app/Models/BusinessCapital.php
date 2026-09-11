@@ -18,7 +18,7 @@ class BusinessCapital extends Model
     {
         return [
             'capital_amount' => 'decimal:2',
-            'registration_date' => 'date',
+            'registration_date' => 'date:Y-m-d',
         ];
     }
 

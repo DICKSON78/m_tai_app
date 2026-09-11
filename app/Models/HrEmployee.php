@@ -8,7 +8,7 @@ class HrEmployee extends Model
     use HasFactory;
     protected $table = 'hr_employees';
     protected $fillable = ['user_id', 'business_id', 'department_id', 'employee_number', 'first_name', 'last_name', 'email', 'phone', 'position', 'employment_type', 'hire_date', 'termination_date', 'base_salary', 'salary_type', 'bank_name', 'bank_account_number', 'emergency_contact_name', 'emergency_contact_phone', 'address', 'avatar', 'status'];
-    protected function casts(): array { return ['hire_date' => 'date', 'termination_date' => 'date', 'base_salary' => 'decimal:2']; }
+    protected function casts(): array { return ['hire_date' => 'date:Y-m-d', 'termination_date' => 'date:Y-m-d', 'base_salary' => 'decimal:2']; }
     public function business() { return $this->belongsTo(Business::class); }
     public function user() { return $this->belongsTo(User::class); }
     public function department() { return $this->belongsTo(HrDepartment::class, 'department_id'); }

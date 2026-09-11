@@ -19,7 +19,7 @@ class SupplierPayment extends Model
     protected function casts(): array
     {
         return [
-            'payment_date' => 'date',
+            'payment_date' => 'date:Y-m-d',
             'exchange_rate' => 'decimal:6',
             'amount' => 'decimal:2',
             'local_amount' => 'decimal:2',

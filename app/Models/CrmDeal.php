@@ -14,7 +14,7 @@ class CrmDeal extends Model
         'expected_close_date', 'notes', 'assigned_to',
     ];
 
-    protected $casts = ['amount' => 'decimal:2', 'expected_close_date' => 'date'];
+    protected $casts = ['amount' => 'decimal:2', 'expected_close_date' => 'date:Y-m-d'];
 
     public function business(): BelongsTo
     {

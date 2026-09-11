@@ -239,7 +239,7 @@ class FinanceTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('name', 'Q1 2026 Renamed')
-            ->assertJsonPath('end_date', '2026-04-01T00:00:00.000000Z');
+            ->assertJsonPath('end_date', '2026-04-01');
 
         $this->assertDatabaseHas('fiscal_periods', [
             'id' => $period->id,

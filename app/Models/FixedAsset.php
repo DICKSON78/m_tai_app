@@ -21,8 +21,8 @@ class FixedAsset extends Model
     protected function casts(): array
     {
         return [
-            'purchase_date' => 'date',
-            'disposal_date' => 'date',
+            'purchase_date' => 'date:Y-m-d',
+            'disposal_date' => 'date:Y-m-d',
             'purchase_price' => 'decimal:2',
             'salvage_value' => 'decimal:2',
             'accumulated_depreciation' => 'decimal:2',

@@ -22,8 +22,8 @@ class Loan extends Model
             'loan_balance' => 'decimal:2',
             'interest_rate' => 'decimal:2',
             'repayment_schedule' => 'array',
-            'start_date' => 'date',
-            'due_date' => 'date',
+            'start_date' => 'date:Y-m-d',
+            'due_date' => 'date:Y-m-d',
         ];
     }
 

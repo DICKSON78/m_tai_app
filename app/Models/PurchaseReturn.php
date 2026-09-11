@@ -19,7 +19,7 @@ class PurchaseReturn extends Model
     protected function casts(): array
     {
         return [
-            'return_date' => 'date',
+            'return_date' => 'date:Y-m-d',
             'total_amount' => 'decimal:2',
             'refund_amount' => 'decimal:2',
         ];

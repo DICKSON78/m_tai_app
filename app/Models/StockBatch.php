@@ -18,9 +18,9 @@ class StockBatch extends Model
     protected function casts(): array
     {
         return [
-            'manufacturing_date' => 'date',
-            'expiry_date' => 'date',
-            'received_at' => 'date',
+            'manufacturing_date' => 'date:Y-m-d',
+            'expiry_date' => 'date:Y-m-d',
+            'received_at' => 'date:Y-m-d',
         ];
     }
 

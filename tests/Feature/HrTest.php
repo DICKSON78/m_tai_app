@@ -109,7 +109,7 @@ class HrTest extends TestCase
 
         $this->assertDatabaseHas('attendance', [
             'employee_id' => $employee->id,
-            'date' => now()->parse('2026-01-15')->toDateTimeString(),
+            'date' => '2026-01-15',
         ]);
     }
 

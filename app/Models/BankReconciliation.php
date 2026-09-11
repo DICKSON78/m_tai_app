@@ -18,7 +18,7 @@ class BankReconciliation extends Model
     protected function casts(): array
     {
         return [
-            'reconciliation_date' => 'date',
+            'reconciliation_date' => 'date:Y-m-d',
             'statement_balance' => 'decimal:2',
             'book_balance' => 'decimal:2',
             'difference' => 'decimal:2',

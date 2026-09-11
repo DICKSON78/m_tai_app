@@ -21,9 +21,9 @@ class PurchaseOrder extends Model
     protected function casts(): array
     {
         return [
-            'order_date' => 'date',
-            'expected_date' => 'date',
-            'received_date' => 'date',
+            'order_date' => 'date:Y-m-d',
+            'expected_date' => 'date:Y-m-d',
+            'received_date' => 'date:Y-m-d',
             'approved_at' => 'datetime',
             'exchange_rate' => 'decimal:6',
             'subtotal' => 'decimal:2',

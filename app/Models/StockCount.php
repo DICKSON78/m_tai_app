@@ -27,7 +27,7 @@ class StockCount extends Model
     protected function casts(): array
     {
         return [
-            'count_date' => 'date',
+            'count_date' => 'date:Y-m-d',
         ];
     }
 

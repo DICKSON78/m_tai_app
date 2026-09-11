@@ -18,7 +18,7 @@ class JournalEntry extends Model
     protected function casts(): array
     {
         return [
-            'date' => 'date',
+            'date' => 'date:Y-m-d',
             'is_posted' => 'boolean',
             'is_reversed' => 'boolean',
             'total_debit' => 'decimal:2',

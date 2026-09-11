@@ -17,7 +17,7 @@ class DepreciationEntry extends Model
     protected function casts(): array
     {
         return [
-            'depreciation_date' => 'date',
+            'depreciation_date' => 'date:Y-m-d',
             'amount' => 'decimal:2',
             'accumulated_total' => 'decimal:2',
         ];
