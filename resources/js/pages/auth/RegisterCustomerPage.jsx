@@ -24,6 +24,7 @@ export default function RegisterCustomerPage() {
         password: '',
         confirmPassword: '',
         location: '',
+        region: '',
         district: '',
         ward: '',
         street: '',
@@ -71,7 +72,10 @@ export default function RegisterCustomerPage() {
                 phone: `${formData.countryCode}${formData.phone}`.replace(/\s/g, ''),
                 password: formData.password,
                 password_confirmation: formData.confirmPassword,
-                location: formData.location || null,
+                region: formData.region || null,
+                district: formData.district || null,
+                ward: formData.ward || null,
+                location: formData.location || formData.region || null,
                 street: formData.street || null,
             }, 'customer');
 
@@ -292,42 +296,11 @@ export default function RegisterCustomerPage() {
                             </>
                         )}
                         <div className="grid md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Location</label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                    </div>
-                                    <input type="text" name="location" value={formData.location} onChange={handleChange} className={inputClasses} placeholder="City / Region" />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">District</label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                                        </svg>
-                                    </div>
-                                    <input type="text" name="district" value={formData.district} onChange={handleChange} className={inputClasses} placeholder="District" />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="grid md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Ward</label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                        </svg>
-                                    </div>
-                                    <input type="text" name="ward" value={formData.ward} onChange={handleChange} className={inputClasses} placeholder="Ward" />
-                                </div>
-                            </div>
+                            <LocationFields
+                                value={{ region: formData.region, district: formData.district, ward: formData.ward }}
+                                onChange={(loc) => setFormData((prev) => ({ ...prev, ...loc }))}
+                                className={inputClasses.replace('pl-11', 'pl-4')}
+                            />
                             <div>
                                 <label className="block text-sm font-semibold text-gray-600 mb-1.5">Street Address</label>
                                 <div className="relative">

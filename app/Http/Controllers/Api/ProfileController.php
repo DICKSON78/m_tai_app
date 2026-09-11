@@ -26,9 +26,22 @@ class ProfileController extends Controller
             'name' => 'sometimes|string|max:255',
             'phone' => 'sometimes|string|max:20',
             'email' => 'sometimes|email|unique:users,email,' . $request->user()->id,
+            'region' => 'sometimes|nullable|string|max:255',
+            'district' => 'sometimes|nullable|string|max:255',
+            'ward' => 'sometimes|nullable|string|max:255',
+            'street_or_area' => 'sometimes|nullable|string|max:255',
         ]);
 
-        $request->user()->update($validated);
+        $user = $request->user();
+        $user->update($validated);
+
+        if (array_key_exists('region', $validated)) {
+            $user->update(['location' => $validated['region'] ?? null]);
+        }
+
+        if (array_key_exists('street_or_area', $validated)) {
+            $user->update(['street' => $validated['street_or_area'] ?? null]);
+        }
 
         return response()->json([
             'message' => 'Profaili imesasishwa.',

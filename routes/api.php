@@ -43,6 +43,7 @@ use App\Http\Controllers\Api\HrPerformanceController;
 use App\Http\Controllers\Api\HrRecruitmentController;
 use App\Http\Controllers\Api\HrTrainingController;
 use App\Http\Controllers\Api\ImportGoodController;
+use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\InvestmentController;
 use App\Http\Controllers\Api\LoanController;
@@ -84,6 +85,11 @@ Route::post('/login', [AuthApiController::class, 'login'])->middleware('throttle
 Route::post('/auth/google', [AuthApiController::class, 'googleLogin'])->middleware('throttle:login');
 Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword'])->middleware('throttle:login');
 Route::post('/reset-password', [AuthApiController::class, 'resetPassword'])->middleware('throttle:login');
+
+// Public location reference data (Tanzania regions -> districts -> wards)
+Route::get('/locations/regions', [LocationController::class, 'regions']);
+Route::get('/locations/districts', [LocationController::class, 'districts']);
+Route::get('/locations/wards', [LocationController::class, 'wards']);
 
 // Protected API routes
 Route::middleware('auth:sanctum')->group(function () {

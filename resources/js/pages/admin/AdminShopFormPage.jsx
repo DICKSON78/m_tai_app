@@ -6,13 +6,14 @@ import PageHeader from '../../components/casfeta/PageHeader';
 import SectionHeader from '../../components/casfeta/SectionHeader';
 import FormField from '../../components/casfeta/FormField';
 import ActionBar from '../../components/casfeta/ActionBar';
+import LocationFields from '../../components/casfeta/LocationFields';
 import { Store, Tag, Phone, MapPin, FileText, Save, User } from 'lucide-react';
 
 export default function AdminShopFormPage() {
     const { id } = useParams();
     const isNew = id === 'new' || id === undefined;
     const navigate = useNavigate();
-    const [form, setForm] = useState({ name: '', business_type: '', description: '', phone: '', location: '', user_id: '', region: '', district: '' });
+    const [form, setForm] = useState({ name: '', business_type: '', description: '', phone: '', location: '', user_id: '', region: '', district: '', ward: '' });
     const [owners, setOwners] = useState([]);
     const [errors, setErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
@@ -29,7 +30,7 @@ export default function AdminShopFormPage() {
         if (isNew) { setLoading(false); return; }
         api.get(`/admin/businesses/${id}`).then(res => {
             const s = res.data;
-            setForm({ name: s.name || s.business_name || '', business_type: s.business_type || s.type || '', description: s.description || '', phone: s.phone || '', location: s.location || '', user_id: s.user_id || '', region: s.region || '', district: s.district || '' });
+            setForm({ name: s.name || s.business_name || '', business_type: s.business_type || s.type || '', description: s.description || '', phone: s.phone || '', location: s.location || '', user_id: s.user_id || '', region: s.region || '', district: s.district || '', ward: s.ward || '' });
         }).catch((error) => { console.error('Failed to fetch shop:', error); navigate('/admin/shops'); }).finally(() => setLoading(false));
     }, [id, isNew, navigate]);
 
@@ -114,8 +115,16 @@ export default function AdminShopFormPage() {
                                 <input type="text" name="phone" value={form.phone} onChange={handleChange} className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA] transition-all" placeholder="e.g. +255 712 345 678" />
                             </FormField>
 
-                            <FormField label="Location" icon={<MapPin className="w-4 h-4" />}>
-                                <input type="text" name="location" value={form.location} onChange={handleChange} className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA] transition-all" placeholder="e.g. Dar es Salaam, Tanzania" />
+                            <div className="md:col-span-2">
+                                <LocationFields
+                                    value={{ region: form.region, district: form.district, ward: form.ward }}
+                                    onChange={(loc) => setForm(prev => ({ ...prev, ...loc, location: loc.region ? `${loc.region}${loc.district ? ', ' + loc.district : ''}` : prev.location }))}
+                                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA] transition-all"
+                                />
+                            </div>
+
+                            <FormField label="Location / Street" icon={<MapPin className="w-4 h-4" />}>
+                                <input type="text" name="location" value={form.location || form.region} onChange={handleChange} className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA] transition-all" placeholder="e.g. Market Street, Dar es Salaam" />
                             </FormField>
 
                             <FormField label="Description" icon={<FileText className="w-4 h-4" />} full>

@@ -62,6 +62,7 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        $this->call(RegionDistrictWardSeeder::class);
         $this->seedUsers();
         $this->seedCurrencies();
         $this->seedChartOfAccounts();

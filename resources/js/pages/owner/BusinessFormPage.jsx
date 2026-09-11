@@ -5,15 +5,8 @@ import PageHeader from '../../components/casfeta/PageHeader';
 import SectionHeader from '../../components/casfeta/SectionHeader';
 import FormField from '../../components/casfeta/FormField';
 import ActionBar from '../../components/casfeta/ActionBar';
+import LocationFields from '../../components/casfeta/LocationFields';
 import { Store, Tag, MapPin, Clock, CreditCard, Image as ImageIcon, Upload } from 'lucide-react';
-
-const TANZANIAN_REGIONS = [
-    'Arusha', 'Dar es Salaam', 'Dodoma', 'Geita', 'Iringa',
-    'Kagera', 'Katavi', 'Kigoma', 'Kilimanjaro', 'Lindi',
-    'Manyara', 'Mara', 'Mbeya', 'Misungwi', 'Morogoro',
-    'Mtwara', 'Mwanza', 'Njombe', 'Pwani', 'Rukwa',
-    'Ruvuma', 'Shinyanga', 'Simiyu', 'Songwe', 'Tabora', 'Tanga',
-];
 
 const BUSINESS_TYPES = [
     { value: 'Duka', label: 'Shop' },
@@ -269,18 +262,13 @@ export default function BusinessFormPage() {
                     </div>
                     <div className="p-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <FormField label="Region" required icon={<MapPin size={16} />} error={errors.region?.[0]}>
-                                <select name="region" value={form.region} onChange={handleChange} className={inputClasses}>
-                                    <option value="">Select region</option>
-                                    {TANZANIAN_REGIONS.map(region => (<option key={region} value={region}>{region}</option>))}
-                                </select>
-                            </FormField>
-                            <FormField label="District" required icon={<MapPin size={16} />} error={errors.district?.[0]}>
-                                <input type="text" name="district" value={form.district} onChange={handleChange} className={inputClasses} placeholder="e.g. Ilala" />
-                            </FormField>
-                            <FormField label="Ward" icon={<MapPin size={16} />}>
-                                <input type="text" name="ward" value={form.ward} onChange={handleChange} className={inputClasses} placeholder="e.g. Kivukoni" />
-                            </FormField>
+                            <div className="md:col-span-2">
+                                <LocationFields
+                                    value={form}
+                                    onChange={(loc) => setForm((prev) => ({ ...prev, ...loc }))}
+                                    className={inputClasses}
+                                />
+                            </div>
                             <FormField label="Street" icon={<MapPin size={16} />}>
                                 <input type="text" name="street" value={form.street} onChange={handleChange} className={inputClasses} placeholder="e.g. Market Street" />
                             </FormField>

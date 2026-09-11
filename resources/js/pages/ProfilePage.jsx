@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import PageHeader from '../components/casfeta/PageHeader';
+import LocationFields from '../components/casfeta/LocationFields';
 import { User, MapPin, Truck, CreditCard, Plus, Check } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -11,8 +12,9 @@ export default function ProfilePage() {
 
     const [editForm, setEditForm] = useState({ name: '', phone: '', email: '' });
     const [savingProfile, setSavingProfile] = useState(false);
+    const [savingAddress, setSavingAddress] = useState(false);
 
-    const [address, setAddress] = useState({ region: '', district: '', street_or_area: '' });
+    const [address, setAddress] = useState({ region: '', district: '', ward: '', street_or_area: '' });
     const [delivery, setDelivery] = useState({ name: '', phone: '', area: '', notes: '' });
 
     const [passwordForm, setPasswordForm] = useState({
@@ -42,6 +44,7 @@ export default function ProfilePage() {
             setAddress({
                 region: data.region || '',
                 district: data.district || '',
+                ward: data.ward || '',
                 street_or_area: data.street_or_area || data.address || '',
             });
             setDelivery({
@@ -79,6 +82,23 @@ export default function ProfilePage() {
 
     const handlePasswordChange = (field) => (e) => {
         setPasswordForm(prev => ({ ...prev, [field]: e.target.value }));
+    };
+
+    const handleSaveAddress = async () => {
+        setSavingAddress(true);
+        try {
+            await api.put('/profile', {
+                region: address.region || null,
+                district: address.district || null,
+                ward: address.ward || null,
+                street_or_area: address.street_or_area || null,
+            });
+            showToast('Taarifa zimehifadhiwa');
+        } catch (err) {
+            setError(err?.response?.data?.message || err?.response?.data?.errors?.region?.[0] || 'Kuhifadhi kumeshindwa. Jaribu tena.');
+        } finally {
+            setSavingAddress(false);
+        }
     };
 
     const handleSavePassword = async () => {
@@ -203,20 +223,20 @@ export default function ProfilePage() {
                 title="Anwani / Mahali"
                 subtitle="Ambapo maagizo yako yatapelekwa"
             >
+                <LocationFields
+                    value={{ region: address.region, district: address.district, ward: address.ward }}
+                    onChange={(loc) => setAddress(prev => ({ ...prev, ...loc }))}
+                    className={inputClass}
+                    labels={{ region: 'Mkoa', district: 'Wilaya', ward: 'Kata' }}
+                />
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <Field label="Mkoa">
-                        <input type="text" value={address.region} onChange={(e) => setAddress(prev => ({ ...prev, region: e.target.value }))} placeholder="e.g. Dar es Salaam" className={inputClass} />
-                    </Field>
-                    <Field label="Wilaya">
-                        <input type="text" value={address.district} onChange={(e) => setAddress(prev => ({ ...prev, district: e.target.value }))} placeholder="e.g. Kinondoni" className={inputClass} />
-                    </Field>
                     <Field label="Mtaa / Eneo">
                         <input type="text" value={address.street_or_area} onChange={(e) => setAddress(prev => ({ ...prev, street_or_area: e.target.value }))} placeholder="e.g. Mbezi Beach" className={inputClass} />
                     </Field>
                 </div>
                 <div className="flex justify-end mt-4">
-                    <button onClick={() => showToast('Taarifa zimehifadhiwa')} className="btn-primary">
-                        Hifadhi Anwani
+                    <button onClick={handleSaveAddress} disabled={savingAddress} className="btn-primary">
+                        {savingAddress ? 'Kuhifadhi...' : 'Hifadhi Anwani'}
                     </button>
                 </div>
             </SectionCard>
