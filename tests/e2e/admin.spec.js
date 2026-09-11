@@ -75,6 +75,30 @@ test.describe('Admin role', () => {
         expectNoApiErrors(apiErrors);
     });
 
+    test('can create a user from the Add form', async ({ page }) => {
+        const apiErrors = watchApi(page);
+        await page.goto('/admin/customers/new', { waitUntil: 'domcontentloaded' });
+        await expect(page.getByRole('heading', { name: 'Create User' })).toBeVisible({ timeout: 30000 });
+
+        const stamp = Date.now();
+        const name = `E2E User ${stamp}`;
+        const email = `e2euser-${stamp}@m-tai-e2e.com`;
+
+        await page.fill('input[name="name"]', name);
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="phone"]', `07${String(stamp).slice(-8)}`);
+        await page.selectOption('select[name="role"]', { index: 1 });
+        await page.fill('input[name="password"]', 'Password123!');
+
+        await page.getByRole('button', { name: 'Create User' }).click();
+        await expect(page.getByText('User created successfully')).toBeVisible({ timeout: 60000 });
+        await page.waitForURL(/\/admin\/customers$/, { timeout: 30000 });
+        await page.getByPlaceholder('Search users...').fill(name);
+        await expect(page.getByText(name).first()).toBeVisible({ timeout: 30000 });
+        await page.waitForTimeout(1500);
+        expectNoApiErrors(apiErrors);
+    });
+
     // ─── Orders management ───────────────────────────────────────────────
     test('can view orders page', async ({ page }) => {
         await assertReachable(page, '/admin/orders');
