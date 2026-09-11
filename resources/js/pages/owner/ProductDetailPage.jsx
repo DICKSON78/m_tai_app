@@ -27,6 +27,7 @@ export default function ProductDetailPage() {
             const res = await api.get(`/owner/products/${id}`);
             setProduct(res.data?.data || res.data);
         } catch (error) { console.error('Failed to fetch product:', error); } finally {
+            setLoading(false);
         }
     };
 

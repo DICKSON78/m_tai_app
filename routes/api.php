@@ -86,10 +86,12 @@ Route::post('/auth/google', [AuthApiController::class, 'googleLogin'])->middlewa
 Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword'])->middleware('throttle:login');
 Route::post('/reset-password', [AuthApiController::class, 'resetPassword'])->middleware('throttle:login');
 
-// Public location reference data (Tanzania regions -> districts -> wards)
+// Public location reference data (Tanzania regions -> districts -> wards -> streets)
 Route::get('/locations/regions', [LocationController::class, 'regions']);
 Route::get('/locations/districts', [LocationController::class, 'districts']);
 Route::get('/locations/wards', [LocationController::class, 'wards']);
+Route::get('/locations/streets', [LocationController::class, 'streets']);
+Route::post('/locations/streets', [LocationController::class, 'learnStreet']);
 
 // Protected API routes
 Route::middleware('auth:sanctum')->group(function () {

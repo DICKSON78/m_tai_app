@@ -16,6 +16,7 @@ class RegionDistrictWardSeeder extends Seeder
             return;
         }
 
+        DB::table('streets')->truncate();
         DB::table('wards')->truncate();
         DB::table('districts')->truncate();
         DB::table('regions')->truncate();
@@ -47,6 +48,36 @@ class RegionDistrictWardSeeder extends Seeder
                 ], $district['wards']), 500) as $chunk) {
                     DB::table('wards')->insert($chunk);
                 }
+            }
+        }
+
+        $this->seedStreets();
+    }
+
+    private function seedStreets(): void
+    {
+        $path = database_path('data/streets.json');
+        if (! is_file($path)) {
+            return;
+        }
+
+        $normalize = fn ($s) => preg_replace('/[\s-]+/', '', mb_strtolower(trim((string) $s)));
+        $districts = DB::table('districts')->get(['id', 'name']);
+
+        foreach (json_decode(file_get_contents($path), true) as $entry) {
+            $district = $districts->first(fn ($d) => $normalize($d->name) === $normalize($entry['district']));
+            if ($district === null) {
+                continue;
+            }
+
+            foreach ($entry['streets'] as $street) {
+                DB::table('streets')->insert([
+                    'ward_id' => null,
+                    'name' => $street,
+                    'is_seeded' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
             }
         }
     }

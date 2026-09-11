@@ -1,0 +1,21 @@
+[
+    { "district": "Ilala", "streets": ["Samora Avenue", "Nyerere Road", "Uhuru Street", "Bibi Titi Mohamed Road", "Morogoro Road", "Msimbazi Street", "Lumumba Street", "Maktaba Street", "Gerezani Street", "Mchikichini Road", "Kariakoo Road", "Mzinga Street", "Tabata Road", "Uhamiaji Street", "Barrack Obama Road"] },
+    { "district": "Kinondoni", "streets": ["Ali Hassan Mwinyi Road", "Bagamoyo Road", "New Bagamoyo Road", "Old Bagamoyo Road", "Haile Selassie Road", "Toure Drive", "Chole Road", "Kinondoni Road", "Old Dar es Salaam Road", "Tegeta Road", "Kunduchi Road", "Masaki Road", "Msasani Road", "Mwenge Road", "Kawe Road"] },
+    { "district": "Temeke", "streets": ["Nelson Mandela Road", "Nyerere Road", "Kilwa Road", "Pugu Road", "Chang'ombe Road", "Yombo Road", "Mtoni Road", "Mbagala Road", "Vingunguti Road", "Keko Road", "Temeke Mwisho Road", "Uhuru Road"] },
+    { "district": "Arusha", "streets": ["Boma Road", "Sokoine Road", "Goliondoi Road", "Makongoro Road", "Moshi Road", "Old Moshi Road", "Njiro Road", "Sakina Road", "Thabo Mbeki Road", "Old Dodoma Road", "Nairobi Road", "Terminal Road", "Kisongo Road", "Sokoni Road"] },
+    { "district": "Dodoma", "streets": ["Raila Odinga Street", "Nkurumah Street", "Jamhuri Street", "Kikuyu Avenue", "Migombani Street", "Nyerere Road", "Mpwapwa Road", "Bahi Road", "Morogoro Road", "Madaraka Street", "Uhuru Street", "Bunge Road", "Kaloleni Street"] },
+    { "district": "Mwanza", "streets": ["Makongoro Road", "Kenyatta Road", "Nyerere Road", "Capri Point Road", "Airport Road", "Mkuyuni Road", "Nyamagana Road", "Isamilo Road", "Bondeni Street", "Mbugani Road", "Kiseke Road", "Lake Road"] },
+    { "district": "Mbeya", "streets": ["Nyerere Road", "Sokoine Road", "Mbalizi Road", "Ilomba Road", "Kenya Road", "Makongoro Road", "Iyunga Road", "Mbeya Peak Road", "Tunduma Road"] },
+    { "district": "Tanga", "streets": ["Nyerere Road", "Independence Avenue", "Kati Street", "Hospital Road", "Sigi Road", "Raskazone Street", "Makorora Road", "Mzingani Road", "Bombo Road"] },
+    { "district": "Moshi", "streets": ["Moshi-Mombasa Road", "Mawenzi Road", "Kibo Road", "Old Moshi Road", "Nyerere Road", "Kilimanjaro Road", "Soweto Road", "KCMC Road"] },
+    { "district": "Kigoma", "streets": ["Market Road", "Mwalimu Julius Nyerere Road", "Katonga Road", "Mwendapole Road", "Railway Road", "Lake Shore Road"] },
+    { "district": "Mtwara", "streets": ["Mikindani Road", "Bank Road", "Airport Road", "Kilimahewa Road", "Jumbe Road", "Rahaleo Road"] },
+    { "district": "Iringa", "streets": ["Gangiloni Street", "Madagali Street", "Nyerere Road", "Ilula Road", "Tosamaganga Road", "Kalenga Road"] },
+    { "district": "Morogoro", "streets": ["Morogoro-Tunduma Road", "Station Street", "Kiswani Street", "Mazimbu Road", "Kingalu Road", "Old Dar es Salaam Road"] },
+    { "district": "Korogwe", "streets": ["Nyerere Road", "Gombero Road", "Milango Road", "Stafu Road", "Magoma Road"] },
+    { "district": "Mjini", "streets": ["Creek Road", "Kenyatta Road", "Malindi Road", "Mkunazini Road", "Vuga Road", "Funguni Road", "Shangani Street", "Stone Town Lane"] },
+    { "district": "Magharibi", "streets": ["Mtoni Road", "Fumba Road", "Mbweni Road", "Kisauni Road", "Chukwani Road"] },
+    { "district": "Wete", "streets": ["Wete Port Road", "Kisauni Road", "Gando Road", "Mjini Road", "Chake Road"] },
+    { "district": "Chake Chake", "streets": ["Chake Chake Road", "Mjini Road", "Kiungoni Road", "Wesha Road", "Tundaua Road"] },
+    { "district": "Rufiji", "streets": ["Ikwiriri Road", "Utete Road", "Bungu Road", "Mbwara Road"] }
+]

@@ -49,9 +49,23 @@ export default function LocationFields({
                 if (d) {
                     setBusyWards(true);
                     api.get('/locations/wards', { params: { district_id: d.id } })
-                        .then((res2) => setWards(Array.isArray(res2.data) ? res2.data : []))
+                        .then((res2) => {
+                            const wardList = Array.isArray(res2.data) ? res2.data : [];
+                            setWards(wardList);
+                            const w = wardList.find((x) => normalize(x.name) === normalize(valueWard));
+                            onChange({
+                                region: r.name,
+                                district: d.name,
+                                ward: w ? w.name : valueWard,
+                                region_id: r.id,
+                                district_id: d.id,
+                                ward_id: w ? w.id : '',
+                            });
+                        })
                         .catch(() => setWards([]))
                         .finally(() => setBusyWards(false));
+                } else {
+                    onChange({ region: r.name, region_id: r.id, district_id: '', ward_id: '' });
                 }
             })
             .catch(() => setDistricts([]))
@@ -61,8 +75,8 @@ export default function LocationFields({
 
     const handleRegion = (e) => {
         const name = e.target.value;
-        onChange({ region: name, district: '', ward: '' });
         const r = regions.find((x) => x.name === name);
+        onChange({ region: name, district: '', ward: '', region_id: r?.id || '', district_id: '', ward_id: '' });
         setDistricts([]);
         setWards([]);
         if (!r) return;
@@ -75,8 +89,8 @@ export default function LocationFields({
 
     const handleDistrict = (e) => {
         const name = e.target.value;
-        onChange({ district: name, ward: '' });
         const d = districts.find((x) => x.name === name);
+        onChange({ district: name, ward: '', district_id: d?.id || '', ward_id: '' });
         setWards([]);
         if (!d) return;
         setBusyWards(true);
@@ -87,7 +101,9 @@ export default function LocationFields({
     };
 
     const handleWard = (e) => {
-        onChange({ ward: e.target.value });
+        const name = e.target.value;
+        const w = wards.find((x) => x.name === name);
+        onChange({ ward: name, ward_id: w?.id || '' });
     };
 
     return (
