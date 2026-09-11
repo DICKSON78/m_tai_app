@@ -146,9 +146,25 @@ export default function CheckoutPage() {
     if (orderSuccess) {
         return (
             <div>
-                <div className="max-w-2xl mx-auto px-4 py-12">
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="p-8 text-center" style={{ background: 'linear-gradient(135deg, #d0f4dd 0%, #b8f0cc 100%)' }}>
+                <div
+                    className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto"
+                    onClick={() => navigate('/customer/shops')}
+                >
+                    <div
+                        className="max-w-md w-full bg-white rounded-2xl border border-gray-200 shadow-xl my-auto overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="p-8 text-center relative" style={{ background: 'linear-gradient(135deg, #d0f4dd 0%, #b8f0cc 100%)' }}>
+                            <button
+                                type="button"
+                                aria-label="Close"
+                                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/70 hover:bg-white flex items-center justify-center text-gray-500 transition"
+                                onClick={() => navigate('/customer/shops')}
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
                             <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
                                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

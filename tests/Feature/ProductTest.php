@@ -62,6 +62,47 @@ class ProductTest extends TestCase
         ]);
     }
 
+    public function test_owner_can_create_product_as_published_from_form(): void
+    {
+        $response = $this->actingAs($this->owner)
+            ->postJson("/api/owner/businesses/{$this->business->id}/products", [
+                'business_id' => $this->business->id,
+                'name' => 'Live Product',
+                'buying_price' => 1200,
+                'selling_price' => 1800,
+                'quantity' => 20,
+                'status' => 'published',
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('is_published', true)
+            ->assertJsonPath('is_draft', false);
+
+        $this->assertDatabaseHas('products', [
+            'business_id' => $this->business->id,
+            'name' => 'Live Product',
+            'is_published' => true,
+            'is_draft' => false,
+        ]);
+    }
+
+    public function test_owner_can_create_product_as_draft_from_form(): void
+    {
+        $response = $this->actingAs($this->owner)
+            ->postJson("/api/owner/businesses/{$this->business->id}/products", [
+                'business_id' => $this->business->id,
+                'name' => 'Draft Product',
+                'buying_price' => 1200,
+                'selling_price' => 1800,
+                'quantity' => 20,
+                'status' => 'draft',
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('is_published', false)
+            ->assertJsonPath('is_draft', true);
+    }
+
     public function test_owner_can_list_products(): void
     {
         Product::factory()->count(3)->create([

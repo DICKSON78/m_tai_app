@@ -11,6 +11,7 @@ use App\Models\Currency;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\TaxRate;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -129,21 +130,35 @@ class OrderController extends Controller
                 }
 
                 // Find or create customer per business
-                $customer = null;
-                $customerRecord = Customer::where('business_id', $businessId)
-                    ->where('phone', $validated['customer_phone'])
-                    ->first();
+                $user = $request->user();
+
+                // Prefer the signed-in customer's record so orders appear in
+                // their account and the owner can see who placed them.
+                $customerRecord = $user && $user->role === 'customer'
+                    ? Customer::where('business_id', $businessId)->where('user_id', $user->id)->first()
+                    : null;
+
+                if (! $customerRecord) {
+                    $customerRecord = Customer::where('business_id', $businessId)
+                        ->where('phone', $validated['customer_phone'])
+                        ->first();
+                }
 
                 if ($customerRecord) {
+                    // Link a signed-in customer to the record if it was previously guest-only.
+                    if ($user && $user->role === 'customer' && ! $customerRecord->user_id) {
+                        $customerRecord->update(['user_id' => $user->id, 'is_guest' => false]);
+                    }
                     $customer = $customerRecord;
                 } else {
                     $customer = Customer::create([
                         'business_id' => $businessId,
+                        'user_id' => $user && $user->role === 'customer' ? $user->id : null,
                         'full_name' => $validated['customer_name'],
                         'phone' => $validated['customer_phone'],
                         'customer_code' => Customer::generateCustomerCode(),
-                        'is_guest' => true,
-                        'customer_type' => $validated['customer_type'] ?? 'walk_in',
+                        'is_guest' => ! $user || $user->role !== 'customer',
+                        'customer_type' => $validated['customer_type'] ?? ($user ? 'registered' : 'walk_in'),
                     ]);
                 }
 
@@ -217,6 +232,8 @@ class OrderController extends Controller
                 }
 
                 $orders[] = $order->load(['items.product', 'payments', 'customer']);
+
+                $this->notifyOwnerOfNewOrder($order, $business);
             }
 
             $request->session()->forget('cart');
@@ -233,6 +250,33 @@ class OrderController extends Controller
             Log::error('Checkout failed: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
 
             return response()->json(['message' => 'An error occurred while placing the order. Please try again.'], 500);
+        }
+    }
+
+    private function notifyOwnerOfNewOrder(Order $order, Business $business): void
+    {
+        $owner = $business->user;
+
+        if (! $owner) {
+            return;
+        }
+
+        try {
+            UserNotification::create([
+                'user_id' => $owner->id,
+                'title' => 'New order received',
+                'message' => 'New order '.$order->transaction_code.' (TZS '.number_format((float) $order->total).') received for '.$business->business_name.'.',
+                'type' => 'new_order',
+            ]);
+
+            PushNotificationController::sendNotification(
+                $owner,
+                'You have a new order',
+                'Order '.$order->transaction_code.' — TZS '.number_format((float) $order->total).' for '.$business->business_name.'.',
+                ['type' => 'new_order', 'order_id' => $order->id, 'business_id' => $business->id],
+            );
+        } catch (\Throwable $e) {
+            Log::warning('Failed to notify owner of new order: '.$e->getMessage());
         }
     }
 

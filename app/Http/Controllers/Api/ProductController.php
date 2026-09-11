@@ -63,6 +63,7 @@ class ProductController extends Controller
             'reorder_quantity' => 'nullable|integer|min:0',
             'is_track_stock' => 'nullable|boolean',
             'location' => 'nullable|string|max:255',
+            'status' => 'sometimes|in:published,draft',
         ]);
 
         $business = $request->input('business_id') ? Business::findOrFail($request->input('business_id')) : $business;
@@ -73,8 +74,9 @@ class ProductController extends Controller
 
         $validated['business_id'] = $business->id;
         $validated['user_id'] = $request->user()->id;
-        $validated['is_published'] = false;
-        $validated['is_draft'] = true;
+        $validated['is_published'] = ($validated['status'] ?? 'draft') === 'published';
+        $validated['is_draft'] = ! $validated['is_published'];
+        unset($validated['status']);
         $validated['slug'] = Str::slug($validated['name']) . '-' . Str::random(5);
 
         if ($request->hasFile('image')) {
@@ -125,6 +127,7 @@ class ProductController extends Controller
             'reorder_quantity' => 'nullable|integer|min:0',
             'is_track_stock' => 'nullable|boolean',
             'location' => 'nullable|string|max:255',
+            'status' => 'sometimes|in:published,draft',
         ]);
 
         if ($request->hasFile('image')) {
@@ -132,6 +135,12 @@ class ProductController extends Controller
                 Storage::disk('public')->delete($product->image);
             }
             $validated['image'] = $request->file('image')->store('products', 'public');
+        }
+
+        if (array_key_exists('status', $validated)) {
+            $validated['is_published'] = $validated['status'] === 'published';
+            $validated['is_draft'] = ! $validated['is_published'];
+            unset($validated['status']);
         }
 
         $product->update($validated);
