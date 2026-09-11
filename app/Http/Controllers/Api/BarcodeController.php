@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Services\Ean13;
 use Illuminate\Http\Request;
 
 class BarcodeController extends Controller
@@ -15,18 +16,16 @@ class BarcodeController extends Controller
         $isEmployee = $user->employees()->where('business_id', $product->business_id)->exists();
         $isAdmin = $user->role === 'admin';
 
-        if (!$isOwner && !$isEmployee && !$isAdmin) {
+        if (! $isOwner && ! $isEmployee && ! $isAdmin) {
             abort(403);
         }
 
-        $barcode = str_pad($product->id, 12, '0', STR_PAD_LEFT);
-
-        $html = $this->generateBarcodeHtml($barcode, $product->name);
+        $barcode = $this->gtinFor($product, $request->user());
 
         return response()->json([
             'barcode' => $barcode,
             'product' => $product->name,
-            'html' => $html,
+            'svg' => Ean13::toSvg($barcode, $product->name),
         ]);
     }
 
@@ -38,12 +37,20 @@ class BarcodeController extends Controller
         ]);
 
         $barcodes = [];
-        foreach ($validated['items'] as $item) {
-            $barcode = str_pad($item['id'] ?? rand(1, 999999), 12, '0', STR_PAD_LEFT);
+
+        foreach ($validated['items'] as $index => $item) {
+            $name = $item['name'] ?? 'Bidhaa';
+            // Stable 12-digit base per order item: item id when numeric,
+            // otherwise the item's position within the order.
+            $ref = is_numeric($item['id'] ?? null) ? (int) $item['id'] : $index + 1;
+            $base = Ean13::GS1_PREFIX
+                . str_pad(substr((string) $ref, 0, 9), 9, '0', STR_PAD_LEFT);
+
             $barcodes[] = [
                 'id' => $item['id'] ?? null,
-                'name' => $item['name'] ?? 'Bidhaa',
-                'barcode' => $barcode,
+                'name' => $name,
+                'barcode' => $base.Ean13::computeCheckDigit($base),
+                'svg' => Ean13::toSvg($base.Ean13::computeCheckDigit($base), $name),
             ];
         }
 
@@ -53,23 +60,23 @@ class BarcodeController extends Controller
         ]);
     }
 
-    protected function generateBarcodeHtml($code, $label)
+    /**
+     * Prefer a manually-entered product barcode when it is a valid EAN-13;
+     * otherwise derive a stable, unique GTIN-13 from business + product id.
+     */
+    protected function gtinFor(Product $product, $user): string
     {
-        $bars = '';
-        $widths = [2,1,1,2,1,1,2,1,2,1,1,2,1,1,2,1,2,1,1,2,1,1,2,1,1,2,1,2,1,1,2];
-
-        for ($i = 0; $i < strlen($code); $i++) {
-            $digit = (int)$code[$i];
-            $bars .= "<div style='display:inline-block;width:{$widths[$i % count($widths)]}px;height:40px;background:#000;margin-right:1px;'></div>";
-            $bars .= "<div style='display:inline-block;width:1px;height:40px;background:#fff;margin-right:1px;'></div>";
+        if ($product->barcode && preg_match('/^\d{12}$/', $product->barcode)) {
+            $manual = $product->barcode.Ean13::computeCheckDigit($product->barcode);
+            if (Ean13::isValid($manual)) {
+                return $manual;
+            }
         }
 
-        return <<<HTML
-<div style="text-align:center;font-family:monospace;">
-    <div style="margin-bottom:4px;">{$bars}</div>
-    <div style="font-size:12px;letter-spacing:2px;">{$code}</div>
-    <div style="font-size:10px;margin-top:2px;">{$label}</div>
-</div>
-HTML;
+        if ($product->barcode && preg_match('/^\d{13}$/', $product->barcode) && Ean13::isValid($product->barcode)) {
+            return $product->barcode;
+        }
+
+        return Ean13::forProduct($product->business_id, $product->id);
     }
 }

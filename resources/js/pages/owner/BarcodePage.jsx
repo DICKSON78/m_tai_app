@@ -107,14 +107,16 @@ export default function BarcodePage() {
                     {barcode && !loading && (
                         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 text-center">
                             <SectionHeader icon={<ScanBarcode size={18} />} title="Barcode Generated" />
-                            {barcode.barcode_image || barcode.image ? (
+                            {barcode.svg ? (
+                                <div className="mt-4 flex justify-center bg-white rounded-lg p-4" dangerouslySetInnerHTML={{ __html: barcode.svg }} />
+                            ) : barcode.barcode_image || barcode.image ? (
                                 <img src={barcode.barcode_image || barcode.image} alt="Barcode" className="mx-auto max-w-md mt-4" />
                             ) : barcode.barcodes ? (
                                 <div className="space-y-3 mt-4">
                                     {barcode.barcodes.map((b, i) => (
-                                        <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                                            <span className="text-sm font-medium text-gray-700">{b.product_name || b.name || `Product ${i + 1}`}</span>
-                                            {b.barcode_image || b.image ? <img src={b.barcode_image || b.image} alt="Barcode" className="h-12" /> : <span className="text-xs text-gray-500 font-mono">{b.code || b.barcode}</span>}
+                                        <div key={i} className="flex flex-col items-center p-3 bg-gray-50 rounded-xl">
+                                            <span className="text-sm font-medium text-gray-700 mb-2">{b.product_name || b.name || `Product ${i + 1}`}</span>
+                                            {b.svg ? <div dangerouslySetInnerHTML={{ __html: b.svg }} /> : b.barcode_image || b.image ? <img src={b.barcode_image || b.image} alt="Barcode" className="h-12" /> : <span className="text-xs text-gray-500 font-mono">{b.barcode || b.code ? <span className="text-xs text-gray-500 font-mono">{b.barcode || b.code}</span> : null}</span>}
                                         </div>
                                     ))}
                                 </div>
