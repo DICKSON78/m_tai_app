@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import LocationFields from '../../components/casfeta/LocationFields';
+import StreetField from '../../components/casfeta/StreetField';
 
 const COUNTRIES = [
     { code: 'TZ', name: 'Tanzania', dial: '+255', flag: '🇹🇿' },
@@ -365,18 +366,12 @@ export default function RegisterSellerPage() {
                             className={inputClasses.replace('pl-11', 'pl-4')}
                         />
                         <div className="grid md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Street Address</label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                    </div>
-                                    <input type="text" name="street" value={formData.street} onChange={handleChange} className={inputClasses} placeholder="Street address" />
-                                </div>
-                            </div>
+                            <StreetField label="Street Address" value={formData.street} onChange={(v) => setFormData(prev => ({ ...prev, street: v }))} wardId={formData.ward_id} className={inputClasses.replace('pl-11', 'pl-4')} placeholder="Street address" icon={
+                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            } />
                         </div>
                         <div className="flex gap-3">
                             <button type="button" onClick={() => goStep(2, 'right')} className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-all">

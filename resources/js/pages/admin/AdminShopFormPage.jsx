@@ -7,6 +7,7 @@ import SectionHeader from '../../components/casfeta/SectionHeader';
 import FormField from '../../components/casfeta/FormField';
 import ActionBar from '../../components/casfeta/ActionBar';
 import LocationFields from '../../components/casfeta/LocationFields';
+import StreetField from '../../components/casfeta/StreetField';
 import { Store, Tag, Phone, MapPin, FileText, Save, User } from 'lucide-react';
 
 export default function AdminShopFormPage() {
@@ -124,7 +125,7 @@ export default function AdminShopFormPage() {
                             </div>
 
                             <FormField label="Location / Street" icon={<MapPin className="w-4 h-4" />}>
-                                <input type="text" name="location" value={form.location || form.region} onChange={handleChange} className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA] transition-all" placeholder="e.g. Market Street, Dar es Salaam" />
+                                <StreetField value={form.location || form.region} onChange={(v) => handleChange({ target: { name: 'location', value: v } })} wardId={form.ward_id} className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA] transition-all" placeholder="e.g. Market Street, Dar es Salaam" autoComplete="off" />
                             </FormField>
 
                             <FormField label="Description" icon={<FileText className="w-4 h-4" />} full>

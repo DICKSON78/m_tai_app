@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import PageHeader from '../components/casfeta/PageHeader';
 import LocationFields from '../components/casfeta/LocationFields';
+import StreetField from '../components/casfeta/StreetField';
 import { User, MapPin, Truck, CreditCard, Plus, Check } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -231,7 +232,7 @@ export default function ProfilePage() {
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <Field label="Mtaa / Eneo">
-                        <input type="text" value={address.street_or_area} onChange={(e) => setAddress(prev => ({ ...prev, street_or_area: e.target.value }))} placeholder="e.g. Mbezi Beach" className={inputClass} />
+                        <StreetField value={address.street_or_area} onChange={(v) => setAddress(prev => ({ ...prev, street_or_area: v }))} wardId={address.ward_id} placeholder="e.g. Mbezi Beach" className={inputClass} />
                     </Field>
                 </div>
                 <div className="flex justify-end mt-4">

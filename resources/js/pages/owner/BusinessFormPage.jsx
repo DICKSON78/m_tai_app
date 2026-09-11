@@ -6,6 +6,7 @@ import SectionHeader from '../../components/casfeta/SectionHeader';
 import FormField from '../../components/casfeta/FormField';
 import ActionBar from '../../components/casfeta/ActionBar';
 import LocationFields from '../../components/casfeta/LocationFields';
+import StreetField from '../../components/casfeta/StreetField';
 import { Store, Tag, MapPin, Clock, CreditCard, Image as ImageIcon, Upload } from 'lucide-react';
 
 const BUSINESS_TYPES = [
@@ -270,7 +271,7 @@ export default function BusinessFormPage() {
                                 />
                             </div>
                             <FormField label="Street" icon={<MapPin size={16} />}>
-                                <input type="text" name="street" value={form.street} onChange={handleChange} className={inputClasses} placeholder="e.g. Market Street" />
+                                <StreetField value={form.street} onChange={(v) => setForm(prev => ({ ...prev, street: v }))} wardId={form.ward_id} className={inputClasses} placeholder="e.g. Market Street" />
                             </FormField>
                             <FormField label="Road" icon={<MapPin size={16} />} full>
                                 <input type="text" name="road" value={form.road} onChange={handleChange} className={inputClasses} placeholder="e.g. Bagamoyo Road" />
