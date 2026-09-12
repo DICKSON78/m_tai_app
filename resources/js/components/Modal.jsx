@@ -6,6 +6,7 @@ const sizeClasses = {
     md: 'sm:max-w-lg',
     lg: 'sm:max-w-2xl',
     xl: 'sm:max-w-4xl',
+    xxl: 'sm:max-w-7xl',
 };
 
 export default function Modal({ isOpen, onClose, title, description, children, size = 'md' }) {

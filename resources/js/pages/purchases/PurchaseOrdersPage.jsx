@@ -214,7 +214,7 @@ export default function PurchaseOrdersPage() {
       )}
 
       {showDetail && (
-        <Modal isOpen={true} onClose={() => setShowDetail(null)} title={showDetail.po_number} size="lg">
+        <Modal isOpen={true} onClose={() => setShowDetail(null)} title={showDetail.po_number} size="xxl">
             <div className="mb-4">
               <p className="text-xs text-gray-500">{showDetail.supplier?.name}</p>
             </div>
