@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
+import Modal from '../../components/Modal';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { FileText, Plus, Search, Eye, CheckCircle, X, Clock, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 
@@ -406,13 +407,8 @@ export default function SupplierInvoicesPage() {
       )}
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-10 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-4xl mx-4 mb-20 shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h3 className="text-lg font-bold text-gray-900">{editingId ? 'Edit Invoice' : 'New Supplier Invoice'}</h3>
-              <button onClick={() => { setShowForm(false); setEditingId(null); }} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <Modal isOpen={true} onClose={() => { setShowForm(false); setEditingId(null); }} title={editingId ? 'Edit Invoice' : 'New Supplier Invoice'} size="lg">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div><label className="block text-xs font-medium text-gray-600 mb-1">Supplier *</label>
                   <select required value={form.supplier_id} onChange={e => setForm({ ...form, supplier_id: e.target.value })}
@@ -510,35 +506,29 @@ export default function SupplierInvoicesPage() {
                   {saving ? 'Saving...' : editingId ? 'Update Invoice' : 'Create Invoice'}</button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
 
       {showDetail && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-10 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-4xl mx-4 mb-20 shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{showDetail.invoice_number}</h3>
-                <p className="text-xs text-gray-500">{showDetail.supplier?.name}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                {showDetail.status === 'pending' && (
-                  <button onClick={() => handleValidate(showDetail.id)}
-                    className="px-3 py-1.5 bg-gradient-to-r from-[#00D4AA] to-[#00b894] text-white rounded-lg text-xs font-medium flex items-center gap-1">
-                    <CheckCircle size={12} /> Validate
-                  </button>
-                )}
-                {showDetail.status === 'pending' && (
-                  <button onClick={() => { setShowDetail(null); handleEdit(showDetail); }}
-                    className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><Edit2 size={12} /> Edit</button>
-                )}
-                <button onClick={() => { setDeleteInvoice(showDetail); setConfirmOpen(true); }}
-                  className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><Trash2 size={12} /> Delete</button>
-                <button onClick={() => setShowDetail(null)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-              </div>
+        <Modal isOpen={true} onClose={() => setShowDetail(null)} title={showDetail.invoice_number} size="lg">
+            <div className="mb-4">
+              <p className="text-xs text-gray-500">{showDetail.supplier?.name}</p>
             </div>
-            <div className="p-6 space-y-6">
+            <div className="flex items-center gap-2 mb-4">
+              {showDetail.status === 'pending' && (
+                <button onClick={() => handleValidate(showDetail.id)}
+                  className="px-3 py-1.5 bg-gradient-to-r from-[#00D4AA] to-[#00b894] text-white rounded-lg text-xs font-medium flex items-center gap-1">
+                  <CheckCircle size={12} /> Validate
+                </button>
+              )}
+              {showDetail.status === 'pending' && (
+                <button onClick={() => { setShowDetail(null); handleEdit(showDetail); }}
+                  className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><Edit2 size={12} /> Edit</button>
+              )}
+              <button onClick={() => { setDeleteInvoice(showDetail); setConfirmOpen(true); }}
+                className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><Trash2 size={12} /> Delete</button>
+            </div>
+            <div className="space-y-6">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                 <div><p className="text-gray-500">Status</p>
                   <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${STATUS_CLASSES[isOverdue(showDetail) ? 'overdue' : showDetail.status] || STATUS_CLASSES.pending}`}>
@@ -582,8 +572,7 @@ export default function SupplierInvoicesPage() {
                 <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600"><p className="text-xs font-medium text-gray-500 mb-1">Notes</p>{showDetail.notes}</div>
               )}
             </div>
-          </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
 import Pagination from '../../components/Pagination';
+import Modal from '../../components/Modal';
 import { Package, Plus, Search, Eye, CheckCircle, X, Trash2 } from 'lucide-react';
 
 const STATUS_CLASSES = {
@@ -180,13 +181,8 @@ export default function PurchaseReceptionsPage() {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-10 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-5xl mx-4 mb-20 shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h3 className="text-lg font-bold text-gray-900">Record Goods Received</h3>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <Modal isOpen={true} onClose={() => setShowForm(false)} title="Record Goods Received" size="xl">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div><label className="block text-xs font-medium text-gray-600 mb-1">Purchase Order *</label>
                   <select required value={form.purchase_order_id} onChange={e => handleSelectPO(e.target.value)}
@@ -299,33 +295,27 @@ export default function PurchaseReceptionsPage() {
                   {saving ? 'Recording...' : 'Record Reception'}</button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
 
       {showDetail && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-10 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-4xl mx-4 mb-20 shadow-2xl">
+        <Modal isOpen={true} onClose={() => setShowDetail(null)} title={showDetail.grn_number || showDetail.reception_number || ''} size="lg">
             {detailLoading ? (
               <div className="flex items-center justify-center py-24"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]" /></div>
             ) : (
               <>
-                <div className="flex items-center justify-between px-6 py-4 border-b">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">{showDetail.grn_number || showDetail.reception_number}</h3>
-                    <p className="text-xs text-gray-500">{showDetail.purchase_order?.po_number} · {showDetail.supplier?.name}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {showDetail.status === 'draft' && (
-                      <>
-                        <button onClick={() => handleConfirm(showDetail)} className="px-3 py-1.5 bg-gradient-to-r from-[#00D4AA] to-[#00b894] text-white rounded-lg text-xs font-medium flex items-center gap-1"><CheckCircle size={12} /> Confirm</button>
-                        <button onClick={() => handleDelete(showDetail)} className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><Trash2 size={12} /> Delete</button>
-                      </>
-                    )}
-                    <button onClick={() => setShowDetail(null)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-                  </div>
+                <div className="mb-4">
+                  <p className="text-xs text-gray-500">{showDetail.purchase_order?.po_number} · {showDetail.supplier?.name}</p>
                 </div>
-                <div className="p-6 space-y-6">
+                <div className="flex items-center gap-2 mb-4">
+                  {showDetail.status === 'draft' && (
+                    <>
+                      <button onClick={() => handleConfirm(showDetail)} className="px-3 py-1.5 bg-gradient-to-r from-[#00D4AA] to-[#00b894] text-white rounded-lg text-xs font-medium flex items-center gap-1"><CheckCircle size={12} /> Confirm</button>
+                      <button onClick={() => handleDelete(showDetail)} className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><Trash2 size={12} /> Delete</button>
+                    </>
+                  )}
+                </div>
+                <div className="space-y-6">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                     <div><p className="text-gray-500">Status</p><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_CLASSES[showDetail.status]}`}>{showDetail.status}</span></div>
                     <div><p className="text-gray-500">Reception Date</p><p className="font-medium">{showDetail.reception_date}</p></div>
@@ -365,8 +355,7 @@ export default function PurchaseReceptionsPage() {
                 </div>
               </>
             )}
-          </div>
-        </div>
+        </Modal>
       )}
 
       <div className="flex flex-wrap items-center gap-3">

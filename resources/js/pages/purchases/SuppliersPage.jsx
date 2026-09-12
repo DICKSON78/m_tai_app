@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
+import Modal from '../../components/Modal';
 import { Truck, Plus, Search, Eye, Edit2, Trash2, X, Phone, Mail, MapPin, Star, Ban, CheckCircle } from 'lucide-react';
 
 const STATUS_CLASSES = {
@@ -129,13 +130,8 @@ export default function SuppliersPage() {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-3xl mx-4 mb-20 shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h3 className="text-lg font-bold text-gray-900">{editing ? 'Edit Supplier' : 'New Supplier'}</h3>
-              <button onClick={() => { setShowForm(false); setEditing(null); }} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <Modal isOpen={true} onClose={() => { setShowForm(false); setEditing(null); }} title={editing ? 'Edit Supplier' : 'New Supplier'} size="lg">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><label className="block text-xs font-medium text-gray-600 mb-1">Name *</label>
                   <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})}
@@ -193,18 +189,12 @@ export default function SuppliersPage() {
                   {saving ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
 
       {showDetail && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-2xl mx-4 mb-20 shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h3 className="text-lg font-bold text-gray-900">{showDetail.name}</h3>
-              <button onClick={() => setShowDetail(null)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-            </div>
-            <div className="p-6 space-y-6">
+        <Modal isOpen={true} onClose={() => setShowDetail(null)} title={showDetail.name} size="lg">
+            <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div><span className="text-gray-500">Code:</span> <span className="font-medium ml-2">{showDetail.code}</span></div>
                 <div><span className="text-gray-500">Status:</span>
@@ -235,8 +225,7 @@ export default function SuppliersPage() {
                 </div>
               )}
             </div>
-          </div>
-        </div>
+        </Modal>
       )}
 
       <div className="flex flex-wrap items-center gap-3">

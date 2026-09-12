@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
 import { Layers, Plus, Search, Edit2, Trash2, X } from 'lucide-react';
+import Modal from '../../components/Modal';
 
 const fmt = (n) => new Intl.NumberFormat('en-TZ', { minimumFractionDigits: 0 }).format(n || 0);
 
@@ -66,43 +67,37 @@ export default function CostCentersPage() {
         </button>} />
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-lg mx-4 mb-20 shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h3 className="text-lg font-bold text-gray-900">{editing ? 'Edit' : 'New'} Cost Center</h3>
-              <button onClick={() => { setShowForm(false); setEditing(null); }} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-xs font-medium text-gray-600 mb-1">Code *</label>
-                  <input type="text" required value={form.code} onChange={e => setForm({...form, code: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-[#00D4AA]" /></div>
-                <div><label className="block text-xs font-medium text-gray-600 mb-1">Name *</label>
-                  <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-[#00D4AA]" /></div>
-              </div>
-              <div><label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
-                <input type="text" value={form.description} onChange={e => setForm({...form, description: e.target.value})}
+        <Modal isOpen={true} onClose={() => { setShowForm(false); setEditing(null); }} title={`${editing ? 'Edit' : 'New'} Cost Center`} size="lg">
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="block text-xs font-medium text-gray-600 mb-1">Code *</label>
+                <input type="text" required value={form.code} onChange={e => setForm({...form, code: e.target.value})}
                   className="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-[#00D4AA]" /></div>
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-xs font-medium text-gray-600 mb-1">Parent Center</label>
-                  <select value={form.parent_id} onChange={e => setForm({...form, parent_id: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-[#00D4AA]">
-                    <option value="">None (Root)</option>
-                    {rootCenters.map(c => <option key={c.id} value={c.id}>{c.code} - {c.name}</option>)}
-                  </select></div>
-                <div><label className="block text-xs font-medium text-gray-600 mb-1">Budget (TZS)</label>
-                  <input type="number" min="0" value={form.budget_amount} onChange={e => setForm({...form, budget_amount: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-[#00D4AA]" /></div>
-              </div>
-              <div className="flex justify-end gap-3 pt-4 border-t">
-                <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="px-4 py-2 text-sm text-gray-600">Cancel</button>
-                <button type="submit" disabled={saving} className="px-6 py-2 bg-gradient-to-r from-[#00D4AA] to-[#00b894] text-white rounded-xl text-sm font-semibold disabled:opacity-50">
-                  {saving ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
+              <div><label className="block text-xs font-medium text-gray-600 mb-1">Name *</label>
+                <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-[#00D4AA]" /></div>
+            </div>
+            <div><label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
+              <input type="text" value={form.description} onChange={e => setForm({...form, description: e.target.value})}
+                className="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-[#00D4AA]" /></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="block text-xs font-medium text-gray-600 mb-1">Parent Center</label>
+                <select value={form.parent_id} onChange={e => setForm({...form, parent_id: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-[#00D4AA]">
+                  <option value="">None (Root)</option>
+                  {rootCenters.map(c => <option key={c.id} value={c.id}>{c.code} - {c.name}</option>)}
+                </select></div>
+              <div><label className="block text-xs font-medium text-gray-600 mb-1">Budget (TZS)</label>
+                <input type="number" min="0" value={form.budget_amount} onChange={e => setForm({...form, budget_amount: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-[#00D4AA]" /></div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="px-4 py-2 text-sm text-gray-600">Cancel</button>
+              <button type="submit" disabled={saving} className="px-6 py-2 bg-gradient-to-r from-[#00D4AA] to-[#00b894] text-white rounded-xl text-sm font-semibold disabled:opacity-50">
+                {saving ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
+            </div>
+          </form>
+        </Modal>
       )}
 
       <div className="relative max-w-md">

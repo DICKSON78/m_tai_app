@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
 import { GraduationCap, Plus, Pencil, Trash2, X, Users, Clock, Calendar } from 'lucide-react';
+import Modal from '../../components/Modal';
 
 export default function TrainingPage() {
     const [programs, setPrograms] = useState([]);
@@ -176,29 +177,23 @@ export default function TrainingPage() {
 
             {/* Enroll modal */}
             {enrolling && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-16" onClick={() => setEnrolling(null)}>
-                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-6 border-b">
-                            <h2 className="text-lg font-bold text-gray-900">Enroll Employee</h2>
-                            <button onClick={() => setEnrolling(null)} className="p-2 text-gray-400 hover:text-gray-600"><X size={18} /></button>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            <p className="text-sm text-gray-500">Program: <strong>{enrolling.title}</strong></p>
-                            <div>
-                                <label className="text-sm font-medium text-gray-700 mb-1 block">Select Employee</label>
-                                <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-lg">
-                                    {employees.map(emp => (
-                                        <button key={emp.id} onClick={() => handleEnroll(enrolling, emp.id)} className="w-full text-left px-4 py-3 hover:bg-[#00D4AA]/10 border-b border-gray-50 last:border-0 transition-colors">
-                                            <div className="text-sm font-medium text-gray-900">{emp.name || emp.employee_number}</div>
-                                            <div className="text-xs text-gray-500">{emp.position || emp.department?.name || ''}</div>
-                                        </button>
-                                    ))}
-                                    {employees.length === 0 && <p className="px-4 py-6 text-sm text-gray-500 text-center">No employees found</p>}
-                                </div>
+                <Modal isOpen={true} onClose={() => setEnrolling(null)} title="Enroll Employee" size="md">
+                    <div className="p-6 space-y-4">
+                        <p className="text-sm text-gray-500">Program: <strong>{enrolling.title}</strong></p>
+                        <div>
+                            <label className="text-sm font-medium text-gray-700 mb-1 block">Select Employee</label>
+                            <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-lg">
+                                {employees.map(emp => (
+                                    <button key={emp.id} onClick={() => handleEnroll(enrolling, emp.id)} className="w-full text-left px-4 py-3 hover:bg-[#00D4AA]/10 border-b border-gray-50 last:border-0 transition-colors">
+                                        <div className="text-sm font-medium text-gray-900">{emp.name || emp.employee_number}</div>
+                                        <div className="text-xs text-gray-500">{emp.position || emp.department?.name || ''}</div>
+                                    </button>
+                                ))}
+                                {employees.length === 0 && <p className="px-4 py-6 text-sm text-gray-500 text-center">No employees found</p>}
                             </div>
                         </div>
                     </div>
-                </div>
+                </Modal>
             )}
         </div>
     );

@@ -51,16 +51,16 @@ class ReceiptController extends Controller
             $total = $e($item['total']);
             $items .= "<tr>
                 <td>{$name}</td>
-                <td style='text-align:right'>{$qty}</td>
-                <td style='text-align:right'>{$price}</td>
-                <td style='text-align:right'>{$total}</td>
+                <td class='num'>{$qty}</td>
+                <td class='num'>{$price}</td>
+                <td class='num'>{$total}</td>
             </tr>";
         }
 
         $discountLine = '';
         if (isset($receipt['discount']) && (float)$receipt['discount'] > 0) {
             $disc = $e($receipt['discount']);
-            $discountLine = "<tr><td>Discount</td><td style='text-align:right'>-TZS {$disc}</td></tr>";
+            $discountLine = "<tr><td>Discount</td><td class='num'>-TZS {$disc}</td></tr>";
         }
 
         $businessName = $e($receipt['business']['name']);
@@ -69,56 +69,80 @@ class ReceiptController extends Controller
         $txnCode = $e($receipt['order']['transaction_code']);
         $txnDate = $e($receipt['order']['date']);
         $payMethod = $e($receipt['order']['payment_method']);
+        $orderStatus = $e(strtoupper($receipt['order']['status'] ?? ''));
         $subtotal = $e($receipt['subtotal']);
         $tax = $e($receipt['tax']);
         $total = $e($receipt['total']);
         $amountPaid = $e($receipt['amount_paid']);
         $change = $e($receipt['change']);
         $footer = $e($receipt['footer']);
-        $logo = \App\Helpers\Branding::logoImgHtml(90, 'center');
+        $logo = \App\Helpers\Branding::logoImgHtml(80, 'center');
 
         return <<<HTML
 <!DOCTYPE html>
 <html>
 <head>
     <style>
-        body { font-family: monospace; font-size: 12px; max-width: 300px; margin: 0 auto; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11.5px; color: #1e293b; max-width: 340px; margin: 0 auto; padding: 18px; }
+        .logo { text-align: center; margin-bottom: 8px; }
         .center { text-align: center; }
-        .bold { font-weight: bold; }
-        .logo { margin-bottom: 6px; }
+        .shop-name { font-size: 16px; font-weight: 700; color: #0f172a; }
+        .shop-meta { font-size: 10.5px; color: #64748b; margin-top: 2px; }
+        .brand-line { height: 3px; background: linear-gradient(90deg, #00D4AA, #0f172a); border-radius: 2px; margin: 10px 0; }
+        .meta-grid { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .meta-grid .k { color: #64748b; text-transform: uppercase; font-size: 9px; letter-spacing: .5px; }
+        .meta-grid .v { font-weight: 600; color: #0f172a; margin-top: 1px; }
+        .dash { border-top: 1px dashed #cbd5e1; margin: 10px 0; }
         table { width: 100%; border-collapse: collapse; }
-        td { padding: 2px 0; }
-        .border-top { border-top: 1px dashed #000; margin: 8px 0; }
-        .total-row { font-weight: bold; font-size: 14px; }
+        th { color: #64748b; font-size: 9px; text-transform: uppercase; letter-spacing: .5px; text-align: left; padding: 4px 0; border-bottom: 1px solid #e2e8f0; }
+        th.num, td.num { text-align: right; }
+        td { padding: 5px 0; font-size: 11px; color: #1e293b; }
+        td.num { font-variant-numeric: tabular-nums; }
+        .totals td { padding: 3px 0; }
+        .total-row td { font-size: 13px; font-weight: 800; color: #0f172a; border-top: 1px solid #e2e8f0; padding-top: 7px; }
+        .grand { color: #065f46; font-weight: 700; }
+        .footer { text-align: center; font-size: 10px; color: #94a3b8; margin-top: 12px; }
     </style>
 </head>
 <body>
-    <div class="center logo">{$logo}</div>
-    <div class="center bold">{$businessName}</div>
-    <div class="center">{$businessCode}</div>
-    <div class="center">{$businessPhone}</div>
-    <div class="border-top"></div>
-    <div><strong>Transaction:</strong> {$txnCode}</div>
-    <div><strong>Date:</strong> {$txnDate}</div>
-    <div><strong>Payment:</strong> {$payMethod}</div>
-    <div class="border-top"></div>
+    <div class="logo">{$logo}</div>
+    <div class="center">
+        <div class="shop-name">{$businessName}</div>
+        <div class="shop-meta">{$businessCode}</div>
+        <div class="shop-meta">{$businessPhone}</div>
+    </div>
+    <div class="brand-line"></div>
+
+    <div class="meta-grid">
+        <div><div class="k">Transaction</div><div class="v">{$txnCode}</div></div>
+        <div style="text-align:right"><div class="k">Payment</div><div class="v">{$payMethod}</div></div>
+    </div>
+    <div class="meta-grid">
+        <div><div class="k">Date</div><div class="v">{$txnDate}</div></div>
+        <div style="text-align:right"><div class="k">Status</div><div class="v">{$orderStatus}</div></div>
+    </div>
+    <div class="dash"></div>
+
     <table>
         <thead>
-            <tr><th>Item</th><th style='text-align:right'>Qty</th><th style='text-align:right'>Price</th><th style='text-align:right'>Total</th></tr>
+            <tr><th>Item</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Total</th></tr>
         </thead>
         <tbody>{$items}</tbody>
     </table>
-    <div class="border-top"></div>
-    <table>
-        <tr><td>Subtotal</td><td style='text-align:right'>TZS {$subtotal}</td></tr>
+    <div class="dash"></div>
+
+    <table class="totals">
+        <tr><td>Subtotal</td><td class="num">TZS {$subtotal}</td></tr>
         {$discountLine}
-        <tr><td>Tax</td><td style='text-align:right'>TZS {$tax}</td></tr>
-        <tr class="total-row"><td>TOTAL</td><td style='text-align:right'>TZS {$total}</td></tr>
-        <tr><td>Paid</td><td style='text-align:right'>TZS {$amountPaid}</td></tr>
-        <tr><td>Change</td><td style='text-align:right'>TZS {$change}</td></tr>
+        <tr><td>Tax</td><td class="num">TZS {$tax}</td></tr>
+        <tr class="total-row"><td>TOTAL</td><td class="num">TZS {$total}</td></tr>
+        <tr><td>Paid</td><td class="num">TZS {$amountPaid}</td></tr>
+        <tr class="grand"><td>Change</td><td class="num">TZS {$change}</td></tr>
     </table>
-    <div class="border-top"></div>
-    <div class="center">{$footer}</div>
+
+    <div class="dash"></div>
+    <div class="footer">{$footer}</div>
 </body>
 </html>
 HTML;

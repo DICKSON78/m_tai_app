@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
+import Modal from '../../components/Modal';
 import { Receipt, Plus, Search, Eye, DollarSign, X } from 'lucide-react';
 import Pagination from '../../components/Pagination';
 
@@ -100,14 +101,13 @@ export default function BillsPage() {
             )}
 
             {showPayModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-6 w-full max-w-md">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Record Payment</h3>
+                <Modal isOpen={true} onClose={() => { setShowPayModal(null); setPayAmount(''); }} title="Record Payment" size="sm">
+                    <div>
                         <p className="text-sm text-gray-600 mb-4">Bill: {showPayModal.bill_number} | Vendor: {showPayModal.vendor_name} | Balance: TZS {(Number(showPayModal.total) - Number(showPayModal.amount_paid)).toLocaleString()}</p>
                         <input type="number" min="0.01" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/20 mb-4" placeholder="Amount" />
-                        <div className="flex justify-end gap-3"><button onClick={() => setShowPayModal(null)} className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg">Cancel</button><button onClick={handlePay} className="px-5 py-2 text-sm font-medium text-white rounded-lg" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>Pay</button></div>
+                        <div className="flex justify-end gap-3"><button onClick={() => { setShowPayModal(null); setPayAmount(''); }} className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg">Cancel</button><button onClick={handlePay} className="px-5 py-2 text-sm font-medium text-white rounded-lg" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>Pay</button></div>
                     </div>
-                </div>
+                </Modal>
             )}
 
             <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1 w-fit">

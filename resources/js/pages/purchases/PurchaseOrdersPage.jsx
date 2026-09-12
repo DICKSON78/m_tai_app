@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
+import Modal from '../../components/Modal';
 import { ShoppingCart, Plus, Search, Eye, Edit2, X, CheckCircle, Send, Ban, Package } from 'lucide-react';
 
 const STATUS_CLASSES = {
@@ -131,13 +132,8 @@ export default function PurchaseOrdersPage() {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-10 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-4xl mx-4 mb-20 shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h3 className="text-lg font-bold text-gray-900">New Purchase Order</h3>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <Modal isOpen={true} onClose={() => setShowForm(false)} title="New Purchase Order" size="lg">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div><label className="block text-xs font-medium text-gray-600 mb-1">Supplier *</label>
                   <select required value={form.supplier_id} onChange={e => setForm({...form, supplier_id: e.target.value})}
@@ -214,32 +210,26 @@ export default function PurchaseOrdersPage() {
                   {saving ? 'Creating...' : 'Create Order'}</button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
 
       {showDetail && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-10 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-4xl mx-4 mb-20 shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{showDetail.po_number}</h3>
-                <p className="text-xs text-gray-500">{showDetail.supplier?.name}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                {showDetail.status === 'draft' && (
-                  <button onClick={() => handleAction(showDetail.id, 'approve')} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><Send size={12} /> Approve & Send</button>
-                )}
-                {showDetail.status === 'sent' && (
-                  <button onClick={() => handleAction(showDetail.id, 'confirm')} className="px-3 py-1.5 bg-purple-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><CheckCircle size={12} /> Confirm</button>
-                )}
-                {!['received', 'cancelled'].includes(showDetail.status) && (
-                  <button onClick={() => handleAction(showDetail.id, 'cancel')} className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><Ban size={12} /> Cancel</button>
-                )}
-                <button onClick={() => setShowDetail(null)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-              </div>
+        <Modal isOpen={true} onClose={() => setShowDetail(null)} title={showDetail.po_number} size="lg">
+            <div className="mb-4">
+              <p className="text-xs text-gray-500">{showDetail.supplier?.name}</p>
             </div>
-            <div className="p-6 space-y-6">
+            <div className="flex items-center gap-2 mb-4">
+              {showDetail.status === 'draft' && (
+                <button onClick={() => handleAction(showDetail.id, 'approve')} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><Send size={12} /> Approve & Send</button>
+              )}
+              {showDetail.status === 'sent' && (
+                <button onClick={() => handleAction(showDetail.id, 'confirm')} className="px-3 py-1.5 bg-purple-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><CheckCircle size={12} /> Confirm</button>
+              )}
+              {!['received', 'cancelled'].includes(showDetail.status) && (
+                <button onClick={() => handleAction(showDetail.id, 'cancel')} className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium flex items-center gap-1"><Ban size={12} /> Cancel</button>
+              )}
+            </div>
+            <div className="space-y-6">
               <div className="grid grid-cols-4 gap-4 text-sm">
                 <div><p className="text-gray-500">Status</p><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_CLASSES[showDetail.status]}`}>{showDetail.status?.replace('_', ' ')}</span></div>
                 <div><p className="text-gray-500">Order Date</p><p className="font-medium">{showDetail.order_date}</p></div>
@@ -271,8 +261,7 @@ export default function PurchaseOrdersPage() {
                 </table>
               </div>
             </div>
-          </div>
-        </div>
+        </Modal>
       )}
 
       <div className="flex flex-wrap items-center gap-3">

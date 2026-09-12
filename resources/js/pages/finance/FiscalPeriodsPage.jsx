@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
 import { Calendar, Plus, Pencil, Trash2, X, Lock, Unlock, ChevronDown } from 'lucide-react';
+import Modal from '../../components/Modal';
 
 export default function FiscalPeriodsPage() {
     const [periods, setPeriods] = useState([]);
@@ -166,48 +167,39 @@ export default function FiscalPeriodsPage() {
 
             {/* Detail modal */}
             {detailPeriod && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-16" onClick={() => setDetailPeriod(null)}>
-                    <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-6 border-b">
+                <Modal isOpen={true} onClose={() => setDetailPeriod(null)} title={detailPeriod.name} description={`${detailPeriod.start_date?.split('T')[0]} to ${detailPeriod.end_date?.split('T')[0]}`} size="lg">
+                    <div className="p-6 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusColor(detailPeriod.status)}`}>{detailPeriod.status}</span>
+                            {detailPeriod.closer && <span className="text-sm text-gray-500">Closed by: {detailPeriod.closer?.name}</span>}
+                        </div>
+                        {detailPeriod.journal_entries?.length > 0 && (
                             <div>
-                                <h2 className="text-lg font-bold text-gray-900">{detailPeriod.name}</h2>
-                                <p className="text-sm text-gray-500 mt-1">{detailPeriod.start_date?.split('T')[0]} to {detailPeriod.end_date?.split('T')[0]}</p>
-                            </div>
-                            <button onClick={() => setDetailPeriod(null)} className="p-2 text-gray-400 hover:text-gray-600"><X size={18} /></button>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            <div className="flex items-center gap-3">
-                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusColor(detailPeriod.status)}`}>{detailPeriod.status}</span>
-                                {detailPeriod.closer && <span className="text-sm text-gray-500">Closed by: {detailPeriod.closer?.name}</span>}
-                            </div>
-                            {detailPeriod.journal_entries?.length > 0 && (
-                                <div>
-                                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Recent Journal Entries</h4>
-                                    <div className="bg-gray-50 rounded-lg overflow-hidden">
-                                        <table className="w-full text-sm">
-                                            <thead><tr className="border-b border-gray-200">
-                                                <th className="text-left px-4 py-2 font-medium text-gray-500 text-xs">Date</th>
-                                                <th className="text-left px-4 py-2 font-medium text-gray-500 text-xs">Description</th>
-                                                <th className="text-right px-4 py-2 font-medium text-gray-500 text-xs">Debit</th>
-                                                <th className="text-right px-4 py-2 font-medium text-gray-500 text-xs">Credit</th>
-                                            </tr></thead>
-                                            <tbody>
-                                                {detailPeriod.journal_entries.map(je => (
-                                                    <tr key={je.id} className="border-b border-gray-100">
-                                                        <td className="px-4 py-2 text-gray-600">{je.date}</td>
-                                                        <td className="px-4 py-2 text-gray-900 font-medium">{je.description}</td>
-                                                        <td className="px-4 py-2 text-right text-gray-600">{fmt(je.total_debit)}</td>
-                                                        <td className="px-4 py-2 text-right text-gray-600">{fmt(je.total_credit)}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                <h4 className="text-sm font-semibold text-gray-700 mb-2">Recent Journal Entries</h4>
+                                <div className="bg-gray-50 rounded-lg overflow-hidden">
+                                    <table className="w-full text-sm">
+                                        <thead><tr className="border-b border-gray-200">
+                                            <th className="text-left px-4 py-2 font-medium text-gray-500 text-xs">Date</th>
+                                            <th className="text-left px-4 py-2 font-medium text-gray-500 text-xs">Description</th>
+                                            <th className="text-right px-4 py-2 font-medium text-gray-500 text-xs">Debit</th>
+                                            <th className="text-right px-4 py-2 font-medium text-gray-500 text-xs">Credit</th>
+                                        </tr></thead>
+                                        <tbody>
+                                            {detailPeriod.journal_entries.map(je => (
+                                                <tr key={je.id} className="border-b border-gray-100">
+                                                    <td className="px-4 py-2 text-gray-600">{je.date}</td>
+                                                    <td className="px-4 py-2 text-gray-900 font-medium">{je.description}</td>
+                                                    <td className="px-4 py-2 text-right text-gray-600">{fmt(je.total_debit)}</td>
+                                                    <td className="px-4 py-2 text-right text-gray-600">{fmt(je.total_credit)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
-                </div>
+                </Modal>
             )}
         </div>
     );

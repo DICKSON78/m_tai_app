@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
 import Pagination from '../../components/Pagination';
+import Modal from '../../components/Modal';
 import { RotateCcw, Plus, Search, Eye, CheckCircle, X, Ban, Trash2 } from 'lucide-react';
 
 const STATUS_CLASSES = {
@@ -223,13 +224,8 @@ export default function PurchaseReturnsPage() {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-10 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-4xl mx-4 mb-20 shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h3 className="text-lg font-bold text-gray-900">New Purchase Return</h3>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <Modal isOpen={true} onClose={() => setShowForm(false)} title="New Purchase Return" size="lg">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {formError && (
                 <div className="px-4 py-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm">{formError}</div>
               )}
@@ -317,34 +313,28 @@ export default function PurchaseReturnsPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
 
       {showDetail && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-10 overflow-y-auto" onClick={() => !detailLoading && setShowDetail(null)}>
-          <div className="bg-white rounded-2xl w-full max-w-4xl mx-4 mb-20 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{getReturnNumber(showDetail)}</h3>
-                <p className="text-xs text-gray-500">{showDetail.supplier?.name || ''}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                {showDetail.status === 'pending' && (
-                  <>
-                    <button onClick={() => handleAction(showDetail, 'approve')} disabled={actionLoading}
-                      className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium flex items-center gap-1 hover:bg-green-700 disabled:opacity-50"><CheckCircle size={12} /> Approve</button>
-                    <button onClick={() => handleAction(showDetail, 'reject')} disabled={actionLoading}
-                      className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium flex items-center gap-1 hover:bg-red-700 disabled:opacity-50"><Ban size={12} /> Reject</button>
-                  </>
-                )}
-                <button onClick={() => setShowDetail(null)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-              </div>
+        <Modal isOpen={true} onClose={() => !detailLoading && setShowDetail(null)} title={getReturnNumber(showDetail)} size="lg">
+            <div className="mb-4">
+              <p className="text-xs text-gray-500">{showDetail.supplier?.name || ''}</p>
+            </div>
+            <div className="flex items-center gap-2 mb-4">
+              {showDetail.status === 'pending' && (
+                <>
+                  <button onClick={() => handleAction(showDetail, 'approve')} disabled={actionLoading}
+                    className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium flex items-center gap-1 hover:bg-green-700 disabled:opacity-50"><CheckCircle size={12} /> Approve</button>
+                  <button onClick={() => handleAction(showDetail, 'reject')} disabled={actionLoading}
+                    className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium flex items-center gap-1 hover:bg-red-700 disabled:opacity-50"><Ban size={12} /> Reject</button>
+                </>
+              )}
             </div>
             {detailLoading ? (
               <div className="flex items-center justify-center py-20"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4AA]" /></div>
             ) : (
-              <div className="p-6 space-y-6">
+              <div className="space-y-6">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                   <div><p className="text-gray-500 mb-1">Status</p>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_CLASSES[showDetail.status] || 'bg-gray-100 text-gray-600'}`}>{humanize(showDetail.status)}</span></div>
@@ -401,8 +391,7 @@ export default function PurchaseReturnsPage() {
                 )}
               </div>
             )}
-          </div>
-        </div>
+        </Modal>
       )}
 
       <div className="flex flex-wrap items-center gap-3">

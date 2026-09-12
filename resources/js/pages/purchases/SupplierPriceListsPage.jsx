@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
+import Modal from '../../components/Modal';
 import { Tag, Plus, Search, Edit2, Trash2, X } from 'lucide-react';
 
 const EMPTY_FORM = {
@@ -196,13 +197,8 @@ export default function SupplierPriceListsPage() {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-2xl mx-4 mb-20 shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h3 className="text-lg font-bold text-gray-900">{editing ? 'Edit Price' : 'New Supplier Price'}</h3>
-              <button onClick={() => { setShowForm(false); resetForm(); }} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <Modal isOpen={true} onClose={() => { setShowForm(false); resetForm(); }} title={editing ? 'Edit Price' : 'New Supplier Price'} size="lg">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">Supplier *</label>
@@ -284,8 +280,7 @@ export default function SupplierPriceListsPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
 
       <div className="flex flex-wrap items-center gap-3">

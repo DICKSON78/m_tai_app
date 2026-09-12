@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
 import { Currency as CurrencyIcon, Plus, X, ArrowRightLeft, Star } from 'lucide-react';
+import Modal from '../../components/Modal';
 
 export default function CurrencyPage() {
     const [currencies, setCurrencies] = useState([]);
@@ -147,46 +148,40 @@ export default function CurrencyPage() {
             )}
 
             {showConvert && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-16" onClick={() => { setShowConvert(false); setConvertResult(null); }}>
-                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-6 border-b">
-                            <h2 className="text-lg font-bold text-gray-900">Currency Converter</h2>
-                            <button onClick={() => { setShowConvert(false); setConvertResult(null); }} className="p-2 text-gray-400 hover:text-gray-600"><X size={18} /></button>
+                <Modal isOpen={true} onClose={() => { setShowConvert(false); setConvertResult(null); }} title="Currency Converter" size="md">
+                    <form onSubmit={handleConvert} className="p-6 space-y-4">
+                        <div>
+                            <label className="text-sm font-medium text-gray-700 mb-1 block">Amount *</label>
+                            <input type="number" step="any" min="0" required value={convertForm.amount} onChange={(e) => setConvertForm({ ...convertForm, amount: e.target.value })} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/20" />
                         </div>
-                        <form onSubmit={handleConvert} className="p-6 space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="text-sm font-medium text-gray-700 mb-1 block">Amount *</label>
-                                <input type="number" step="any" min="0" required value={convertForm.amount} onChange={(e) => setConvertForm({ ...convertForm, amount: e.target.value })} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/20" />
+                                <label className="text-sm font-medium text-gray-700 mb-1 block">From *</label>
+                                <select required value={convertForm.from} onChange={(e) => setConvertForm({ ...convertForm, from: e.target.value })} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/20">
+                                    <option value="">Select...</option>
+                                    {currencies.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
+                                </select>
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700 mb-1 block">From *</label>
-                                    <select required value={convertForm.from} onChange={(e) => setConvertForm({ ...convertForm, from: e.target.value })} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/20">
-                                        <option value="">Select...</option>
-                                        {currencies.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700 mb-1 block">To *</label>
-                                    <select required value={convertForm.to} onChange={(e) => setConvertForm({ ...convertForm, to: e.target.value })} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/20">
-                                        <option value="">Select...</option>
-                                        {currencies.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
-                                    </select>
-                                </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 mb-1 block">To *</label>
+                                <select required value={convertForm.to} onChange={(e) => setConvertForm({ ...convertForm, to: e.target.value })} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/20">
+                                    <option value="">Select...</option>
+                                    {currencies.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
+                                </select>
                             </div>
-                            <button type="submit" className="w-full px-5 py-2.5 text-sm font-medium text-white rounded-lg" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>Convert</button>
-                        </form>
-                        {convertResult && (
-                            <div className="px-6 pb-6">
-                                <div className="bg-[#00D4AA]/10 rounded-lg p-4 text-center">
-                                    <p className="text-sm text-gray-600">Result</p>
-                                    <p className="text-2xl font-bold text-gray-900 mt-1">{convertForm.to} {Number(convertResult.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                                    <p className="text-xs text-gray-500 mt-1">Rate: 1 {convertResult.from} = {convertResult.rate} {convertResult.to}</p>
-                                </div>
+                        </div>
+                        <button type="submit" className="w-full px-5 py-2.5 text-sm font-medium text-white rounded-lg" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>Convert</button>
+                    </form>
+                    {convertResult && (
+                        <div className="px-6 pb-6">
+                            <div className="bg-[#00D4AA]/10 rounded-lg p-4 text-center">
+                                <p className="text-sm text-gray-600">Result</p>
+                                <p className="text-2xl font-bold text-gray-900 mt-1">{convertForm.to} {Number(convertResult.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                                <p className="text-xs text-gray-500 mt-1">Rate: 1 {convertResult.from} = {convertResult.rate} {convertResult.to}</p>
                             </div>
-                        )}
-                    </div>
-                </div>
+                        </div>
+                    )}
+                </Modal>
             )}
 
             {loading ? (

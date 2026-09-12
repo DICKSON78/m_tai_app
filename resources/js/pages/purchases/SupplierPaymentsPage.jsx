@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
+import Modal from '../../components/Modal';
 import { CreditCard, Plus, Search, Eye, CheckCircle, X, Ban } from 'lucide-react';
 
 const METHOD_CLASSES = {
@@ -119,13 +120,8 @@ export default function SupplierPaymentsPage() {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-lg mx-4 mb-20 shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h3 className="text-lg font-bold text-gray-900">Record Supplier Payment</h3>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <Modal isOpen={true} onClose={() => setShowForm(false)} title="Record Supplier Payment" size="md">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div><label className="block text-xs font-medium text-gray-600 mb-1">Supplier *</label>
                 <select required value={form.supplier_id} onChange={e => { setForm({...form, supplier_id: e.target.value, supplier_invoice_id: ''}); fetchSupplierInvoices(e.target.value); }}
                   className="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-[#00D4AA]">
@@ -170,8 +166,7 @@ export default function SupplierPaymentsPage() {
                   {saving ? 'Recording...' : 'Record Payment'}</button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
 
       <div className="flex flex-wrap items-center gap-3">
