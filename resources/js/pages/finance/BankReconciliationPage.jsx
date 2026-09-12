@@ -43,7 +43,8 @@ export default function BankReconciliationPage() {
             if (statusFilter) params.status = statusFilter;
             if (accountFilter) params.bank_account_id = accountFilter;
             const res = await api.get('/owner/finance/bank-reconciliations', { params });
-            setReconciliations(res.data.data || []);
+            const list = res.data?.data ?? res.data;
+            setReconciliations(Array.isArray(list) ? list : []);
             setCurrentPage(res.data.current_page || 1);
             setLastPage(res.data.last_page || 1);
         } catch (error) { console.error('Failed to fetch reconciliations:', error); setReconciliations([]); } finally { setLoading(false); }
@@ -60,7 +61,7 @@ export default function BankReconciliationPage() {
     useEffect(() => { fetchAccounts(); }, [fetchAccounts]);
     useEffect(() => { setCurrentPage(1); }, [statusFilter, accountFilter]);
 
-    const filtered = reconciliations.filter((r) => {
+    const filtered = (Array.isArray(reconciliations) ? reconciliations : []).filter((r) => {
         if (!search) return true;
         const q = search.toLowerCase();
         return String(accountName(r)).toLowerCase().includes(q) || String(r.notes || '').toLowerCase().includes(q);
@@ -89,7 +90,9 @@ export default function BankReconciliationPage() {
         setSelectedIds([]);
         try {
             const res = await api.get(`/owner/finance/bank-reconciliations/${id}`);
-            setDetail({ reconciliation: res.data.reconciliation || {}, transactions: res.data.unreconciled_transactions || [] });
+            const txs = res.data?.unreconciled_transactions;
+            const rec = res.data?.reconciliation || {};
+            setDetail({ reconciliation: rec, transactions: Array.isArray(txs) ? txs : [] });
         } catch (err) { alert(err.response?.data?.message || 'Failed to load reconciliation'); } finally { setDetailLoading(false); }
     };
 

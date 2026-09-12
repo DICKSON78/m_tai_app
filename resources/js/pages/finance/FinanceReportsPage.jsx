@@ -141,7 +141,9 @@ export default function FinanceReportsPage() {
 
     const renderTrialBalance = () => {
         if (!reportData) return <EmptyState />;
-        const { accounts = [], total_debit, total_credit } = reportData;
+        const reportAccounts = reportData.accounts;
+        const accounts = Array.isArray(reportAccounts) ? reportAccounts : [];
+        const { total_debit, total_credit } = reportData;
         return (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <table className="w-full">
