@@ -30,6 +30,7 @@ const OWNER_ROUTES = [
     '/owner/finance/bank-accounts',
     '/owner/finance/reports',
     '/owner/hr/employees',
+    '/owner/hr/recruitment',
     '/owner/purchases/suppliers',
     '/owner/purchases/orders',
     '/owner/purchases/receptions',
