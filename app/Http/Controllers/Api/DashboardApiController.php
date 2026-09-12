@@ -86,6 +86,52 @@ class DashboardApiController extends Controller
     {
         $business = $request->user()->businesses()->first();
 
+        $recentOrders = collect();
+        $monthlyRevenue = collect();
+        $monthlyOrders = collect();
+
+        if ($business) {
+            $recentOrders = $business->orders()
+                ->with(['customer:id,full_name'])
+                ->orderBy('created_at', 'desc')
+                ->limit(8)
+                ->get();
+
+            $driver = $business->getConnection()->getDriverName();
+            $dateExpr = $driver === 'sqlite'
+                ? "strftime('%Y-%m', created_at)"
+                : "DATE_FORMAT(created_at, '%Y-%m')";
+
+            $monthlyRevenue = $business->orders()
+                ->where('status', 'completed')
+                ->where('created_at', '>=', now()->subMonths(6)->startOfMonth())
+                ->select(
+                    DB::raw("{$dateExpr} as month"),
+                    DB::raw('SUM(total) as revenue')
+                )
+                ->groupBy('month')
+                ->orderBy('month', 'asc')
+                ->get()
+                ->map(fn ($row) => [
+                    'month' => date('M', strtotime($row->month . '-01')),
+                    'revenue' => (float) $row->revenue,
+                ]);
+
+            $monthlyOrders = $business->orders()
+                ->where('created_at', '>=', now()->subMonths(6)->startOfMonth())
+                ->select(
+                    DB::raw("{$dateExpr} as month"),
+                    DB::raw('COUNT(*) as orders')
+                )
+                ->groupBy('month')
+                ->orderBy('month', 'asc')
+                ->get()
+                ->map(fn ($row) => [
+                    'month' => date('M', strtotime($row->month . '-01')),
+                    'orders' => (int) $row->orders,
+                ]);
+        }
+
         return response()->json([
             'business' => $business,
             'totalProducts' => $business ? $business->products()->count() : 0,
@@ -96,6 +142,9 @@ class DashboardApiController extends Controller
             'lowStockProducts' => $business ? $business->products()->where('quantity', '<=', 5)->count() : 0,
             'activeLoans' => $business ? $business->loans()->where('status', 'active')->count() : 0,
             'pendingCreditSales' => $business ? (float) $business->creditSales()->where('status', 'pending')->sum('amount') : 0,
+            'recent_orders' => $recentOrders,
+            'monthly_revenue' => $monthlyRevenue,
+            'monthly_orders' => $monthlyOrders,
         ]);
     }
 
