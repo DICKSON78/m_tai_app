@@ -183,6 +183,47 @@ class SupplierTest extends TestCase
             ->assertJsonCount(1, 'data');
     }
 
+    public function test_invoice_numbers_are_not_reused_after_delete(): void
+    {
+        $supplier = $this->createSupplier();
+
+        $first = $this->actingAs($this->owner)
+            ->postJson('/api/owner/purchases/invoices', [
+                'supplier_id' => $supplier->id,
+                'invoice_date' => now()->toDateString(),
+                'subtotal' => 10000,
+            ])
+            ->assertStatus(201)
+            ->json('invoice_number');
+
+        $second = $this->actingAs($this->owner)
+            ->postJson('/api/owner/purchases/invoices', [
+                'supplier_id' => $supplier->id,
+                'invoice_date' => now()->toDateString(),
+                'subtotal' => 10000,
+            ])
+            ->assertStatus(201)
+            ->json('invoice_number');
+
+        $this->assertEquals('SINV-' . now()->year . '-00002', $second);
+
+        $id = SupplierInvoice::where('invoice_number', $first)->value('id');
+        $this->actingAs($this->owner)
+            ->deleteJson("/api/owner/purchases/invoices/{$id}")
+            ->assertOk();
+
+        $third = $this->actingAs($this->owner)
+            ->postJson('/api/owner/purchases/invoices', [
+                'supplier_id' => $supplier->id,
+                'invoice_date' => now()->toDateString(),
+                'subtotal' => 10000,
+            ])
+            ->assertStatus(201)
+            ->json('invoice_number');
+
+        $this->assertEquals('SINV-' . now()->year . '-00003', $third);
+    }
+
     // ---- Supplier Price Lists ----
 
     public function test_owner_can_create_supplier_price_list(): void

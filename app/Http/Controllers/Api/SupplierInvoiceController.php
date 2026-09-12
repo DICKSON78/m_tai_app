@@ -188,7 +188,8 @@ class SupplierInvoiceController extends Controller
     private function generateInvoiceNumber($businessId): string
     {
         $year = date('Y');
-        $last = SupplierInvoice::where('business_id', $businessId)
+        $last = SupplierInvoice::withTrashed()
+            ->where('business_id', $businessId)
             ->whereYear('created_at', $year)
             ->latest('id')
             ->value('invoice_number');
