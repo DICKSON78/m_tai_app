@@ -58,7 +58,11 @@ export default function BusinessDetailPage() {
     };
 
     const fetchCapitals = async () => {
-        try { const res = await api.get(`/owner/businesses/${id}/capitals`); setCapitals(res.data.data || res.data || []); }
+        try {
+            const res = await api.get(`/owner/businesses/${id}/capitals`);
+            const payload = res.data?.data;
+            setCapitals(Array.isArray(payload) ? payload : Array.isArray(res.data?.capitals) ? res.data.capitals : Array.isArray(res.data) ? res.data : []);
+        }
         catch (error) { console.error('Failed to fetch capitals:', error); setCapitals([]); } finally { setLoading(false); }
     };
 
@@ -76,7 +80,7 @@ export default function BusinessDetailPage() {
     };
 
     const openCapitalModal = () => { setCapitalForm(initialCapitalForm); setCapitalErrors({}); setCapitalModalOpen(true); };
-    const totalCapital = capitals.reduce((sum, c) => sum + (parseFloat(c.capital_amount) || 0), 0);
+    const totalCapital = (Array.isArray(capitals) ? capitals : []).reduce((sum, c) => sum + (parseFloat(c.capital_amount) || 0), 0);
     const inputClasses = "w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00D4AA] focus:border-[#00D4AA] text-sm text-gray-900 placeholder-gray-400";
 
     const capitalColumns = [
