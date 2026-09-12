@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
 import Pagination from '../../components/Pagination';
@@ -55,6 +55,9 @@ export default function RecruitmentPage() {
 
     const [jobDetailModal, setJobDetailModal] = useState({ open: false, data: null });
 
+    const jobsRef = useRef([]);
+    useEffect(() => { jobsRef.current = jobs; }, [jobs]);
+
     const fetchDepartments = useCallback(async () => {
         try { const res = await api.get('/owner/hr/departments'); setDepartments(res.data?.data || res.data || []); } catch (error) { console.error('Failed to fetch departments:', error); setDepartments([]); }
     }, []);
@@ -73,9 +76,10 @@ export default function RecruitmentPage() {
     const fetchApplications = useCallback(async () => {
         setLoading(true);
         try {
+            const currentJobs = jobsRef.current;
             if (selectedJob) {
                 const res = await api.get(`/owner/hr/jobs/${selectedJob}/applications`, { params: { page: currentPage, per_page: 15 } });
-                const apps = (res.data?.data || []).map(a => ({ ...a, _jobTitle: jobs.find(j => j.id === selectedJob)?.title }));
+                const apps = (res.data?.data || []).map(a => ({ ...a, _jobTitle: currentJobs.find(j => j.id === selectedJob)?.title }));
                 setApplications(apps);
                 setCurrentPage(res.data?.current_page || 1);
                 setLastPage(res.data?.last_page || 1);
@@ -88,7 +92,7 @@ export default function RecruitmentPage() {
                 setApplications(allApps);
             }
         } catch (error) { console.error('Failed to fetch applications:', error); setApplications([]); } finally { setLoading(false); }
-    }, [currentPage, selectedJob, jobs]);
+    }, [currentPage, selectedJob]);
 
     useEffect(() => { fetchDepartments(); }, [fetchDepartments]);
     useEffect(() => { if (activeTab === 'jobs') fetchJobs(); else fetchApplications(); }, [activeTab, fetchJobs, fetchApplications]);
