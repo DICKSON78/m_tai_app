@@ -2,9 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
-import EmptyState from '../../components/casfeta/EmptyState';
-import SectionHeader from '../../components/casfeta/SectionHeader';
-import { Store, Plus, Package, ShoppingCart, Users, DollarSign, Eye, Pencil, RefreshCw, MapPin, Clock, TrendingUp, CheckCircle } from 'lucide-react';
+import { Store, Plus, Package, ShoppingCart, Users, DollarSign, Eye, Pencil, RefreshCw, MapPin, CheckCircle, TrendingUp } from 'lucide-react';
+import Pagination from '../../components/Pagination';
 
 const statusFilters = [
     { key: '', label: 'All' },
@@ -26,14 +25,16 @@ const statusLabel = {
     closed: 'Closed',
 };
 
-const headerColors = [
-    'from-[#00D4AA] to-[#00b894]',
-    'from-[#3b82f6] to-[#2563eb]',
-    'from-[#f59e0b] to-[#d97706]',
-    'from-[#8b5cf6] to-[#7c3aed]',
-    'from-[#ec4899] to-[#db2777]',
-    'from-[#14b8a6] to-[#0d9488]',
+const avatarColors = [
+    'bg-[#00D4AA]/10 text-[#00B894]',
+    'bg-blue-100 text-blue-700',
+    'bg-amber-100 text-amber-700',
+    'bg-purple-100 text-purple-700',
+    'bg-rose-100 text-rose-700',
+    'bg-cyan-100 text-cyan-700',
 ];
+
+const PER_PAGE = 10;
 
 export default function BusinessListPage() {
     document.title = 'My Businesses - M-TAI';
@@ -43,6 +44,7 @@ export default function BusinessListPage() {
     const [statusFilter, setStatusFilter] = useState('');
     const [search, setSearch] = useState('');
     const [activeId, setActiveId] = useState(() => localStorage.getItem('active_business_id'));
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => { fetchBusinesses(); }, []);
 
@@ -89,6 +91,15 @@ export default function BusinessListPage() {
             capital: arr.reduce((s, b) => s + Number(b.opening_capital || 0), 0),
         };
     }, [businesses]);
+
+    const pageItems = useMemo(() => {
+        const start = (currentPage - 1) * PER_PAGE;
+        return filtered.slice(start, start + PER_PAGE);
+    }, [filtered, currentPage]);
+
+    const lastPage = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+
+    useEffect(() => { setCurrentPage(1); }, [statusFilter, search]);
 
     if (loading) {
         return (
@@ -139,98 +150,113 @@ export default function BusinessListPage() {
                 <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search businesses..." className="w-full sm:w-64 px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/20" />
             </div>
 
-            {filtered.length === 0 ? (
-                <EmptyState title="No businesses found" description={businesses.length === 0 ? "Create your first business to get started." : "Try a different search or filter."} actionTo="/owner/businesses/new" actionLabel="Add Business" />
+            {pageItems.length === 0 ? (
+                <div className="card overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
+                    <div className="px-6 py-12 text-center">
+                        <Store size={40} className="mx-auto text-gray-300 mb-3" />
+                        <p className="text-sm text-gray-500 mb-3">No businesses found</p>
+                        <Link to="/owner/businesses/new" className="inline-flex items-center gap-2 px-5 py-2.5 text-white font-medium rounded-xl transition-all duration-200 shadow-md hover:shadow-lg" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>
+                            <Plus size={16} /> Add Business
+                        </Link>
+                    </div>
+                </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {filtered.map((biz, i) => {
-                        const isActive = String(biz.id) === String(activeId);
-                        const color = headerColors[i % headerColors.length];
-                        const initial = biz.business_name?.charAt(0)?.toUpperCase() || 'B';
-                        const locationParts = [biz.ward, biz.district, biz.region].filter(Boolean);
-
-                        return (
-                            <div key={biz.id} className={`bg-white rounded-2xl border overflow-hidden transition-all duration-200 ${isActive ? 'border-[#00D4AA] shadow-lg ring-2 ring-[#00D4AA]/20' : 'border-gray-200 shadow-sm hover:shadow-md'}`}>
-                                <div className={`bg-gradient-to-r ${color} px-6 py-5 relative`}>
-                                    {isActive && (
-                                        <div className="absolute top-3 right-3">
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/90 text-[#00B894]"><CheckCircle size={10} /> Current</span>
-                                        </div>
-                                    )}
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-11 h-11 rounded-xl bg-white/25 flex items-center justify-center text-white font-bold text-lg shrink-0">{initial}</div>
-                                        <div className="min-w-0">
-                                            <h3 className="text-white font-bold text-base truncate">{biz.business_name}</h3>
-                                            <p className="text-white/75 text-xs font-mono mt-0.5">{biz.business_code}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="p-5 space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <span className={`${statusBadge[biz.status] || 'badge badge-gray'}`}>{statusLabel[biz.status] || biz.status}</span>
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#00D4AA]/10 text-[#00B894]">{biz.business_category || biz.business_type || 'Business'}</span>
-                                    </div>
-
-                                    {locationParts.length > 0 && (
-                                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                                            <MapPin size={12} className="shrink-0 text-gray-400" />
-                                            <span className="truncate">{locationParts.join(', ')}</span>
-                                        </div>
-                                    )}
-
-                                    {biz.working_hours && (
-                                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                                            <Clock size={12} className="shrink-0 text-gray-400" />
-                                            <span>{biz.working_hours.open} — {biz.working_hours.close}</span>
-                                        </div>
-                                    )}
-
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <div className="text-center p-2.5 bg-gray-50 rounded-lg">
-                                            <Package size={14} className="mx-auto text-gray-400 mb-1" />
-                                            <p className="text-sm font-bold text-gray-900">{biz.products_count ?? 0}</p>
-                                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">Products</p>
-                                        </div>
-                                        <div className="text-center p-2.5 bg-gray-50 rounded-lg">
-                                            <ShoppingCart size={14} className="mx-auto text-gray-400 mb-1" />
-                                            <p className="text-sm font-bold text-gray-900">{biz.orders_count ?? 0}</p>
-                                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">Orders</p>
-                                        </div>
-                                        <div className="text-center p-2.5 bg-gray-50 rounded-lg">
-                                            <Users size={14} className="mx-auto text-gray-400 mb-1" />
-                                            <p className="text-sm font-bold text-gray-900">{biz.employees_count ?? 0}</p>
-                                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">Staff</p>
-                                        </div>
-                                    </div>
-
-                                    {Number(biz.opening_capital) > 0 && (
-                                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                            <div className="flex items-center gap-1.5">
-                                                <TrendingUp size={13} className="text-[#00B894]" />
-                                                <span className="text-xs font-medium text-gray-600">Opening Capital</span>
-                                            </div>
-                                            <span className="text-sm font-bold text-[#00B894]">TZS {Number(biz.opening_capital).toLocaleString()}</span>
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                                        <Link to={`/owner/businesses/${biz.id}`} className="flex-1 text-center px-3 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-all text-sm inline-flex items-center justify-center gap-1.5">
-                                            <Eye size={14} /> View
-                                        </Link>
-                                        <Link to={`/owner/businesses/${biz.id}/edit`} className="flex-1 text-center px-3 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-all text-sm inline-flex items-center justify-center gap-1.5">
-                                            <Pencil size={14} /> Edit
-                                        </Link>
-                                        {biz.status === 'active' && (
-                                            <button onClick={() => handleSwitch(biz)} disabled={isActive} className={`flex-1 text-center px-3 py-2.5 font-bold rounded-lg transition-all text-sm inline-flex items-center justify-center gap-1.5 shadow-md ${isActive ? 'bg-[#00D4AA]/20 text-[#00B894] cursor-default shadow-none' : 'bg-[#00D4AA] text-white hover:bg-[#00B894] hover:shadow-lg'}`}>
-                                                <RefreshCw size={14} /> {isActive ? 'Active' : 'Switch'}
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
+                <div className="card overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
+                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
+                        <h3 className="text-sm font-semibold text-gray-900">Businesses ({filtered.length})</h3>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-gray-100 text-left">
+                                    <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Business</th>
+                                    <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Code</th>
+                                    <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Location</th>
+                                    <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Products</th>
+                                    <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Orders</th>
+                                    <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Staff</th>
+                                    <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Capital</th>
+                                    <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {pageItems.map((biz, i) => {
+                                    const isActive = String(biz.id) === String(activeId);
+                                    const locationParts = [biz.ward, biz.district, biz.region].filter(Boolean);
+                                    return (
+                                        <tr key={biz.id} className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${isActive ? 'bg-[#00D4AA]/5' : ''}`}>
+                                            <td className="px-6 py-3">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-9 h-9 rounded-full ${avatarColors[i % avatarColors.length]} flex items-center justify-center text-xs font-bold uppercase shrink-0`}>
+                                                        {biz.business_name?.charAt(0) || 'B'}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <span className="font-medium text-gray-800 flex items-center gap-1.5">
+                                                            {biz.business_name}
+                                                            {isActive && <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[#00D4AA]/10 text-[#00B894] shrink-0"><CheckCircle size={10} /> Active</span>}
+                                                        </span>
+                                                        <span className="block text-xs text-gray-500">{biz.business_category || biz.business_type || 'Business'}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-3">
+                                                <span className="font-mono text-xs text-gray-600">{biz.business_code}</span>
+                                            </td>
+                                            <td className="px-6 py-3">
+                                                <span className={`${statusBadge[biz.status] || 'badge badge-gray'}`}>{statusLabel[biz.status] || biz.status}</span>
+                                            </td>
+                                            <td className="px-6 py-3">
+                                                <span className="inline-flex items-center gap-1.5 text-sm text-gray-600">
+                                                    <MapPin size={13} className="text-gray-400" />
+                                                    {locationParts.length ? locationParts.join(', ') : '-'}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-3">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#00D4AA]/10 text-[#00B894]">{biz.products_count ?? 0}</span>
+                                            </td>
+                                            <td className="px-6 py-3">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">{biz.orders_count ?? 0}</span>
+                                            </td>
+                                            <td className="px-6 py-3">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">{biz.employees_count ?? 0}</span>
+                                            </td>
+                                            <td className="px-6 py-3">
+                                                {Number(biz.opening_capital) > 0 ? (
+                                                    <span className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
+                                                        <TrendingUp size={13} className="text-[#00B894]" />
+                                                        TZS {Number(biz.opening_capital).toLocaleString()}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-sm text-gray-400">-</span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-3">
+                                                <div className="flex items-center gap-2 justify-end">
+                                                    <Link to={`/owner/businesses/${biz.id}`} title="View" className="h-8 w-8 bg-[#00D4AA]/10 text-[#00B894] rounded-lg flex items-center justify-center hover:bg-[#00D4AA]/20 transition-all">
+                                                        <Eye size={14} />
+                                                    </Link>
+                                                    <Link to={`/owner/businesses/${biz.id}/edit`} title="Edit" className="h-8 w-8 bg-blue-100 text-blue-700 rounded-lg flex items-center justify-center hover:bg-blue-200 transition-all">
+                                                        <Pencil size={14} />
+                                                    </Link>
+                                                    {biz.status === 'active' && (
+                                                        <button onClick={() => handleSwitch(biz)} disabled={isActive} title={isActive ? 'Currently active' : 'Switch'} className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all ${isActive ? 'bg-[#00D4AA]/20 text-[#00B894] cursor-default' : 'bg-[#00D4AA] text-white hover:bg-[#00B894]'}`}>
+                                                            <RefreshCw size={14} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                    {filtered.length > PER_PAGE && (
+                        <div className="px-6 py-4 border-t border-gray-100">
+                            <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={setCurrentPage} />
+                        </div>
+                    )}
                 </div>
             )}
         </div>
