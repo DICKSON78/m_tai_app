@@ -33,10 +33,24 @@ test.describe.serial('Full journey: shop -> product -> purchase -> delivery', ()
             const typeSelect = page.locator('select[name="business_type"]');
             await typeSelect.selectOption({ index: 1 });
             await page.fill('input[name="business_category"]', 'Jumla (Retail)');
-            await page.locator('select[name="region"]').selectOption({ index: 1 });
-            await page.fill('input[name="district"]', 'Ilala');
-            await page.fill('input[name="ward"]', 'Kivukoni');
-            await page.fill('input[name="street"]', 'Market Street');
+            // LocationFields renders region/district/ward as unnamed selects in
+            // order; select by position and wait for cascading options.
+            const selects = page.locator('select');
+            const selectCount = await selects.count();
+            const regionSelect = selects.nth(selectCount - 3);
+            const districtSelect = selects.nth(selectCount - 2);
+            const wardSelect = selects.nth(selectCount - 1);
+            await expect(regionSelect.locator('option')).not.toHaveCount(1, { timeout: 30000 });
+            await regionSelect.selectOption({ index: 1 });
+            await expect(districtSelect).toBeEnabled({ timeout: 30000 });
+            await expect(districtSelect.locator('option')).not.toHaveCount(1, { timeout: 30000 });
+            await districtSelect.selectOption({ index: 1 });
+            await expect(wardSelect).toBeEnabled({ timeout: 30000 });
+            await expect(wardSelect.locator('option')).not.toHaveCount(1, { timeout: 30000 });
+            await wardSelect.selectOption({ index: 1 });
+            // Street is a datalist-backed combobox.
+            const streetField = page.getByPlaceholder('e.g. Market Street');
+            await streetField.fill('Market Street');
 
             await page.getByRole('button', { name: /save|create|submit/i }).first().click();
             await page.waitForURL(/\/owner\/businesses$/, { timeout: 60000 });
@@ -91,10 +105,9 @@ test.describe.serial('Full journey: shop -> product -> purchase -> delivery', ()
             await page.getByPlaceholder('Search products...').fill(journey.productName);
             await expect(page.getByText(journey.productName)).toBeVisible({ timeout: 30000 });
 
-            // Creating a product stores it as a DRAFT; the row must be
-            // explicitly published before customers can see it.
+            // The form's Publish action stores the product as published
+            // directly, so the row must already be live.
             const prodRow = page.locator('tr').filter({ hasText: journey.productName }).first();
-            await prodRow.locator('button[title="Publish"]').click();
             await expect(prodRow.getByText('Published')).toBeVisible({ timeout: 30000 });
             await page.waitForTimeout(1500);
             expectNoApiErrors(apiErrors);
