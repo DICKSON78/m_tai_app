@@ -23,16 +23,17 @@ function ReportRow({ label, amount, indent, bold, color }) {
 }
 
 function ReportSection({ title, items, totalLabel, indent = 0 }) {
+    const rows = Array.isArray(items) ? items : [];
     return (
         <>
             <tr className="border-b border-gray-100 bg-gray-50/50">
                 <td colSpan={2} className="px-6 py-2.5 text-xs font-bold uppercase text-gray-500 tracking-wider" style={{ paddingLeft: `${(indent * 24) + 24}px` }}>{title}</td>
             </tr>
-            {items?.map((item, i) => (
-                <ReportRow key={i} label={item.name || item.label} amount={item.amount} indent={indent + 1} color={item.color} />
+            {rows.map((item, i) => (
+                <ReportRow key={i} label={item.name || item.label} amount={item.amount !== undefined ? item.amount : item.balance} indent={indent + 1} color={item.color} />
             ))}
             {totalLabel && (
-                <ReportRow label={totalLabel} amount={items?.reduce((s, i) => s + Number(i.amount || 0), 0)} bold />
+                <ReportRow label={totalLabel} amount={rows.reduce((s, i) => s + Number(i.amount !== undefined ? i.amount : i.balance || 0), 0)} bold />
             )}
         </>
     );
@@ -66,7 +67,9 @@ export default function FinanceReportsPage() {
 
     const renderProfitLoss = () => {
         if (!reportData) return <EmptyState />;
-        const { revenue = [], expenses = [], total_revenue, total_expenses, net_profit } = reportData;
+        const { revenues, expenses, total_revenue, total_expenses, net_income } = reportData;
+        const revenueRows = Array.isArray(revenues) ? revenues : [];
+        const expenseRows = Array.isArray(expenses) ? expenses : [];
         return (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <table className="w-full">
@@ -75,11 +78,11 @@ export default function FinanceReportsPage() {
                         <th className="text-right px-6 py-3 font-medium text-gray-500 text-xs uppercase">Amount (TZS)</th>
                     </tr></thead>
                     <tbody>
-                        <ReportSection title="Revenue / Income" items={revenue} totalLabel="Total Revenue" />
-                        <ReportSection title="Expenses" items={expenses} totalLabel="Total Expenses" />
+                        <ReportSection title="Revenue / Income" items={revenueRows} totalLabel="Total Revenue" />
+                        <ReportSection title="Expenses" items={expenseRows} totalLabel="Total Expenses" />
                         <tr className="border-t-2 border-gray-200 bg-gray-100">
                             <td className="px-6 py-3 text-sm font-bold text-gray-900">Net Profit / (Loss)</td>
-                            <td className={`px-6 py-3 text-sm text-right font-bold ${Number(net_profit) >= 0 ? 'text-green-600' : 'text-red-600'}`}>TZS {fmt(net_profit)}</td>
+                            <td className={`px-6 py-3 text-sm text-right font-bold ${Number(total_revenue - total_expenses) >= 0 ? 'text-green-600' : 'text-red-600'}`}>TZS {fmt(total_revenue - total_expenses)}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -89,7 +92,10 @@ export default function FinanceReportsPage() {
 
     const renderBalanceSheet = () => {
         if (!reportData) return <EmptyState />;
-        const { assets = [], liabilities = [], equity = [], total_assets, total_liabilities, total_equity } = reportData;
+        const { assets, liabilities, equity, total_liabilities_and_equity } = reportData;
+        const assetRows = Array.isArray(assets?.items) ? assets.items : [];
+        const liabilityRows = Array.isArray(liabilities?.items) ? liabilities.items : [];
+        const equityRows = Array.isArray(equity?.items) ? equity.items : [];
         return (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <table className="w-full">
@@ -98,12 +104,12 @@ export default function FinanceReportsPage() {
                         <th className="text-right px-6 py-3 font-medium text-gray-500 text-xs uppercase">Amount (TZS)</th>
                     </tr></thead>
                     <tbody>
-                        <ReportSection title="Assets" items={assets} totalLabel="Total Assets" />
-                        <ReportSection title="Liabilities" items={liabilities} totalLabel="Total Liabilities" />
-                        <ReportSection title="Equity" items={equity} totalLabel="Total Equity" />
+                        <ReportSection title="Assets" items={assetRows} totalLabel="Total Assets" />
+                        <ReportSection title="Liabilities" items={liabilityRows} totalLabel="Total Liabilities" />
+                        <ReportSection title="Equity" items={equityRows} totalLabel="Total Equity" />
                         <tr className="border-t-2 border-gray-200 bg-gray-100">
                             <td className="px-6 py-3 text-sm font-bold text-gray-900">Total Liabilities & Equity</td>
-                            <td className="px-6 py-3 text-sm text-right font-bold text-gray-900">TZS {fmt((Number(total_liabilities) || 0) + (Number(total_equity) || 0))}</td>
+                            <td className="px-6 py-3 text-sm text-right font-bold text-gray-900">TZS {fmt(total_liabilities_and_equity)}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -113,7 +119,12 @@ export default function FinanceReportsPage() {
 
     const renderCashFlow = () => {
         if (!reportData) return <EmptyState />;
-        const { operating = [], investing = [], financing = [], opening_balance, closing_balance } = reportData;
+        const { breakdown, net_cash_flow } = reportData;
+        const rows = [
+            { name: 'Customer Payments', amount: Number(breakdown?.customer_payments || 0) },
+            { name: 'Bills Paid', amount: -Number(breakdown?.bills_paid || 0) },
+            { name: 'Supplier Payments', amount: -Number(breakdown?.supplier_payments || 0) },
+        ];
         return (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <table className="w-full">
@@ -122,16 +133,10 @@ export default function FinanceReportsPage() {
                         <th className="text-right px-6 py-3 font-medium text-gray-500 text-xs uppercase">Amount (TZS)</th>
                     </tr></thead>
                     <tbody>
-                        <ReportSection title="Operating Activities" items={operating} totalLabel="Net Operating Cash Flow" />
-                        <ReportSection title="Investing Activities" items={investing} totalLabel="Net Investing Cash Flow" />
-                        <ReportSection title="Financing Activities" items={financing} totalLabel="Net Financing Cash Flow" />
-                        <tr className="border-t-2 border-gray-200 bg-gray-100">
-                            <td className="px-6 py-3 text-sm font-bold text-gray-900">Opening Cash Balance</td>
-                            <td className="px-6 py-3 text-sm text-right font-bold text-gray-900">TZS {fmt(opening_balance)}</td>
-                        </tr>
-                        <tr className="border-b border-gray-100 bg-gray-100">
-                            <td className="px-6 py-3 text-sm font-bold text-gray-900">Closing Cash Balance</td>
-                            <td className="px-6 py-3 text-sm text-right font-bold text-gray-900">TZS {fmt(closing_balance)}</td>
+                        <ReportSection title="Cash Flows" items={rows} totalLabel="Net Cash Flow" />
+                        <tr className="border-t border-gray-200">
+                            <td className="px-6 py-3 text-sm font-semibold text-gray-700">Net Change in Cash</td>
+                            <td className={`px-6 py-3 text-sm text-right font-bold ${Number(net_cash_flow) >= 0 ? 'text-green-600' : 'text-red-600'}`}>TZS {fmt(net_cash_flow)}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -158,8 +163,8 @@ export default function FinanceReportsPage() {
                             <tr key={i} className="border-b border-gray-50 hover:bg-gray-50">
                                 <td className="px-6 py-2.5 text-sm font-mono text-gray-600">{acc.code}</td>
                                 <td className="px-6 py-2.5 text-sm font-medium text-gray-900">{acc.name}</td>
-                                <td className="px-6 py-2.5 text-sm text-right font-semibold text-red-600">{Number(acc.debit) > 0 ? fmt(acc.debit) : '-'}</td>
-                                <td className="px-6 py-2.5 text-sm text-right font-semibold text-green-600">{Number(acc.credit) > 0 ? fmt(acc.credit) : '-'}</td>
+                                <td className="px-6 py-2.5 text-sm text-right font-semibold text-red-600">{Number(acc.total_debit) > 0 ? fmt(acc.total_debit) : '-'}</td>
+                                <td className="px-6 py-2.5 text-sm text-right font-semibold text-green-600">{Number(acc.total_credit) > 0 ? fmt(acc.total_credit) : '-'}</td>
                             </tr>
                         ))}
                         <tr className="border-t-2 border-gray-200 bg-gray-100 font-bold">
