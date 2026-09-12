@@ -3,12 +3,17 @@ import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
 import SectionHeader from '../../components/casfeta/SectionHeader';
 import EmptyState from '../../components/casfeta/EmptyState';
-import { Download, Package, ClipboardList, Receipt, Loader2 } from 'lucide-react';
+import { Download, Package, ClipboardList, Receipt, Loader2, FileText, FileSpreadsheet } from 'lucide-react';
 
 const EXPORT_TYPES = [
-    { key: 'products', title: 'Products', desc: 'List of all products, prices, and stock levels.', icon: Package, color: 'bg-[#00D4AA]/10 text-[#00B894]' },
-    { key: 'orders', title: 'Orders', desc: 'History of all orders with details and amounts.', icon: ClipboardList, color: 'bg-blue-100 text-blue-700' },
-    { key: 'expenses', title: 'Expenses', desc: 'List of all expenses by category with totals.', icon: Receipt, color: 'bg-purple-100 text-purple-700' },
+    { key: 'products', title: 'Products', desc: 'Stock levels, buying/selling prices, and inventory value.', icon: Package, color: 'bg-[#00D4AA]/10 text-[#00B894]' },
+    { key: 'orders', title: 'Orders', desc: 'Sales history with transaction codes, customers, and totals.', icon: ClipboardList, color: 'bg-blue-100 text-blue-700' },
+    { key: 'expenses', title: 'Expenses', desc: 'All expenses grouped by category with running totals.', icon: Receipt, color: 'bg-purple-100 text-purple-700' },
+];
+
+const FORMATS = [
+    { key: 'csv', label: 'CSV', icon: FileText },
+    { key: 'xlsx', label: 'Excel', icon: FileSpreadsheet },
 ];
 
 export default function ExportPage() {
@@ -22,19 +27,24 @@ export default function ExportPage() {
             .catch((error) => { console.error('Failed to fetch businesses:', error); setBusinesses([]); });
     }, []);
 
-    const handleExport = async (type) => {
+    const handleExport = async (type, format) => {
         if (!selectedBusiness) return;
-        setLoading(type);
+        const key = `${type}:${format}`;
+        setLoading(key);
         try {
-            const res = await api.get(`/owner/businesses/${selectedBusiness}/export/${type}`, { responseType: 'blob' });
+            const res = await api.get(`/owner/businesses/${selectedBusiness}/export/${type}`, {
+                responseType: 'blob',
+                params: { format },
+            });
             const url = window.URL.createObjectURL(new Blob([res.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `${type}_${selectedBusiness}_${new Date().toISOString().slice(0,10)}.csv`);
+            link.setAttribute('download', `${type}_${selectedBusiness}_${new Date().toISOString().slice(0, 10)}.${format}`);
             document.body.appendChild(link);
             link.click();
             link.remove();
-        } catch (error) { console.error('Failed to export data:', error);
+        } catch (error) {
+            console.error('Failed to export data:', error);
             alert('Failed to export data');
         } finally {
             setLoading('');
@@ -43,7 +53,7 @@ export default function ExportPage() {
 
     return (
         <div className="space-y-6">
-            <PageHeader title="Export Data" subtitle="Download your business data as CSV files." icon={<Download size={20} />} />
+            <PageHeader title="Export Data" subtitle="Download your business data as CSV or styled Excel reports." icon={<Download size={20} />} />
 
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                 <label className="block text-sm font-semibold text-gray-900 mb-2">Select Business</label>
@@ -67,14 +77,23 @@ export default function ExportPage() {
                                 </div>
                                 <h3 className="text-lg font-bold text-gray-900 mb-1">{exp.title}</h3>
                                 <p className="text-sm text-gray-500 mb-6 flex-1">{exp.desc}</p>
-                                <button onClick={() => handleExport(exp.key)} disabled={loading === exp.key}
-                                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-[#00D4AA] text-white rounded-lg text-sm font-medium hover:bg-[#00B894] transition-all shadow-md disabled:opacity-50">
-                                    {loading === exp.key ? (
-                                        <><Loader2 size={16} className="animate-spin" /> Downloading...</>
-                                    ) : (
-                                        <><Download size={16} /> Download CSV</>
-                                    )}
-                                </button>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {FORMATS.map(fmt => {
+                                        const FmtIcon = fmt.icon;
+                                        const key = `${exp.key}:${fmt.key}`;
+                                        return (
+                                            <button key={fmt.key} onClick={() => handleExport(exp.key, fmt.key)} disabled={loading === key}
+                                                className="inline-flex items-center justify-center gap-2 px-3 py-3 bg-[#00D4AA] text-white rounded-lg text-sm font-medium hover:bg-[#00B894] transition-all shadow-md disabled:opacity-50">
+                                                {loading === key ? (
+                                                    <Loader2 size={16} className="animate-spin" />
+                                                ) : (
+                                                    <FmtIcon size={16} />
+                                                )}
+                                                {fmt.label}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         );
                     })}
