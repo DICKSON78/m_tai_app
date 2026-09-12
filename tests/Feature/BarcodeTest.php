@@ -59,7 +59,9 @@ class BarcodeTest extends TestCase
         $this->assertSame(13, strlen($payload['barcode']));
         $this->assertTrue(Ean13::isValid($payload['barcode']));
         $this->assertStringContainsString('<svg', $payload['svg']);
-        $this->assertStringContainsString('Test Bars', $payload['svg']);
+        $this->assertStringNotContainsString('Test Bars', $payload['svg']);
+        $textOnly = trim(strip_tags($payload['svg']));
+        $this->assertMatchesRegularExpression('/^[\d\s]+$/', $textOnly);
 
         // Same product always yields the same barcode.
         $again = $this->actingAs($this->owner)->getJson("/api/products/{$product->id}/barcode");

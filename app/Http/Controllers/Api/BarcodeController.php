@@ -25,7 +25,7 @@ class BarcodeController extends Controller
         return response()->json([
             'barcode' => $barcode,
             'product' => $product->name,
-            'svg' => Ean13::toSvg($barcode, $product->name),
+            'svg' => Ean13::toSvg($barcode),
         ]);
     }
 
@@ -50,7 +50,7 @@ class BarcodeController extends Controller
                 'id' => $item['id'] ?? null,
                 'name' => $name,
                 'barcode' => $base.Ean13::computeCheckDigit($base),
-                'svg' => Ean13::toSvg($base.Ean13::computeCheckDigit($base), $name),
+                'svg' => Ean13::toSvg($base.Ean13::computeCheckDigit($base)),
             ];
         }
 

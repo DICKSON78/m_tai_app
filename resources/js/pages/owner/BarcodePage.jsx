@@ -108,7 +108,10 @@ export default function BarcodePage() {
                         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 text-center">
                             <SectionHeader icon={<ScanBarcode size={18} />} title="Barcode Generated" />
                             {barcode.svg ? (
-                                <div className="mt-4 flex justify-center bg-white rounded-lg p-4" dangerouslySetInnerHTML={{ __html: barcode.svg }} />
+                                <div className="mt-4 flex justify-center flex-col items-center gap-3 bg-white rounded-lg p-4">
+                                    {barcode.product && <span className="text-sm font-medium text-gray-700">{barcode.product}</span>}
+                                    <div dangerouslySetInnerHTML={{ __html: barcode.svg }} />
+                                </div>
                             ) : barcode.barcode_image || barcode.image ? (
                                 <img src={barcode.barcode_image || barcode.image} alt="Barcode" className="mx-auto max-w-md mt-4" />
                             ) : barcode.barcodes ? (
