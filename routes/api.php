@@ -499,6 +499,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/invoices', [SupplierInvoiceController::class, 'index']);
         Route::post('/invoices', [SupplierInvoiceController::class, 'store']);
         Route::get('/invoices/aging', [SupplierInvoiceController::class, 'aging']);
+        Route::get('/invoices/next-number', [SupplierInvoiceController::class, 'nextInvoiceNumber']);
         Route::get('/invoices/{supplierInvoice}', [SupplierInvoiceController::class, 'show']);
         Route::put('/invoices/{supplierInvoice}', [SupplierInvoiceController::class, 'update']);
         Route::post('/invoices/{supplierInvoice}/validate', [SupplierInvoiceController::class, 'validate_']);

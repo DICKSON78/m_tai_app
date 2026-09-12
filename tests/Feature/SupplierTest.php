@@ -122,6 +122,44 @@ class SupplierTest extends TestCase
             'subtotal' => 200000,
             'status' => 'draft',
         ]);
+
+        $this->assertMatchesRegularExpression(
+            '/SINV-\d{4}-\d{5}/',
+            SupplierInvoice::where('supplier_id', $supplier->id)->value('invoice_number'),
+            'invoice_number should be auto-generated'
+        );
+    }
+
+    public function test_next_invoice_number_is_returned(): void
+    {
+        $this->actingAs($this->owner)
+            ->getJson('/api/owner/purchases/invoices/next-number')
+            ->assertOk()
+            ->assertJsonStructure(['number'])
+            ->assertJsonPath('number', 'SINV-' . now()->year . '-00001');
+    }
+
+    public function test_invoice_numbers_are_sequential(): void
+    {
+        $supplier = $this->createSupplier();
+
+        $this->actingAs($this->owner)
+            ->postJson('/api/owner/purchases/invoices', [
+                'supplier_id' => $supplier->id,
+                'invoice_date' => now()->toDateString(),
+                'subtotal' => 10000,
+            ])
+            ->assertStatus(201)
+            ->assertJsonPath('invoice_number', 'SINV-' . now()->year . '-00001');
+
+        $this->actingAs($this->owner)
+            ->postJson('/api/owner/purchases/invoices', [
+                'supplier_id' => $supplier->id,
+                'invoice_date' => now()->toDateString(),
+                'subtotal' => 20000,
+            ])
+            ->assertStatus(201)
+            ->assertJsonPath('invoice_number', 'SINV-' . now()->year . '-00002');
     }
 
     public function test_owner_can_list_supplier_invoices(): void

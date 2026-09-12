@@ -37,7 +37,7 @@ class SupplierInvoiceController extends Controller
             'supplier_id' => 'required|exists:suppliers,id',
             'purchase_order_id' => 'nullable|exists:purchase_orders,id',
             'invoice_date' => 'required|date',
-            'due_date' => 'required|date|after_or_equal:invoice_date',
+            'due_date' => 'nullable|date|after_or_equal:invoice_date',
             'supplier_invoice_number' => 'nullable|string|max:100',
             'subtotal' => 'required|numeric|min:0',
             'discount_amount' => 'nullable|numeric|min:0',
@@ -49,6 +49,7 @@ class SupplierInvoiceController extends Controller
 
         $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
 
+        $validated['due_date'] = $validated['due_date'] ?? $validated['invoice_date'];
         $validated['business_id'] = $businessId;
         $validated['invoice_number'] = $this->generateInvoiceNumber($businessId);
         $validated['total'] = $validated['subtotal'] - ($validated['discount_amount'] ?? 0) + ($validated['tax_amount'] ?? 0);
@@ -176,6 +177,12 @@ class SupplierInvoiceController extends Controller
             'total_outstanding' => array_sum($aging),
             'invoice_count' => $invoices->count(),
         ]);
+    }
+
+    public function nextInvoiceNumber(Request $request)
+    {
+        $businessId = $request->user()->current_business_id ?? $request->user()->businesses()->first()?->id;
+        return response()->json(['number' => $this->generateInvoiceNumber($businessId)]);
     }
 
     private function generateInvoiceNumber($businessId): string
