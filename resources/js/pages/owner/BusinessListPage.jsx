@@ -52,7 +52,8 @@ export default function BusinessListPage() {
         setLoading(true); setError(null);
         try {
             const res = await api.get('/owner/businesses', { params: { per_page: 200 } });
-            setBusinesses(res.data.data || res.data || []);
+            const payload = res.data?.data || res.data;
+            setBusinesses(Array.isArray(payload) ? payload : []);
         } catch (err) {
             console.error('Failed to load businesses:', err);
             setError('Failed to load businesses. Please try again.');
@@ -74,7 +75,8 @@ export default function BusinessListPage() {
     };
 
     const filtered = useMemo(() => {
-        return businesses.filter((b) => {
+        const arr = Array.isArray(businesses) ? businesses : [];
+        return arr.filter((b) => {
             if (statusFilter && b.status !== statusFilter) return false;
             if (search && !b.business_name?.toLowerCase().includes(search.toLowerCase()) && !b.business_code?.toLowerCase().includes(search.toLowerCase())) return false;
             return true;
@@ -82,7 +84,7 @@ export default function BusinessListPage() {
     }, [businesses, statusFilter, search]);
 
     const totals = useMemo(() => {
-        const arr = businesses.length ? businesses : [];
+        const arr = Array.isArray(businesses) ? businesses : [];
         return {
             count: arr.length,
             products: arr.reduce((s, b) => s + (b.products_count || 0), 0),
@@ -129,7 +131,7 @@ export default function BusinessListPage() {
                 <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl text-red-700 text-sm">{error}</div>
             )}
 
-            {businesses.length > 0 && (
+            {Array.isArray(businesses) && businesses.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                     <StatCard icon={<Store size={20} />} value={totals.count} label="Businesses" color="bg-[#00D4AA]/10 text-[#00B894]" />
                     <StatCard icon={<Package size={20} />} value={totals.products} label="Products" color="bg-blue-100 text-blue-700" />
