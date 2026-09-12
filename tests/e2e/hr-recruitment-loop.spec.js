@@ -14,10 +14,8 @@ test('recruitment page does not loop', async ({ page }) => {
     page.on('response', (res) => { if (res.status() >= 500) errors.push(`HTTP ${res.status()} ${res.url()}`); });
 
     await page.goto('/owner/hr/recruitment', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(4000);
-    const afterLoad = jobsRequests;
+    await page.waitForTimeout(9000);
 
-    await page.waitForTimeout(5000);
-    console.log('JOBS_REQS after first 4s:', afterLoad, 'after 9s:', jobsRequests, 'ERRORS:', JSON.stringify(errors));
     expect(errors).toEqual([]);
+    expect(jobsRequests).toBeLessThanOrEqual(5);
 });
