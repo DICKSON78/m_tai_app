@@ -15,27 +15,38 @@ test('street field learns custom values and offers DB suggestions', async ({ pag
     await page.goto('/owner/businesses/new', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(1200);
 
-    // Street field is the input bound to a datalist.
-    const streetInput = page.locator('input').filter({ has: page.locator('datalist') }).first();
+    // Street field is the single input bound to a datalist.
+    const streetInput = page.locator('input[list]');
     await expect(streetInput).toBeVisible({ timeout: 15000 });
 
-    // Cascade: Dar-es-salaam -> Ilala -> a ward. This triggers a GET for streets.
+    // LocationFields renders region/district/ward as the last three selects in
+    // order; select by position and wait for cascading options.
     const selects = page.locator('select');
-    await page.waitForFunction(() => {
-        const s = document.querySelectorAll('select');
-        if (s.length < 2) return false;
-        const opts = Array.from(s[0].options || []);
-        return opts.some((o) => o.textContent.includes('Dar-es-salaam'));
-    }, null, { timeout: 15000 });
-    await selects.nth(0).selectOption('Dar-es-salaam');
-    await page.waitForFunction(() => document.querySelectorAll('select')[1].options.length > 1, null, { timeout: 15000 });
-    const districtTexts = await selects.nth(1).locator('option').allTextContents();
-    const firstDistrict = districtTexts.find((t) => t.trim() && !t.includes('--'));
-    await selects.nth(1).selectOption(firstDistrict);
-    await page.waitForFunction(() => document.querySelectorAll('select')[2].options.length > 1, null, { timeout: 15000 });
-    const wardTexts = await selects.nth(2).locator('option').allTextContents();
-    const firstWard = wardTexts.find((t) => t.trim() && !t.includes('--'));
-    await selects.nth(2).selectOption(firstWard);
+    const selectCount = await selects.count();
+    expect(selectCount).toBeGreaterThanOrEqual(3);
+    const regionSelect = selects.nth(selectCount - 3);
+    const districtSelect = selects.nth(selectCount - 2);
+    const wardSelect = selects.nth(selectCount - 1);
+    await expect(regionSelect.locator('option')).not.toHaveCount(1, { timeout: 30000 });
+    await regionSelect.selectOption({ index: 1 });
+    await expect(districtSelect).toBeEnabled({ timeout: 30000 });
+    await expect(districtSelect.locator('option')).not.toHaveCount(1, { timeout: 30000 });
+    await districtSelect.selectOption({ index: 1 });
+    await expect(wardSelect).toBeEnabled({ timeout: 30000 });
+    await expect(wardSelect.locator('option')).not.toHaveCount(1, { timeout: 30000 });
+    await wardSelect.selectOption({ index: 1 });
 
-    await page.waitForFunction(() => streets.length > 0, null, { timeout: 15000 });
-    expect(streets.length).toBeGreaterThan(0้อย (…eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)).catch(() => {});
+    await page.waitForFunction(() => document.querySelectorAll('datalist option').length > 0, null, { timeout: 15000 });
+
+    // Type a custom street value and blur; the component persists it to the
+    // backend via POST /api/locations/streets so other users see suggestions.
+    const customStreet = `Custom Street ${Date.now()}`;
+    await streetInput.fill(customStreet);
+    await streetInput.blur();
+    const postRes = page.waitForResponse((r) => r.url().includes('/api/locations/streets') && r.request().method() === 'POST' && (r.request().postData() || '').includes(customStreet), { timeout: 15000 });
+    await postRes;
+
+    // The datalist shows the DB-suggested streets loaded for the ward.
+    const optionCount = await page.locator('datalist option').count();
+    expect(optionCount).toBeGreaterThan(0);
+});

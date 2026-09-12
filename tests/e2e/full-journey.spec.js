@@ -55,11 +55,9 @@ test.describe.serial('Full journey: shop -> product -> purchase -> delivery', ()
             await page.getByRole('button', { name: /save|create|submit/i }).first().click();
             await page.waitForURL(/\/owner\/businesses$/, { timeout: 60000 });
 
-            const card = page.locator('.grid > div').filter({
-                has: page.getByRole('heading', { name: journey.shopName, exact: true }),
-            }).first();
-            await expect(card).toBeVisible({ timeout: 30000 });
-            await expect(card.getByText('Pending', { exact: true })).toBeVisible({ timeout: 15000 });
+            const row = page.locator('tr').filter({ has: page.getByText(journey.shopName, { exact: true }) }).first();
+            await expect(row).toBeVisible({ timeout: 30000 });
+            await expect(row.getByText('Pending', { exact: true })).toBeVisible({ timeout: 15000 });
             await page.waitForTimeout(1000);
             expectNoApiErrors(apiErrors);
         });
