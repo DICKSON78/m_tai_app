@@ -13,6 +13,20 @@ const STATUS_MAP = {
     cancelled: { label: 'Cancelled', className: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700' },
 };
 
+const fmtMoney = (n) => {
+    const v = Number(n) || 0;
+    const abs = Math.abs(v);
+    const compact = (val, suffix) => {
+        const dec = val !== 0 && Math.abs(val) < 100 && !Number.isInteger(val) ? 1 : 0;
+        return (dec ? val.toFixed(dec) : Math.round(val).toString()) + suffix;
+    };
+    if (abs >= 1e12) return compact(v / 1e12, 'T');
+    if (abs >= 1e9) return compact(v / 1e9, 'B');
+    if (abs >= 1e6) return compact(v / 1e6, 'M');
+    if (abs >= 1e3) return compact(v / 1e3, 'K');
+    return v.toLocaleString();
+};
+
 const revenueChartConfig = {
     revenue: { label: 'Revenue', color: '#00D4AA' },
 };
@@ -95,7 +109,7 @@ export default function OwnerDashboard() {
                 <div className="stat-card flex items-center justify-between">
                     <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-500 truncate">Total Sales</p>
-                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {((stats.todaySales || 0) / 1000).toFixed(0)}K</p>
+                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {fmtMoney(stats.todaySales)}</p>
                     </div>
                     <div className="stat-icon bg-[#00D4AA]/10 text-[#00D4AA] shrink-0">
                         <DollarSign size={24} />
@@ -115,7 +129,7 @@ export default function OwnerDashboard() {
                 <div className="stat-card flex items-center justify-between">
                     <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-500 truncate">Total Expenses</p>
-                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {((stats.totalExpenses || 0) / 1000).toFixed(0)}K</p>
+                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {fmtMoney(stats.totalExpenses)}</p>
                     </div>
                     <div className="stat-icon bg-red-500/10 text-red-600 shrink-0">
                         <Receipt size={24} />
@@ -147,7 +161,7 @@ export default function OwnerDashboard() {
                 <div className="stat-card flex items-center justify-between">
                     <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-500 truncate">Active Loans</p>
-                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {((stats.activeLoans || 0) / 1000).toFixed(0)}K</p>
+                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {fmtMoney(stats.activeLoans)}</p>
                     </div>
                     <div className="stat-icon bg-orange-500/10 text-orange-600 shrink-0">
                         <Banknote size={24} />
@@ -157,7 +171,7 @@ export default function OwnerDashboard() {
                 <div className="stat-card flex items-center justify-between">
                     <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-500 truncate">Customer Debts</p>
-                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {((stats.pendingCreditSales || 0) / 1000).toFixed(0)}K</p>
+                        <p className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">TZS {fmtMoney(stats.pendingCreditSales)}</p>
                     </div>
                     <div className="stat-icon bg-red-500/10 text-red-600 shrink-0">
                         <CreditCard size={24} />

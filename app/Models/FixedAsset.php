@@ -29,10 +29,10 @@ class FixedAsset extends Model
             'current_value' => 'decimal:2',
             'disposal_price' => 'decimal:2',
 'useful_life_months' => 'integer',
-    ];
+        ];
+    }
 
     protected $appends = ['net_book_value', 'monthly_depreciation'];
-    }
 
     public function business() { return $this->belongsTo(Business::class); }
     public function categoryAccount() { return $this->belongsTo(Account::class, 'category_account_id'); }
