@@ -3,6 +3,7 @@ import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
 import Modal from '../../components/Modal';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import InvoiceQR from '../../components/InvoiceQR';
 import { FileText, Plus, Search, Eye, CheckCircle, X, Clock, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 
 const STATUS_CLASSES = {
@@ -576,7 +577,14 @@ export default function SupplierInvoicesPage() {
                   </tbody>
                 </table>
               </div>
-              <div className="flex justify-end">
+              <div className="flex items-end justify-between gap-4">
+                <InvoiceQR
+                  number={showDetail.invoice_number}
+                  total={showDetail.total}
+                  date={showDetail.invoice_date}
+                  status={showDetail.status}
+                  customer={showDetail.supplier?.name}
+                />
                 <div className="w-full sm:w-64 space-y-1 text-sm">
                   <div className="flex justify-between text-gray-600"><span>Subtotal</span><span>{fmtCurrency(showDetail.subtotal)}</span></div>
                   <div className="flex justify-between text-gray-600"><span>Tax</span><span>{fmtCurrency(showDetail.tax_amount)}</span></div>

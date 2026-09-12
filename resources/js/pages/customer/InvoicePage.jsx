@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
 import { FileText, Printer, ArrowLeft, Download } from 'lucide-react';
+import InvoiceQR from '../../components/InvoiceQR';
 
 export default function InvoicePage() {
     const { id } = useParams();
@@ -130,7 +131,14 @@ export default function InvoicePage() {
                     </table>
 
                     {/* Totals */}
-                    <div className="flex justify-end mt-4">
+                    <div className="flex items-end justify-between gap-4 mt-4">
+                        <InvoiceQR
+                            number={ord.transaction_code}
+                            total={invoice.total}
+                            date={ord.date}
+                            status={ord.status}
+                            customer={invoice.customer_name}
+                        />
                         <div className="w-full max-w-xs space-y-1.5 text-sm">
                             <div className="flex justify-between text-gray-600">
                                 <span>Subtotal</span>
