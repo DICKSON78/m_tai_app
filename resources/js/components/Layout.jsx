@@ -32,6 +32,9 @@ export default function Layout({ children }) {
                             <Link to="/" className="text-gray-600 hover:text-primary transition font-medium">
                                 {t("navbar.home")}
                             </Link>
+                            <Link to="/customer/shops" className="text-gray-600 hover:text-primary transition font-medium">
+                                {t("navbar.marketplace")}
+                            </Link>
                             {user ? (
                                 <>
                                     <Link to={dashboardPath} className="text-gray-600 hover:text-primary transition font-medium">
@@ -99,6 +102,13 @@ export default function Layout({ children }) {
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 {t("navbar.home")}
+                            </Link>
+                            <Link
+                                to="/customer/shops"
+                                className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                {t("navbar.marketplace")}
                             </Link>
                             {user ? (
                                 <>

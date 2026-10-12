@@ -5,9 +5,12 @@ import api from '../services/api';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import CustomerSidebar from './CustomerSidebar';
 import CustomerRightRail from './CustomerRightRail';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 export default function CustomerMarketplaceLayout({ children }) {
     const { user, logout } = useAuth();
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [cartCount, setCartCount] = useState(0);
     const [search, setSearch] = useState('');
@@ -92,7 +95,7 @@ export default function CustomerMarketplaceLayout({ children }) {
                                 <input
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Search products, shops..."
+                                    placeholder={t("shop.search_products")+ " or shops..."}
                                     className="flex-1 px-3 py-2.5 text-sm text-gray-800 outline-none bg-transparent min-w-0"
                                 />
                                 <span className="w-px h-5 bg-gray-200 shrink-0" />
@@ -210,6 +213,7 @@ export default function CustomerMarketplaceLayout({ children }) {
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
+                            <div className="ml-2"><LanguageSwitcher className="text-white" /></div>
                         </div>
                     </div>
 
