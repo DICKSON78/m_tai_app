@@ -813,3 +813,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/businesses/{business}/export/expenses', [ExportController::class, 'expenses']);
     });
 });
+
+// Language
+use App\Http\Controllers\Api\LanguageController;
+Route::post('/language/switch', [LanguageController::class, 'switch']);
+Route::get('/language/current', [LanguageController::class, 'current']);

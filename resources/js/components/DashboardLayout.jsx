@@ -8,11 +8,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const navConfig = {
     admin: [
         { label: 'Overview', items: [
-            { to: '/admin/dashboard', label: 'Dashboard', icon: 'home' },
+            { to: '/admin/dashboard', label: '{t("common.dashboard")}', icon: 'home' },
         ]},
         { label: 'Business Management', items: [
             { to: '/admin/shops', label: 'All Businesses', icon: 'store' },
@@ -81,7 +83,7 @@ const navConfig = {
     ],
     business_owner: [
         { label: 'Main', items: [
-            { to: '/owner/dashboard', label: 'Dashboard', icon: 'home' },
+            { to: '/owner/dashboard', label: '{t("common.dashboard")}', icon: 'home' },
             { to: '/owner/businesses', label: 'Businesses', icon: 'store' },
             { to: '/owner/products', label: 'Products', icon: 'package' },
             { to: '/owner/categories', label: 'Categories', icon: 'collection' },
@@ -158,7 +160,7 @@ const navConfig = {
     ],
     employee: [
         { label: 'Work', items: [
-            { to: '/employee/dashboard', label: 'Dashboard', icon: 'home' },
+            { to: '/employee/dashboard', label: '{t("common.dashboard")}', icon: 'home' },
             { to: '/employee/customers', label: 'Customers', icon: 'users' },
             { to: '/employee/inventory', label: 'Inventory', icon: 'clipboard' },
             { to: '/employee/expenses', label: 'Expenses', icon: 'currency-dollar' },
@@ -170,7 +172,7 @@ const navConfig = {
     ],
     customer: [
         { label: 'Shopping', items: [
-            { to: '/customer/dashboard', label: 'Dashboard', icon: 'home' },
+            { to: '/customer/dashboard', label: '{t("common.dashboard")}', icon: 'home' },
             { to: '/customer/shops', label: 'Shops', icon: 'store' },
             { to: '/customer/orders', label: 'Orders', icon: 'shopping-cart' },
             { to: '/customer/deliveries', label: 'Deliveries', icon: 'truck' },
@@ -182,7 +184,7 @@ const navConfig = {
     ],
     transporter: [
         { label: 'Work', items: [
-            { to: '/transporter/dashboard', label: 'Dashboard', icon: 'home' },
+            { to: '/transporter/dashboard', label: '{t("common.dashboard")}', icon: 'home' },
             { to: '/transporter/deliveries', label: 'Deliveries', icon: 'truck' },
         ]},
         { label: 'Account', items: [

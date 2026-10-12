@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import LocationFields from '../../components/casfeta/LocationFields';
 import StreetField from '../../components/casfeta/StreetField';
 
@@ -37,6 +38,7 @@ export default function RegisterCustomerPage() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const { register } = useAuth();
+    const { t } = useTranslation();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -54,13 +56,13 @@ export default function RegisterCustomerPage() {
         setError('');
 
         if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
+            setError('{t("common.password")}s do not match');
             setLoading(false);
             return;
         }
 
         if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters');
+            setError('{t("common.password")} must be at least 6 characters');
             setLoading(false);
             return;
         }
@@ -89,7 +91,7 @@ export default function RegisterCustomerPage() {
                 window.location.href = '/login';
             }
         } catch (err) { console.error('Registration failed:', err);
-            const msg = err?.response?.data?.message || err?.response?.data?.errors?.name?.[0] || 'Registration failed. Please try again.';
+            const msg = err?.response?.data?.message || err?.response?.data?.errors?.name?.[0] || '{t("auth.registration_failed")}';
             setError(msg);
         } finally {
             setLoading(false);
@@ -108,9 +110,9 @@ export default function RegisterCustomerPage() {
                         </div>
                         <span className="text-gray-600 font-black text-3xl">M-TAI</span>
                     </div>
-                    <p className="text-[10px] font-bold text-[#00D4AA] uppercase tracking-[3px] mb-3">Customer Registration</p>
-                    <h1 className="text-4xl font-black text-gray-600 mb-3">Join M-TAI</h1>
-                    {step === 1 && <p className="text-gray-500 text-lg">Choose your customer type to get started</p>}
+                    <p className="text-[10px] font-bold text-[#00D4AA] uppercase tracking-[3px] mb-3">{t("auth.customer_registration")}</p>
+                    <h1 className="text-4xl font-black text-gray-600 mb-3">{t("auth.join_mtai")}</h1>
+                    {step === 1 && <p className="text-gray-500 text-lg">{t("auth.choose_customer_type")}</p>}
                     {step > 1 && (
                         <div className="flex items-center justify-center gap-3 mt-4">
                             {[1,2,3].map(s => (
@@ -140,10 +142,10 @@ export default function RegisterCustomerPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-bold text-gray-600 mb-2">Personal</h3>
-                            <p className="text-gray-500 text-sm mb-6">Shop for yourself as an individual.</p>
+                            <h3 className="text-xl font-bold text-gray-600 mb-2">{t("auth.personal")}</h3>
+                            <p className="text-gray-500 text-sm mb-6">{t("auth.personal_desc")}</p>
                             <div className="flex items-center gap-2 text-[#00D4AA] font-semibold text-sm">
-                                <span>Get Started</span>
+                                <span>{t("auth.get_started")}</span>
                                 <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
@@ -159,10 +161,10 @@ export default function RegisterCustomerPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-bold text-gray-600 mb-2">Business</h3>
-                            <p className="text-gray-500 text-sm mb-6">Shop for your business or organization.</p>
+                            <h3 className="text-xl font-bold text-gray-600 mb-2">{t("auth.business")}</h3>
+                            <p className="text-gray-500 text-sm mb-6">{t("auth.business_desc")}</p>
                             <div className="flex items-center gap-2 text-[#00D4AA] font-semibold text-sm">
-                                <span>Get Started</span>
+                                <span>{t("auth.get_started")}</span>
                                 <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
@@ -175,7 +177,7 @@ export default function RegisterCustomerPage() {
                     <form key={`step2-${animKey}`} onSubmit={(e) => { e.preventDefault(); goStep(3, 'left'); }} className={`space-y-5 ${stepDir === 'left' ? 'step-enter-left' : 'step-enter-right'}`}>
                         <div className="grid md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">First Name</label>
+                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">{t("common.first_name")}</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,7 +188,7 @@ export default function RegisterCustomerPage() {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Middle Name</label>
+                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">{t("auth.middle_name")}</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,7 +200,7 @@ export default function RegisterCustomerPage() {
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-600 mb-1.5">Last Name</label>
+                            <label className="block text-sm font-semibold text-gray-600 mb-1.5">{t("common.last_name")}</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -210,7 +212,7 @@ export default function RegisterCustomerPage() {
                         </div>
                         <div className="grid md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Email</label>
+                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">{t("common.email")}</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,7 +223,7 @@ export default function RegisterCustomerPage() {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Phone Number</label>
+                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">{t("common.phone_number")}</label>
                                 <div className="flex gap-2">
                                     <select name="countryCode" value={formData.countryCode} onChange={handleChange} className="w-32 px-3 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 outline-none bg-white">
                                         {COUNTRIES.map(c => (
@@ -234,7 +236,7 @@ export default function RegisterCustomerPage() {
                         </div>
                         <div className="grid md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Password</label>
+                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">{t("common.password")}</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,7 +254,7 @@ export default function RegisterCustomerPage() {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Confirm Password</label>
+                                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Confirm {t("common.password")}</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,18 +276,18 @@ export default function RegisterCustomerPage() {
                         {userType === 'location' && (
                             <>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-600 mb-1.5">Business Name</label>
+                                    <label className="block text-sm font-semibold text-gray-600 mb-1.5">{t("auth.business")} Name</label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                             <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                             </svg>
                                         </div>
-                                        <input type="text" name="businessName" value={formData.businessName} onChange={handleChange} className={inputClasses} placeholder="Business name" required />
+                                        <input type="text" name="businessName" value={formData.businessName} onChange={handleChange} className={inputClasses} placeholder={t("auth.business_name")} required />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-600 mb-1.5">Business Category</label>
+                                    <label className="block text-sm font-semibold text-gray-600 mb-1.5">{t("auth.business")} Category</label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                             <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

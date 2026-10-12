@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Layout({ children }) {
     const { user, logout } = useAuth();
+    const { t } = useTranslation();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const dashboardPath = user ? `/${user.role === 'business_owner' ? 'owner' : user.role}/dashboard` : null;
@@ -27,23 +30,24 @@ export default function Layout({ children }) {
                         {/* Desktop Navigation */}
                         <div className="hidden md:flex items-center space-x-4">
                             <Link to="/" className="text-gray-600 hover:text-primary transition font-medium">
-                                Nyumbani
+                                {t("navbar.home")}
                             </Link>
                             {user ? (
                                 <>
                                     <Link to={dashboardPath} className="text-gray-600 hover:text-primary transition font-medium">
-                                        Dashibodi
+                                        {t("common.dashboard")}
                                     </Link>
+                                    <LanguageSwitcher className="text-gray-600" />
                                     <div className="flex items-center space-x-3 ml-4 border-l pl-4">
                                         <span className="text-sm text-gray-500">
-                                            Karibu,{' '}
+                                            {t("navbar.welcome")},{' '}
                                             <span className="font-semibold text-gray-800">{user.name}</span>
                                         </span>
                                         <button
                                             onClick={logout}
                                             className="text-sm text-red-500 hover:text-red-700 transition font-medium cursor-pointer"
                                         >
-                                            Ondoka
+                                            {t("common.logout")}
                                         </button>
                                     </div>
                                 </>
@@ -53,13 +57,13 @@ export default function Layout({ children }) {
                                         to="/login"
                                         className="text-gray-600 hover:text-primary transition font-medium"
                                     >
-                                        Ingia
+                                        {t("common.login")}
                                     </Link>
                                     <Link
                                         to="/register"
                                         className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition font-medium"
                                     >
-                                        Jiandikishe
+                                        {t("common.register")}
                                     </Link>
                                 </>
                             )}
@@ -94,7 +98,7 @@ export default function Layout({ children }) {
                                 className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                Nyumbani
+                                {t("navbar.home")}
                             </Link>
                             {user ? (
                                 <>
@@ -103,11 +107,11 @@ export default function Layout({ children }) {
                                         className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
-                                        Dashibodi
+                                        {t("common.dashboard")}
                                     </Link>
                                     <div className="border-t pt-2 mt-2">
                                         <span className="block px-3 py-1 text-sm text-gray-500">
-                                            Karibu, {user.name}
+                                            {t("navbar.welcome")}, {user.name}
                                         </span>
                                         <button
                                             onClick={() => {
@@ -116,7 +120,7 @@ export default function Layout({ children }) {
                                             }}
                                             className="w-full text-left px-3 py-2 rounded-lg text-red-500 hover:bg-red-50"
                                         >
-                                            Ondoka
+                                            {t("common.logout")}
                                         </button>
                                     </div>
                                 </>
@@ -127,14 +131,14 @@ export default function Layout({ children }) {
                                         className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
-                                        Ingia
+                                        {t("common.login")}
                                     </Link>
                                     <Link
                                         to="/register"
                                         className="block px-3 py-2 rounded-lg bg-primary text-white text-center hover:bg-primary-dark"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
-                                        Jiandikishe
+                                        {t("common.register")}
                                     </Link>
                                 </>
                             )}

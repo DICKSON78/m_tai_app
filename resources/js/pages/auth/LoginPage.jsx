@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../../components/LanguageSwitcher';
 
 export default function LoginPage() {
     const [credentials, setCredentials] = useState('');
@@ -10,6 +12,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
     const { login, loginWithGoogle } = useAuth();
+    const { t } = useTranslation();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -24,7 +27,7 @@ export default function LoginPage() {
             else if (role === 'employee') window.location.href = '/employee/dashboard';
             else if (role === 'transporter') window.location.href = '/transporter/dashboard';
             else window.location.href = '/customer/dashboard';
-        } catch (err) { console.error('Login failed:', err);
+        } catch (err) { console.error('{t("auth.login")} failed:', err);
             const msg = err.response?.data?.message
                 || err.response?.data?.errors?.login?.[0]
                 || 'Network error. Please try again.';
@@ -69,9 +72,9 @@ export default function LoginPage() {
                         </div>
                         <span className="text-gray-600 font-black text-3xl">M-TAI</span>
                     </div>
-                    <p className="text-[10px] font-bold text-[#00D4AA] uppercase tracking-[3px] mb-3">Login</p>
-                    <h1 className="text-4xl font-black text-gray-600 mb-3">Welcome Back</h1>
-                    <p className="text-gray-500 text-lg">Sign in to your account to continue</p>
+                    <p className="text-[10px] font-bold text-[#00D4AA] uppercase tracking-[3px] mb-3">{t("auth.login")}</p>
+                    <h1 className="text-4xl font-black text-gray-600 mb-3">{t("auth.welcome_back")}</h1>
+                    <p className="text-gray-500 text-lg">{t("auth.sign_in_continue")}</p>
                 </div>
 
                 {error && (
@@ -83,7 +86,7 @@ export default function LoginPage() {
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
                         <label className="block text-sm font-semibold text-gray-600 mb-1.5">
-                            Email / Phone Number
+                            {t("common.email")} / {t("common.phone")}
                         </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -96,14 +99,14 @@ export default function LoginPage() {
                                 value={credentials}
                                 onChange={(e) => setCredentials(e.target.value)}
                                 className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:ring-2 focus:ring-[#00D4AA] focus:border-[#00D4AA]"
-                                placeholder="Email, phone, or user code"
+                                placeholder={t("auth.email_phone_placeholder")}
                                 required
                             />
                         </div>
                     </div>
                     <div>
                         <label className="block text-sm font-semibold text-gray-600 mb-1.5">
-                            Password
+                            {t("common.password")}
                         </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -116,7 +119,7 @@ export default function LoginPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="w-full pl-11 pr-11 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:ring-2 focus:ring-[#00D4AA] focus:border-[#00D4AA]"
-                                placeholder="••••••••"
+                                placeholder={t("auth.password_placeholder")}
                                 required
                             />
                             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors">
@@ -130,7 +133,7 @@ export default function LoginPage() {
                     </div>
                     <div className="flex items-center justify-end mb-6">
                         <Link to="/forgot-password" className="text-sm text-[#00D4AA] hover:text-[#00B894] font-medium transition-colors">
-                            Forgot Password?
+                            {t("auth.forgot_password")}
                         </Link>
                     </div>
                     <button
@@ -138,7 +141,7 @@ export default function LoginPage() {
                         disabled={loading}
                         className="w-full py-3 bg-[#00D4AA] hover:bg-[#00B894] text-[#0A140C] rounded-xl font-bold text-sm transition-all duration-200 disabled:opacity-50 shadow-md hover:shadow-lg"
                     >
-                        {loading ? 'Signing in...' : 'SIGN IN'}
+                        {loading ? t("common.loading") : t("common.login").toUpperCase()}
                     </button>
                 </form>
 
@@ -147,7 +150,7 @@ export default function LoginPage() {
                         <div className="w-full border-t border-gray-200"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                        <span className="bg-white px-4 text-gray-400">or continue with</span>
+                        <span className="bg-white px-4 text-gray-400">{t("auth.or_continue")}</span>
                     </div>
                 </div>
 
@@ -163,14 +166,14 @@ export default function LoginPage() {
                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
-                    {googleLoading ? 'Signing in...' : 'Continue with Google'}
+                    {googleLoading ? t("common.loading") : t("auth.google_signin")}
                 </button>
 
                 <div className="mt-10 text-center">
                     <p className="text-gray-500 text-sm">
-                        Don't have an account?{' '}
+                        {t("auth.dont_have_account")}{' '}
                         <Link to="/register" className="text-[#00D4AA] font-semibold hover:text-[#00B894] transition-colors">
-                            Sign Up
+                            {t("auth.sign_up")}
                         </Link>
                     </p>
                 </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import LocationFields from '../../components/casfeta/LocationFields';
 import StreetField from '../../components/casfeta/StreetField';
 
@@ -58,6 +59,7 @@ export default function RegisterSellerPage() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const { register } = useAuth();
+    const { t } = useTranslation();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import ProductCard from '../../components/ProductCard';
 import ShimmerProductGrid from '../../components/ShimmerProductGrid';
@@ -83,6 +84,7 @@ function BannerCarousel({ slides }) {
 
 export default function CustomerDashboard() {
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);

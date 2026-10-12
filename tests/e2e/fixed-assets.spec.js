@@ -20,8 +20,8 @@ test('fixed assets page renders and creates an asset end-to-end', async ({ page 
     await page.getByRole('button', { name: 'New Asset' }).click();
     await page.waitForTimeout(400);
 
-    await page.getByLabel(/Name \*/).fill(name);
-    await page.getByLabel(/Purchase Date \*/).fill('2026-09-01');
+    await page.locator('label', { hasText: 'Name *' }).locator('..').locator('input').fill(name);
+    await page.locator('label', { hasText: 'Purchase Date *' }).locator('..').locator('input').fill('2026-09-01');
     await page.locator('label', { hasText: /Purchase Cost/ }).locator('..').locator('input').fill('1250000');
     await page.locator('label', { hasText: /Useful Life/ }).locator('..').locator('input').fill('24');
 
@@ -50,10 +50,11 @@ test('fixed assets page renders and creates an asset end-to-end', async ({ page 
         const item = (json.data || []).find((a) => a.name === n);
         return item ? item.id : null;
     }, name);
+    const token = await page.evaluate(() => localStorage.getItem('auth_token'));
     console.log('Created asset id for cleanup:', createdId);
-    if (createdId) {
+    if (createdId && token) {
         await page.request.delete(`/api/owner/finance/fixed-assets/${createdId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` },
+            headers: { Authorization: `Bearer ${token}` },
         });
     }
 });

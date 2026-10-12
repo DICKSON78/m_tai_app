@@ -6,7 +6,7 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 import { Package, Plus, Search, Eye, Pencil, Trash2, EyeOff, Filter, RotateCcw } from 'lucide-react';
 
 export default function ProductListPage() {
-    document.title = 'Products - M-TAI';
+    document.title = '{t("products.products")} - M-TAI';
     const navigate = useNavigate();
     const [businesses, setBusinesses] = useState([]);
     const [selectedBusiness, setSelectedBusiness] = useState('');
@@ -121,7 +121,7 @@ export default function ProductListPage() {
 
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 mb-6">
                 <h3 className="text-sm font-semibold text-gray-900 flex items-center mb-4">
-                    <Filter size={14} className="text-[#00D4AA] mr-2" /> Search Resources
+                    <Filter size={14} className="text-[#00D4AA] mr-2" /> {t("common.search")} Resources
                 </h3>
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1 relative">
@@ -130,7 +130,7 @@ export default function ProductListPage() {
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search products..."
+                            placeholder={t("common.search_products")}
                             className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00D4AA] focus:border-[#00D4AA] text-sm"
                         />
                     </div>
@@ -150,7 +150,7 @@ export default function ProductListPage() {
                             onChange={(e) => setCategory(e.target.value)}
                             className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00D4AA] focus:border-[#00D4AA] text-sm"
                         >
-                            <option value="">All Categories</option>
+                            <option value="">{t("products.categories")}</option>
                             {categories.map((cat) => (
                                 <option key={cat.id} value={cat.id}>{cat.name}</option>
                             ))}
@@ -169,9 +169,9 @@ export default function ProductListPage() {
                             onChange={(e) => setStock(e.target.value)}
                             className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00D4AA] focus:border-[#00D4AA] text-sm"
                         >
-                            <option value="">All Stock</option>
-                            <option value="low">Low Stock</option>
-                            <option value="in_stock">In Stock</option>
+                            <option value="">All {t("products.stock")}</option>
+                            <option value="low">Low {t("products.stock")}</option>
+                            <option value="in_stock">In {t("products.stock")}</option>
                         </select>
                         <button
                             onClick={handleReset}
@@ -197,7 +197,7 @@ export default function ProductListPage() {
             ) : (
                 <div className="card overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm mb-6">
                     <div className="px-6 py-4 border-b border-gray-100">
-                        <h3 className="text-sm font-semibold text-gray-900">Products ({products.length})</h3>
+                        <h3 className="text-sm font-semibold text-gray-900">{t("products.products")} ({products.length})</h3>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full">
@@ -206,9 +206,9 @@ export default function ProductListPage() {
                                     <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Image</th>
                                     <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Name</th>
                                     <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Category</th>
-                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Purchase Price</th>
-                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Selling Price</th>
-                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Stock</th>
+                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Purchase {t("products.price")}</th>
+                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Selling {t("products.price")}</th>
+                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">{t("products.stock")}</th>
                                     <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Status</th>
                                     <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Actions</th>
                                 </tr>

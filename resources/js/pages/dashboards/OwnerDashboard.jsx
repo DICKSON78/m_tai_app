@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../../components/ui/chart';
 import { Area, AreaChart, Bar, BarChart, XAxis, YAxis, CartesianGrid } from 'recharts';
@@ -37,6 +38,7 @@ const ordersChartConfig = {
 
 export default function OwnerDashboard() {
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [stats, setStats] = useState({
         totalProducts: 0,
         todaySales: 0,

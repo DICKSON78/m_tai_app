@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import PageHeader from '../components/casfeta/PageHeader';
 import LocationFields from '../components/casfeta/LocationFields';
@@ -197,7 +198,7 @@ export default function ProfilePage() {
                 </div>
             )}
 
-            {/* Profile identity */}
+            {/* {t("profile.profile")} identity */}
             <div className="card mb-4">
                 <div className="flex items-center space-x-4">
                     <div className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold shrink-0" style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}>

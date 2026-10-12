@@ -38,7 +38,7 @@ const PAYMENT_STATUS_MAP = {
 };
 
 export default function OrderListPage() {
-    document.title = 'Orders - M-TAI';
+    document.title = '{t("orders.orders")} - M-TAI';
     const navigate = useNavigate();
 
     const [businesses, setBusinesses] = useState([]);
@@ -178,7 +178,7 @@ export default function OrderListPage() {
                     <Filter size={14} className="text-[#00D4AA] mr-2" /> Search Resources
                     {totalOrders > 0 && (
                         <span className="ml-auto text-sm text-gray-500">
-                            Total orders: <span className="font-semibold text-gray-900">{totalOrders}</span>
+                            {t("common.total")} orders: <span className="font-semibold text-gray-900">{totalOrders}</span>
                         </span>
                     )}
                 </h3>
@@ -257,19 +257,19 @@ export default function OrderListPage() {
             ) : (
                 <div className="card overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm mb-6">
                     <div className="px-6 py-4 border-b border-gray-100">
-                        <h3 className="text-sm font-semibold text-gray-900">Orders ({orders.length})</h3>
+                        <h3 className="text-sm font-semibold text-gray-900">{t("orders.orders")} ({orders.length})</h3>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
                                 <tr>
                                     <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Code</th>
-                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Customer</th>
-                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Date</th>
-                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Total</th>
-                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Status</th>
+                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">{t("customers.customer")}</th>
+                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">{t("common.date")}</th>
+                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">{t("common.total")}</th>
+                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">{t("common.status")}</th>
                                     <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Payment</th>
-                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">Actions</th>
+                                    <th className="text-left px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">{t("common.actions")}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -338,7 +338,7 @@ export default function OrderListPage() {
                                                                 setStatusDropdownOrderId(statusDropdownOrderId === row.id ? null : row.id);
                                                             }}
                                                             className="h-8 w-8 bg-gray-100 text-gray-600 rounded-lg flex items-center justify-center hover:bg-gray-200 transition-all"
-                                                            title="Change Status"
+                                                            title={t("actions.change_status")}
                                                         >
                                                             <RefreshCw size={14} />
                                                         </button>
@@ -417,13 +417,13 @@ export default function OrderListPage() {
                                 </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-sm text-gray-500">Customer</span>
+                                <span className="text-sm text-gray-500">{t("customers.customer")}</span>
                                 <span className="text-sm font-medium text-gray-800">
                                     {verifyOrder.customer?.name || verifyOrder.customer_name || '-'}
                                 </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-sm text-gray-500">Total</span>
+                                <span className="text-sm text-gray-500">{t("common.total")}</span>
                                 <span className="text-sm font-bold text-gray-800">
                                     TZS {Number(verifyOrder.total || verifyOrder.total_amount || 0).toLocaleString()}
                                 </span>
@@ -451,7 +451,7 @@ export default function OrderListPage() {
                 )}
             </Modal>
 
-            <Modal isOpen={statusModalOpen} onClose={() => { setStatusModalOpen(false); setStatusModalOrder(null); setStatusAction(''); }} title="Change Order Status" size="sm">
+            <Modal isOpen={statusModalOpen} onClose={() => { setStatusModalOpen(false); setStatusModalOrder(null); setStatusAction(''); }} title={t("actions.change_order_status")} size="sm">
                 {statusModalOrder && (
                     <div>
                         <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-3">
@@ -462,7 +462,7 @@ export default function OrderListPage() {
                                 </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-sm text-gray-500">Current Status</span>
+                                <span className="text-sm text-gray-500">Current {t("common.status")}</span>
                                 {(() => {
                                     const cfg = ORDER_STATUS_MAP[statusModalOrder.status] || ORDER_STATUS_MAP.pending;
                                     return (
