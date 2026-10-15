@@ -96,7 +96,6 @@ const navConfig = {
         { label: 'Business', items: [
             { to: '/owner/inventory', label: 'Inventory', icon: 'clipboard' },
             { to: '/owner/orders', label: 'Orders', icon: 'shopping-cart', badgeKey: 'pendingOrders' },
-            { to: '/owner/notifications', label: 'Notifications', icon: 'home', badgeKey: 'unread' },
             { to: '/owner/loans', label: 'Loans', icon: 'banknotes' },
             { to: '/owner/expenses', label: 'Expenses', icon: 'currency-dollar' },
             { to: '/owner/credit-sales', label: 'Credit Sales', icon: 'credit-card' },
@@ -398,7 +397,6 @@ export default function DashboardLayout({ children }) {
 
     const badgeFor = (item) => {
         if (!item.badgeKey) return 0;
-        if (item.badgeKey === 'unread') return unreadCount;
         if (item.badgeKey === 'pendingOrders') return ownerCounts.pendingOrders;
         if (item.badgeKey === 'lowStock') return ownerCounts.lowStock;
         return 0;
