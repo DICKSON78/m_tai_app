@@ -144,7 +144,7 @@ export default function ProductListPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
                     <button
                         onClick={() => setStock('')}
-                        className={`bg-white rounded-xl border shadow-sm p-4 flex items-center gap-3 text-left hover:shadow-md transition-all ${stock === '' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
+                        className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex items-center gap-3 text-left hover:shadow-md transition-all"
                     >
                         <div className="w-10 h-10 rounded-xl bg-[#00D4AA]/10 text-[#00B894] flex items-center justify-center shrink-0"><Package size={20} /></div>
                         <div>
