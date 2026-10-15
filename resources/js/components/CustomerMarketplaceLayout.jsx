@@ -57,12 +57,7 @@ export default function CustomerMarketplaceLayout({ children }) {
         navigate(`/customer/shops${params.toString() ? `?${params.toString()}` : ''}`);
     };
 
-    const customerNav = [
-        { label: t('navbar.marketplace'), to: '/customer/dashboard' },
-        { label: t('shop.shops'), to: '/customer/shops' },
-        { label: t('orders.orders'), to: '/customer/orders' },
-        { label: t('cart.my_cart'), to: '/customer/cart' },
-    ];
+    const avatarInitial = ((user?.name || 'C').trim().charAt(0) || 'C').toUpperCase();
 
     return (
         <div className="h-screen flex flex-col bg-surface overflow-hidden">
@@ -92,27 +87,6 @@ export default function CustomerMarketplaceLayout({ children }) {
                             </div>
                             <span className="text-white font-bold text-xl tracking-tight hidden sm:block">M-TAI</span>
                         </Link>
-
-                        {/* Desktop nav — Marketplace first */}
-                        <div className="hidden lg:flex items-center gap-1">
-                            {customerNav.map((link) => {
-                                const isActive = link.to === '/customer/dashboard'
-                                    ? window.location.pathname === '/customer/dashboard' || window.location.pathname === '/customer/marketplace'
-                                    : window.location.pathname.startsWith(link.to);
-                                return (
-                                    <Link
-                                        key={link.to}
-                                        to={link.to}
-                                        className={`relative px-4 py-2 text-sm font-medium transition-colors duration-300 ${
-                                            isActive ? 'text-white' : 'text-white/60 hover:text-white'
-                                        }`}
-                                    >
-                                        {link.label}
-                                        <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-[#00D4AA] transition-all duration-300 rounded-full ${isActive ? 'w-6' : 'w-0 group-hover:w-6'}`} />
-                                    </Link>
-                                );
-                            })}
-                        </div>
 
                         {/* Search */}
                         <form onSubmit={handleSearch} className="relative hidden md:block flex-1 min-w-0 max-w-md mx-2">
@@ -214,31 +188,35 @@ export default function CustomerMarketplaceLayout({ children }) {
                                 )}
                             </Link>
 
-                            {/* User */}
+                            {/* User avatar */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <button className="flex items-center gap-1.5 px-3 py-1 rounded-full hover:bg-white/5 transition-colors">
-                                        <span className="text-sm font-bold text-white hidden md:block max-w-[120px] truncate">{(user?.name || 'Customer')}</span>
-                                        <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                        </svg>
+                                    <button className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-black text-[#0A140C] shrink-0 bg-gradient-to-r from-[#00D4AA] to-[#00B894] hover:shadow-lg hover:shadow-[#00D4AA]/25 transition-all" aria-label="Account">
+                                        {avatarInitial}
                                     </button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-60">
                                     <DropdownMenuLabel>
-                                        <p className="font-semibold">{user?.name || 'Customer'}</p>
-                                        <p className="text-xs font-normal text-gray-500">{user?.email || ''}</p>
+                                        <div className="flex items-center gap-3">
+                                            <span className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-black text-[#0A140C] shrink-0 bg-gradient-to-r from-[#00D4AA] to-[#00B894]">
+                                                {avatarInitial}
+                                            </span>
+                                            <div className="min-w-0">
+                                                <p className="font-semibold truncate">{user?.name || 'Customer'}</p>
+                                                <p className="text-xs font-normal text-gray-500 truncate">{user?.email || ''}</p>
+                                            </div>
+                                        </div>
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem onClick={() => navigate('/customer/profile')} className="cursor-pointer">
-                                        Settings
+                                        {t('profile.profile')}
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => navigate('/customer/wishlist')} className="cursor-pointer">
-                                        My Wishlist
+                                    <DropdownMenuItem onClick={() => navigate('/customer/profile')} className="cursor-pointer">
+                                        {t('settings.settings')}
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50">
-                                        Sign Out
+                                        {t('common.logout')}
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -249,19 +227,6 @@ export default function CustomerMarketplaceLayout({ children }) {
                     {/* Mobile nav */}
                     {mobileOpen && (
                         <div className="lg:hidden bg-[#0A140C]/95 backdrop-blur-xl border-t border-white/5 px-6 py-6">
-                            <ul className="flex flex-col gap-1 mb-4">
-                                {customerNav.map((link) => (
-                                    <li key={link.to}>
-                                        <Link
-                                            to={link.to}
-                                            onClick={() => setMobileOpen(false)}
-                                            className="block px-4 py-3 text-sm font-medium rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-all"
-                                        >
-                                            {link.label}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
                             <form onSubmit={handleSearch} className="mb-4">
                                 <div className="flex items-center bg-white rounded-full overflow-hidden">
                                     <input
