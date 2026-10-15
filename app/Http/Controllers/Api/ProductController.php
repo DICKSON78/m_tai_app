@@ -18,6 +18,7 @@ class ProductController extends Controller
             'search' => 'nullable|string|max:255',
             'status' => 'nullable|in:published,draft,all',
             'low_stock' => 'nullable|boolean',
+            'stock' => 'nullable|in:all,in_stock,low,out',
             'per_page' => 'nullable|integer|min:1|max:200',
         ]);
 
@@ -37,10 +38,33 @@ class ProductController extends Controller
             ->when($request->status === 'published', fn($q) => $q->where('is_published', true))
             ->when($request->status === 'draft', fn($q) => $q->where('is_draft', true))
             ->when($request->low_stock, fn($q) => $q->where('quantity', '<=', 5))
+            ->when($request->stock === 'low', fn($q) => $q->where('quantity', '>', 0)->where('quantity', '<=', 5))
+            ->when($request->stock === 'out', fn($q) => $q->where('quantity', '<=', 0))
+            ->when($request->stock === 'in_stock', fn($q) => $q->where('quantity', '>', 5))
             ->orderBy('created_at', 'desc')
             ->paginate($request->per_page ?? 15);
 
         return response()->json($products);
+    }
+
+    public function productStats(Request $request, Business $business)
+    {
+        if ($business->user_id !== $request->user()->id) {
+            abort(403, 'Huna ruhusa');
+        }
+
+        $base = $business->products();
+
+        return response()->json([
+            'total' => (clone $base)->count(),
+            'published' => (clone $base)->where('is_published', true)->count(),
+            'draft' => (clone $base)->where('is_draft', true)->count(),
+            'in_stock' => (clone $base)->where('quantity', '>', 5)->count(),
+            'low_stock' => (clone $base)->where('quantity', '>', 0)->where('quantity', '<=', 5)->count(),
+            'out_of_stock' => (clone $base)->where('quantity', '<=', 0)->count(),
+            'stock_value' => (float) (clone $base)->selectRaw('COALESCE(SUM(quantity * buying_price), 0) as v')->value('v'),
+            'total_units' => (int) (clone $base)->sum('quantity'),
+        ]);
     }
 
     public function store(Request $request, Business $business)

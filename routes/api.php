@@ -151,6 +151,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/businesses/{business}/capitals', [BusinessController::class, 'addCapital']);
 
         // Products
+        Route::get('/businesses/{business}/products/stats', [ProductController::class, 'productStats']);
         Route::get('/businesses/{business}/products', [ProductController::class, 'index']);
         Route::post('/businesses/{business}/products', [ProductController::class, 'store']);
         Route::get('/products/{product}', [ProductController::class, 'show']);

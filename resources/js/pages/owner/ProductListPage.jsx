@@ -26,6 +26,7 @@ export default function ProductListPage() {
     const [deleteId, setDeleteId] = useState(null);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [togglingId, setTogglingId] = useState(null);
+    const [stats, setStats] = useState({ total: 0, published: 0, in_stock: 0, low_stock: 0, out_of_stock: 0, stock_value: 0, total_units: 0 });
 
     useEffect(() => {
         api.get('/owner/businesses').then(res => {
@@ -64,13 +65,22 @@ export default function ProductListPage() {
         }
     }, [selectedBusiness, currentPage, search, category, status, stock]);
 
+    const fetchStats = useCallback(async () => {
+        if (!selectedBusiness) return;
+        try {
+            const res = await api.get(`/owner/businesses/${selectedBusiness}/products/stats`);
+            setStats(res.data || {});
+        } catch (error) { console.error('Failed to fetch product stats:', error); }
+    }, [selectedBusiness]);
+
     useEffect(() => {
         if (selectedBusiness) {
             api.get(`/owner/businesses/${selectedBusiness}/categories`).then(res => {
                 setCategories(res.data?.data || res.data || []);
             }).catch((error) => { console.error('Failed to fetch categories:', error); setCategories([]); });
+            fetchStats();
         }
-    }, [selectedBusiness]);
+    }, [selectedBusiness, fetchStats]);
 
     useEffect(() => {
         fetchProducts();
@@ -85,6 +95,7 @@ export default function ProductListPage() {
         try {
             await api.delete(`/owner/products/${deleteId}`);
             fetchProducts();
+            fetchStats();
         } catch (error) { console.error('Failed to delete product:', error); alert(error?.response?.data?.message || 'Failed to delete product. Please try again.'); } finally {
         }
     };
@@ -95,6 +106,7 @@ export default function ProductListPage() {
         try {
             await api.post(`/owner/products/${product.id}/toggle-publish`);
             fetchProducts();
+            fetchStats();
         } catch (error) { console.error('Failed to toggle publish status:', error); alert(error?.response?.data?.message || 'Failed to update product. Please try again.'); } finally {
             setTogglingId(null);
         }
@@ -118,6 +130,73 @@ export default function ProductListPage() {
                     >
                         <Plus size={16} /> <span className="hidden sm:inline">Add New</span>
                     </Link>
+                </div>
+            )}
+
+            {selectedBusiness && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                    <button
+                        onClick={() => setStock('')}
+                        className={`bg-white rounded-2xl border p-4 text-left shadow-sm hover:shadow-md transition-all ${stock === '' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
+                    >
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="w-8 h-8 rounded-xl bg-[#00D4AA]/10 flex items-center justify-center">
+                                <Package size={16} className="text-[#00B894]" />
+                            </span>
+                            <span className="text-xs font-medium text-gray-500">{t('products.total_products') || 'Total Products'}</span>
+                        </div>
+                        <p className="text-2xl font-black text-gray-900">{Number(stats.total || 0).toLocaleString()}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">{Number(stats.total_units || 0).toLocaleString()} units</p>
+                    </button>
+                    <button
+                        onClick={() => setStock('in_stock')}
+                        className={`bg-white rounded-2xl border p-4 text-left shadow-sm hover:shadow-md transition-all ${stock === 'in_stock' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
+                    >
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="w-8 h-8 rounded-xl bg-green-100 flex items-center justify-center">
+                                <Package size={16} className="text-green-600" />
+                            </span>
+                            <span className="text-xs font-medium text-gray-500">{t('products.in_stock')}</span>
+                        </div>
+                        <p className="text-2xl font-black text-green-600">{Number(stats.in_stock || 0).toLocaleString()}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">qty &gt; 5</p>
+                    </button>
+                    <button
+                        onClick={() => setStock('low')}
+                        className={`bg-white rounded-2xl border p-4 text-left shadow-sm hover:shadow-md transition-all ${stock === 'low' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
+                    >
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="w-8 h-8 rounded-xl bg-yellow-100 flex items-center justify-center">
+                                <Package size={16} className="text-yellow-600" />
+                            </span>
+                            <span className="text-xs font-medium text-gray-500">{t('products.low_stock')}</span>
+                        </div>
+                        <p className="text-2xl font-black text-yellow-600">{Number(stats.low_stock || 0).toLocaleString()}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">qty 1 – 5</p>
+                    </button>
+                    <button
+                        onClick={() => setStock('out')}
+                        className={`bg-white rounded-2xl border p-4 text-left shadow-sm hover:shadow-md transition-all ${stock === 'out' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
+                    >
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center">
+                                <Package size={16} className="text-red-600" />
+                            </span>
+                            <span className="text-xs font-medium text-gray-500">{t('products.out_of_stock')}</span>
+                        </div>
+                        <p className="text-2xl font-black text-red-600">{Number(stats.out_of_stock || 0).toLocaleString()}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">qty 0</p>
+                    </button>
+                    <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm col-span-2 sm:col-span-1">
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="w-8 h-8 rounded-xl bg-[#0A140C] flex items-center justify-center">
+                                <span className="text-[#00D4AA] text-sm font-black">T</span>
+                            </span>
+                            <span className="text-xs font-medium text-gray-500">Stock Value</span>
+                        </div>
+                        <p className="text-2xl font-black text-gray-900">TZS {Number(stats.stock_value || 0).toLocaleString()}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">{Number(stats.published || 0).toLocaleString()} published</p>
+                    </div>
                 </div>
             )}
 
@@ -172,8 +251,9 @@ export default function ProductListPage() {
                             className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00D4AA] focus:border-[#00D4AA] text-sm"
                         >
                             <option value="">All {t("products.stock")}</option>
-                            <option value="low">Low {t("products.stock")}</option>
                             <option value="in_stock">In {t("products.stock")}</option>
+                            <option value="low">Low {t("products.stock")}</option>
+                            <option value="out">Out of {t("products.stock")}</option>
                         </select>
                         <button
                             onClick={handleReset}
