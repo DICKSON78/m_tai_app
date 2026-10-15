@@ -7,20 +7,20 @@ import { FileText } from 'lucide-react';
 
 const STATUS_CONFIG = {
     pending: { label: 'Pending', badge: 'badge badge-yellow', icon: '⏳' },
-    confirmed: { label: 'Confirmed', badge: 'badge badge-green', icon: '✓' },
-    processing: { label: 'Processing', badge: 'badge badge-green', icon: '⚙' },
+    confirmed: { label: 'Confirmed', badge: 'badge badge-blue', icon: '✓' },
+    processing: { label: 'Processing', badge: 'badge badge-purple', icon: '⚙' },
     completed: { label: 'Completed', badge: 'badge badge-green', icon: '✓' },
     cancelled: { label: 'Cancelled', badge: 'badge badge-red', icon: '✕' },
-    delivered: { label: 'Delivered', badge: 'badge badge-green', icon: '✓' },
-    shipped: { label: 'Shipped', badge: 'badge badge-blue', icon: '🚚' },
+    delivered: { label: 'Delivered', badge: 'badge badge-indigo', icon: '✓' },
+    shipped: { label: 'Shipped', badge: 'badge badge-cyan', icon: '🚚' },
 };
 
 const PAYMENT_STATUS_CONFIG = {
     paid: { label: 'Paid', badge: 'badge badge-green' },
     pending: { label: 'Pending', badge: 'badge badge-yellow' },
-    unpaid: { label: 'Unpaid', badge: 'badge badge-red' },
+    unpaid: { label: 'Unpaid', badge: 'badge badge-orange' },
     failed: { label: 'Failed', badge: 'badge badge-red' },
-    refunded: { label: 'Refunded', badge: 'badge badge-gray' },
+    refunded: { label: 'Refunded', badge: 'badge badge-indigo' },
 };
 
 const PAYMENT_METHOD_LABELS = {

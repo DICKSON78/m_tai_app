@@ -10,7 +10,7 @@ import { ShoppingCart, User, Phone, MapPin, Package, CreditCard, DollarSign, Cal
 
 const ORDER_STATUS_MAP = {
     pending: { label: 'Pending', badge: 'badge badge-yellow' },
-    confirmed: { label: 'Confirmed', badge: 'badge badge-green' },
+    confirmed: { label: 'Confirmed', badge: 'badge badge-blue' },
     completed: { label: 'Completed', badge: 'badge badge-green' },
     cancelled: { label: 'Cancelled', badge: 'badge badge-red' },
 };
@@ -18,9 +18,9 @@ const ORDER_STATUS_MAP = {
 const PAYMENT_STATUS_MAP = {
     pending: { label: 'Pending', badge: 'badge badge-yellow' },
     paid: { label: 'Paid', badge: 'badge badge-green' },
-    partial: { label: 'Partial', badge: 'badge badge-green' },
+    partial: { label: 'Partial', badge: 'badge badge-purple' },
     failed: { label: 'Failed', badge: 'badge badge-red' },
-    refunded: { label: 'Refunded', badge: 'badge badge-green' },
+    refunded: { label: 'Refunded', badge: 'badge badge-indigo' },
 };
 
 const PAYMENT_METHOD_MAP = {

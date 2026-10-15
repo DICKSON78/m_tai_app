@@ -167,6 +167,9 @@ html { scroll-behavior: smooth; }
 .badge-blue { @apply bg-blue-100 text-blue-700; }
 .badge-gray { @apply bg-gray-100 text-gray-600; }
 .badge-purple { @apply bg-purple-100 text-purple-700; }
+.badge-indigo { @apply bg-indigo-100 text-indigo-700; }
+.badge-cyan { @apply bg-cyan-100 text-cyan-700; }
+.badge-orange { @apply bg-orange-100 text-orange-700; }
 
 /* Tabs */
 .tab-nav { @apply flex -mb-px overflow-x-auto border-b border-gray-200; }

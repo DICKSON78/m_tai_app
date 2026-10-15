@@ -32,7 +32,7 @@ const PAYMENT_STATUS_OPTIONS = [
 
 const ORDER_STATUS_MAP = {
     pending: { label: 'Pending', badge: 'bg-yellow-100 text-yellow-700' },
-    confirmed: { label: 'Confirmed', badge: 'bg-[#00D4AA]/10 text-[#00B894]' },
+    confirmed: { label: 'Confirmed', badge: 'bg-blue-100 text-blue-700' },
     completed: { label: 'Completed', badge: 'bg-[#00D4AA]/10 text-[#00B894]' },
     cancelled: { label: 'Cancelled', badge: 'bg-red-100 text-red-600' },
 };
@@ -40,9 +40,9 @@ const ORDER_STATUS_MAP = {
 const PAYMENT_STATUS_MAP = {
     pending: { label: 'Pending', badge: 'bg-yellow-100 text-yellow-700' },
     paid: { label: 'Paid', badge: 'bg-[#00D4AA]/10 text-[#00B894]' },
-    partial: { label: 'Partial', badge: 'bg-[#00D4AA]/10 text-[#00B894]' },
+    partial: { label: 'Partial', badge: 'bg-purple-100 text-purple-700' },
     failed: { label: 'Failed', badge: 'bg-red-100 text-red-600' },
-    refunded: { label: 'Refunded', badge: 'bg-[#00D4AA]/10 text-[#00B894]' },
+    refunded: { label: 'Refunded', badge: 'bg-indigo-100 text-indigo-700' },
 };
 
 export default function OrderListPage() {

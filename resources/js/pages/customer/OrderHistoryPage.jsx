@@ -7,19 +7,19 @@ import { ShoppingCart } from 'lucide-react';
 
 const STATUS_CONFIG = {
     pending: { label: 'Pending', badge: 'badge badge-yellow' },
-    confirmed: { label: 'Confirmed', badge: 'badge badge-green' },
-    processing: { label: 'Processing', badge: 'badge badge-green' },
+    confirmed: { label: 'Confirmed', badge: 'badge badge-blue' },
+    processing: { label: 'Processing', badge: 'badge badge-purple' },
     completed: { label: 'Completed', badge: 'badge badge-green' },
     cancelled: { label: 'Cancelled', badge: 'badge badge-red' },
-    delivered: { label: 'Delivered', badge: 'badge badge-green' },
+    delivered: { label: 'Delivered', badge: 'badge badge-indigo' },
 };
 
 const PAYMENT_STATUS_CONFIG = {
     paid: { label: 'Paid', badge: 'badge badge-green' },
     pending: { label: 'Pending', badge: 'badge badge-yellow' },
-    unpaid: { label: 'Unpaid', badge: 'badge badge-red' },
+    unpaid: { label: 'Unpaid', badge: 'badge badge-orange' },
     failed: { label: 'Failed', badge: 'badge badge-red' },
-    refunded: { label: 'Refunded', badge: 'badge badge-gray' },
+    refunded: { label: 'Refunded', badge: 'badge badge-indigo' },
 };
 
 export default function OrderHistoryPage() {

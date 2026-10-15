@@ -9,7 +9,7 @@ import { Home, Package, DollarSign, ShoppingCart, Receipt, Users, AlertTriangle,
 
 const STATUS_MAP = {
     pending: { label: 'Pending', className: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700' },
-    confirmed: { label: 'Confirmed', className: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#00D4AA]/10 text-[#00B894]' },
+    confirmed: { label: 'Confirmed', className: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700' },
     completed: { label: 'Completed', className: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700' },
     cancelled: { label: 'Cancelled', className: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700' },
 };
