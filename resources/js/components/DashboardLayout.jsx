@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Sheet, SheetContent } from './ui/sheet';
@@ -10,11 +10,12 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
+import api from '../services/api';
 
 const navConfig = {
     admin: [
         { label: 'Overview', items: [
-            { to: '/admin/dashboard', label: '{t("common.dashboard")}', icon: 'home' },
+            { to: '/admin/dashboard', labelKey: 'common.dashboard', label: 'Dashboard', icon: 'home' },
         ]},
         { label: 'Business Management', items: [
             { to: '/admin/shops', label: 'All Businesses', icon: 'store' },
@@ -83,9 +84,9 @@ const navConfig = {
     ],
     business_owner: [
         { label: 'Main', items: [
-            { to: '/owner/dashboard', label: '{t("common.dashboard")}', icon: 'home' },
+            { to: '/owner/dashboard', labelKey: 'common.dashboard', label: 'Dashboard', icon: 'home' },
             { to: '/owner/businesses', label: 'Businesses', icon: 'store' },
-            { to: '/owner/products', label: 'Products', icon: 'package' },
+            { to: '/owner/products', label: 'Products', icon: 'package', badgeKey: 'lowStock' },
             { to: '/owner/categories', label: 'Categories', icon: 'collection' },
         ]},
         { label: 'People', items: [
@@ -94,8 +95,8 @@ const navConfig = {
         ]},
         { label: 'Business', items: [
             { to: '/owner/inventory', label: 'Inventory', icon: 'clipboard' },
-            { to: '/owner/orders', label: 'Orders', icon: 'shopping-cart' },
-            { to: '/owner/notifications', label: 'Notifications', icon: 'home' },
+            { to: '/owner/orders', label: 'Orders', icon: 'shopping-cart', badgeKey: 'pendingOrders' },
+            { to: '/owner/notifications', label: 'Notifications', icon: 'home', badgeKey: 'unread' },
             { to: '/owner/loans', label: 'Loans', icon: 'banknotes' },
             { to: '/owner/expenses', label: 'Expenses', icon: 'currency-dollar' },
             { to: '/owner/credit-sales', label: 'Credit Sales', icon: 'credit-card' },
@@ -160,7 +161,7 @@ const navConfig = {
     ],
     employee: [
         { label: 'Work', items: [
-            { to: '/employee/dashboard', label: '{t("common.dashboard")}', icon: 'home' },
+            { to: '/employee/dashboard', labelKey: 'common.dashboard', label: 'Dashboard', icon: 'home' },
             { to: '/employee/customers', label: 'Customers', icon: 'users' },
             { to: '/employee/inventory', label: 'Inventory', icon: 'clipboard' },
             { to: '/employee/expenses', label: 'Expenses', icon: 'currency-dollar' },
@@ -172,7 +173,7 @@ const navConfig = {
     ],
     customer: [
         { label: 'Shopping', items: [
-            { to: '/customer/dashboard', label: '{t("common.dashboard")}', icon: 'home' },
+            { to: '/customer/dashboard', labelKey: 'common.dashboard', label: 'Dashboard', icon: 'home' },
             { to: '/customer/shops', label: 'Shops', icon: 'store' },
             { to: '/customer/orders', label: 'Orders', icon: 'shopping-cart' },
             { to: '/customer/deliveries', label: 'Deliveries', icon: 'truck' },
@@ -184,7 +185,7 @@ const navConfig = {
     ],
     transporter: [
         { label: 'Work', items: [
-            { to: '/transporter/dashboard', label: '{t("common.dashboard")}', icon: 'home' },
+            { to: '/transporter/dashboard', labelKey: 'common.dashboard', label: 'Dashboard', icon: 'home' },
             { to: '/transporter/deliveries', label: 'Deliveries', icon: 'truck' },
         ]},
         { label: 'Account', items: [
@@ -308,16 +309,100 @@ function SidebarIcon({ icon, className = 'w-5 h-5 shrink-0' }) {
 
 export default function DashboardLayout({ children }) {
     const { user, logout } = useAuth();
+    const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [collapsedGroups, setCollapsedGroups] = useState({});
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [notifLoading, setNotifLoading] = useState(false);
+    const [ownerCounts, setOwnerCounts] = useState({ pendingOrders: 0, lowStock: 0 });
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
+
+    const fetchNotifications = useCallback(async () => {
+        try {
+            const [listRes, countRes] = await Promise.all([
+                api.get('/notifications', { params: { page: 1 } }),
+                api.get('/notifications/unread-count'),
+            ]);
+            const body = listRes.data;
+            const items = Array.isArray(body?.data) ? body.data : (Array.isArray(body) ? body : []);
+            setNotifications(items.slice(0, 7));
+            setUnreadCount(countRes.data?.unread_count ?? items.filter((n) => !n.is_read).length);
+        } catch {
+            // ignore — bell stays empty rather than breaking the layout
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchNotifications();
+        const id = setInterval(fetchNotifications, 30000);
+        return () => clearInterval(id);
+    }, [fetchNotifications]);
+
+    useEffect(() => {
+        if ((user?.role || '') !== 'business_owner') return;
+        api.get('/owner/dashboard')
+            .then((res) => {
+                const d = res.data || {};
+                setOwnerCounts({
+                    pendingOrders: Number(d.pendingOrders || 0),
+                    lowStock: Number(d.lowStockProducts || 0),
+                });
+            })
+            .catch(() => {});
+    }, [user?.role]);
+
+    const markOneRead = async (n) => {
+        try {
+            await api.put(`/notifications/${n.id}/read`);
+        } catch {
+            // ignore
+        } finally {
+            fetchNotifications();
+        }
+    };
+
+    const markAllRead = async () => {
+        setNotifLoading(true);
+        try {
+            await api.put('/notifications/read-all');
+        } catch {
+            // ignore
+        } finally {
+            setNotifLoading(false);
+            fetchNotifications();
+        }
+    };
+
+    const timeAgo = (iso) => {
+        if (!iso) return '';
+        const s = Math.max(1, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
+        if (s < 60) return `${s}s`;
+        const m = Math.floor(s / 60);
+        if (m < 60) return `${m}m`;
+        const h = Math.floor(m / 60);
+        if (h < 24) return `${h}h`;
+        const d = Math.floor(h / 24);
+        if (d < 30) return `${d}d`;
+        return new Date(iso).toLocaleDateString();
+    };
+
+    const resolveLabel = (item) => (item.labelKey ? t(item.labelKey) : item.label);
+
+    const badgeFor = (item) => {
+        if (!item.badgeKey) return 0;
+        if (item.badgeKey === 'unread') return unreadCount;
+        if (item.badgeKey === 'pendingOrders') return ownerCounts.pendingOrders;
+        if (item.badgeKey === 'lowStock') return ownerCounts.lowStock;
+        return 0;
+    };
 
     const toggleGroup = (gi) => {
         setCollapsedGroups(prev => ({ ...prev, [gi]: !prev[gi] }));
@@ -390,6 +475,7 @@ export default function DashboardLayout({ children }) {
                                 <div className={`space-y-0.5 overflow-hidden transition-all duration-200 ${collapsed ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
                                     {group.items.map((item) => {
                                         const active = isActive(item.to);
+                                        const badge = badgeFor(item);
                                         return (
                                             <Tooltip key={item.to} delayDuration={0}>
                                                 <TooltipTrigger asChild>
@@ -404,7 +490,12 @@ export default function DashboardLayout({ children }) {
                                                         style={active ? { background: 'linear-gradient(135deg, #00D4AA, #00c9a0)' } : undefined}
                                                     >
                                                         <SidebarIcon icon={item.icon} className="w-5 h-5 shrink-0" />
-                                                        <span>{item.label}</span>
+                                                        <span className="flex-1 truncate">{resolveLabel(item)}</span>
+                                                        {badge > 0 && (
+                                                            <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center shrink-0">
+                                                                {badge > 99 ? '99+' : badge}
+                                                            </span>
+                                                        )}
                                                     </Link>
                                                 </TooltipTrigger>
                                             </Tooltip>
@@ -501,33 +592,58 @@ export default function DashboardLayout({ children }) {
                                     <svg className="w-[18px] h-[18px] text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                     </svg>
-                                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[9px] text-white font-bold border-2 border-white">3</span>
+                                    {unreadCount > 0 && (
+                                        <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-red-500 rounded-full flex items-center justify-center text-[9px] text-white font-bold border-2 border-white">
+                                            {unreadCount > 99 ? '99+' : unreadCount}
+                                        </span>
+                                    )}
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-80">
-                                <DropdownMenuLabel className="font-semibold">Notifications</DropdownMenuLabel>
+                                <DropdownMenuLabel className="font-semibold flex items-center justify-between">
+                                    <span>{t('notifications.notifications')}</span>
+                                    {unreadCount > 0 && (
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); markAllRead(); }}
+                                            disabled={notifLoading}
+                                            className="text-xs font-medium text-primary hover:underline disabled:opacity-50"
+                                        >
+                                            {t('notifications.mark_all_read')}
+                                        </button>
+                                    )}
+                                </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <div className="max-h-72 overflow-y-auto">
-                                    {[
-                                        { title: 'New order received', desc: 'Order #1234 from John Doe', time: '2 min ago', unread: true },
-                                        { title: 'Payment confirmed', desc: 'TZS 150,000 received', time: '15 min ago', unread: true },
-                                        { title: 'New user registered', desc: 'Jane Smith joined as Customer', time: '1 hour ago', unread: true },
-                                        { title: 'System update', desc: 'Scheduled maintenance tonight', time: '3 hours ago', unread: false },
-                                    ].map((n, i) => (
-                                        <DropdownMenuItem key={i} className="flex items-start gap-3 py-3 cursor-pointer">
-                                            <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${n.unread ? 'bg-primary' : 'bg-gray-300'}`} />
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium text-gray-900">{n.title}</p>
-                                                <p className="text-xs text-gray-500 truncate">{n.desc}</p>
-                                            </div>
-                                            <span className="text-[11px] text-gray-400 whitespace-nowrap">{n.time}</span>
-                                        </DropdownMenuItem>
-                                    ))}
+                                    {notifications.length === 0 ? (
+                                        <p className="text-sm text-gray-500 text-center py-6">{t('notifications.no_notifications')}</p>
+                                    ) : (
+                                        notifications.map((n) => (
+                                            <DropdownMenuItem
+                                                key={n.id}
+                                                onClick={() => { if (!n.is_read) markOneRead(n); }}
+                                                className="flex items-start gap-3 py-3 cursor-pointer"
+                                            >
+                                                <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${!n.is_read ? 'bg-primary' : 'bg-gray-300'}`} />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900">{n.title}</p>
+                                                    <p className="text-xs text-gray-500 truncate">{n.message}</p>
+                                                </div>
+                                                <span className="text-[11px] text-gray-400 whitespace-nowrap">{timeAgo(n.created_at)}</span>
+                                            </DropdownMenuItem>
+                                        ))
+                                    )}
                                 </div>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-center justify-center text-sm font-medium text-primary cursor-pointer">
-                                    View all notifications
-                                </DropdownMenuItem>
+                                {role === 'business_owner' && (
+                                    <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            onClick={() => navigate('/owner/notifications')}
+                                            className="text-center justify-center text-sm font-medium text-primary cursor-pointer"
+                                        >
+                                            {t('notifications.view_all')}
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
                             </DropdownMenuContent>
                         </DropdownMenu>
 

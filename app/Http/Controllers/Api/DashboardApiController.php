@@ -140,6 +140,7 @@ class DashboardApiController extends Controller
             'totalExpenses' => $business ? (float) $business->expenses()->sum('amount') : 0,
             'totalEmployees' => $business ? $business->employees()->count() : 0,
             'lowStockProducts' => $business ? $business->products()->where('quantity', '<=', 5)->count() : 0,
+            'pendingOrders' => $business ? $business->orders()->where('status', 'pending')->count() : 0,
             'activeLoans' => $business ? $business->loans()->where('status', 'active')->count() : 0,
             'pendingCreditSales' => $business ? (float) $business->creditSales()->where('status', 'pending')->sum('amount') : 0,
             'recent_orders' => $recentOrders,

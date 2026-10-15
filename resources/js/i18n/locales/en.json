@@ -317,7 +317,8 @@
     "mark_read": "Mark as Read",
     "no_notifications": "No notifications",
     "unread": "Unread",
-    "read": "Read"
+    "read": "Read",
+    "view_all": "View all notifications"
   },
   "settings": {
     "settings": "Settings",
