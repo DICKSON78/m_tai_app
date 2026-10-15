@@ -794,6 +794,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Orders - Business Owner
     Route::middleware('role:business_owner')->group(function () {
+        Route::get('/owner/orders/stats', [OrderController::class, 'ownerOrderStats']);
         Route::get('/owner/orders', [OrderController::class, 'ownerOrders']);
         Route::post('/owner/orders/{order}/verify', [OrderController::class, 'verify']);
         Route::post('/owner/orders/{order}/status', [OrderController::class, 'updateStatus']);

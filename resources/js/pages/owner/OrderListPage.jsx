@@ -4,7 +4,14 @@ import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
-import { ShoppingCart, Search, Eye, CheckCircle, RefreshCw, Calendar, Filter, RotateCcw } from 'lucide-react';
+import { ShoppingCart, Search, Eye, CheckCircle, RefreshCw, Calendar, Filter, RotateCcw, DollarSign } from 'lucide-react';
+
+function compactMoney(v) {
+    const n = Number(v || 0);
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+    return n.toLocaleString();
+}
 
 const STATUS_OPTIONS = [
     { value: '', label: 'All' },
@@ -49,6 +56,7 @@ export default function OrderListPage() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
     const [totalOrders, setTotalOrders] = useState(0);
+    const [stats, setStats] = useState({ total: 0, pending: 0, confirmed: 0, completed: 0, cancelled: 0, revenue: 0 });
 
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
@@ -114,6 +122,18 @@ export default function OrderListPage() {
         fetchOrders();
     }, [fetchOrders]);
 
+    const fetchStats = useCallback(async () => {
+        if (!selectedBusiness) return;
+        try {
+            const res = await api.get('/owner/orders/stats', { params: { business_id: selectedBusiness } });
+            setStats(res.data || {});
+        } catch (error) { console.error('Failed to fetch order stats:', error); }
+    }, [selectedBusiness]);
+
+    useEffect(() => {
+        fetchStats();
+    }, [fetchStats]);
+
     useEffect(() => {
         setCurrentPage(1);
     }, [selectedBusiness, dateFrom, dateTo, status, paymentStatus]);
@@ -131,6 +151,7 @@ export default function OrderListPage() {
             setVerifyModalOpen(false);
             setVerifyOrder(null);
             fetchOrders();
+            fetchStats();
         } catch (error) { console.error('Failed to verify order:', error); alert(error?.response?.data?.message || 'Failed to verify order. Please try again.'); } finally {
         }
     };
@@ -152,6 +173,7 @@ export default function OrderListPage() {
             setStatusModalOrder(null);
             setStatusAction('');
             fetchOrders();
+            fetchStats();
         } catch (error) { console.error('Failed to update order status:', error); alert(error?.response?.data?.message || 'Failed to update order status. Please try again.'); } finally {
         }
     };
@@ -175,6 +197,58 @@ export default function OrderListPage() {
 
     return (
         <div className="space-y-0" onClick={() => { if (statusDropdownOrderId) setStatusDropdownOrderId(null); }}>
+            {selectedBusiness && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                    <button
+                        onClick={() => setStatus('')}
+                        className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex items-center gap-3 text-left hover:shadow-md transition-all"
+                    >
+                        <div className="w-10 h-10 rounded-xl bg-[#00D4AA]/10 text-[#00B894] flex items-center justify-center shrink-0"><ShoppingCart size={20} /></div>
+                        <div>
+                            <p className="text-lg font-bold text-gray-900">{Number(stats.total || 0).toLocaleString()}</p>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">Total Orders</p>
+                        </div>
+                    </button>
+                    <button
+                        onClick={() => setStatus('pending')}
+                        className={`bg-white rounded-xl border shadow-sm p-4 flex items-center gap-3 text-left hover:shadow-md transition-all ${status === 'pending' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
+                    >
+                        <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0"><ShoppingCart size={20} /></div>
+                        <div>
+                            <p className="text-lg font-bold text-gray-900">{Number(stats.pending || 0).toLocaleString()}</p>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">Pending</p>
+                        </div>
+                    </button>
+                    <button
+                        onClick={() => setStatus('confirmed')}
+                        className={`bg-white rounded-xl border shadow-sm p-4 flex items-center gap-3 text-left hover:shadow-md transition-all ${status === 'confirmed' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
+                    >
+                        <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0"><ShoppingCart size={20} /></div>
+                        <div>
+                            <p className="text-lg font-bold text-gray-900">{Number(stats.confirmed || 0).toLocaleString()}</p>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">Confirmed</p>
+                        </div>
+                    </button>
+                    <button
+                        onClick={() => setStatus('completed')}
+                        className={`bg-white rounded-xl border shadow-sm p-4 flex items-center gap-3 text-left hover:shadow-md transition-all ${status === 'completed' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
+                    >
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0"><CheckCircle size={20} /></div>
+                        <div>
+                            <p className="text-lg font-bold text-gray-900">{Number(stats.completed || 0).toLocaleString()}</p>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">Completed</p>
+                        </div>
+                    </button>
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex items-center gap-3 col-span-2 sm:col-span-1">
+                        <div className="w-10 h-10 rounded-xl bg-[#0A140C] text-[#00D4AA] flex items-center justify-center shrink-0"><DollarSign size={20} /></div>
+                        <div>
+                            <p className="text-lg font-bold text-gray-900">TZS {compactMoney(stats.revenue)}</p>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">Revenue</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 mb-6">
                 <h3 className="text-sm font-semibold text-gray-900 flex items-center mb-4">
                     <Filter size={14} className="text-[#00D4AA] mr-2" /> Search Resources

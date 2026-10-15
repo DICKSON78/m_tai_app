@@ -373,6 +373,10 @@ class OrderController extends Controller
         $validated = $request->validate([
             'business_id' => 'sometimes|nullable|integer',
             'customer_id' => 'sometimes|nullable|integer',
+            'status' => 'sometimes|nullable|in:pending,confirmed,completed,cancelled',
+            'payment_status' => 'sometimes|nullable|in:pending,paid,partial,failed,refunded',
+            'date_from' => 'sometimes|nullable|date',
+            'date_to' => 'sometimes|nullable|date',
             'per_page' => 'sometimes|nullable|integer|max:200',
         ]);
 
@@ -389,10 +393,51 @@ class OrderController extends Controller
             $query->where('customer_id', $validated['customer_id']);
         }
 
+        if (! empty($validated['status'])) {
+            $query->where('status', $validated['status']);
+        }
+
+        if (! empty($validated['payment_status'])) {
+            $query->where('payment_status', $validated['payment_status']);
+        }
+
+        if (! empty($validated['date_from'])) {
+            $query->whereDate('created_at', '>=', $validated['date_from']);
+        }
+
+        if (! empty($validated['date_to'])) {
+            $query->whereDate('created_at', '<=', $validated['date_to']);
+        }
+
         $orders = $query->orderBy('created_at', 'desc')
             ->paginate($validated['per_page'] ?? 15);
 
         return response()->json($orders);
+    }
+
+    public function ownerOrderStats(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'business_id' => 'sometimes|nullable|integer',
+        ]);
+
+        $businessIds = $user->businesses()->pluck('id');
+
+        $base = Order::whereIn('business_id', $businessIds);
+        if (! empty($validated['business_id'])) {
+            $base = Order::where('business_id', $validated['business_id']);
+        }
+
+        return response()->json([
+            'total' => (clone $base)->count(),
+            'pending' => (clone $base)->where('status', 'pending')->count(),
+            'confirmed' => (clone $base)->where('status', 'confirmed')->count(),
+            'completed' => (clone $base)->where('status', 'completed')->count(),
+            'cancelled' => (clone $base)->where('status', 'cancelled')->count(),
+            'revenue' => (float) (clone $base)->where('status', '!=', 'cancelled')->sum('total'),
+        ]);
     }
 
     public function employeeOrders(Request $request)
