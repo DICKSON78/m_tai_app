@@ -267,6 +267,7 @@ class OrderController extends Controller
                 'title' => 'New order received',
                 'message' => 'New order '.$order->transaction_code.' (TZS '.number_format((float) $order->total).') received for '.$business->business_name.'.',
                 'type' => 'new_order',
+                'link' => '/owner/orders/'.$order->id,
             ]);
 
             PushNotificationController::sendNotification(

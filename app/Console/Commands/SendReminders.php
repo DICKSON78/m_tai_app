@@ -58,6 +58,7 @@ class SendReminders extends Command
             'title' => $title,
             'message' => $body,
             'type' => $type,
+            'link' => $this->linkFor($data),
         ]);
 
         PushNotificationController::sendNotification(
@@ -68,6 +69,20 @@ class SendReminders extends Command
         );
 
         return true;
+    }
+
+    private function linkFor(array $data): ?string
+    {
+        $entity = $data['entity'] ?? null;
+        $id = $data['id'] ?? null;
+
+        return match ($entity) {
+            'credit_sale' => '/owner/credit-sales',
+            'loan' => '/owner/loans',
+            'bill' => '/owner/finance/bills',
+            'product' => $id ? "/owner/products/{$id}" : '/owner/products',
+            default => null,
+        };
     }
 
     private function creditSaleReminders(Business $business, $owner, int $days): int

@@ -368,6 +368,23 @@ export default function DashboardLayout({ children }) {
         }
     };
 
+    const fallbackLinkFor = (n) => {
+        const type = n?.type || '';
+        if (role !== 'business_owner') return null;
+        if (type.startsWith('new_order') || type === 'order') return '/owner/orders';
+        if (type.startsWith('stock_')) return '/owner/products';
+        if (type.startsWith('credit_sale')) return '/owner/credit-sales';
+        if (type.startsWith('loan')) return '/owner/loans';
+        if (type.startsWith('bill')) return '/owner/finance/bills';
+        return null;
+    };
+
+    const handleNotificationClick = async (n) => {
+        await markOneRead(n);
+        const link = n.link || fallbackLinkFor(n);
+        if (link) navigate(link);
+    };
+
     const markAllRead = async () => {
         setNotifLoading(true);
         try {
@@ -618,7 +635,7 @@ export default function DashboardLayout({ children }) {
                                         notifications.map((n) => (
                                             <DropdownMenuItem
                                                 key={n.id}
-                                                onClick={() => { if (!n.is_read) markOneRead(n); }}
+                                                onClick={() => handleNotificationClick(n)}
                                                 className="flex items-start gap-3 py-3 cursor-pointer"
                                             >
                                                 <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${!n.is_read ? 'bg-primary' : 'bg-gray-300'}`} />

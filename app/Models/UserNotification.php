@@ -12,7 +12,7 @@ class UserNotification extends Model
     protected $table = 'user_notifications';
 
     protected $fillable = [
-        'user_id', 'title', 'message', 'type', 'is_read', 'read_at',
+        'user_id', 'title', 'message', 'type', 'link', 'is_read', 'read_at',
     ];
 
     protected function casts(): array

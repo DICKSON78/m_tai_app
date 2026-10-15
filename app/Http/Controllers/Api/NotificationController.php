@@ -16,6 +16,7 @@ class NotificationController extends Controller
             'title' => 'required|string|max:255',
             'message' => 'required|string',
             'type' => 'nullable|string|max:50',
+            'link' => 'nullable|string|max:255',
             'send_email' => 'nullable|boolean',
         ]);
 
@@ -23,6 +24,7 @@ class NotificationController extends Controller
             'title' => $validated['title'],
             'message' => $validated['message'],
             'type' => $validated['type'] ?? 'general',
+            'link' => $validated['link'] ?? null,
             'is_read' => false,
         ]);
 
