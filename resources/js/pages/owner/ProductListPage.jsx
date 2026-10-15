@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { Package, Plus, Search, Eye, Pencil, Trash2, EyeOff, Filter, RotateCcw } from 'lucide-react';
 
 export default function ProductListPage() {
-    document.title = '{t("products.products")} - M-TAI';
+    const { t } = useTranslation();
+    useEffect(() => { document.title = `${t('products.products')} - M-TAI`; }, [t]);
     const navigate = useNavigate();
     const [businesses, setBusinesses] = useState([]);
     const [selectedBusiness, setSelectedBusiness] = useState('');

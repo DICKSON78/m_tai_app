@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
@@ -38,7 +39,8 @@ const PAYMENT_STATUS_MAP = {
 };
 
 export default function OrderListPage() {
-    document.title = '{t("orders.orders")} - M-TAI';
+    const { t } = useTranslation();
+    useEffect(() => { document.title = `${t('orders.orders')} - M-TAI`; }, [t]);
     const navigate = useNavigate();
 
     const [businesses, setBusinesses] = useState([]);
