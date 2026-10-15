@@ -60,7 +60,7 @@
     "welcome_back": "Karibu Tena",
     "sign_in_continue": "Ingia kwenye akaunti yako ili kuendelea",
     "email_phone_placeholder": "Barua pepe, simu, au msimbo wa mtumiaji",
-    "password_placeholder": "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",
+    "password_placeholder": "••••••••",
     "forgot_password": "Umesahau nenosiri?",
     "dont_have_account": "Huna akaunti?",
     "create_account": "Fungua Akaunti",
@@ -100,7 +100,7 @@
     "enter_email_reset": "Ingiza barua pepe yako kupata token ya kuwekeza upya",
     "reset_sent": "Token ya kuwekeza upya imetumwa kwa barua pepe yako.",
     "reset_token_demo": "Token yako (kwa mfano):",
-    "reset_now": "Weka Upya Nenosiri Sasa \u2192",
+    "reset_now": "Weka Upya Nenosiri Sasa →",
     "go_to_login": "Nenda Kuingia",
     "enter_email": "Ingiza barua pepe yako",
     "send_reset_token": "Tuma Token",
@@ -111,7 +111,14 @@
     "about": "Kuhusu",
     "contact": "Wasiliana",
     "welcome": "Karibu",
-    "marketplace": "Soko"
+    "marketplace": "Soko",
+    "products": "Bidhaa",
+    "faq": "Maswali",
+    "sign_in": "Ingia",
+    "get_started": "Anza",
+    "view_only": "Tazama — fungua akaunti ili kununua",
+    "create_account_to_buy": "Fungua akaunti ili kununua",
+    "view_shop": "Angalia Duka"
   },
   "dashboard": {
     "overview": "Muhtasari",

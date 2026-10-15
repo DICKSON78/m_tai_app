@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-
-const navLinks = [
-  { label: 'Home', to: '/' },
-  { label: 'About', to: '/about' },
-  { label: 'Products', to: '/products' },
-  { label: 'FAQ', to: '/faq' },
-  { label: 'Contact', to: '/contact' },
-]
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '../../components/LanguageSwitcher'
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { pathname } = useLocation()
+  const { t } = useTranslation()
+
+  const navLinks = [
+    { label: t('navbar.home'), to: '/' },
+    { label: t('navbar.about'), to: '/about' },
+    { label: t('navbar.products'), to: '/products' },
+    { label: t('navbar.marketplace'), to: '/marketplace' },
+    { label: t('navbar.faq'), to: '/faq' },
+    { label: t('navbar.contact'), to: '/contact' },
+  ]
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50)
@@ -61,13 +65,14 @@ export default function Navbar() {
 
             <div className="hidden lg:flex items-center gap-3">
               <Link to="/login" className="px-5 py-2.5 text-sm font-semibold text-white/80 hover:text-white transition-colors duration-300">
-                Sign In
+                {t("common.login")}
               </Link>
+              <LanguageSwitcher className="text-white" />
               <Link
                 to="/register"
                 className="px-6 py-2.5 bg-gradient-to-r from-[#00D4AA] to-[#00B894] text-[#0A140C] text-sm font-bold rounded-full hover:shadow-lg hover:shadow-[#00D4AA]/25 transition-all duration-300 hover:scale-105"
               >
-                Get Started
+                {t("common.register")}
               </Link>
             </div>
 
@@ -102,11 +107,14 @@ export default function Navbar() {
               })}
             </ul>
             <div className="flex flex-col gap-3">
+              <div className="flex justify-center py-2">
+                <LanguageSwitcher className="text-white justify-center" />
+              </div>
               <Link to="/login" onClick={() => setOpen(false)} className="text-center px-6 py-3 border border-white/20 text-white text-sm font-semibold rounded-full hover:bg-white/5 transition-all">
-                Sign In
+                {t("common.login")}
               </Link>
               <Link to="/register" onClick={() => setOpen(false)} className="text-center px-6 py-3 bg-gradient-to-r from-[#00D4AA] to-[#00B894] text-[#0A140C] text-sm font-bold rounded-full">
-                Get Started
+                {t("common.register")}
               </Link>
             </div>
           </div>

@@ -93,6 +93,12 @@ Route::get('/locations/wards', [LocationController::class, 'wards']);
 Route::get('/locations/streets', [LocationController::class, 'streets']);
 Route::post('/locations/streets', [LocationController::class, 'learnStreet']);
 
+// Public marketplace browsing (view without account; buying requires auth)
+Route::get('/public/shops/search', [ShopController::class, 'searchShops']);
+Route::get('/public/shops/{business}', [ShopController::class, 'openShop']);
+Route::get('/public/shops/{business}/products', [ShopController::class, 'shopProducts']);
+Route::get('/public/shop/products/{product}', [ShopController::class, 'productDetail']);
+
 // Protected API routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthApiController::class, 'logout']);

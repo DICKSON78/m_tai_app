@@ -14,6 +14,8 @@ import PublicAboutPage from './mtai-public/pages/AboutPage';
 import PublicProductsPage from './mtai-public/pages/ProductsPage';
 import PublicFAQPage from './mtai-public/pages/FAQPage';
 import PublicContactPage from './mtai-public/pages/ContactPage';
+import PublicMarketplacePage from './mtai-public/pages/MarketplacePage';
+import PublicMarketplaceShopPage from './mtai-public/pages/MarketplaceShopPage';
 
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
@@ -202,6 +204,8 @@ function AppRoutes() {
             <Route path="/" element={<PublicLayout><PublicHomePage /></PublicLayout>} />
             <Route path="/about" element={<PublicLayout><PublicAboutPage /></PublicLayout>} />
             <Route path="/products" element={<PublicLayout><PublicProductsPage /></PublicLayout>} />
+            <Route path="/marketplace" element={<PublicLayout><PublicMarketplacePage /></PublicLayout>} />
+            <Route path="/marketplace/:id" element={<PublicLayout><PublicMarketplaceShopPage /></PublicLayout>} />
             <Route path="/faq" element={<PublicLayout><PublicFAQPage /></PublicLayout>} />
             <Route path="/contact" element={<PublicLayout><PublicContactPage /></PublicLayout>} />
 
