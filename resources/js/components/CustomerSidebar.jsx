@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
+import { useTranslation } from 'react-i18next';
+
 const MAIN_LINKS = [
-    { to: '/customer/dashboard', label: 'Overview', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
+    { to: '/customer/dashboard', labelKey: 'navbar.marketplace', fallback: 'Marketplace', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
     { to: '/customer/shops', label: 'Shops', icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z' },
     { to: '/customer/orders', label: 'My Orders', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
     { to: '/customer/cart', label: 'My Cart', icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z' },
@@ -15,7 +17,9 @@ const ACCOUNT_LINKS = [
 
 function SideLink({ item, onNavigate }) {
     const location = useLocation();
+    const { t } = useTranslation();
     const active = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+    const label = item.labelKey ? t(item.labelKey, { defaultValue: item.fallback }) : item.label;
     return (
         <Link
             to={item.to}
@@ -25,7 +29,7 @@ function SideLink({ item, onNavigate }) {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d={item.icon} />
             </svg>
-            <span>{item.label}</span>
+            <span>{label}</span>
         </Link>
     );
 }

@@ -354,6 +354,7 @@ function AppRoutes() {
             {/* Customer Routes */}
             <Route path="/customer" element={<Navigate to="/customer/dashboard" replace />} />
             <Route path="/customer/dashboard" element={<ProtectedRoute roles={['customer']}><CustomerDashboard /></ProtectedRoute>} />
+            <Route path="/customer/marketplace" element={<Navigate to="/customer/dashboard" replace />} />
             <Route path="/customer/shops" element={<ProtectedRoute roles={['customer']}><ShopSearchPage /></ProtectedRoute>} />
             <Route path="/customer/shops/:id" element={<ProtectedRoute roles={['customer']}><ShopDetailPage /></ProtectedRoute>} />
             <Route path="/customer/cart" element={<ProtectedRoute roles={['customer']}><CartPage /></ProtectedRoute>} />
