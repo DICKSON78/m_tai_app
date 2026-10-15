@@ -11,13 +11,15 @@ class ShopController extends Controller
 {
     public function searchShops(Request $request)
     {
-        $request->validate(['q' => 'required|string|min:1']);
+        $request->validate(['q' => 'nullable|string|min:1']);
 
         $businesses = Business::where('status', 'active')
             ->where('is_published', true)
-            ->where(function ($q) use ($request) {
-                $q->where('business_name', 'like', "%{$request->q}%")
-                  ->orWhere('business_code', 'like', "%{$request->q}%");
+            ->when($request->filled('q'), function ($q) use ($request) {
+                $q->where(function ($sub) use ($request) {
+                    $sub->where('business_name', 'like', "%{$request->q}%")
+                      ->orWhere('business_code', 'like', "%{$request->q}%");
+                });
             })
             ->withCount('products')
             ->paginate(12);

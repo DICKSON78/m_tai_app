@@ -97,6 +97,7 @@ Route::post('/locations/streets', [LocationController::class, 'learnStreet']);
 Route::get('/public/shops/search', [ShopController::class, 'searchShops']);
 Route::get('/public/shops/{business}', [ShopController::class, 'openShop']);
 Route::get('/public/shops/{business}/products', [ShopController::class, 'shopProducts']);
+Route::get('/public/products', [ShopController::class, 'products']);
 Route::get('/public/shop/products/{product}', [ShopController::class, 'productDetail']);
 
 // Protected API routes
