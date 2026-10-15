@@ -94,7 +94,7 @@ export default function ProductDetailPage() {
     else if (qty <= threshold) stockBadgeColor = 'text-orange-500';
     else if (qty <= threshold * 3) stockBadgeColor = 'text-yellow-500';
 
-    const isPublished = product.status === 'published';
+    const isPublished = product.is_published || product.status === 'published';
 
     return (
         <div className="space-y-6">
