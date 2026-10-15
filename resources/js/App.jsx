@@ -106,6 +106,7 @@ import EmployeeDirectoryPage from './pages/hr/EmployeeDirectoryPage';
 import AttendancePage from './pages/hr/AttendancePage';
 import LeaveManagementPage from './pages/hr/LeaveManagementPage';
 import PayrollPage from './pages/hr/PayrollPage';
+import PayrollDetailPage from './pages/hr/PayrollDetailPage';
 import PerformancePage from './pages/hr/PerformancePage';
 import RecruitmentPage from './pages/hr/RecruitmentPage';
 import TrainingPage from './pages/hr/TrainingPage';
@@ -321,6 +322,7 @@ function AppRoutes() {
             <Route path="/owner/hr/attendance" element={<ProtectedRoute roles={['business_owner', 'admin']}><AttendancePage /></ProtectedRoute>} />
             <Route path="/owner/hr/leave" element={<ProtectedRoute roles={['business_owner', 'admin']}><LeaveManagementPage /></ProtectedRoute>} />
             <Route path="/owner/hr/payroll" element={<ProtectedRoute roles={['business_owner', 'admin']}><PayrollPage /></ProtectedRoute>} />
+            <Route path="/owner/hr/payroll/:id" element={<ProtectedRoute roles={['business_owner', 'admin']}><PayrollDetailPage /></ProtectedRoute>} />
             <Route path="/owner/hr/performance" element={<ProtectedRoute roles={['business_owner', 'admin']}><PerformancePage /></ProtectedRoute>} />
             <Route path="/owner/hr/recruitment" element={<ProtectedRoute roles={['business_owner', 'admin']}><RecruitmentPage /></ProtectedRoute>} />
             <Route path="/owner/hr/training" element={<ProtectedRoute roles={['business_owner', 'admin']}><TrainingPage /></ProtectedRoute>} />

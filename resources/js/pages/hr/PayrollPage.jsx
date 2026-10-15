@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
 import Pagination from '../../components/Pagination';
@@ -16,6 +17,7 @@ const emptyGenerateForm = { name: '', period_start: '', period_end: '', payment_
 
 export default function PayrollPage() {
     document.title = 'Payroll - M-TAI';
+    const navigate = useNavigate();
     const [payrolls, setPayrolls] = useState([]);
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState('all');
@@ -25,7 +27,6 @@ export default function PayrollPage() {
     const [generateForm, setGenerateForm] = useState(emptyGenerateForm);
     const [generating, setGenerating] = useState(false);
     const [generateErrors, setGenerateErrors] = useState({});
-    const [detailModal, setDetailModal] = useState({ open: false, data: null });
 
     const fetchPayrolls = useCallback(async () => {
         setLoading(true);
@@ -50,10 +51,6 @@ export default function PayrollPage() {
 
     const handleProcess = async (id) => { try { await api.post(`/owner/hr/payrolls/${id}/process`); fetchPayrolls(); } catch (error) { console.error('Failed to process payroll:', error); alert(error?.response?.data?.message || 'Failed to process payroll. Please try again.'); } };
     const handlePay = async (id) => { try { await api.post(`/owner/hr/payrolls/${id}/pay`); fetchPayrolls(); } catch (error) { console.error('Failed to pay payroll:', error); alert(error?.response?.data?.message || 'Failed to mark payroll as paid. Please try again.'); } };
-    const openDetail = async (p) => {
-        try { const res = await api.get(`/owner/hr/payrolls/${p.id}`); setDetailModal({ open: true, data: res.data }); }
-        catch (error) { console.error('Failed to fetch payroll detail:', error); setDetailModal({ open: true, data: p }); }
-    };
 
     const totalStats = payrolls.reduce((acc, p) => ({ gross: acc.gross + Number(p.total_gross || 0), net: acc.net + Number(p.total_net || 0) }), { gross: 0, net: 0 });
     const inputClasses = "w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00D4AA] focus:border-[#00D4AA] text-sm";
@@ -125,7 +122,7 @@ export default function PayrollPage() {
                                             <td className="px-6 py-3"><span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${st.classes}`}>{st.label}</span></td>
                                             <td className="px-6 py-3">
                                                 <div className="flex items-center gap-2">
-                                                    <button onClick={() => openDetail(p)} className="h-8 w-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-200 transition-all" title="View"><Eye size={14} /></button>
+                                                    <button onClick={() => navigate(`/owner/hr/payroll/${p.id}`)} className="h-8 w-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-200 transition-all" title="View"><Eye size={14} /></button>
                                                     {p.status === 'draft' && <button onClick={() => handleProcess(p.id)} className="h-8 px-3 bg-yellow-100 text-yellow-700 rounded-lg flex items-center gap-1 text-xs font-medium hover:bg-yellow-200 transition-all"><PlayCircle size={12} />Process</button>}
                                                     {p.status === 'processed' && <button onClick={() => handlePay(p.id)} className="h-8 px-3 bg-green-100 text-green-700 rounded-lg flex items-center gap-1 text-xs font-medium hover:bg-green-200 transition-all"><CreditCard size={12} />Pay</button>}
                                                 </div>
@@ -174,57 +171,6 @@ export default function PayrollPage() {
                         </button>
                     </div>
                 </form>
-            </Modal>
-
-            <Modal isOpen={detailModal.open} onClose={() => setDetailModal({ open: false, data: null })} title="Payroll Details" size="lg">
-                {detailModal.data && (
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                            <div><p className="text-xs font-semibold text-gray-400 uppercase">Name</p><p className="text-sm font-medium text-gray-900">{detailModal.data.name || '-'}</p></div>
-                            <div><p className="text-xs font-semibold text-gray-400 uppercase">Period</p><p className="text-sm font-medium text-gray-900">{detailModal.data.period_start} - {detailModal.data.period_end}</p></div>
-                            <div><p className="text-xs font-semibold text-gray-400 uppercase">Payment Date</p><p className="text-sm font-medium text-gray-900">{detailModal.data.payment_date || '-'}</p></div>
-                            <div><p className="text-xs font-semibold text-gray-400 uppercase">Status</p><span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${(STATUS_LABELS[detailModal.data.status] || { classes: 'bg-gray-100 text-gray-700' }).classes}`}>{(STATUS_LABELS[detailModal.data.status] || { label: detailModal.data.status }).label}</span></div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className="bg-gray-50 rounded-xl p-4"><p className="text-xs font-semibold text-gray-400 uppercase mb-1">Total Gross</p><p className="text-lg font-bold text-gray-900">TZS {Number(detailModal.data.total_gross || 0).toLocaleString()}</p></div>
-                            <div className="bg-gray-50 rounded-xl p-4"><p className="text-xs font-semibold text-gray-400 uppercase mb-1">Total Deductions</p><p className="text-lg font-bold text-red-600">TZS {Number(detailModal.data.total_deductions || 0).toLocaleString()}</p></div>
-                            <div className="bg-gray-50 rounded-xl p-4"><p className="text-xs font-semibold text-gray-400 uppercase mb-1">Total Net</p><p className="text-lg font-bold text-green-600">TZS {Number(detailModal.data.total_net || 0).toLocaleString()}</p></div>
-                        </div>
-                        {detailModal.data.items && detailModal.data.items.length > 0 && (
-                            <div>
-                                <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Employee Items ({detailModal.data.items.length})</p>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-sm">
-                                        <thead><tr className="border-b border-gray-200">
-                                            <th className="text-left px-3 py-2 font-medium text-gray-500 text-xs">Employee</th>
-                                            <th className="text-right px-3 py-2 font-medium text-gray-500 text-xs">Base</th>
-                                            <th className="text-right px-3 py-2 font-medium text-gray-500 text-xs">Allow.</th>
-                                            <th className="text-right px-3 py-2 font-medium text-gray-500 text-xs">Bonus</th>
-                                            <th className="text-right px-3 py-2 font-medium text-gray-500 text-xs">Tax</th>
-                                            <th className="text-right px-3 py-2 font-medium text-gray-500 text-xs">Other</th>
-                                            <th className="text-right px-3 py-2 font-medium text-gray-500 text-xs">Net Pay</th>
-                                            <th className="text-left px-3 py-2 font-medium text-gray-500 text-xs">Status</th>
-                                        </tr></thead>
-                                        <tbody>
-                                            {detailModal.data.items.map((item) => (
-                                                <tr key={item.id} className="border-b border-gray-50">
-                                                    <td className="px-3 py-2">{item.employee ? `${item.employee.first_name} ${item.employee.last_name}` : '-'}</td>
-                                                    <td className="px-3 py-2 text-right">TZS {Number(item.base_salary || 0).toLocaleString()}</td>
-                                                    <td className="px-3 py-2 text-right">TZS {Number(item.allowances || 0).toLocaleString()}</td>
-                                                    <td className="px-3 py-2 text-right">TZS {Number(item.bonuses || 0).toLocaleString()}</td>
-                                                    <td className="px-3 py-2 text-right text-red-600">TZS {Number(item.tax_deduction || 0).toLocaleString()}</td>
-                                                    <td className="px-3 py-2 text-right text-red-600">TZS {Number(item.other_deductions || 0).toLocaleString()}</td>
-                                                    <td className="px-3 py-2 text-right font-semibold">TZS {Number(item.net_pay || 0).toLocaleString()}</td>
-                                                    <td className="px-3 py-2"><span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${item.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{item.status}</span></td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
             </Modal>
         </div>
     );
