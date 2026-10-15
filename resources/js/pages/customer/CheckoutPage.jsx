@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 import PageHeader from '../../components/casfeta/PageHeader';
 import { CreditCard } from 'lucide-react';
 
@@ -39,6 +40,7 @@ const PAYMENT_METHODS = [
 
 export default function CheckoutPage() {
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -68,6 +70,24 @@ export default function CheckoutPage() {
     useEffect(() => {
         fetchCart();
     }, [fetchCart]);
+
+    // Autopopulate customer details from the registered account
+    useEffect(() => {
+        if (user) {
+            if (user.name) setCustomerName((prev) => prev || user.name);
+            if (user.phone) setCustomerPhone((prev) => prev || user.phone);
+        }
+    }, [user]);
+
+    useEffect(() => {
+        api.get('/profile')
+            .then((res) => {
+                const p = res.data?.data || res.data;
+                if (p?.name) setCustomerName((prev) => prev || p.name);
+                if (p?.phone) setCustomerPhone((prev) => prev || p.phone);
+            })
+            .catch(() => {});
+    }, []);
 
     const getSubtotal = () => {
         return items.reduce((sum, item) => {
