@@ -6,6 +6,13 @@ import Pagination from '../../components/Pagination';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { Package, Plus, Search, Eye, Pencil, Trash2, EyeOff, Filter, RotateCcw } from 'lucide-react';
 
+function compactMoney(v) {
+    const n = Number(v || 0);
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+    return n.toLocaleString();
+}
+
 export default function ProductListPage() {
     const { t } = useTranslation();
     useEffect(() => { document.title = `${t('products.products')} - M-TAI`; }, [t]);
@@ -137,65 +144,50 @@ export default function ProductListPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
                     <button
                         onClick={() => setStock('')}
-                        className={`bg-white rounded-2xl border p-4 text-left shadow-sm hover:shadow-md transition-all ${stock === '' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
+                        className={`bg-white rounded-xl border shadow-sm p-4 flex items-center gap-3 text-left hover:shadow-md transition-all ${stock === '' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
                     >
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="w-8 h-8 rounded-xl bg-[#00D4AA]/10 flex items-center justify-center">
-                                <Package size={16} className="text-[#00B894]" />
-                            </span>
-                            <span className="text-xs font-medium text-gray-500">{t('products.total_products') || 'Total Products'}</span>
+                        <div className="w-10 h-10 rounded-xl bg-[#00D4AA]/10 text-[#00B894] flex items-center justify-center shrink-0"><Package size={20} /></div>
+                        <div>
+                            <p className="text-lg font-bold text-gray-900">{Number(stats.total || 0).toLocaleString()}</p>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">Total Products</p>
                         </div>
-                        <p className="text-2xl font-black text-gray-900">{Number(stats.total || 0).toLocaleString()}</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">{Number(stats.total_units || 0).toLocaleString()} units</p>
                     </button>
                     <button
                         onClick={() => setStock('in_stock')}
-                        className={`bg-white rounded-2xl border p-4 text-left shadow-sm hover:shadow-md transition-all ${stock === 'in_stock' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
+                        className={`bg-white rounded-xl border shadow-sm p-4 flex items-center gap-3 text-left hover:shadow-md transition-all ${stock === 'in_stock' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
                     >
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="w-8 h-8 rounded-xl bg-green-100 flex items-center justify-center">
-                                <Package size={16} className="text-green-600" />
-                            </span>
-                            <span className="text-xs font-medium text-gray-500">{t('products.in_stock')}</span>
+                        <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0"><Package size={20} /></div>
+                        <div>
+                            <p className="text-lg font-bold text-gray-900">{Number(stats.in_stock || 0).toLocaleString()}</p>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">In Stock</p>
                         </div>
-                        <p className="text-2xl font-black text-green-600">{Number(stats.in_stock || 0).toLocaleString()}</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">qty &gt; 5</p>
                     </button>
                     <button
                         onClick={() => setStock('low')}
-                        className={`bg-white rounded-2xl border p-4 text-left shadow-sm hover:shadow-md transition-all ${stock === 'low' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
+                        className={`bg-white rounded-xl border shadow-sm p-4 flex items-center gap-3 text-left hover:shadow-md transition-all ${stock === 'low' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
                     >
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="w-8 h-8 rounded-xl bg-yellow-100 flex items-center justify-center">
-                                <Package size={16} className="text-yellow-600" />
-                            </span>
-                            <span className="text-xs font-medium text-gray-500">{t('products.low_stock')}</span>
+                        <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0"><Package size={20} /></div>
+                        <div>
+                            <p className="text-lg font-bold text-gray-900">{Number(stats.low_stock || 0).toLocaleString()}</p>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">Low Stock</p>
                         </div>
-                        <p className="text-2xl font-black text-yellow-600">{Number(stats.low_stock || 0).toLocaleString()}</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">qty 1 – 5</p>
                     </button>
                     <button
                         onClick={() => setStock('out')}
-                        className={`bg-white rounded-2xl border p-4 text-left shadow-sm hover:shadow-md transition-all ${stock === 'out' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
+                        className={`bg-white rounded-xl border shadow-sm p-4 flex items-center gap-3 text-left hover:shadow-md transition-all ${stock === 'out' ? 'border-[#00D4AA] ring-2 ring-[#00D4AA]/30' : 'border-gray-200'}`}
                     >
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center">
-                                <Package size={16} className="text-red-600" />
-                            </span>
-                            <span className="text-xs font-medium text-gray-500">{t('products.out_of_stock')}</span>
+                        <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0"><Package size={20} /></div>
+                        <div>
+                            <p className="text-lg font-bold text-gray-900">{Number(stats.out_of_stock || 0).toLocaleString()}</p>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">Out of Stock</p>
                         </div>
-                        <p className="text-2xl font-black text-red-600">{Number(stats.out_of_stock || 0).toLocaleString()}</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">qty 0</p>
                     </button>
-                    <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm col-span-2 sm:col-span-1">
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="w-8 h-8 rounded-xl bg-[#0A140C] flex items-center justify-center">
-                                <span className="text-[#00D4AA] text-sm font-black">T</span>
-                            </span>
-                            <span className="text-xs font-medium text-gray-500">Stock Value</span>
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex items-center gap-3 col-span-2 sm:col-span-1">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0"><span className="text-sm font-black">T</span></div>
+                        <div>
+                            <p className="text-lg font-bold text-gray-900">TZS {compactMoney(stats.stock_value)}</p>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-wide">Stock Value</p>
                         </div>
-                        <p className="text-2xl font-black text-gray-900">TZS {Number(stats.stock_value || 0).toLocaleString()}</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">{Number(stats.published || 0).toLocaleString()} published</p>
                     </div>
                 </div>
             )}
