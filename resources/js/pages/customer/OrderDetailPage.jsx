@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { X, RotateCcw, CheckCircle } from 'lucide-react';
+import { X, RotateCcw, CheckCircle, ClipboardList, Check, Truck, Home, XCircle } from 'lucide-react';
 import PageHeader from '../../components/casfeta/PageHeader';
 import { FileText } from 'lucide-react';
 
@@ -28,6 +28,82 @@ const PAYMENT_METHOD_LABELS = {
     bank_card: 'Bank Card',
     cash: 'M-Pesa',
 };
+
+const TRACK_STEPS = [
+    { key: 'placed', label: 'Order Placed', desc: 'We received your order', Icon: ClipboardList },
+    { key: 'confirmed', label: 'Confirmed', desc: 'Shop accepted your order', Icon: Check },
+    { key: 'shipped', label: 'On the Way', desc: 'Your products are moving', Icon: Truck },
+    { key: 'delivered', label: 'Delivered', desc: 'Enjoy your products', Icon: Home },
+];
+
+const STEP_INDEX = {
+    pending: 0,
+    confirmed: 1,
+    processing: 1,
+    shipped: 2,
+    completed: 3,
+    delivered: 3,
+};
+
+function OrderTracker({ status }) {
+    if (status === 'cancelled') {
+        return (
+            <div className="bg-white rounded-2xl border border-red-200 shadow-sm p-5 mb-4">
+                <div className="flex items-center gap-3">
+                    <span className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                        <XCircle size={20} />
+                    </span>
+                    <div>
+                        <h2 className="font-bold text-gray-900">Order Cancelled</h2>
+                        <p className="text-sm text-gray-500">This order was cancelled and will not be delivered.</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    const current = STEP_INDEX[status] ?? 0;
+
+    return (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-4">
+            <h2 className="font-bold text-gray-900 mb-1">Track Your Order</h2>
+            <p className="text-sm text-gray-500 mb-5">Follow your products step by step until they arrive.</p>
+            <div className="overflow-x-auto">
+                <div className="flex items-start min-w-[560px]">
+                    {TRACK_STEPS.map((step, i) => {
+                        const done = i < current;
+                        const active = i === current;
+                        const { Icon } = step;
+                        return (
+                            <div key={step.key} className="flex-1 flex items-start last:flex-none">
+                                <div className="flex flex-col items-center text-center w-full">
+                                    <span
+                                        className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                                            done
+                                                ? 'bg-[#00D4AA] text-white'
+                                                : active
+                                                    ? 'bg-[#00D4AA]/15 text-[#00B894] ring-4 ring-[#00D4AA]/20'
+                                                    : 'bg-gray-100 text-gray-400'
+                                        }`}
+                                    >
+                                        {done ? <Check size={20} strokeWidth={3} /> : <Icon size={20} />}
+                                    </span>
+                                    <p className={`text-xs font-bold mt-2 ${i <= current ? 'text-gray-900' : 'text-gray-400'}`}>
+                                        {step.label}
+                                    </p>
+                                    <p className="text-[11px] text-gray-400 mt-0.5 hidden sm:block">{step.desc}</p>
+                                </div>
+                                {i < TRACK_STEPS.length - 1 && (
+                                    <div className={`h-0.5 flex-1 mx-2 mt-[22px] rounded-full ${i < current ? 'bg-[#00D4AA]' : 'bg-gray-200'}`} />
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function OrderDetailPage() {
     const { id } = useParams();
@@ -217,6 +293,7 @@ export default function OrderDetailPage() {
             </div>
 
             <div className="pb-6">
+                <OrderTracker status={order.status} />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-6">
                         {order.shop_name && (
