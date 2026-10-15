@@ -112,7 +112,7 @@ export default function ProductListPage() {
             {selectedBusiness && (
                 <div className="flex items-center justify-end mb-6">
                     <Link
-                        to={`/owner/businesses/${selectedBusiness}/products/create`}
+                        to={`/owner/products/new?business_id=${selectedBusiness}`}
                         className="inline-flex items-center gap-2 px-5 py-2.5 text-white font-medium rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
                         style={{ background: 'linear-gradient(135deg, #00D4AA, #00b894)' }}
                     >

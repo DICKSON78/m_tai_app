@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
 import SectionHeader from '../../components/casfeta/SectionHeader';
@@ -10,12 +10,13 @@ import { Package, FileText, Image as ImageIcon, DollarSign, Hash, Tag, Video, Bu
 export default function ProductFormPage() {
     const navigate = useNavigate();
     const { businessId, id } = useParams();
+    const [searchParams] = useSearchParams();
     const isEdit = Boolean(id);
 
     const [loading, setLoading] = useState(isEdit);
     const [submitting, setSubmitting] = useState(false);
     const [businesses, setBusinesses] = useState([]);
-    const [selectedBusiness, setSelectedBusiness] = useState(businessId || '');
+    const [selectedBusiness, setSelectedBusiness] = useState(businessId || searchParams.get('business_id') || '');
     const [categories, setCategories] = useState([]);
 
     const [form, setForm] = useState({

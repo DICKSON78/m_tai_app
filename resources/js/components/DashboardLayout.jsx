@@ -345,18 +345,29 @@ export default function DashboardLayout({ children }) {
         return () => clearInterval(id);
     }, [fetchNotifications]);
 
-    useEffect(() => {
+    const fetchOwnerCounts = useCallback(async () => {
         if ((user?.role || '') !== 'business_owner') return;
-        api.get('/owner/dashboard')
-            .then((res) => {
-                const d = res.data || {};
-                setOwnerCounts({
-                    pendingOrders: Number(d.pendingOrders || 0),
-                    lowStock: Number(d.lowStockProducts || 0),
-                });
-            })
-            .catch(() => {});
+        try {
+            const res = await api.get('/owner/dashboard');
+            const d = res.data || {};
+            setOwnerCounts({
+                pendingOrders: Number(d.pendingOrders || 0),
+                lowStock: Number(d.lowStockProducts || 0),
+            });
+        } catch {
+            // ignore
+        }
     }, [user?.role]);
+
+    useEffect(() => {
+        fetchOwnerCounts();
+    }, [fetchOwnerCounts]);
+
+    // Refresh sidebar badges when navigating (e.g. after solving an order/stock issue elsewhere)
+    useEffect(() => {
+        fetchOwnerCounts();
+        fetchNotifications();
+    }, [location.pathname, fetchOwnerCounts, fetchNotifications]);
 
     const markOneRead = async (n) => {
         try {
@@ -381,6 +392,7 @@ export default function DashboardLayout({ children }) {
 
     const handleNotificationClick = async (n) => {
         await markOneRead(n);
+        fetchOwnerCounts();
         const link = n.link || fallbackLinkFor(n);
         if (link) navigate(link);
     };
@@ -394,6 +406,7 @@ export default function DashboardLayout({ children }) {
         } finally {
             setNotifLoading(false);
             fetchNotifications();
+            fetchOwnerCounts();
         }
     };
 
