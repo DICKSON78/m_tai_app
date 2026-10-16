@@ -392,7 +392,9 @@
           "title": "Timu",
           "desc": "Simamia wafanyakazi wako"
         }
-      ]
+      ],
+      "downloadApp": "Pakua App ya Android",
+      "downloadNote": "toleo 1.0.0 · 79 MB · Android 8.0+"
     },
     "whyChoose": {
       "eyebrow": "Kwa Nini M-TAI",
@@ -543,7 +545,8 @@
       "subtitle": "Jiunge na biashara 500+ kote Afrika zinazotumia M-TAI kurahisisha shughuli, kuongeza mauzo, na kukua haraka.",
       "cta1": "Anza Jaribio Bure",
       "cta2": "Ongea na Mauzo",
-      "note": "Hakuna kadi ya benki inayohitajika · Usanidi chini ya saa 48"
+      "note": "Hakuna kadi ya benki inayohitajika · Usanidi chini ya saa 48",
+      "downloadApp": "Pakua App ya Android"
     },
     "footer": {
       "tagline": "Mfumo mmoja wa kusimamia biashara uliojengwa kwa ajili ya makampuni ya Afrika.",

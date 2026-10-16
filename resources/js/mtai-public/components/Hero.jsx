@@ -66,6 +66,26 @@ export default function Hero() {
               </Link>
             </div>
 
+            {/* APK download */}
+            <div className="flex items-center gap-4 fade-in-up-d3 mb-12">
+              <a
+                href="/downloads/MTAI-App-v1.0.0.apk"
+                download
+                className="flex items-center gap-3 px-6 py-3 bg-white/5 border border-[#00D4AA]/30 rounded-2xl hover:bg-white/10 hover:border-[#00D4AA]/60 transition-all duration-300"
+              >
+                <svg className="w-8 h-8 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <span className="text-left">
+                  <span className="block text-white text-sm font-bold">{t('site.hero.downloadApp')}</span>
+                  <span className="block text-white/40 text-xs">{t('site.hero.downloadNote')}</span>
+                </span>
+                <svg className="w-5 h-5 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </a>
+            </div>
+
             {/* Trust */}
             <div className="grid grid-cols-[auto_1fr] items-center gap-6 fade-in-up-d4">
               <div className="flex -space-x-3">

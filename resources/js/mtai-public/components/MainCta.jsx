@@ -27,7 +27,7 @@ export default function MainCta() {
           {t('site.mainCta.subtitle')}
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
           <Link to="/register" className="px-10 py-4 bg-gradient-to-r from-[#00D4AA] to-[#00B894] text-[#0A140C] font-bold text-sm rounded-full hover:shadow-xl hover:shadow-[#00D4AA]/25 transition-all duration-300 hover:scale-105">
             {t('site.mainCta.cta1')}
           </Link>
@@ -35,6 +35,17 @@ export default function MainCta() {
             {t('site.mainCta.cta2')}
           </Link>
         </div>
+
+        <a
+          href="/downloads/MTAI-App-v1.0.0.apk"
+          download
+          className="inline-flex items-center gap-2 px-6 py-3 mb-8 text-sm font-semibold text-[#00D4AA] hover:text-white border border-[#00D4AA]/30 hover:border-[#00D4AA]/60 rounded-full transition-all duration-300"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          {t('site.mainCta.downloadApp')}
+        </a>
 
         <p className="text-white/30 text-xs">{t('site.mainCta.note')}</p>
       </div>

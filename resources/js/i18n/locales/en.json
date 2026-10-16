@@ -392,7 +392,9 @@
           "title": "Team",
           "desc": "Manage your staff"
         }
-      ]
+      ],
+      "downloadApp": "Download Android App",
+      "downloadNote": "v1.0.0 · 79 MB · Android 8.0+"
     },
     "whyChoose": {
       "eyebrow": "Why M-TAI",
@@ -543,7 +545,8 @@
       "subtitle": "Join 500+ businesses across Africa already using M-TAI to streamline operations, boost sales, and grow faster.",
       "cta1": "Start Free Trial",
       "cta2": "Talk to Sales",
-      "note": "No credit card required · Setup in under 48 hours"
+      "note": "No credit card required · Setup in under 48 hours",
+      "downloadApp": "Download Android App"
     },
     "footer": {
       "tagline": "The all-in-one business management platform built for African enterprises.",
