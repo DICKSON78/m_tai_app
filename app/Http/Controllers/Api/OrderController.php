@@ -23,6 +23,7 @@ class OrderController extends Controller
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:20',
+            'delivery_address' => 'nullable|string|max:500',
             'payment_method' => 'required|in:cash,mobile_money,bank_transfer,card,other',
             'notes' => 'nullable|string|max:1000',
             'customer_type' => 'sometimes|in:registered,guest,walk_in',
@@ -203,6 +204,7 @@ class OrderController extends Controller
                     'status' => 'pending',
                     'payment_status' => $total > 0 ? 'unpaid' : 'paid',
                     'notes' => $validated['notes'] ?? null,
+                    'delivery_address' => $validated['delivery_address'] ?? null,
                     'currency_id' => $currencyId,
                     'currency_code' => $currencyCode,
                     'exchange_rate' => $exchangeRate,

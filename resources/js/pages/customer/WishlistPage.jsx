@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
 import ConfirmDialog from '../../components/ConfirmDialog';
-import PageHeader from '../../components/casfeta/PageHeader';
+import CustomerPageHeader from '../../components/CustomerPageHeader';
 import ShimmerProductGrid from '../../components/ShimmerProductGrid';
 import { Heart } from 'lucide-react';
 
 export default function WishlistPage() {
+    const navigate = useNavigate();
+    const { t } = useTranslation();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -65,10 +68,10 @@ export default function WishlistPage() {
 
     return (
         <div>
-            <PageHeader
-                title="Wishlist"
-                subtitle={totalItems > 0 ? `${totalItems} products in wishlist` : 'Your saved products'}
-                icon={<Heart size={20} />}
+            <CustomerPageHeader
+                title={t('common.wishlist')}
+                subtitle={totalItems > 0 ? `${totalItems} products in wishlist` : ''}
+                onBack={() => navigate('/customer/dashboard')}
             />
 
             <div className="pb-6">

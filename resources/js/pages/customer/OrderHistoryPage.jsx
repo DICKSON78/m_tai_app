@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
-import PageHeader from '../../components/casfeta/PageHeader';
+import CustomerPageHeader from '../../components/CustomerPageHeader';
 import { ShoppingCart } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -82,10 +82,10 @@ export default function OrderHistoryPage() {
 
     return (
         <div>
-            <PageHeader
-                title="Order History"
-                subtitle={totalOrders > 0 ? `Total orders: ${totalOrders}` : 'View your order history and track deliveries'}
-                icon={<ShoppingCart size={20} />}
+            <CustomerPageHeader
+                title="My Orders"
+                subtitle={totalOrders > 0 ? `Total orders: ${totalOrders}` : ''}
+                onBack={() => navigate('/customer/dashboard')}
             />
 
             <div className="pb-6">

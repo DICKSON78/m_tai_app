@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
-import PageHeader from '../../components/casfeta/PageHeader';
+import CustomerPageHeader from '../../components/CustomerPageHeader';
 import { ShoppingCart } from 'lucide-react';
 
 export default function CartPage() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -70,6 +72,17 @@ export default function CartPage() {
         }, 0);
     };
 
+    const handleClear = async () => {
+        if (items.length === 0) return;
+        try {
+            await api.delete('/cart');
+            setItems([]);
+            window.dispatchEvent(new Event('mtai-cart-updated'));
+        } catch (error) {
+            console.error('Failed to clear cart:', error);
+        }
+    };
+
     const formatPrice = (price) => `TZS ${Number(price || 0).toLocaleString()}`;
 
     if (loading) {
@@ -84,7 +97,15 @@ export default function CartPage() {
 
     return (
         <div>
-            <PageHeader title="My Cart" subtitle="Review your products before checkout" icon={<ShoppingCart size={20} />} />
+            <CustomerPageHeader
+                title={t('cart.my_cart')}
+                subtitle={items.length > 0 ? `${items.length} ${t('cart.items')}` : ''}
+                rightAction={items.length > 0 ? (
+                    <button onClick={handleClear} className="text-[12px] font-semibold" style={{ color: '#DC2626' }}>
+                        {t('cart.clear')}
+                    </button>
+                ) : null}
+            />
 
             <div className="pb-6">
                 {items.length === 0 ? (
@@ -106,95 +127,40 @@ export default function CartPage() {
                         </Link>
                     </div>
                 ) : (
-                    <div className="flex flex-col lg:flex-row gap-8">
-                        <div className="flex-1">
-                            <div className="re-table-wrap">
-                                <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase">
-                                    <div className="col-span-5">Product</div>
-                                    <div className="col-span-2 text-center">Price</div>
-                                    <div className="col-span-2 text-center">Quantity</div>
-                                    <div className="col-span-2 text-right">Total</div>
-                                    <div className="col-span-1"></div>
-                                </div>
+                    <div className="px-4 pb-8">
+                        <div className="flex flex-col gap-4 mb-6">
+                            {items.map((item) => {
+                                const itemKey = item.key || item.id;
+                                const price = parseFloat(item.selling_price || item.price || 0);
+                                const qty = parseInt(item.quantity || 1, 10);
+                                const itemTotal = price * qty;
+                                const isUpdating = updatingKey === itemKey;
+                                const img = item.image_url || item.product?.image_url || (item.image || item.product?.image ? `/storage/${item.image || item.product?.image}` : null);
 
-                                {items.map((item) => {
-                                    const itemKey = item.key || item.id;
-                                    const price = parseFloat(item.selling_price || item.price || 0);
-                                    const qty = parseInt(item.quantity || 1, 10);
-                                    const itemTotal = price * qty;
-                                    const isUpdating = updatingKey === itemKey;
-
-                                    return (
-                                        <div
-                                            key={itemKey}
-                                            className={`grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 border-b border-gray-100 items-center transition ${
-                                                isUpdating ? 'opacity-50' : ''
-                                            }`}
-                                        >
-                                            <div className="col-span-5 flex items-center space-x-4">
-                                                <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                                                    {item.image || item.product?.image ? (
-                                                        <img
-                                                            src={item.image_url || item.product?.image_url || `/storage/${item.image || item.product?.image}`}
-                                                            alt={item.name || item.product?.name}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center">
-                                                            <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                            </svg>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <h3 className="font-semibold text-gray-800 text-sm truncate">
-                                                        {item.name || item.product?.name}
-                                                    </h3>
-                                                    {item.shop_name && (
-                                                        <p className="text-xs text-gray-500 mt-0.5">{item.shop_name}</p>
-                                                    )}
-                                                    <p className="text-sm text-primary font-semibold md:hidden mt-1">
-                                                        {formatPrice(price)}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div className="hidden md:block col-span-2 text-center text-sm text-gray-700">
-                                                {formatPrice(price)}
-                                            </div>
-
-                                            <div className="col-span-2 flex items-center justify-center">
-                                                <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                                                    <button
-                                                        onClick={() => handleUpdateQuantity(itemKey, qty - 1)}
-                                                        disabled={qty <= 1 || isUpdating}
-                                                        className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition text-sm font-bold disabled:opacity-50"
-                                                    >
-                                                        −
-                                                    </button>
-                                                    <span className="w-10 text-center text-sm py-1.5 border-l border-r border-gray-300">
-                                                        {qty}
-                                                    </span>
-                                                    <button
-                                                        onClick={() => handleUpdateQuantity(itemKey, qty + 1)}
-                                                        disabled={isUpdating}
-                                                        className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition text-sm font-bold disabled:opacity-50"
-                                                    >
-                                                        +
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <div className="col-span-2 text-right font-semibold text-gray-800 text-sm">
-                                                {formatPrice(itemTotal)}
-                                            </div>
-
-                                            <div className="col-span-1 text-right">
+                                return (
+                                    <div
+                                        key={itemKey}
+                                        className={`bg-white rounded-xl shadow-sm p-2 flex gap-4 transition ${isUpdating ? 'opacity-50' : ''}`}
+                                    >
+                                        <div className="w-[72px] h-[72px] rounded-xl overflow-hidden shrink-0 flex items-center justify-center" style={{ background: '#F1F5F9' }}>
+                                            {img ? (
+                                                <img src={img} alt={item.name || item.product?.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span className="text-[26px] font-bold text-white">
+                                                    {(item.name || item.product?.name || '?').charAt(0).toUpperCase()}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                                            <div className="flex items-start gap-2">
+                                                <h3 className="flex-1 text-[14px] font-semibold leading-5 line-clamp-2" style={{ color: '#0F172A' }}>
+                                                    {item.name || item.product?.name}
+                                                </h3>
                                                 <button
                                                     onClick={() => handleRemoveItem(itemKey)}
                                                     disabled={isUpdating}
-                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition disabled:opacity-50"
+                                                    className="w-6 h-6 flex items-center justify-center shrink-0 disabled:opacity-50"
+                                                    style={{ color: '#94A3B8' }}
                                                     title="Remove"
                                                 >
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,52 +168,65 @@ export default function CartPage() {
                                                     </svg>
                                                 </button>
                                             </div>
+                                            <p className="text-[12px] font-bold" style={{ color: '#00A886' }}>
+                                                {formatPrice(price)}
+                                            </p>
+                                            <div className="flex items-center justify-between mt-1">
+                                                <div className="flex items-center gap-1.5 rounded-xl border p-1" style={{ borderColor: '#E2E8F0', background: '#FFFFFF' }}>
+                                                    <button
+                                                        onClick={() => handleUpdateQuantity(itemKey, qty - 1)}
+                                                        disabled={qty <= 1 || isUpdating}
+                                                        className="w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-40"
+                                                        style={{ background: '#E6FBF6' }}
+                                                    >
+                                                        <span className="w-3 h-[2.5px] rounded" style={{ background: '#00A886' }} />
+                                                    </button>
+                                                    <span className="min-w-[26px] text-center text-[14px] font-semibold" style={{ color: '#0F172A' }}>
+                                                        {qty}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => handleUpdateQuantity(itemKey, qty + 1)}
+                                                        disabled={isUpdating}
+                                                        className="w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-40"
+                                                        style={{ background: '#E6FBF6' }}
+                                                    >
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="#00A886" strokeWidth={3} viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" d="M12 5v14M5 12h14" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <span className="text-[14px] font-bold" style={{ color: '#0F172A' }}>
+                                                    {formatPrice(itemTotal)}
+                                                </span>
+                                            </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
+                                    </div>
+                                );
+                            })}
                         </div>
 
-                        <div className="lg:w-80 shrink-0">
-                            <div className="card sticky top-24">
-                                <h3 className="font-semibold text-gray-800 mb-4">Summary</h3>
-
-                                <div className="space-y-3 mb-6">
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-gray-500">Product ({items.length})</span>
-                                        <span className="text-gray-800">{formatPrice(getSubtotal())}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-gray-500">Shipping</span>
-                                        <span className="text-gray-400 text-xs">From shop</span>
-                                    </div>
-                                    <div className="border-t border-gray-200 pt-3">
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-semibold text-gray-800">Total</span>
-                                            <span className="text-xl font-bold text-primary">
-                                                {formatPrice(getSubtotal())}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button
-                                    onClick={() => navigate('/customer/checkout')}
-                                    className="w-full btn-accent justify-center"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
-                                    </svg>
-                                    <span>Proceed to Checkout</span>
-                                </button>
-
-                                <Link
-                                    to="/customer/shops"
-                                    className="block text-center text-sm text-primary hover:underline mt-3"
-                                >
-                                    ← Continue Shopping
-                                </Link>
+                        <div className="bg-white border-t px-4 pt-4 pb-6 -mx-4" style={{ borderColor: '#E2E8F0' }}>
+                            <div className="flex items-center justify-between">
+                                <span className="text-[14px]" style={{ color: '#64748B' }}>
+                                    Subtotal ({items.length} {items.length === 1 ? 'item' : 'items'})
+                                </span>
+                                <span className="text-[20px] font-bold" style={{ color: '#0F172A' }}>
+                                    {formatPrice(getSubtotal())}
+                                </span>
                             </div>
+                            <div className="flex items-center gap-1 mt-1">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="#00A886" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                                </svg>
+                                <span className="text-[12px]" style={{ color: '#64748B' }}>Delivery calculated at checkout</span>
+                            </div>
+                            <button
+                                onClick={() => navigate('/customer/checkout')}
+                                className="w-full h-12 rounded-xl text-[16px] font-semibold text-white mt-4 transition-opacity hover:opacity-90"
+                                style={{ background: '#00D4AA' }}
+                            >
+                                Checkout · {formatPrice(getSubtotal())}
+                            </button>
                         </div>
                     </div>
                 )}

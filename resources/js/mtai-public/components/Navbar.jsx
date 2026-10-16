@@ -61,6 +61,12 @@ export default function Navbar() {
                   </Link>
                 )
               })}
+              <Link
+                to="/register/seller"
+                className="relative px-4 py-2 text-sm font-semibold text-[#00D4AA] hover:text-white transition-colors duration-300"
+              >
+                {t('navbar.become_seller')}
+              </Link>
             </div>
 
             <div className="hidden lg:flex items-center gap-3">
@@ -105,6 +111,15 @@ export default function Navbar() {
                   </li>
                 )
               })}
+              <li>
+                <Link
+                  to="/register/seller"
+                  onClick={() => setOpen(false)}
+                  className="block px-4 py-3 text-sm font-semibold rounded-xl text-[#00D4AA] hover:bg-white/5 transition-all"
+                >
+                  {t('navbar.become_seller')}
+                </Link>
+              </li>
             </ul>
             <div className="flex flex-col gap-3">
               <div className="flex justify-center py-2">

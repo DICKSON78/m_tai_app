@@ -65,8 +65,8 @@ export default function ProductCard({ product }) {
     return (
         <div
             onClick={open}
-            className="group bg-white rounded-2xl overflow-hidden cursor-pointer text-left transition-shadow hover:shadow-md"
-            style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}
+            className="group bg-white rounded-3xl overflow-hidden cursor-pointer text-left transition-shadow hover:shadow-md"
+            style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.12)' }}
         >
             {/* Post header */}
             <div className="flex items-center px-2.5 py-2">
@@ -92,8 +92,8 @@ export default function ProductCard({ product }) {
 
             {/* Image */}
             <div
-                className="relative w-full flex items-center justify-center overflow-hidden"
-                style={{ height: 170, backgroundColor: image ? '#f3f4f6' : placeholderColor }}
+                className="relative w-full flex items-center justify-center overflow-hidden h-[260px]"
+                style={{ backgroundColor: image ? '#f3f4f6' : placeholderColor }}
             >
                 {image ? (
                     <img src={image} alt={product.name} className="w-full h-full object-cover" />

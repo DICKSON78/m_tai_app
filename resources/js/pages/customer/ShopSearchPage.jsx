@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../services/api';
 import Pagination from '../../components/Pagination';
-import PageHeader from '../../components/casfeta/PageHeader';
+import CustomerPageHeader from '../../components/CustomerPageHeader';
 import ShimmerProductGrid from '../../components/ShimmerProductGrid';
 import { Store } from 'lucide-react';
 
@@ -71,7 +71,7 @@ export default function ShopSearchPage() {
 
     return (
         <div>
-            <PageHeader title="Shops" subtitle="Browse and search available shops" icon={<Store size={20} />} />
+            <CustomerPageHeader title="Shops" subtitle="Browse and search available shops" onBack={() => navigate('/customer/dashboard')} />
             <div className="-mt-2 pb-3">
                 <form onSubmit={handleSearch}>
                     <div className="flex items-center bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm focus-within:border-primary/60">
@@ -85,7 +85,7 @@ export default function ShopSearchPage() {
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder="Search shops by name or code..."
-                            className="flex-1 px-3 py-2.5 text-gray-800 outline-none"
+                            className="flex-1 pl-10 pr-3 py-2.5 text-gray-800 outline-none"
                         />
                         <button
                             type="submit"

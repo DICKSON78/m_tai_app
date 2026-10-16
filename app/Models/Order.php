@@ -12,7 +12,7 @@ class Order extends Model
     protected $fillable = [
         'business_id', 'customer_id', 'transaction_code', 'subtotal',
         'discount', 'tax', 'total', 'status', 'payment_status',
-        'notes', 'processed_by', 'currency_id', 'currency_code', 'exchange_rate',
+        'notes', 'delivery_address', 'processed_by', 'currency_id', 'currency_code', 'exchange_rate',
     ];
 
     protected function casts(): array

@@ -220,7 +220,7 @@ export default function CustomerDashboard() {
 
             {/* Product grid (e-commerce layout, fills width) */}
             {loading ? (
-                <ShimmerProductGrid count={10} columns="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3" />
+                <ShimmerProductGrid count={6} columns="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" />
             ) : products.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-gray-200 py-12 text-center">
                     <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -232,7 +232,7 @@ export default function CustomerDashboard() {
                     <p className="text-sm text-gray-500">Try a different category or check back soon.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 pb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                     {products.map(product => (
                         <ProductCard key={product.id} product={product} />
                     ))}

@@ -198,11 +198,36 @@ function PublicLayout({ children }) {
     );
 }
 
+function RootRoute() {
+    const { user, loading } = useAuth();
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    if (user) {
+        const dashboards = {
+            admin: '/admin/dashboard',
+            business_owner: '/owner/dashboard',
+            employee: '/employee/dashboard',
+            customer: '/customer/dashboard',
+            transporter: '/transporter/dashboard',
+        };
+        return <Navigate to={dashboards[user.role] || '/customer/dashboard'} replace />;
+    }
+
+    return <PublicLayout><PublicHomePage /></PublicLayout>;
+}
+
 function AppRoutes() {
     return (
         <Routes>
             {/* Public Phermex-style routes */}
-            <Route path="/" element={<PublicLayout><PublicHomePage /></PublicLayout>} />
+            <Route path="/" element={<RootRoute />} />
             <Route path="/about" element={<PublicLayout><PublicAboutPage /></PublicLayout>} />
             <Route path="/products" element={<PublicLayout><PublicProductsPage /></PublicLayout>} />
             <Route path="/marketplace" element={<PublicLayout><PublicMarketplacePage /></PublicLayout>} />

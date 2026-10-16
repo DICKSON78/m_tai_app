@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { X, RotateCcw, CheckCircle, ClipboardList, Check, Truck, Home, XCircle } from 'lucide-react';
-import PageHeader from '../../components/casfeta/PageHeader';
+import CustomerPageHeader from '../../components/CustomerPageHeader';
 import { FileText } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -223,10 +223,9 @@ export default function OrderDetailPage() {
 
     return (
         <div>
-            <PageHeader
-                title={order.transaction_code || order.code || `Order #${order.id}`}
-                subtitle={`Created: ${formatDate(order.created_at || order.date)}`}
-                icon={<FileText size={20} />}
+            <CustomerPageHeader
+                title="Order Details"
+                subtitle={order.transaction_code || order.code || `Order #${order.id}`}
             />
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-4">
                 <div className="flex items-center gap-2 text-sm text-gray-500">

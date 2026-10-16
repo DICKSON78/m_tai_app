@@ -15,7 +15,6 @@ export default function CustomerMarketplaceLayout({ children }) {
     const { pathname } = useLocation();
     const [cartCount, setCartCount] = useState(0);
     const [search, setSearch] = useState('');
-    const [mobileOpen, setMobileOpen] = useState(false);
     const [filterOpen, setFilterOpen] = useState(false);
     const [filterMin, setFilterMin] = useState('');
     const [filterMax, setFilterMax] = useState('');
@@ -44,7 +43,6 @@ export default function CustomerMarketplaceLayout({ children }) {
     const handleSearch = (e) => {
         e.preventDefault();
         const q = search.trim();
-        setMobileOpen(false);
         if (q) navigate(`/customer/shops?q=${encodeURIComponent(q)}`);
         else navigate('/customer/shops');
     };
@@ -89,7 +87,7 @@ export default function CustomerMarketplaceLayout({ children }) {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     placeholder={t("shop.search_products")+ " or shops..."}
-                                    className="flex-1 px-3 py-2.5 text-sm text-gray-800 outline-none bg-transparent min-w-0"
+                                    className="flex-1 pl-10 pr-3 py-2.5 text-sm text-gray-800 outline-none bg-transparent min-w-0"
                                 />
                                 <button
                                     type="button"
@@ -173,7 +171,7 @@ export default function CustomerMarketplaceLayout({ children }) {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     placeholder={t("common.search")}
-                                    className="flex-1 px-2 py-2 text-sm text-gray-800 outline-none bg-transparent min-w-0"
+                                    className="flex-1 pl-9 pr-2 py-2 text-sm text-gray-800 outline-none bg-transparent min-w-0"
                                 />
                             </div>
                         </form>
@@ -214,12 +212,25 @@ export default function CustomerMarketplaceLayout({ children }) {
                                         </div>
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => navigate('/customer/orders')} className="cursor-pointer">
+                                        {t('orders.orders')}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => navigate('/customer/wishlist')} className="cursor-pointer">
+                                        {t('common.wishlist')}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => navigate('/customer/deliveries')} className="cursor-pointer">
+                                        {t('deliveries.deliveries')}
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => navigate('/customer/profile')} className="cursor-pointer">
                                         {t('profile.profile')}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => navigate('/customer/profile')} className="cursor-pointer">
                                         {t('settings.settings')}
                                     </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <div className="px-2 py-1.5">
+                                        <LanguageSwitcher className="text-gray-700" />
+                                    </div>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50">
                                         {t('common.logout')}
@@ -232,21 +243,6 @@ export default function CustomerMarketplaceLayout({ children }) {
                         </div>
                     </div>
 
-                    {/* Mobile "More" panel */}
-                    {mobileOpen && (
-                        <div className="lg:hidden bg-[#0A140C]/95 backdrop-blur-xl border-t border-white/5 px-6 py-6">
-                            <div className="flex justify-center pb-4">
-                                <LanguageSwitcher className="text-white" />
-                            </div>
-                            <CustomerSidebar onNavigate={() => setMobileOpen(false)} />
-                            <button
-                                onClick={logout}
-                                className="mt-4 w-full text-center px-6 py-3 border border-red-400/30 text-red-300 text-sm font-semibold rounded-full"
-                            >
-                                {t('common.logout')}
-                            </button>
-                        </div>
-                    )}
                 </div>
             </header>
 
@@ -270,26 +266,18 @@ export default function CustomerMarketplaceLayout({ children }) {
                 </aside>
             </div>
 
-            {/* ===== Mobile bottom tab bar (Instagram-style) ===== */}
-            <nav className="lg:hidden shrink-0 z-50 bg-[#0A140C] border-t border-white/10">
-                <div className="grid grid-cols-5 px-2 pb-[env(safe-area-inset-bottom)]">
+            {/* ===== Mobile bottom tab bar (native-app style) ===== */}
+            <nav className="lg:hidden shrink-0 z-50 bg-white border-t border-[#E2E8F0]">
+                <div className="grid grid-cols-4 px-2 pt-1.5 pb-[max(8px,env(safe-area-inset-bottom))]">
                     {[
                         {
-                            key: 'marketplace',
+                            key: 'shop',
                             to: '/customer/dashboard',
-                            active: pathname === '/customer/dashboard' || pathname === '/customer/marketplace',
+                            active: pathname === '/customer/dashboard' || pathname === '/customer/marketplace'
+                                || pathname.startsWith('/customer/shops') || pathname === '/customer/wishlist',
+                            label: t('navbar.marketplace'),
                             icon: (
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                </svg>
-                            ),
-                        },
-                        {
-                            key: 'shops',
-                            to: '/customer/shops',
-                            active: pathname.startsWith('/customer/shops'),
-                            icon: (
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9l1.5-5h15L21 9M3 9h18M3 9v10a1 1 0 001 1h16a1 1 0 001-1V9M9 20v-6h6v6" />
                                 </svg>
                             ),
@@ -297,21 +285,33 @@ export default function CustomerMarketplaceLayout({ children }) {
                         {
                             key: 'orders',
                             to: '/customer/orders',
-                            active: pathname.startsWith('/customer/orders'),
+                            active: pathname.startsWith('/customer/orders') || pathname.startsWith('/customer/deliveries'),
+                            label: t('orders.orders'),
                             icon: (
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
                             ),
                         },
                         {
                             key: 'cart',
                             to: '/customer/cart',
-                            active: pathname === '/customer/cart',
-                            badge: cartCount,
+                            active: pathname === '/customer/cart' || pathname === '/customer/checkout',
+                            label: t('cart.cart'),
                             icon: (
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+                                </svg>
+                            ),
+                        },
+                        {
+                            key: 'profile',
+                            to: '/customer/profile',
+                            active: pathname === '/customer/profile',
+                            label: t('profile.profile'),
+                            icon: (
+                                <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             ),
                         },
@@ -319,33 +319,13 @@ export default function CustomerMarketplaceLayout({ children }) {
                         <Link
                             key={tab.key}
                             to={tab.to}
-                            onClick={() => setMobileOpen(false)}
-                            className={`relative flex flex-col items-center gap-1 py-2.5 transition-colors ${
-                                tab.active ? 'text-[#00D4AA]' : 'text-white/50'
-                            }`}
+                            className="flex flex-col items-center gap-0.5 py-1 transition-colors"
+                            style={{ color: tab.active ? '#00A886' : '#9CA3AF' }}
                         >
-                            {tab.active && <span className="absolute top-0 w-8 h-1 rounded-full bg-[#00D4AA]" />}
-                            <span className="relative">
-                                {tab.icon}
-                                {tab.badge > 0 && (
-                                    <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-[9px] font-bold text-white flex items-center justify-center">
-                                        {tab.badge > 99 ? '99+' : tab.badge}
-                                    </span>
-                                )}
-                            </span>
+                            {tab.icon}
+                            <span className="text-[11px] font-medium leading-tight">{tab.label}</span>
                         </Link>
                     ))}
-                    <button
-                        onClick={() => setMobileOpen((v) => !v)}
-                        className={`relative flex flex-col items-center gap-1 py-2.5 transition-colors ${
-                            mobileOpen ? 'text-[#00D4AA]' : 'text-white/50'
-                        }`}
-                    >
-                        {mobileOpen && <span className="absolute top-0 w-8 h-1 rounded-full bg-[#00D4AA]" />}
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
                 </div>
             </nav>
         </div>

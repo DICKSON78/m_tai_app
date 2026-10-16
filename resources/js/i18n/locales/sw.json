@@ -54,7 +54,8 @@
     "yes": "Ndiyo",
     "no": "Hapana",
     "sending": "Inatuma...",
-    "search_products": "Tafuta bidhaa..."
+    "search_products": "Tafuta bidhaa...",
+    "wishlist": "Orodha ya Vipendwa"
   },
   "auth": {
     "welcome_back": "Karibu Tena",
@@ -118,7 +119,8 @@
     "get_started": "Anza",
     "view_only": "Tazama — fungua akaunti ili kununua",
     "create_account_to_buy": "Fungua akaunti ili kununua",
-    "view_shop": "Angalia Duka"
+    "view_shop": "Angalia Duka",
+    "become_seller": "Kuwa Muuzaji"
   },
   "dashboard": {
     "overview": "Muhtasari",
@@ -286,7 +288,8 @@
     "quantity": "Idadi",
     "subtotal": "Jumla Ndogo",
     "total": "Jumla",
-    "items": "Vitu"
+    "items": "Vitu",
+    "clear": "Futa"
   },
   "checkout": {
     "checkout": "Malipo",
@@ -296,7 +299,17 @@
     "order_summary": "Muhtasari wa Agizo",
     "place_order": "Wasilisha Agizo",
     "cash_on_delivery": "Malipo Wakati wa Uwasilishaji",
-    "mobile_money": "Pesa ya Simu"
+    "mobile_money": "Pesa ya Simu",
+    "address_placeholder": "Mtaa, namba ya nyumba, eneo, alama...",
+    "coupon_code": "Kuponi",
+    "enter_coupon": "Ingiza kuponi",
+    "apply": "Tumia",
+    "remove": "Ondoa",
+    "order_confirmed": "Agizo Limethibitishwa",
+    "thank_you": "Asante kwa agizo lako. Bidhaa zako ziko njiani.",
+    "view_orders": "Angalia Maagizo Yangu",
+    "back_home": "Rudi Nyumbani",
+    "delivery_hint": "Gharama ya uwasilishaji itahesabiwa unapolipa"
   },
   "profile": {
     "profile": "Wasifu",
