@@ -1,6 +1,13 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 export default function Footer() {
+  const { t } = useTranslation()
+  const productLinks = t('site.footer.productLinks', { returnObjects: true })
+  const companyLinks = t('site.footer.companyLinks', { returnObjects: true })
+  const resourceLinks = t('site.footer.resourceLinks', { returnObjects: true })
+  const legalLinks = t('site.footer.legalLinks', { returnObjects: true })
+
   return (
     <footer className="bg-[#0A140C] border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6 py-16">
@@ -13,14 +20,14 @@ export default function Footer() {
               <span className="text-white font-black text-xl tracking-tight">M-TAI</span>
             </Link>
             <p className="text-white/40 text-sm leading-relaxed max-w-[280px]">
-              The all-in-one business management platform built for African enterprises.
+              {t('site.footer.tagline')}
             </p>
           </div>
 
           <div>
-            <h4 className="text-white font-semibold text-sm mb-4">Product</h4>
+            <h4 className="text-white font-semibold text-sm mb-4">{t('site.footer.product')}</h4>
             <ul className="space-y-3">
-              {['Features', 'Pricing', 'Integrations', 'Changelog', 'API Docs'].map((item) => (
+              {(Array.isArray(productLinks) ? productLinks : []).map((item) => (
                 <li key={item}>
                   <a href="#" className="text-white/40 text-sm hover:text-[#00D4AA] transition-colors">{item}</a>
                 </li>
@@ -29,9 +36,9 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-white font-semibold text-sm mb-4">Company</h4>
+            <h4 className="text-white font-semibold text-sm mb-4">{t('site.footer.company')}</h4>
             <ul className="space-y-3">
-              {['About Us', 'Careers', 'Press', 'Partners', 'Contact'].map((item) => (
+              {(Array.isArray(companyLinks) ? companyLinks : []).map((item) => (
                 <li key={item}>
                   <a href="#" className="text-white/40 text-sm hover:text-[#00D4AA] transition-colors">{item}</a>
                 </li>
@@ -40,9 +47,9 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-white font-semibold text-sm mb-4">Resources</h4>
+            <h4 className="text-white font-semibold text-sm mb-4">{t('site.footer.resources')}</h4>
             <ul className="space-y-3">
-              {['Blog', 'Case Studies', 'Help Center', 'Community', 'Status'].map((item) => (
+              {(Array.isArray(resourceLinks) ? resourceLinks : []).map((item) => (
                 <li key={item}>
                   <a href="#" className="text-white/40 text-sm hover:text-[#00D4AA] transition-colors">{item}</a>
                 </li>
@@ -51,9 +58,9 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-white font-semibold text-sm mb-4">Legal</h4>
+            <h4 className="text-white font-semibold text-sm mb-4">{t('site.footer.legal')}</h4>
             <ul className="space-y-3">
-              {['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Security', 'GDPR'].map((item) => (
+              {(Array.isArray(legalLinks) ? legalLinks : []).map((item) => (
                 <li key={item}>
                   <a href="#" className="text-white/40 text-sm hover:text-[#00D4AA] transition-colors">{item}</a>
                 </li>
@@ -64,7 +71,7 @@ export default function Footer() {
 
         <div className="mt-16 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-white/30 text-xs">
-            © {new Date().getFullYear()} M-TAI. All rights reserved.
+            © {new Date().getFullYear()} M-TAI. {t('site.footer.rights')}
           </p>
           <div className="flex gap-4">
             {[

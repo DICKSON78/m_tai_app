@@ -364,5 +364,415 @@
     "analytics": "Analytics",
     "sales_report": "Sales Report",
     "inventory_report": "Inventory Report"
+  },
+  "site": {
+    "hero": {
+      "badge": "Now serving 500+ businesses across Africa",
+      "title1": "Run Your",
+      "title2": "Business",
+      "title3": "Smarter.",
+      "subtitle": "The all-in-one platform for inventory, sales, customers, and analytics. Built for African businesses, designed for the world.",
+      "ctaPrimary": "Start Free Trial",
+      "ctaSecondary": "See How It Works",
+      "trusted": "Trusted by 500+ businesses",
+      "cards": [
+        {
+          "title": "Inventory",
+          "desc": "Track stock in real-time"
+        },
+        {
+          "title": "Point of Sale",
+          "desc": "Fast checkout system"
+        },
+        {
+          "title": "Analytics",
+          "desc": "Smart business insights"
+        },
+        {
+          "title": "Team",
+          "desc": "Manage your staff"
+        }
+      ]
+    },
+    "whyChoose": {
+      "eyebrow": "Why M-TAI",
+      "title": "Built for Your Business",
+      "subtitle": "A trusted partner that helps you grow your business and unlock new opportunities across Africa.",
+      "reasons": [
+        {
+          "title": "Built for African Markets",
+          "desc": "Supports local currencies, mobile money payments, and offline-capable workflows designed for African businesses."
+        },
+        {
+          "title": "Real-Time Analytics",
+          "desc": "Make data-driven decisions with live dashboards showing sales trends, inventory levels, and customer insights."
+        },
+        {
+          "title": "Lightning Setup",
+          "desc": "Go from sign-up to live in under 48 hours. We handle data migration, staff training, and provide 24/7 support."
+        },
+        {
+          "title": "Trusted by 500+",
+          "desc": "Join a growing community of business owners across Africa who rely on M-TAI every day."
+        }
+      ]
+    },
+    "story": {
+      "eyebrow": "Our Story",
+      "title1": "Digitizing African",
+      "title2": "Commerce.",
+      "para1": "We started with a simple observation: African businesses deserve world-class digital tools. Most platforms are built for Western markets and ignore the unique needs of African commerce.",
+      "para2": "M-TAI was born to bridge that gap — a platform designed from the ground up for mobile money, local currencies, and the realities of doing business in Africa.",
+      "stat": "500+",
+      "statLabel": "Businesses Served",
+      "imageAlt": "Business team",
+      "cta1": "Learn More",
+      "cta2": "Get Started"
+    },
+    "features": {
+      "eyebrow": "Features",
+      "title1": "Everything You Need to",
+      "title2": "Run Your Business",
+      "subtitle": "From inventory to delivery, M-TAI handles every aspect of your business operations.",
+      "cta": "Start Free Trial",
+      "list": [
+        {
+          "title": "Inventory Management",
+          "desc": "Track stock levels, fast-moving products, and get color-coded alerts — Red for low, Yellow for medium, Green for healthy."
+        },
+        {
+          "title": "Sales & POS",
+          "desc": "Process orders with mobile money, card payments, and cash. Each transaction gets a unique TXN code for verification."
+        },
+        {
+          "title": "Profit Tracking",
+          "desc": "Auto-calculates Grand Daily Sales, Grand Total Profit, Grand Daily Expenditure, and Perfect Profit with detailed reports."
+        },
+        {
+          "title": "Loan Management",
+          "desc": "Track multiple loan types — Bank, Friendly, Amana Cash — with balances, repayment plans, interest rates, and status."
+        },
+        {
+          "title": "Customer Credit",
+          "desc": "Record credit sales (Kopsha) with customer details, due dates, reminder notifications, and debt clearance tracking."
+        },
+        {
+          "title": "Delivery Network",
+          "desc": "Customers request delivery, transporters accept or negotiate. Track pickup, destination, pricing, and real-time status."
+        }
+      ]
+    },
+    "howItWorks": {
+      "eyebrow": "How It Works",
+      "title": "Four Simple Steps",
+      "steps": [
+        {
+          "title": "Create Your Account",
+          "desc": "Sign up in minutes with your business details. No credit card required."
+        },
+        {
+          "title": "Set Up Your Store",
+          "desc": "Add products, configure settings, and invite your team members."
+        },
+        {
+          "title": "Start Selling",
+          "desc": "Process orders, accept payments, and manage inventory from day one."
+        },
+        {
+          "title": "Grow & Scale",
+          "desc": "Access insights, expand to new markets, and grow your business."
+        }
+      ]
+    },
+    "testimonials": {
+      "eyebrow": "Testimonials",
+      "title1": "Loved by Business Owners Across",
+      "title2": "Africa",
+      "list": [
+        {
+          "quote": "M-TAI transformed how I manage my shop. From inventory to sales, everything is in one place. I've doubled my revenue in 6 months and my team loves how easy it is to use.",
+          "name": "Amina Hassan",
+          "role": "Shop Owner, Dar es Salaam"
+        },
+        {
+          "quote": "The analytics alone are worth it. I can see exactly what's selling and what's not. Makes ordering stock so much easier.",
+          "name": "Joseph Mwangi",
+          "role": "Retailer, Nairobi"
+        },
+        {
+          "quote": "Setup was incredibly fast. Within a day we were processing orders and tracking inventory. My team loves it.",
+          "name": "Sarah Kimani",
+          "role": "Manager, Kampala"
+        },
+        {
+          "quote": "Finally a platform that understands African business. Mobile money integration works flawlessly.",
+          "name": "David Ochieng",
+          "role": "Wholesaler, Lagos"
+        },
+        {
+          "quote": "The delivery tracking feature saved us so much time. Customers love knowing where their orders are.",
+          "name": "Grace Mwende",
+          "role": "E-commerce, Accra"
+        },
+        {
+          "quote": "Best decision we made for our business. The ROI was visible within the first month of using M-TAI.",
+          "name": "Peter Otieno",
+          "role": "Restaurant Owner, Mombasa"
+        },
+        {
+          "quote": "Customer support is amazing. Anytime we have an issue, it's resolved within hours. Truly reliable.",
+          "name": "Fatima Ali",
+          "role": "Boutique Owner, Zanzibar"
+        }
+      ]
+    },
+    "news": {
+      "eyebrow": "Newsroom",
+      "title": "In the News",
+      "viewAll": "View All →",
+      "list": [
+        "M-TAI Raises Seed Round to Expand Business Tech Across Africa",
+        "How Digital Tools Are Transforming SME Management in East Africa",
+        "M-TAI Partners with Major Distributors for Seamless Supply Chain"
+      ]
+    },
+    "mainCta": {
+      "badge": "Limited Time Offer",
+      "title1": "Ready to Grow Your",
+      "title2": "Business?",
+      "subtitle": "Join 500+ businesses across Africa already using M-TAI to streamline operations, boost sales, and grow faster.",
+      "cta1": "Start Free Trial",
+      "cta2": "Talk to Sales",
+      "note": "No credit card required · Setup in under 48 hours"
+    },
+    "footer": {
+      "tagline": "The all-in-one business management platform built for African enterprises.",
+      "product": "Product",
+      "company": "Company",
+      "resources": "Resources",
+      "legal": "Legal",
+      "productLinks": [
+        "Features",
+        "Pricing",
+        "Integrations",
+        "Changelog",
+        "API Docs"
+      ],
+      "companyLinks": [
+        "About Us",
+        "Careers",
+        "Press",
+        "Partners",
+        "Contact"
+      ],
+      "resourceLinks": [
+        "Blog",
+        "Case Studies",
+        "Help Center",
+        "Community",
+        "Status"
+      ],
+      "legalLinks": [
+        "Privacy Policy",
+        "Terms of Service",
+        "Cookie Policy",
+        "Security",
+        "GDPR"
+      ],
+      "rights": "All rights reserved."
+    },
+    "about": {
+      "heroEyebrow": "About Us",
+      "heroTitle1": "Digitizing",
+      "heroTitle2": "African Commerce",
+      "heroSubtitle": "M-TAI was born from a simple belief: African businesses deserve world-class digital tools, built for the way they actually work.",
+      "statLabels": [
+        "Businesses Served",
+        "Countries",
+        "Transactions Processed",
+        "Uptime"
+      ],
+      "storyEyebrow": "Our Story",
+      "storyTitle": "From Idea to Impact",
+      "storyImageAlt": "Our team",
+      "para1": "M-TAI started in 2024 when our founder, James Mwangi, watched his mother struggle with managing her shop using paper records and spreadsheets. She was losing track of inventory, missing sales opportunities, and spending hours on manual bookkeeping.",
+      "para2": "We realized millions of small business owners across Africa face the same challenges daily. Existing solutions were either too expensive, too complex, or built for Western markets without understanding the realities of African commerce.",
+      "para3": "Today, M-TAI serves 500+ businesses across 15+ countries, processing over 50 million transactions. We're just getting started.",
+      "valuesEyebrow": "Our Values",
+      "valuesTitle": "What Drives Us",
+      "values": [
+        {
+          "title": "Built for Africa",
+          "desc": "We design for the realities of African commerce — from mobile money to offline-first workflows."
+        },
+        {
+          "title": "Customer First",
+          "desc": "Every feature starts with a conversation with our customers. Their success is our success."
+        },
+        {
+          "title": "Security & Trust",
+          "desc": "Enterprise-grade security protects your data. We earn your trust every day."
+        }
+      ],
+      "teamEyebrow": "Our Team",
+      "teamTitle": "Meet the People Behind M-TAI",
+      "teamRoles": [
+        "Founder & CEO",
+        "Head of Product",
+        "CTO",
+        "Head of Operations"
+      ]
+    },
+    "contact": {
+      "heroEyebrow": "Contact Us",
+      "heroTitle": "Get in Touch",
+      "heroSubtitle": "Have a question or want to learn more? We'd love to hear from you.",
+      "successTitle": "Message Sent!",
+      "successMsg": "We'll get back to you within 24 hours.",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "subject": "Subject",
+      "message": "Message",
+      "send": "Send Message",
+      "firstNamePh": "John",
+      "lastNamePh": "Doe",
+      "emailPh": "john@company.com",
+      "subjectPh": "How can we help?",
+      "messagePh": "Tell us more...",
+      "infoLabels": [
+        "Email",
+        "Phone",
+        "Location"
+      ],
+      "officeHours": "Office Hours",
+      "hoursLines": [
+        "Monday - Friday: 8:00 AM - 6:00 PM",
+        "Saturday: 9:00 AM - 1:00 PM",
+        "Sunday: Closed"
+      ]
+    },
+    "faq": {
+      "heroEyebrow": "FAQ",
+      "heroTitle1": "Frequently Asked",
+      "heroTitle2": "Questions",
+      "heroSubtitle": "Everything you need to know about M-TAI. Can't find an answer? Contact our support team.",
+      "list": [
+        {
+          "q": "What is M-TAI?",
+          "a": "M-TAI is an all-in-one business management platform designed for African enterprises. It covers inventory, POS, customer management, analytics, delivery, and more."
+        },
+        {
+          "q": "How much does it cost?",
+          "a": "M-TAI offers a free tier for small businesses and affordable paid plans starting from $19/month. Contact us for enterprise pricing."
+        },
+        {
+          "q": "Is my data secure?",
+          "a": "Yes. We use industry-standard encryption, regular backups, and SOC 2 compliant infrastructure. Your data is safe with us."
+        },
+        {
+          "q": "Do you support mobile money?",
+          "a": "Absolutely. M-TAI integrates with M-Pesa, Airtel Money, Tigo Pesa, and other major mobile money providers across Africa."
+        },
+        {
+          "q": "Can I use it offline?",
+          "a": "Yes. M-TAI supports offline mode for critical operations. Data syncs automatically when you reconnect."
+        },
+        {
+          "q": "How long does setup take?",
+          "a": "Most businesses are up and running within 48 hours. We provide free onboarding support and data migration assistance."
+        },
+        {
+          "q": "Do you offer training?",
+          "a": "Yes. Every plan includes access to video tutorials, documentation, and live training sessions. Premium plans get dedicated account managers."
+        },
+        {
+          "q": "Can I invite my team?",
+          "a": "Yes. You can add unlimited team members with role-based access control. Each person gets their own login with customized permissions."
+        },
+        {
+          "q": "What integrations do you support?",
+          "a": "We integrate with major payment providers, accounting tools (QuickBooks, Xero), and offer an open API for custom integrations."
+        },
+        {
+          "q": "Is there a mobile app?",
+          "a": "Yes. M-TAI has native iOS and Android apps for managing your business on the go, including offline capabilities."
+        }
+      ],
+      "stillTitle": "Still have questions?",
+      "stillSubtitle": "Our team is here to help.",
+      "contactCta": "Contact Support"
+    },
+    "productsPage": {
+      "heroEyebrow": "Products",
+      "heroTitle1": "Everything You Need",
+      "heroTitle2": "to Scale",
+      "heroSubtitle": "A comprehensive suite of tools designed to help African businesses manage, grow, and thrive.",
+      "list": [
+        {
+          "name": "Inventory Management",
+          "desc": "Track stock levels, set reorder points, manage expiration dates, and get real-time alerts across all locations.",
+          "features": [
+            "Real-time stock tracking",
+            "Low-stock alerts",
+            "Expiration date management",
+            "Multi-location support"
+          ]
+        },
+        {
+          "name": "Point of Sale",
+          "desc": "Process transactions quickly with integrated mobile money, card payments, and instant invoicing.",
+          "features": [
+            "Mobile money integration",
+            "Card payments",
+            "Instant invoicing",
+            "Receipt generation"
+          ]
+        },
+        {
+          "name": "Customer Management",
+          "desc": "Build lasting relationships with customer profiles, purchase history, and loyalty programs.",
+          "features": [
+            "Customer profiles",
+            "Purchase history",
+            "Loyalty programs",
+            "Communication tools"
+          ]
+        },
+        {
+          "name": "Analytics & Reports",
+          "desc": "Make data-driven decisions with live dashboards showing sales trends, inventory levels, and customer insights.",
+          "features": [
+            "Real-time dashboards",
+            "Sales analytics",
+            "Inventory reports",
+            "Export capabilities"
+          ]
+        },
+        {
+          "name": "Employee Management",
+          "desc": "Manage your team with role-based access, shift scheduling, and performance tracking.",
+          "features": [
+            "Role-based access",
+            "Shift scheduling",
+            "Performance tracking",
+            "Payroll integration"
+          ]
+        },
+        {
+          "name": "Delivery & Transport",
+          "desc": "Manage deliveries, track shipments, and coordinate your transport network efficiently.",
+          "features": [
+            "Delivery tracking",
+            "Route optimization",
+            "Transporter management",
+            "Proof of delivery"
+          ]
+        }
+      ],
+      "ctaTitle": "Ready to Get Started?",
+      "ctaSubtitle": "Join 500+ businesses already using M-TAI.",
+      "ctaButton": "Start Free Trial"
+    }
   }
 }

@@ -364,5 +364,415 @@
     "analytics": "Uchanganuzi",
     "sales_report": "Ripoti ya Mauzo",
     "inventory_report": "Ripoti ya Akiba"
+  },
+  "site": {
+    "hero": {
+      "badge": "Tunahudumia biashara 500+ kote Afrika",
+      "title1": "Endesha",
+      "title2": "Biashara Yako",
+      "title3": "Kisasa Zaidi.",
+      "subtitle": "Mfumo mmoja unaounganisha stoo, mauzo, wateja na takwimu. Umejengwa kwa ajili ya biashara za Afrika, kwa viwango vya dunia.",
+      "ctaPrimary": "Anza Jaribio Bure",
+      "ctaSecondary": "Angalia Jinsi Inavyofanya Kazi",
+      "trusted": "Inaaminiwa na biashara 500+",
+      "cards": [
+        {
+          "title": "Stoo",
+          "desc": "Fuatilia stoo moja kwa moja"
+        },
+        {
+          "title": "Mauzo (POS)",
+          "desc": "Mfumo wa malipo wa haraka"
+        },
+        {
+          "title": "Takwimu",
+          "desc": "Maarifa mahiri ya kibiashara"
+        },
+        {
+          "title": "Timu",
+          "desc": "Simamia wafanyakazi wako"
+        }
+      ]
+    },
+    "whyChoose": {
+      "eyebrow": "Kwa Nini M-TAI",
+      "title": "Imejengwa kwa Ajili ya Biashara Yako",
+      "subtitle": "Mshirika wa kuaminika anayekusaidia kukuza biashara yako na kufungua fursa mpya kote Afrika.",
+      "reasons": [
+        {
+          "title": "Imejengwa kwa Masoko ya Afrika",
+          "desc": "Inasaidia sarafu za ndani, malipo ya pesa za simu, na mifumo inayofanya kazi hata bila intaneti, iliyoundwa kwa ajili ya biashara za Afrika."
+        },
+        {
+          "title": "Takwimu Moja kwa Moja",
+          "desc": "Fanya maamuzi yanayotokana na data kupitia dashibodi zinazoonyesha mienendo ya mauzo, viwango vya stoo na maarifa ya wateja."
+        },
+        {
+          "title": "Usanidi wa Haraka",
+          "desc": "Toka usajili hadi kuanza kutumia ndani ya saa 48. Tunashughulikia uhamishaji wa data, mafunzo ya wafanyakazi, na tunatoa msaada saa 24/7."
+        },
+        {
+          "title": "Inaaminiwa na 500+",
+          "desc": "Jiunge na jumuiya inayokua ya wamiliki wa biashara kote Afrika wanaotegemea M-TAI kila siku."
+        }
+      ]
+    },
+    "story": {
+      "eyebrow": "Hadithi Yetu",
+      "title1": "Kudijitalisha Biashara",
+      "title2": "za Afrika.",
+      "para1": "Tulianza na jambo rahisi: biashara za Afrika zinastahili zana bora za kidijitali. Mifumo mingi imejengwa kwa masoko ya Magharibi na kupuuza mahitaji ya kipekee ya biashara za Afrika.",
+      "para2": "M-TAI ilizaliwa kuziba pengo hilo — mfumo uliojengwa kuanzia mwanzo kwa ajili ya pesa za simu, sarafu za ndani, na uhalisia wa kufanya biashara Afrika.",
+      "stat": "500+",
+      "statLabel": "Biashara Zinazohudumiwa",
+      "imageAlt": "Timu ya kibiashara",
+      "cta1": "Soma Zaidi",
+      "cta2": "Anza Sasa"
+    },
+    "features": {
+      "eyebrow": "Vipengele",
+      "title1": "Kila Unachohitaji",
+      "title2": "Kuendesha Biashara Yako",
+      "subtitle": "Kuanzia stoo hadi usafirishaji, M-TAI inashughulikia kila nyanja ya uendeshaji wa biashara yako.",
+      "cta": "Anza Jaribio Bure",
+      "list": [
+        {
+          "title": "Usimamizi wa Stoo",
+          "desc": "Fuatilia viwango vya stoo, bidhaa zinazouzika haraka, na upate arifa za rangi — Nyekundu stoo kidogo, Njano wastani, Kijani nzuri."
+        },
+        {
+          "title": "Mauzo na POS",
+          "desc": "Chakata oda kwa pesa za simu, kadi na taslimu. Kila muamala unapata namba ya kipekee ya TXN kwa uthibitisho."
+        },
+        {
+          "title": "Ufuatiliaji wa Faida",
+          "desc": "Inakokotoa kiotomatiki Mauzo ya Jumla ya Kila Siku, Faida Jumla, Matumizi ya Jumla ya Kila Siku, na Faida Kamili pamoja na ripoti za kina."
+        },
+        {
+          "title": "Usimamizi wa Mikopo",
+          "desc": "Fuatilia aina mbalimbali za mikopo — Benki, ya Kirafiki, Amana Cash — pamoja na salio, mipango ya marejesho, riba na hali."
+        },
+        {
+          "title": "Mikopo ya Wateja",
+          "desc": "Rekodi mauzo ya mkopo (Kopsha) pamoja na taarifa za mteja, tarehe za kulipa, vikumbusho, na ufuatiliaji wa malipo."
+        },
+        {
+          "title": "Mtandao wa Usafirishaji",
+          "desc": "Wateja wanaomba usafirishaji, wasafirishaji wanakubali au wanajadili. Fuatilia eneo la kuchukulia, unakoenda, bei na hali moja kwa moja."
+        }
+      ]
+    },
+    "howItWorks": {
+      "eyebrow": "Jinsi Inavyofanya Kazi",
+      "title": "Hatua Nne Rahisi",
+      "steps": [
+        {
+          "title": "Fungua Akaunti Yako",
+          "desc": "Jisajili kwa dakika chache kwa taarifa za biashara yako. Hakuna kadi ya benki inayohitajika."
+        },
+        {
+          "title": "Sanidi Duka Lako",
+          "desc": "Ongeza bidhaa, sanidi mipangilio, na waalike wafanyakazi wako."
+        },
+        {
+          "title": "Anza Kuuza",
+          "desc": "Chakata oda, pokea malipo, na simamia stoo kuanzia siku ya kwanza."
+        },
+        {
+          "title": "Kua na Kupanuka",
+          "desc": "Pata maarifa, panuka kwenye masoko mapya, na ikuze biashara yako."
+        }
+      ]
+    },
+    "testimonials": {
+      "eyebrow": "Shuhuda",
+      "title1": "Wanapendwa na Wamiliki wa Biashara Kote",
+      "title2": "Afrika",
+      "list": [
+        {
+          "quote": "M-TAI imebadilisha kabisa namna ninavyosimamia duka langu. Kuanzia stoo hadi mauzo, kila kitu kiko sehemu moja. Nimeongeza mapato yangu mara mbili ndani ya miezi 6 na timu yangu inapenda jinsi ilivyo rahisi kutumia.",
+          "name": "Amina Hassan",
+          "role": "Mmiliki wa Duka, Dar es Salaam"
+        },
+        {
+          "quote": "Takwimu zake zenyewe zinatosha. Naona hasa kinachouzika na kisichouzika. Kuagiza stoo imekuwa rahisi sana.",
+          "name": "Joseph Mwangi",
+          "role": "Muuzaji wa Rejareja, Nairobi"
+        },
+        {
+          "quote": "Usanidi ulikuwa wa haraka sana. Ndani ya siku moja tulikuwa tunachakata oda na kufuatilia stoo. Timu yangu inaupenda.",
+          "name": "Sarah Kimani",
+          "role": "Meneja, Kampala"
+        },
+        {
+          "quote": "Mwishowe mfumo unaoelewa biashara za Afrika. Muunganiko wa pesa za simu unafanya kazi bila kasoro.",
+          "name": "David Ochieng",
+          "role": "Muuzaji wa Jumla, Lagos"
+        },
+        {
+          "quote": "Kipengele cha kufuatilia usafirishaji kimetuokoa muda mwingi. Wateja wanapenda kujua oda zao ziko wapi.",
+          "name": "Grace Mwende",
+          "role": "Biashara ya Mtandaoni, Accra"
+        },
+        {
+          "quote": "Ni uamuzi bora tulioufanya kwa biashara yetu. Faida ilionekana ndani ya mwezi wa kwanza wa kutumia M-TAI.",
+          "name": "Peter Otieno",
+          "role": "Mmiliki wa Mgahawa, Mombasa"
+        },
+        {
+          "quote": "Huduma kwa wateja ni nzuri sana. Kila tunapokuwa na tatizo, linatatuliwa ndani ya saa chache. Wanaaminika kweli.",
+          "name": "Fatima Ali",
+          "role": "Mmiliki wa Butiki, Zanzibar"
+        }
+      ]
+    },
+    "news": {
+      "eyebrow": "Chumba cha Habari",
+      "title": "Kwenye Habari",
+      "viewAll": "Angalia Zote →",
+      "list": [
+        "M-TAI Yapata Mtaji wa Ukuaji ili Kupanua Teknolojia ya Biashara Kote Afrika",
+        "Jinsi Zana za Kidijitali Zinavyobadilisha Usimamizi wa Biashara Ndogo Afrika Mashariki",
+        "M-TAI Yashirikiana na Wasambazaji Wakubwa kwa Mnyororo Bora wa Ugavi"
+      ]
+    },
+    "mainCta": {
+      "badge": "Ofa ya Muda Mfupi",
+      "title1": "Uko Tayari Kuikuza",
+      "title2": "Biashara Yako?",
+      "subtitle": "Jiunge na biashara 500+ kote Afrika zinazotumia M-TAI kurahisisha shughuli, kuongeza mauzo, na kukua haraka.",
+      "cta1": "Anza Jaribio Bure",
+      "cta2": "Ongea na Mauzo",
+      "note": "Hakuna kadi ya benki inayohitajika · Usanidi chini ya saa 48"
+    },
+    "footer": {
+      "tagline": "Mfumo mmoja wa kusimamia biashara uliojengwa kwa ajili ya makampuni ya Afrika.",
+      "product": "Bidhaa",
+      "company": "Kampuni",
+      "resources": "Rasilimali",
+      "legal": "Sheria",
+      "productLinks": [
+        "Vipengele",
+        "Bei",
+        "Miunganiko",
+        "Mabadiliko",
+        "Nyaraka za API"
+      ],
+      "companyLinks": [
+        "Kutuhusu",
+        "Ajira",
+        "Habari",
+        "Washirika",
+        "Wasiliana"
+      ],
+      "resourceLinks": [
+        "Blogu",
+        "Uchunguzi Kifani",
+        "Kituo cha Msaada",
+        "Jumuiya",
+        "Hali ya Mfumo"
+      ],
+      "legalLinks": [
+        "Sera ya Faragha",
+        "Masharti ya Huduma",
+        "Sera ya Vidakuzi",
+        "Usalama",
+        "GDPR"
+      ],
+      "rights": "Haki zote zimehifadhiwa."
+    },
+    "about": {
+      "heroEyebrow": "Kutuhusu",
+      "heroTitle1": "Kudijitalisha",
+      "heroTitle2": "Biashara za Afrika",
+      "heroSubtitle": "M-TAI ilizaliwa kutokana na imani rahisi: biashara za Afrika zinastahili zana bora za kidijitali, zilizojengwa kwa namna zinavyofanya kazi.",
+      "statLabels": [
+        "Biashara Zinazohudumiwa",
+        "Nchi",
+        "Miamala Iliyochakatwa",
+        "Upatikanaji"
+      ],
+      "storyEyebrow": "Hadithi Yetu",
+      "storyTitle": "Kutoka Wazo hadi Matokeo",
+      "storyImageAlt": "Timu yetu",
+      "para1": "M-TAI ilianza mwaka 2024 pale mwanzilishi wetu, James Mwangi, aliposhuhudia mama yake akipata shida kusimamia duka lake kwa kutumia karatasi na majedwali. Alikuwa anapoteza hesabu za stoo, anakosa fursa za mauzo, na anatumia saa nyingi kwenye uhasibu wa mikono.",
+      "para2": "Tuligundua mamilioni ya wamiliki wa biashara ndogo kote Afrika wanakumbana na changamoto hizo kila siku. Mifumo iliyopo ilikuwa ama ghali mno, ngumu mno, au imejengwa kwa masoko ya Magharibi bila kuelewa uhalisia wa biashara za Afrika.",
+      "para3": "Leo, M-TAI inahudumia biashara 500+ katika nchi 15+, ikichakata zaidi ya miamala milioni 50. Tumeanza tu.",
+      "valuesEyebrow": "Maadili Yetu",
+      "valuesTitle": "Kinachotusukuma",
+      "values": [
+        {
+          "title": "Imejengwa kwa Ajili ya Afrika",
+          "desc": "Tunabuni kwa kuzingatia uhalisia wa biashara za Afrika — kuanzia pesa za simu hadi mifumo inayofanya kazi bila intaneti."
+        },
+        {
+          "title": "Mteja Kwanza",
+          "desc": "Kila kipengele huanza na mazungumzo na wateja wetu. Mafanikio yao ni mafanikio yetu."
+        },
+        {
+          "title": "Usalama na Imani",
+          "desc": "Usalama wa kiwango cha kibiashara unalinda data yako. Tunajipatia imani yako kila siku."
+        }
+      ],
+      "teamEyebrow": "Timu Yetu",
+      "teamTitle": "Kutana na Watu Nyuma ya M-TAI",
+      "teamRoles": [
+        "Mwanzilishi na Mkurugenzi",
+        "Mkuu wa Bidhaa",
+        "Mkurugenzi wa Teknolojia",
+        "Mkuu wa Uendeshaji"
+      ]
+    },
+    "contact": {
+      "heroEyebrow": "Wasiliana Nasi",
+      "heroTitle": "Wasiliana Nasi",
+      "heroSubtitle": "Una swali au unataka kujua zaidi? Tungependa kusikia kutoka kwako.",
+      "successTitle": "Ujumbe Umetumwa!",
+      "successMsg": "Tutakujibu ndani ya saa 24.",
+      "firstName": "Jina la Kwanza",
+      "lastName": "Jina la Ukoo",
+      "email": "Barua Pepe",
+      "subject": "Kichwa",
+      "message": "Ujumbe",
+      "send": "Tuma Ujumbe",
+      "firstNamePh": "Juma",
+      "lastNamePh": "Mwangi",
+      "emailPh": "juma@kampuni.com",
+      "subjectPh": "Tunawezaje kukusaidia?",
+      "messagePh": "Tuambie zaidi...",
+      "infoLabels": [
+        "Barua Pepe",
+        "Simu",
+        "Mahali"
+      ],
+      "officeHours": "Saa za Ofisi",
+      "hoursLines": [
+        "Jumatatu - Ijumaa: 8:00 Asubuhi - 6:00 Mchana",
+        "Jumamosi: 9:00 Asubuhi - 1:00 Mchana",
+        "Jumapili: Imefungwa"
+      ]
+    },
+    "faq": {
+      "heroEyebrow": "Maswali",
+      "heroTitle1": "Maswali Yanayoulizwa",
+      "heroTitle2": "Mara kwa Mara",
+      "heroSubtitle": "Kila unachohitaji kujua kuhusu M-TAI. Hukupati jibu? Wasiliana na timu yetu ya msaada.",
+      "list": [
+        {
+          "q": "M-TAI ni nini?",
+          "a": "M-TAI ni mfumo mmoja wa kusimamia biashara uliojengwa kwa ajili ya makampuni ya Afrika. Unahusu stoo, mauzo (POS), usimamizi wa wateja, takwimu, usafirishaji, na zaidi."
+        },
+        {
+          "q": "Inagharimu kiasi gani?",
+          "a": "M-TAI inatoa kifurushi cha bure kwa biashara ndogo na vifurushi nafuu vya kulipia kuanzia $19 kwa mwezi. Wasiliana nasi kwa bei za makampuni makubwa."
+        },
+        {
+          "q": "Data yangu iko salama?",
+          "a": "Ndiyo. Tunatumia usimbaji wa kisasa, nakala za kudumu, na miundombinu inayokidhi viwango vya SOC 2. Data yako iko salama."
+        },
+        {
+          "q": "Mnasaidia pesa za simu?",
+          "a": "Kabisa. M-TAI inaunganika na M-Pesa, Airtel Money, Tigo Pesa, na watoa huduma wengine wakubwa wa pesa za simu kote Afrika."
+        },
+        {
+          "q": "Naweza kuitumia bila intaneti?",
+          "a": "Ndiyo. M-TAI inasaidia hali ya bila intaneti kwa shughuli muhimu. Data inasawazishwa kiotomatiki ukiunganishwa tena."
+        },
+        {
+          "q": "Usanidi unachukua muda gani?",
+          "a": "Biashara nyingi zinaanza kutumia ndani ya saa 48. Tunatoa msaada wa bure wa kuanza na kuhamisha data."
+        },
+        {
+          "q": "Mnatoa mafunzo?",
+          "a": "Ndiyo. Kila kifurushi kinajumuisha video za mafunzo, nyaraka, na vipindi vya mafunzo ya moja kwa moja. Vifurushi vya juu vinapata mameneja wa akaunti wa kipekee."
+        },
+        {
+          "q": "Naweza waalika timu yangu?",
+          "a": "Ndiyo. Unaweza kuongeza wafanyakazi wengi bila kikomo pamoja na udhibiti wa ufikiaji kwa majukumu. Kila mtu anapata akaunti yake na ruhusa maalum."
+        },
+        {
+          "q": "Mnaunganika na mifumo gani?",
+          "a": "Tunaunganika na watoa huduma wakuu wa malipo, zana za uhasibu (QuickBooks, Xero), na tunatoa API wazi kwa miunganiko maalum."
+        },
+        {
+          "q": "Kuna programu ya simu?",
+          "a": "Ndiyo. M-TAI ina programu za iOS na Android za kusimamia biashara yako ukiwa popote, ikiwa na uwezo wa kufanya kazi bila intaneti."
+        }
+      ],
+      "stillTitle": "Bado una maswali?",
+      "stillSubtitle": "Timu yetu iko hapa kukusaidia.",
+      "contactCta": "Wasiliana na Msaada"
+    },
+    "productsPage": {
+      "heroEyebrow": "Bidhaa",
+      "heroTitle1": "Kila Unachohitaji",
+      "heroTitle2": "Kupanuka",
+      "heroSubtitle": "Mkusanyiko kamili wa zana zilizoundwa kusaidia biashara za Afrika kusimamia, kukua, na kustawi.",
+      "list": [
+        {
+          "name": "Usimamizi wa Stoo",
+          "desc": "Fuatilia viwango vya stoo, weka viwango vya kuagiza upya, simamia tarehe za kuharibika, na upate arifa moja kwa moja katika matawi yote.",
+          "features": [
+            "Ufuatiliaji wa stoo moja kwa moja",
+            "Arifa za stoo kidogo",
+            "Usimamizi wa tarehe za kuharibika",
+            "Msaada wa matawi mengi"
+          ]
+        },
+        {
+          "name": "Mauzo (POS)",
+          "desc": "Chakata miamala haraka kwa pesa za simu, kadi, na ankara za papo hapo.",
+          "features": [
+            "Muunganiko wa pesa za simu",
+            "Malipo ya kadi",
+            "Ankara za papo hapo",
+            "Utoaji wa risiti"
+          ]
+        },
+        {
+          "name": "Usimamizi wa Wateja",
+          "desc": "Jenga uhusiano wa kudumu kupitia wasifu wa wateja, historia ya manunuzi, na programu za uaminifu.",
+          "features": [
+            "Wasifu wa wateja",
+            "Historia ya manunuzi",
+            "Programu za uaminifu",
+            "Zana za mawasiliano"
+          ]
+        },
+        {
+          "name": "Takwimu na Ripoti",
+          "desc": "Fanya maamuzi yanayotokana na data kupitia dashibodi zinazoonyesha mienendo ya mauzo, viwango vya stoo na maarifa ya wateja.",
+          "features": [
+            "Dashibodi moja kwa moja",
+            "Takwimu za mauzo",
+            "Ripoti za stoo",
+            "Uwezo wa kuhamisha"
+          ]
+        },
+        {
+          "name": "Usimamizi wa Wafanyakazi",
+          "desc": "Simamia timu yako kwa ufikiaji wa majukumu, upangaji wa zamu, na ufuatiliaji wa utendaji.",
+          "features": [
+            "Ufikiaji kwa majukumu",
+            "Upangaji wa zamu",
+            "Ufuatiliaji wa utendaji",
+            "Muunganiko wa mishahara"
+          ]
+        },
+        {
+          "name": "Usafirishaji",
+          "desc": "Simamia usafirishaji, fuatilia mizigo, na ratibu mtandao wako wa usafiri kwa ufanisi.",
+          "features": [
+            "Ufuatiliaji wa usafirishaji",
+            "Uboreshaji wa njia",
+            "Usimamizi wa wasafirishaji",
+            "Uthibitisho wa uwasilishaji"
+          ]
+        }
+      ],
+      "ctaTitle": "Uko Tayari Kuanza?",
+      "ctaSubtitle": "Jiunge na biashara 500+ zinazotumia M-TAI.",
+      "ctaButton": "Anza Jaribio Bure"
+    }
   }
 }

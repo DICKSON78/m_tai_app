@@ -1,79 +1,64 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
-const testimonials = [
+const testimonialMeta = [
   {
-    quote: "M-TAI transformed how I manage my shop. From inventory to sales, everything is in one place. I've doubled my revenue in 6 months and my team loves how easy it is to use.",
-    name: "Amina Hassan",
-    role: "Shop Owner, Dar es Salaam",
     initials: "AH",
-    img: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=400&fit=crop&crop=face",
+    img: "https://images.pexels.com/photos/20122943/pexels-photo-20122943.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
   },
   {
-    quote: "The analytics alone are worth it. I can see exactly what's selling and what's not. Makes ordering stock so much easier.",
-    name: "Joseph Mwangi",
-    role: "Retailer, Nairobi",
     initials: "JM",
-    img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+    img: "https://images.pexels.com/photos/12455720/pexels-photo-12455720.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
   },
   {
-    quote: "Setup was incredibly fast. Within a day we were processing orders and tracking inventory. My team loves it.",
-    name: "Sarah Kimani",
-    role: "Manager, Kampala",
     initials: "SK",
-    img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop&crop=face",
+    img: "https://images.pexels.com/photos/33837391/pexels-photo-33837391.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
   },
   {
-    quote: "Finally a platform that understands African business. Mobile money integration works flawlessly.",
-    name: "David Ochieng",
-    role: "Wholesaler, Lagos",
     initials: "DO",
-    img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face",
+    img: "https://images.pexels.com/photos/19518395/pexels-photo-19518395.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
   },
   {
-    quote: "The delivery tracking feature saved us so much time. Customers love knowing where their orders are.",
-    name: "Grace Mwende",
-    role: "E-commerce, Accra",
     initials: "GM",
-    img: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&h=400&fit=crop&crop=face",
+    img: "https://images.pexels.com/photos/21674913/pexels-photo-21674913.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
   },
   {
-    quote: "Best decision we made for our business. The ROI was visible within the first month of using M-TAI.",
-    name: "Peter Otieno",
-    role: "Restaurant Owner, Mombasa",
     initials: "PO",
-    img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face",
+    img: "https://images.pexels.com/photos/21852749/pexels-photo-21852749.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
   },
   {
-    quote: "Customer support is amazing. Anytime we have an issue, it's resolved within hours. Truly reliable.",
-    name: "Fatima Ali",
-    role: "Boutique Owner, Zanzibar",
     initials: "FA",
-    img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face",
+    img: "https://images.pexels.com/photos/33569519/pexels-photo-33569519.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
   },
 ]
 
 export default function Testimonial() {
+  const { t } = useTranslation()
   const [current, setCurrent] = useState(0)
+  const list = t('site.testimonials.list', { returnObjects: true })
+  const testimonials = Array.isArray(list) ? list : []
 
   useEffect(() => {
+    if (testimonials.length === 0) return
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % testimonials.length)
     }, 5000)
     return () => clearInterval(timer)
-  }, [])
+  }, [testimonials.length])
 
-  const t = testimonials[current]
+  const item = testimonials[current] || {}
+  const meta = testimonialMeta[current] || {}
 
   return (
     <section className="py-24 lg:py-32 bg-gray-50 relative">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <span className="inline-block text-[#00D4AA] text-xs font-bold uppercase tracking-widest mb-4 border-b-2 border-[#00D4AA]/30 pb-1">
-            Testimonials
+            {t('site.testimonials.eyebrow')}
           </span>
           <h2 className="text-4xl lg:text-5xl font-black text-[#0A140C] tracking-tight">
-            Loved by Business Owners Across{' '}
-            <span className="text-[#00D4AA]">Africa</span>
+            {t('site.testimonials.title1')}{' '}
+            <span className="text-[#00D4AA]">{t('site.testimonials.title2')}</span>
           </h2>
         </div>
 
@@ -89,16 +74,16 @@ export default function Testimonial() {
               </svg>
 
               <p className="text-white/90 text-lg lg:text-xl leading-relaxed mb-8 transition-all duration-500">
-                "{t.quote}"
+                "{item.quote || ''}"
               </p>
 
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00D4AA] to-[#00B894] flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">{t.initials}</span>
+                  <span className="text-white text-sm font-bold">{meta.initials || ''}</span>
                 </div>
                 <div>
-                  <p className="text-white font-semibold">{t.name}</p>
-                  <p className="text-white/50 text-sm">{t.role}</p>
+                  <p className="text-white font-semibold">{item.name || ''}</p>
+                  <p className="text-white/50 text-sm">{item.role || ''}</p>
                 </div>
                 <div className="hidden sm:flex items-center gap-1 ml-auto">
                   {[1,2,3,4,5].map(s => (
@@ -111,8 +96,8 @@ export default function Testimonial() {
             </div>
 
             <img
-              src={t.img}
-              alt={t.name}
+              src={meta.img || ''}
+              alt={item.name || ''}
               className="hidden lg:block w-48 h-48 rounded-2xl object-cover border border-white/10 shrink-0 transition-all duration-500"
               loading="lazy"
             />
