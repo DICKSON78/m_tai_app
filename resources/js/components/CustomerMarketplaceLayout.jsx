@@ -161,6 +161,23 @@ export default function CustomerMarketplaceLayout({ children }) {
                             )}
                         </form>
 
+                        {/* Mobile search (in top bar) */}
+                        <form onSubmit={handleSearch} className="md:hidden flex-1 min-w-0 mx-1">
+                            <div className="flex items-center bg-white rounded-full overflow-hidden shadow-lg shadow-black/20">
+                                <div className="pl-3 text-gray-400 shrink-0">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                                <input
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder={t("common.search")}
+                                    className="flex-1 px-2 py-2 text-sm text-gray-800 outline-none bg-transparent min-w-0"
+                                />
+                            </div>
+                        </form>
+
                         <div className="flex items-center gap-3 shrink-0">
                             {/* Cart */}
                             <Link
@@ -213,28 +230,6 @@ export default function CustomerMarketplaceLayout({ children }) {
                                 <LanguageSwitcher className="text-white" />
                             </span>
                         </div>
-                    </div>
-
-                    {/* Mobile search row (Instagram-style, below top bar) */}
-                    <div className="md:hidden pb-3">
-                        <form onSubmit={handleSearch}>
-                            <div className="flex items-center bg-white rounded-full overflow-hidden shadow-lg shadow-black/20">
-                                <div className="pl-4 text-gray-400 shrink-0">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </div>
-                                <input
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    placeholder={t("shop.search_products")}
-                                    className="flex-1 px-3 py-2.5 text-sm text-gray-800 outline-none bg-transparent min-w-0"
-                                />
-                                <button type="submit" className="px-5 py-2.5 text-sm font-bold text-[#0A140C] shrink-0 bg-gradient-to-r from-[#00D4AA] to-[#00B894]">
-                                    Search
-                                </button>
-                            </div>
-                        </form>
                     </div>
 
                     {/* Mobile "More" panel */}
