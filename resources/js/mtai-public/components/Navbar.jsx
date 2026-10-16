@@ -64,15 +64,15 @@ export default function Navbar() {
             </div>
 
             <div className="hidden lg:flex items-center gap-3">
-              <Link to="/login" className="px-5 py-2.5 text-sm font-semibold text-white/80 hover:text-white transition-colors duration-300">
-                {t("common.login")}
-              </Link>
-              <LanguageSwitcher className="text-white" />
+              <LanguageSwitcher variant="dropdown" className="text-white" />
               <Link
                 to="/register"
                 className="px-6 py-2.5 bg-gradient-to-r from-[#00D4AA] to-[#00B894] text-[#0A140C] text-sm font-bold rounded-full hover:shadow-lg hover:shadow-[#00D4AA]/25 transition-all duration-300 hover:scale-105"
               >
                 {t("common.register")}
+              </Link>
+              <Link to="/login" className="px-6 py-2.5 text-sm font-semibold text-white border border-white/25 rounded-full hover:bg-white/10 hover:border-white/40 transition-all duration-300">
+                {t("common.login")}
               </Link>
             </div>
 
@@ -108,13 +108,13 @@ export default function Navbar() {
             </ul>
             <div className="flex flex-col gap-3">
               <div className="flex justify-center py-2">
-                <LanguageSwitcher className="text-white justify-center" />
+                <LanguageSwitcher variant="dropdown" className="text-white justify-center" />
               </div>
-              <Link to="/login" onClick={() => setOpen(false)} className="text-center px-6 py-3 border border-white/20 text-white text-sm font-semibold rounded-full hover:bg-white/5 transition-all">
-                {t("common.login")}
-              </Link>
               <Link to="/register" onClick={() => setOpen(false)} className="text-center px-6 py-3 bg-gradient-to-r from-[#00D4AA] to-[#00B894] text-[#0A140C] text-sm font-bold rounded-full">
                 {t("common.register")}
+              </Link>
+              <Link to="/login" onClick={() => setOpen(false)} className="text-center px-6 py-3 border border-white/25 text-white text-sm font-semibold rounded-full hover:bg-white/10 transition-all">
+                {t("common.login")}
               </Link>
             </div>
           </div>
