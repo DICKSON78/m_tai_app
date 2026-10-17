@@ -6,10 +6,10 @@ import LocationFields from '../../components/casfeta/LocationFields';
 import StreetField from '../../components/casfeta/StreetField';
 
 const COUNTRIES = [
-    { code: 'TZ', name: 'Tanzania', dial: '+255', flag: '🇹🇿' },
-    { code: 'KE', name: 'Kenya', dial: '+254', flag: '🇰🇪' },
-    { code: 'UG', name: 'Uganda', dial: '+256', flag: '🇺🇬' },
-    { code: 'RW', name: 'Rwanda', dial: '+250', flag: '🇷🇼' },
+    { code: 'TZ', name: 'Tanzania', dial: '+255' },
+    { code: 'KE', name: 'Kenya', dial: '+254' },
+    { code: 'UG', name: 'Uganda', dial: '+256' },
+    { code: 'RW', name: 'Rwanda', dial: '+250' },
 ];
 
 const INDUSTRIES = [
@@ -256,7 +256,7 @@ export default function RegisterSellerPage() {
                                 <div className="flex gap-2">
                                     <select name="countryCode" value={formData.countryCode} onChange={handleChange} className="w-32 px-3 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 outline-none bg-white">
                                         {COUNTRIES.map(c => (
-                                            <option key={c.code} value={c.dial}>{c.flag} {c.dial}</option>
+                                            <option key={c.code} value={c.dial}>{c.code} {c.dial}</option>
                                         ))}
                                     </select>
                                     <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:ring-2 focus:ring-[#00D4AA] focus:border-[#00D4AA]" placeholder="712 345 678" required />

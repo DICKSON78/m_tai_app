@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Salad, Zap } from 'lucide-react';
 import api from '../services/api';
 
 const PLACEHOLDER_COLORS = ['#0FAE8C', '#2F80ED', '#F2994A', '#EB5757', '#9B51E0', '#27AE60'];
 
 const ADS = [
-    { title: 'Shop the freshest', sub: 'Farm produce delivered', emoji: '🥗' },
-    { title: 'Flash Sale Today', sub: 'Up to 50% off essentials', emoji: '⚡' },
+    { title: 'Shop the freshest', sub: 'Farm produce delivered', Icon: Salad },
+    { title: 'Flash Sale Today', sub: 'Up to 50% off essentials', Icon: Zap },
 ];
 
 export default function CustomerRightRail() {
@@ -50,7 +51,7 @@ export default function CustomerRightRail() {
                             <p className="text-sm font-bold leading-tight">{ad.title}</p>
                             <p className="text-xs text-white/80 mt-0.5">{ad.sub}</p>
                         </div>
-                        <span className="text-2xl">{ad.emoji}</span>
+                        <span className="text-white"><ad.Icon size={26} strokeWidth={2} /></span>
                     </div>
                 </Link>
             ))}

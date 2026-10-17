@@ -367,7 +367,7 @@ export default function OrderDetailScreen() {
                             active && styles.timelineDotActive,
                           ]}
                         >
-                          {done ? <Text style={styles.timelineCheck}>✓</Text> : null}
+                          {done ? <MaterialIcons name="check" size={13} color={COLORS.primaryDark} /> : null}
                         </View>
                         {!isLast ? (
                           <View

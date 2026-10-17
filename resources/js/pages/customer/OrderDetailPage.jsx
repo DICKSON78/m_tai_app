@@ -6,13 +6,13 @@ import CustomerPageHeader from '../../components/CustomerPageHeader';
 import { FileText } from 'lucide-react';
 
 const STATUS_CONFIG = {
-    pending: { label: 'Pending', badge: 'badge badge-yellow', icon: '⏳' },
-    confirmed: { label: 'Confirmed', badge: 'badge badge-blue', icon: '✓' },
-    processing: { label: 'Processing', badge: 'badge badge-purple', icon: '⚙' },
-    completed: { label: 'Completed', badge: 'badge badge-green', icon: '✓' },
-    cancelled: { label: 'Cancelled', badge: 'badge badge-red', icon: '✕' },
-    delivered: { label: 'Delivered', badge: 'badge badge-indigo', icon: '✓' },
-    shipped: { label: 'Shipped', badge: 'badge badge-cyan', icon: '🚚' },
+    pending: { label: 'Pending', badge: 'badge badge-yellow' },
+    confirmed: { label: 'Confirmed', badge: 'badge badge-blue' },
+    processing: { label: 'Processing', badge: 'badge badge-purple' },
+    completed: { label: 'Completed', badge: 'badge badge-green' },
+    cancelled: { label: 'Cancelled', badge: 'badge badge-red' },
+    delivered: { label: 'Delivered', badge: 'badge badge-indigo' },
+    shipped: { label: 'Shipped', badge: 'badge badge-cyan' },
 };
 
 const PAYMENT_STATUS_CONFIG = {
@@ -176,7 +176,7 @@ export default function OrderDetailPage() {
         }
     };
 
-    const getStatusConfig = (status) => STATUS_CONFIG[status] || { label: status, badge: 'badge badge-gray', icon: '•' };
+    const getStatusConfig = (status) => STATUS_CONFIG[status] || { label: status, badge: 'badge badge-gray' };
     const getPaymentStatusConfig = (status) => PAYMENT_STATUS_CONFIG[status] || { label: status, badge: 'badge badge-gray' };
 
     if (loading) {

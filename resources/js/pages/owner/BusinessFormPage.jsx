@@ -7,7 +7,7 @@ import FormField from '../../components/casfeta/FormField';
 import ActionBar from '../../components/casfeta/ActionBar';
 import LocationFields from '../../components/casfeta/LocationFields';
 import StreetField from '../../components/casfeta/StreetField';
-import { Store, Tag, MapPin, Clock, CreditCard, Image as ImageIcon, Upload } from 'lucide-react';
+import { Store, Tag, MapPin, Clock, CreditCard, Image as ImageIcon, Upload, ShoppingCart, UtensilsCrossed, Pill, Scissors, Apple, Smartphone } from 'lucide-react';
 
 const BUSINESS_TYPES = [
     { value: 'Duka', label: 'Shop' },
@@ -20,12 +20,12 @@ const BUSINESS_TYPES = [
 ];
 
 const SHOP_TEMPLATES = [
-    { id: 'retail', name: 'Duka la Rejareja', emoji: '🛒', type: 'Duka', category: 'General Retail', working_hours_start: '08:00', working_hours_end: '21:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
-    { id: 'restaurant', name: 'Mgahawa', emoji: '🍽️', type: 'Hoteli', category: 'Food & Restaurant', working_hours_start: '07:00', working_hours_end: '22:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
-    { id: 'pharmacy', name: 'Pharmacy', emoji: '💊', type: 'Pharmacy', category: 'Health & Pharmacy', working_hours_start: '08:00', working_hours_end: '20:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
-    { id: 'salon', name: 'Saluni', emoji: '💇', type: 'Vitolani', category: 'Beauty & Salon', working_hours_start: '09:00', working_hours_end: '19:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
-    { id: 'grocery', name: 'Grocery', emoji: '🥬', type: 'Duka', category: 'Groceries', working_hours_start: '07:00', working_hours_end: '21:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
-    { id: 'electronics', name: 'Electronics', emoji: '📱', type: 'Duka', category: 'Electronics', working_hours_start: '09:00', working_hours_end: '20:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+    { id: 'retail', name: 'Duka la Rejareja', Icon: ShoppingCart, type: 'Duka', category: 'General Retail', working_hours_start: '08:00', working_hours_end: '21:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+    { id: 'restaurant', name: 'Mgahawa', Icon: UtensilsCrossed, type: 'Hoteli', category: 'Food & Restaurant', working_hours_start: '07:00', working_hours_end: '22:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+    { id: 'pharmacy', name: 'Pharmacy', Icon: Pill, type: 'Pharmacy', category: 'Health & Pharmacy', working_hours_start: '08:00', working_hours_end: '20:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+    { id: 'salon', name: 'Saluni', Icon: Scissors, type: 'Vitolani', category: 'Beauty & Salon', working_hours_start: '09:00', working_hours_end: '19:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+    { id: 'grocery', name: 'Grocery', Icon: Apple, type: 'Duka', category: 'Groceries', working_hours_start: '07:00', working_hours_end: '21:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+    { id: 'electronics', name: 'Electronics', Icon: Smartphone, type: 'Duka', category: 'Electronics', working_hours_start: '09:00', working_hours_end: '20:00', working_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
 ];
 
 const WORKING_DAYS = [
@@ -202,7 +202,9 @@ export default function BusinessFormPage() {
                                     onClick={() => handleTemplateSelect(template)}
                                     className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border transition cursor-pointer ${templateId === template.id ? 'border-[#00D4AA] bg-[#00D4AA]/10 ring-2 ring-[#00D4AA]/30' : 'border-gray-200 hover:border-[#00D4AA] hover:bg-[#00D4AA]/5'}`}
                                 >
-                                    <span className="text-3xl">{template.emoji}</span>
+                                    <span className="text-[#00D4AA]">
+                                        <template.Icon size={30} strokeWidth={1.75} />
+                                    </span>
                                     <span className="text-sm font-semibold text-gray-800">{template.name}</span>
                                     <span className="text-xs text-gray-500">{template.category}</span>
                                 </button>

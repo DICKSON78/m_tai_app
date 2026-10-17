@@ -59,7 +59,7 @@ export default function CustomerDeliveriesPage() {
                 ) : deliveries.length === 0 ? (
                     <div className="text-center py-16">
                         <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <span className="text-2xl">📦</span>
+                            <Truck className="w-7 h-7 text-gray-400" strokeWidth={1.75} />
                         </div>
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">No deliveries yet</h3>
                         <p className="text-sm text-gray-500 mb-6">Your order deliveries will appear here</p>

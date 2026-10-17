@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import PageHeader from '../../components/casfeta/PageHeader';
-import { Warehouse as WarehouseIcon, Plus, Pencil, Trash2, X, MapPin, ArrowRightLeft, Package, ChevronDown, ChevronRight } from 'lucide-react';
+import { Warehouse as WarehouseIcon, Plus, Pencil, Trash2, X, Check, MapPin, ArrowRightLeft, Package, ChevronDown, ChevronRight } from 'lucide-react';
 
 const STATUS_COLORS = { active: 'bg-green-100 text-green-700', inactive: 'bg-gray-100 text-gray-500', pending: 'bg-yellow-100 text-yellow-700', in_transit: 'bg-blue-100 text-blue-700', received: 'bg-green-100 text-green-700', cancelled: 'bg-red-100 text-red-600' };
 const TEMP_COLORS = { ambient: 'bg-gray-100 text-gray-600', cold: 'bg-blue-100 text-blue-700', frozen: 'bg-indigo-100 text-indigo-700' };
@@ -267,8 +267,8 @@ export default function WarehousePage() {
                                     <td className="px-6 py-3"><span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[t.status]}`}>{t.status?.replace('_', ' ')}</span></td>
                                     <td className="px-6 py-3"><div className="flex items-center justify-end gap-1">
                                         {t.status === 'pending' && <>
-                                            <button onClick={() => handleTransferAction(t, 'confirm')} className="p-2 text-green-500 hover:bg-green-50 rounded-lg" title="Confirm Received">✓</button>
-                                            <button onClick={() => handleTransferAction(t, 'cancel')} className="p-2 text-red-400 hover:bg-red-50 rounded-lg" title="Cancel">✕</button>
+                                            <button onClick={() => handleTransferAction(t, 'confirm')} className="p-2 text-green-500 hover:bg-green-50 rounded-lg" title="Confirm Received"><Check size={14} /></button>
+                                            <button onClick={() => handleTransferAction(t, 'cancel')} className="p-2 text-red-400 hover:bg-red-50 rounded-lg" title="Cancel"><X size={14} /></button>
                                         </>}
                                         <button onClick={() => handleDelete(t)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg"><Trash2 size={14} /></button>
                                     </div></td>

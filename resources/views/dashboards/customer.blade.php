@@ -6,7 +6,7 @@
 <div class="space-y-6">
     {{-- Welcome --}}
     <div class="bg-gradient-to-r from-primary to-blue-400 rounded-2xl p-6 text-white">
-        <h2 class="text-2xl font-bold">Karibu, {{ Auth::user()->name }}! 👋</h2>
+        <h2 class="text-2xl font-bold">Karibu, {{ Auth::user()->name }}!</h2>
         <p class="mt-1 text-blue-100">Tumia M-TAI kununua bidhaa kwa urahisi na haraka.</p>
         <a href="{{ url('/customer/shops') }}" class="inline-flex items-center mt-4 bg-white text-primary px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-50 transition">
             Tazama Maduka

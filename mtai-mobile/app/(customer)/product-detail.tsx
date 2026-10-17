@@ -537,7 +537,7 @@ export default function ProductDetailScreen() {
           </View>
 
           <Button
-            title={justAdded ? 'Added to Cart ✓' : `Add to Cart · ${formatTZS(lineTotal)}`}
+            title={justAdded ? 'Added to Cart' : `Add to Cart · ${formatTZS(lineTotal)}`}
             onPress={handleAddToCart}
             size="lg"
             loading={false}

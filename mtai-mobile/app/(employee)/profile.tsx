@@ -339,7 +339,7 @@ function ConfirmDialog({
       <TouchableOpacity style={styles.dialogBackdrop} activeOpacity={1} onPress={loading ? undefined : onCancel}>
         <TouchableOpacity activeOpacity={1} style={styles.dialogCard}>
           <View style={styles.dialogIconWrap}>
-            <Text style={styles.dialogIcon}>⎋</Text>
+            <MaterialIcons name="logout" size={26} color={COLORS.red[700]} />
           </View>
           <Text style={styles.dialogTitle}>{title}</Text>
           <Text style={styles.dialogMessage}>{message}</Text>
