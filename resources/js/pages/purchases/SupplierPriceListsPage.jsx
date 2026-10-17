@@ -249,7 +249,7 @@ export default function SupplierPriceListsPage() {
                   <label className="block text-xs font-medium text-gray-600 mb-1">Currency</label>
                   <select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}
                     className="w-full px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-[#00D4AA]">
-                    <option value="TZS">TZS</option><option value="KES">KES</option>
+                    <option value="TZS">TZS</option>
                   </select>
                 </div>
                 <div>

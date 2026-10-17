@@ -178,18 +178,6 @@ class DatabaseSeeder extends Seeder
             'is_base' => true,
             'is_active' => true,
         ]);
-        Currency::firstOrCreate(['code' => 'KES'], [
-            'name' => 'Kenyan Shilling',
-            'symbol' => 'KES',
-            'decimal_places' => 2,
-            'is_base' => false,
-            'is_active' => true,
-        ]);
-
-        ExchangeRate::firstOrCreate(
-            ['business_id' => $this->bid, 'from_currency' => 'KES', 'to_currency' => 'TZS', 'effective_date' => '2026-01-01'],
-            ['rate' => 19.50000000, 'is_active' => true]
-        );
     }
 
     private function seedChartOfAccounts(): void

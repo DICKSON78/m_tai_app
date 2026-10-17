@@ -79,7 +79,7 @@ export default function CurrencyPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="text-sm font-medium text-gray-700 mb-1 block">Currency Code *</label>
-                                <input type="text" required maxLength={3} value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="e.g. TZS, KES, UGX" className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/20 uppercase" />
+                                <input type="text" required maxLength={3} value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="e.g. TZS" className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/20 uppercase" />
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-700 mb-1 block">Name *</label>
@@ -87,7 +87,7 @@ export default function CurrencyPage() {
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-700 mb-1 block">Symbol *</label>
-                                <input type="text" required maxLength={10} value={form.symbol} onChange={(e) => setForm({ ...form, symbol: e.target.value })} placeholder="e.g. TSh, KSh, Fr" className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/20" />
+                                <input type="text" required maxLength={10} value={form.symbol} onChange={(e) => setForm({ ...form, symbol: e.target.value })} placeholder="e.g. TSh" className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/20" />
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-700 mb-1 block">Decimal Places</label>
