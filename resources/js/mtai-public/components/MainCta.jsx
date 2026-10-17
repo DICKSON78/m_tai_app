@@ -37,7 +37,7 @@ export default function MainCta() {
         </div>
 
         <a
-          href="/downloads/MTAI-App-v1.0.0.apk"
+          href="/downloads/MTAI-App-v1.1.0.apk"
           download
           className="inline-flex items-center gap-2 px-6 py-3 mb-8 text-sm font-semibold text-[#00D4AA] hover:text-white border border-[#00D4AA]/30 hover:border-[#00D4AA]/60 rounded-full transition-all duration-300"
         >

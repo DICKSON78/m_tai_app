@@ -69,7 +69,7 @@ export default function Hero() {
             {/* APK download */}
             <div className="flex items-center gap-4 fade-in-up-d3 mb-12">
               <a
-                href="/downloads/MTAI-App-v1.0.0.apk"
+                href="/downloads/MTAI-App-v1.1.0.apk"
                 download
                 className="flex items-center gap-3 px-6 py-3 bg-white/5 border border-[#00D4AA]/30 rounded-2xl hover:bg-white/10 hover:border-[#00D4AA]/60 transition-all duration-300"
               >
