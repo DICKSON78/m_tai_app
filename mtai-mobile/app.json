@@ -2,7 +2,7 @@
   "expo": {
     "name": "M-TAI",
     "slug": "mtai-mobile",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "mtai",
@@ -50,7 +50,7 @@
       ]
     ],
     "extra": {
-      "apiUrl": "https://mtai-app-903291264005.africa-south1.run.app"
+      "apiUrl": "https://www.mtai.co.tz"
     }
   }
 }

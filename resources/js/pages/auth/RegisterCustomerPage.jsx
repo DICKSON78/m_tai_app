@@ -56,13 +56,13 @@ export default function RegisterCustomerPage() {
         setError('');
 
         if (formData.password !== formData.confirmPassword) {
-            setError('{t("common.password")}s do not match');
+            setError('Passwords do not match');
             setLoading(false);
             return;
         }
 
         if (formData.password.length < 6) {
-            setError('{t("common.password")} must be at least 6 characters');
+            setError('Password must be at least 6 characters');
             setLoading(false);
             return;
         }
@@ -84,14 +84,14 @@ export default function RegisterCustomerPage() {
             }, 'customer');
 
             if (result && result.id) {
-                window.location.href = '/login';
+                window.location.href = '/';
             } else if (result && result.message) {
                 setError(result.message);
             } else {
-                window.location.href = '/login';
+                window.location.href = '/';
             }
         } catch (err) { console.error('Registration failed:', err);
-            const msg = err?.response?.data?.message || err?.response?.data?.errors?.name?.[0] || '{t("auth.registration_failed")}';
+            const msg = err?.response?.data?.message || err?.response?.data?.errors?.name?.[0] || t('auth.registration_failed');
             setError(msg);
         } finally {
             setLoading(false);

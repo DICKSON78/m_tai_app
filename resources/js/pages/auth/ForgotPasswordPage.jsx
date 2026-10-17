@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { Mail, ArrowLeft, CheckCircle, KeyRound } from 'lucide-react';
 
@@ -18,7 +19,7 @@ export default function ForgotPasswordPage() {
         setMessage('');
         try {
             const res = await api.post('/forgot-password', { email });
-            setMessage(res.data.message || '{t("auth.reset_sent")}');
+            setMessage(res.data.message || t('auth.reset_sent'));
             if (res.data.token) {
                 setToken(res.data.token);
             }
@@ -58,7 +59,7 @@ export default function ForgotPasswordPage() {
                                 </div>
                             )}
                             <Link to={token ? `/reset-password?token=${token}` : '/login'} className="mt-3 inline-block text-sm font-medium text-primary hover:underline">
-                                {token ? '{t("auth.reset_now")}' : '{t("auth.go_to_login")}'}
+                                {token ? t('auth.reset_now') : t('auth.go_to_login')}
                             </Link>
                         </div>
                     )}
@@ -90,7 +91,7 @@ export default function ForgotPasswordPage() {
                             disabled={loading}
                             className="w-full py-3 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition-all"
                         >
-                            {loading ? '{t("common.sending")}' : '{t("auth.send_reset_token")}'}
+                            {loading ? t('common.sending') : t('auth.send_reset_token')}
                         </button>
                     </form>
 

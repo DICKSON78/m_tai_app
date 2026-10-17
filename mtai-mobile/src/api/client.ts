@@ -2,7 +2,7 @@ import Constants from 'expo-constants';
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { getToken, clearAuth } from '../utils/storage';
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl || 'https://mtai-app-903291264005.africa-south1.run.app';
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'https://www.mtai.co.tz';
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
