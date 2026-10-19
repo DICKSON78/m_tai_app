@@ -428,7 +428,7 @@
         },
         {
           "title": "Inaaminiwa na 500+",
-          "desc": "Jiunge na jumuiya inayokua ya wamiliki wa biashara kote Afrika wanaotegemea M-TAI kila siku."
+          "desc": "Jukwaa Moja Kwa Ukuaji wa Haraka. Unganisha ununuzi, uuzaji, usimamizi wa biashara na usafirishaji katika jukwaa moja. Rahisisha shughuli zako za kila siku, unanue mitandao na wanunuzi, wauzaji na wasafirishaji, na gundua fursa mpya za kujenga uhusiano na kukua biashara yako."
         }
       ]
     },
@@ -436,8 +436,8 @@
       "eyebrow": "Hadithi Yetu",
       "title1": "Kudijitalisha Biashara",
       "title2": "za Afrika.",
-      "para1": "Tulianza na jambo rahisi: biashara za Afrika zinastahili zana bora za kidijitali. Mifumo mingi imejengwa kwa masoko ya Magharibi na kupuuza mahitaji ya kipekee ya biashara za Afrika.",
-      "para2": "M-TAI ilizaliwa kuziba pengo hilo — mfumo uliojengwa kuanzia mwanzo kwa ajili ya pesa za simu, sarafu za ndani, na uhalisia wa kufanya biashara Afrika.",
+      "para1": "M TAI ilianza na imani rahisi: biashara kote Afrika zinastahili zana bora za kidijitali zinazoelewa jinsi wanavyofanya kazi. Kwa kusukumwa na uzoefu wa mwanzilishi wetu kama mjasiriamali na mteja, tulianza kurahisisha biashara ya kila siku na kufungua fursa mpya za kukua.",
+      "para2": "Imebuniwa na Big Brain Company Limited, M TAI inaunganisha ununuzi, uuzaji, usimamizi wa biashara na huduma za usafirishaji katika jukwaa moja kamili — kusaidia biashara, wanunuzi na wasafirishaji kuunganisha, kufanya kazi kwa akili na kukua.",
       "stat": "500+",
       "statLabel": "Biashara Zinazohudumiwa",
       "imageAlt": "Timu ya kibiashara",
@@ -474,6 +474,18 @@
         {
           "title": "Mtandao wa Usafirishaji",
           "desc": "Wateja wanaomba usafirishaji, wasafirishaji wanakubali au wanajadili. Fuatilia eneo la kuchukulia, unakoenda, bei na hali moja kwa moja."
+        },
+        {
+          "title": "Soko (Marketplace)",
+          "desc": "Gundua bidhaa, ununue kwa wauzaji, na chunguza fursa mpya za kununua. Onyesha bidhaa zako na ufikie wateja kupitia soko lililounganishwa."
+        },
+        {
+          "title": "Usimamizi wa Maduka Mengi",
+          "desc": "Simamia maduka mengi kutoka akaunti moja. Fuatilia stoo na mauzo ya kila duka, koordisha uhamishaji wa bidhaa, na bakia biashara yako ipangwa katika maeneo tofauti."
+        },
+        {
+          "title": "Usimamizi wa Wafanyakazi na Ruhusa",
+          "desc": "Panga timu yako na dhibiti ufikiaji wa taarifa za biashara. Peleka wafanyakazi kwenye maduka na simamia ruhusa kulingana na majukumu yao."
         }
       ]
     },

@@ -428,7 +428,7 @@
         },
         {
           "title": "Trusted by 500+",
-          "desc": "Join a growing community of business owners across Africa who rely on M-TAI every day."
+          "desc": "One Connected Platform for Faster Growth. Bring buying, selling, business management, and transport together in one platform. Simplify your daily activities, connect with buyers, sellers, and transporters, and discover new opportunities to build relationships and grow your business."
         }
       ]
     },
@@ -436,8 +436,8 @@
       "eyebrow": "Our Story",
       "title1": "Digitizing African",
       "title2": "Commerce.",
-      "para1": "We started with a simple observation: African businesses deserve world-class digital tools. Most platforms are built for Western markets and ignore the unique needs of African commerce.",
-      "para2": "M-TAI was born to bridge that gap — a platform designed from the ground up for mobile money, local currencies, and the realities of doing business in Africa.",
+      "para1": "M TAI began with a simple belief: businesses across Africa deserve practical digital tools that understand how they work. Inspired by our founder's experience as a business owner and customer, we set out to simplify everyday commerce and create more opportunities for growth.",
+      "para2": "Developed by Big Brain Company Limited, M TAI brings buying, selling, business management, and transport services together in one comprehensive platform—helping businesses, buyers, and transporters connect, work smarter, and grow.",
       "stat": "500+",
       "statLabel": "Businesses Served",
       "imageAlt": "Business team",
@@ -474,6 +474,18 @@
         {
           "title": "Delivery Network",
           "desc": "Customers request delivery, transporters accept or negotiate. Track pickup, destination, pricing, and real-time status."
+        },
+        {
+          "title": "Marketplace",
+          "desc": "Discover products, connect with sellers, and explore new buying opportunities. Showcase your products and reach customers through one connected marketplace."
+        },
+        {
+          "title": "Multi-Shop Management",
+          "desc": "Manage multiple shops from one account. Follow each shop's stock and sales, coordinate stock transfers, and keep your business organised across locations."
+        },
+        {
+          "title": "Employee & Access Management",
+          "desc": "Organise your team and control access to business information. Assign employees to shops and manage permissions according to their responsibilities."
         }
       ]
     },
