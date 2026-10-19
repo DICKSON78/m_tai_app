@@ -82,15 +82,9 @@ export default function AboutPage() {
                 {t('site.about.storyTitle')}
               </h2>
               <div className="space-y-4 text-gray-500 text-base leading-relaxed">
-                <p>
-                  {t('site.about.para1')}
-                </p>
-                <p>
-                  {t('site.about.para2')}
-                </p>
-                <p>
-                  {t('site.about.para3')}
-                </p>
+                {[t('site.about.para1'), t('site.about.para2'), t('site.about.para3')].filter(Boolean).map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
               </div>
             </div>
           </div>
