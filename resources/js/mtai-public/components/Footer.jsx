@@ -1,17 +1,34 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
+const CONTACT_ICONS = {
+  phone: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z',
+  mail: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+  globe: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9',
+  pin: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z',
+  user: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+}
+
+const contactHref = (icon, value) => {
+  if (icon === 'mail') return `mailto:${value}`
+  if (icon === 'phone') return `tel:${value.replace(/\s/g, '')}`
+  if (icon === 'globe') return value.startsWith('http') ? value : `https://${value}`
+  return null
+}
+
 export default function Footer() {
   const { t } = useTranslation()
   const productLinks = t('site.footer.productLinks', { returnObjects: true })
   const companyLinks = t('site.footer.companyLinks', { returnObjects: true })
   const resourceLinks = t('site.footer.resourceLinks', { returnObjects: true })
   const legalLinks = t('site.footer.legalLinks', { returnObjects: true })
+  const contact = t('site.footer.contact', { returnObjects: true })
+  const contactData = contact && typeof contact === 'object' ? contact : null
 
   return (
     <footer className="bg-[#0A140C] border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-10">
           <div className="col-span-2 md:col-span-4 lg:col-span-1 mb-4 lg:mb-0">
             <Link to="/" className="flex items-center gap-2 mb-5">
               <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg shadow-black/20 overflow-hidden">
@@ -67,6 +84,33 @@ export default function Footer() {
               ))}
             </ul>
           </div>
+
+          {contactData && (
+            <div className="col-span-2 md:col-span-4 lg:col-span-1">
+              <h4 className="text-white font-semibold text-sm mb-4">{contactData.heading}</h4>
+              <p className="text-[#00D4AA] text-[11px] font-bold uppercase tracking-widest mb-4">{contactData.subheading}</p>
+              <ul className="space-y-3.5">
+                {(Array.isArray(contactData.items) ? contactData.items : []).map((item) => {
+                  const href = contactHref(item.icon, item.value)
+                  return (
+                    <li key={item.label} className="flex items-start gap-2.5">
+                      <svg className="w-4 h-4 text-[#00D4AA] shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d={CONTACT_ICONS[item.icon] || CONTACT_ICONS.globe} />
+                      </svg>
+                      <div className="min-w-0">
+                        <span className="block text-white/35 text-[11px] leading-tight">{item.label}</span>
+                        {href ? (
+                          <a href={href} className="block text-white/70 text-sm leading-snug hover:text-[#00D4AA] transition-colors break-words">{item.value}</a>
+                        ) : (
+                          <span className="block text-white/70 text-sm leading-snug break-words">{item.value}</span>
+                        )}
+                      </div>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="mt-16 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">

@@ -595,7 +595,18 @@
         "Usalama",
         "GDPR"
       ],
-      "rights": "Haki zote zimehifadhiwa."
+      "rights": "Haki zote zimehifadhiwa.",
+      "contact": {
+        "heading": "Simamia Wateja Wako",
+        "subheading": "Mawasiliano:",
+        "items": [
+          { "icon": "phone", "label": "Simu", "value": "+255 713 646 300" },
+          { "icon": "mail", "label": "Barua pepe", "value": "info@bigbraintz.com" },
+          { "icon": "globe", "label": "Tovuti", "value": "www.bigbraintz.com" },
+          { "icon": "pin", "label": "Mahali", "value": "Dar es Salaam Tanzania" },
+          { "icon": "user", "label": "Mtu wa kuwasiliana", "value": "Victory Kilindo" }
+        ]
+      }
     },
     "about": {
       "heroEyebrow": "Kutuhusu",
@@ -747,12 +758,12 @@
         },
         {
           "name": "Usimamizi wa Wateja",
-          "desc": "Jenga uhusiano wa kudumu kupitia wasifu wa wateja, historia ya manunuzi, na programu za uaminifu.",
+          "desc": "Jenga uhusiano imara wa wateja kwa rekodi zilizopangwa na mwonekano wazi wa historia ya manunuzi. Elewa mahitaji ya wateja wako, fuatilia malipo yanayodaiwa, na toa uzoefu wa ununuzi wa kibinafsi zaidi.",
           "features": [
-            "Wasifu wa wateja",
-            "Historia ya manunuzi",
-            "Programu za uaminifu",
-            "Zana za mawasiliano"
+            "Rekodi za wateja zilizopangwa",
+            "Historia ya manunuzi ya wateja",
+            "Ufuatiliaji wa mauzo ya mkopo na malipo",
+            "Ufuatiliaji bora wa wateja"
           ]
         },
         {

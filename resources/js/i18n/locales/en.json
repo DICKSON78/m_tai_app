@@ -595,7 +595,18 @@
         "Security",
         "GDPR"
       ],
-      "rights": "All rights reserved."
+      "rights": "All rights reserved.",
+      "contact": {
+        "heading": "Manage Your Customers",
+        "subheading": "Mawasiliano:",
+        "items": [
+          { "icon": "phone", "label": "Mobile", "value": "+255 713 646 300" },
+          { "icon": "mail", "label": "Email", "value": "info@bigbraintz.com" },
+          { "icon": "globe", "label": "Website", "value": "www.bigbraintz.com" },
+          { "icon": "pin", "label": "Location", "value": "Dar es Salaam Tanzania" },
+          { "icon": "user", "label": "Contact person", "value": "Victory Kilindo" }
+        ]
+      }
     },
     "about": {
       "heroEyebrow": "About Us",
@@ -747,12 +758,12 @@
         },
         {
           "name": "Customer Management",
-          "desc": "Build lasting relationships with customer profiles, purchase history, and loyalty programs.",
+          "desc": "Build stronger customer relationships with organised records and a clear view of purchase history. Understand your customers' needs, follow up on outstanding payments, and provide a more personal shopping experience.",
           "features": [
-            "Customer profiles",
-            "Purchase history",
-            "Loyalty programs",
-            "Communication tools"
+            "Organised customer records",
+            "Customer purchase history",
+            "Credit sales and payment tracking",
+            "Better customer follow-up"
           ]
         },
         {
