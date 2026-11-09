@@ -55,11 +55,19 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold text-sm mb-4">{t('site.footer.company')}</h4>
             <ul className="space-y-3">
-              {(Array.isArray(companyLinks) ? companyLinks : []).map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-white/40 text-sm hover:text-[#00D4AA] transition-colors">{item}</a>
-                </li>
-              ))}
+              {(Array.isArray(companyLinks) ? companyLinks : []).map((item, i) => {
+                const paths = ['/about', '/our-story', '#', '#', '#', '/contact']
+                const to = paths[i]
+                return (
+                  <li key={item}>
+                    {to && to !== '#' ? (
+                      <Link to={to} className="text-white/40 text-sm hover:text-[#00D4AA] transition-colors">{item}</Link>
+                    ) : (
+                      <a href="#" className="text-white/40 text-sm hover:text-[#00D4AA] transition-colors">{item}</a>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           </div>
 

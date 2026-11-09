@@ -4,17 +4,17 @@ const articleMeta = [
   {
     source: 'TechCrunch',
     date: 'Mar 2026',
-    img: 'https://images.pexels.com/photos/9301763/pexels-photo-9301763.jpeg?auto=compress&cs=tinysrgb&w=600',
+    img: '/img/news-techcrunch.jpg',
   },
   {
     source: 'Reuters',
     date: 'Feb 2026',
-    img: 'https://images.pexels.com/photos/20068076/pexels-photo-20068076.jpeg?auto=compress&cs=tinysrgb&w=600',
+    img: '/img/news-reuters.jpg',
   },
   {
     source: 'Bloomberg',
     date: 'Jan 2026',
-    img: 'https://images.pexels.com/photos/37562258/pexels-photo-37562258.jpeg?auto=compress&cs=tinysrgb&w=600',
+    img: '/img/news-bloomberg.jpg',
   },
 ]
 

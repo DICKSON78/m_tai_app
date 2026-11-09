@@ -110,6 +110,7 @@
   "navbar": {
     "home": "Home",
     "about": "About",
+    "ourStory": "Our Story",
     "contact": "Contact",
     "welcome": "Welcome",
     "marketplace": "Marketplace",
@@ -434,10 +435,12 @@
     },
     "story": {
       "eyebrow": "Our Story",
-      "title1": "Digitizing African",
-      "title2": "Commerce.",
-      "para1": "M TAI began with a simple belief: businesses across Africa deserve practical digital tools that understand how they work. Inspired by our founder's experience as a business owner and customer, we set out to simplify everyday commerce and create more opportunities for growth.",
-      "para2": "Developed by Big Brain Company Limited, M TAI brings buying, selling, business management, and transport services together in one comprehensive platform—helping businesses, buyers, and transporters connect, work smarter, and grow.",
+      "title1": "From Idea to Impact",
+      "title2": "",
+      "para1": "M TAI grew out of the real-life experiences of its founder, Victory Kilindo—as a business owner, a customer, and a tradesman purchasing materials for his work. These experiences revealed everyday challenges in buying, selling, and managing business activities.",
+      "para2": "His journey into graphic design and computing helped him see how those challenges could be addressed through practical digital tools. He began shaping an idea: bringing businesses, customers, and transporters together within one connected platform.",
+      "para3": "In 2025, Victory founded M TAI. A product of Big Brain Company Limited, M TAI is built around a clear purpose: to simplify commerce, support business growth, and serve the everyday needs of businesses and customers across Tanzania and Africa.",
+      "tagline": "Built for Your Success.",
       "stat": "500+",
       "statLabel": "Businesses Served",
       "imageAlt": "Business team",
@@ -588,6 +591,7 @@
       ],
       "companyLinks": [
         "About Us",
+        "Our Story",
         "Careers",
         "Press",
         "Partners",
@@ -622,9 +626,10 @@
     },
     "about": {
       "heroEyebrow": "About Us",
-      "heroTitle1": "Digitizing",
-      "heroTitle2": "African Commerce",
-      "heroSubtitle": "M-TAI was born from a simple belief: African businesses deserve world-class digital tools, built for the way they actually work.",
+      "heroTitle1": "Connecting Commerce.",
+      "heroTitle2": "Empowering Your Success.",
+      "heroSubtitle": "M TAI is a business infrastructure application by Big Brain Company Limited, designed to bring buying, selling, business management, and transport services together in one connected platform. Rooted in Tanzania with a vision for Africa and beyond, we build practical digital tools for businesses, customers, and transporters.",
+      "heroTagline": "Built for Your Success.",
       "statLabels": [
         "Businesses Served",
         "Countries",
@@ -633,34 +638,78 @@
       ],
       "storyEyebrow": "Our Story",
       "storyTitle": "From Idea to Impact",
-      "storyImageAlt": "Our team",
-      "para1": "M TAI began with a simple belief: businesses across Africa deserve practical digital tools that understand how they work. Inspired by our founder's experience as a business owner and customer, we set out to simplify everyday commerce and create more opportunities for growth.",
-      "para2": "Developed by Big Brain Company Limited, M TAI brings buying, selling, business management, and transport services together in one comprehensive platform—helping businesses, buyers, and transporters connect, work smarter, and grow.",
-      "para3": "",
+      "storyImageAlt": "M TAI logo",
+      "para1": "M TAI grew out of the real-life experiences of its founder, Victory Kilindo—as a business owner, a customer, and a tradesman purchasing materials for his work. These experiences revealed everyday challenges in buying, selling, and managing business activities.",
+      "para2": "His journey into graphic design and computing helped him see how those challenges could be addressed through practical digital tools. He began shaping an idea: bringing businesses, customers, and transporters together within one connected platform.",
+      "para3": "In 2025, Victory founded M TAI. A product of Big Brain Company Limited, M TAI is built around a clear purpose: to simplify commerce, support business growth, and serve the everyday needs of businesses and customers across Tanzania and Africa.",
+      "para4": "Built for Your Success.",
+      "readFullStory": "Read Full Story",
       "valuesEyebrow": "Our Values",
       "valuesTitle": "What Drives Us",
       "values": [
         {
-          "title": "Built for Africa",
-          "desc": "We design for the realities of African commerce — from mobile money to offline-first workflows."
+          "title": "Practical Innovation",
+          "desc": "We turn everyday challenges in buying, selling, business management, and transport into practical digital solutions. Rooted in Tanzania, our vision reaches across Africa and beyond."
         },
         {
-          "title": "Customer First",
-          "desc": "Every feature starts with a conversation with our customers. Their success is our success."
+          "title": "People First",
+          "desc": "We put the needs of buyers, business owners, and transporters at the heart of our work. We listen, learn, and build tools that support their everyday progress."
         },
         {
-          "title": "Security & Trust",
-          "desc": "Enterprise-grade security protects your data. We earn your trust every day."
+          "title": "Integrity & Trust",
+          "desc": "We believe trust is earned through honesty, accountability, and responsible handling of information. These principles guide how we build our platform and serve our users."
         }
       ],
       "teamEyebrow": "Our Team",
-      "teamTitle": "Meet the People Behind M-TAI",
-      "teamRoles": [
-        "Founder & CEO",
-        "Head of Product",
-        "CTO",
-        "Head of Operations"
+      "teamTitle": "People Behind M TAI",
+      "team": [
+        {
+          "name": "Victory Kilindo",
+          "role": "CEO & Founder",
+          "initials": "VK",
+          "bio": "Victory founded M TAI, a comprehensive business infrastructure application, in 2025. He also co-founded Big Brain Company Limited alongside his fellow directors. His vision is to build practical digital tools that serve businesses and customers across Tanzania and Africa. He leads the company's strategic direction and guides the development of M TAI."
+        },
+        {
+          "name": "CPA Alfaksa Boniface",
+          "role": "Co-Founder, Financial Expert & Board Member",
+          "initials": "AB",
+          "bio": "Alfaksa is a Certified Public Accountant, CPA(T), with a master's degree in finance and twenty years of experience in financial management. As a co-founder and member of the Board of Directors, he provides financial guidance and oversight, helping shape the company's financial strategy, long-term planning, and sustainable growth."
+        },
+        {
+          "name": "Raphael Ngombale",
+          "role": "Head of Technical Department & Board Member",
+          "initials": "RN",
+          "bio": "Raphael is a telecommunications engineer who leads the company's technical department. He oversees the engineering and product development behind M TAI, as well as the company's digital infrastructure, and contributes technical expertise to the board's strategic decisions."
+        }
       ]
+    },
+    "ourStory": {
+      "eyebrow": "Our Story",
+      "title": "M TAI — Merchant Trading App International",
+      "subtitle": "A Vision Shaped by Experience, Faith and Purpose",
+      "sections": [
+        {
+          "title": "From Everyday Challenges to a Bigger Vision",
+          "text": "M TAI began with the lived experiences of its founder, Victory Kilindo. While running a stationery business, he faced the daily pressures of purchasing goods, managing inventory, recording sales and serving customers. Later, working as a technician, he experienced the buyer's side of trade: searching for materials, travelling between suppliers and arranging costly transportation. These experiences showed him that buyers and sellers were often struggling with different parts of the same problem."
+        },
+        {
+          "title": "An Unexpected Path into Technology",
+          "text": "A move into graphic design and computing changed how Victory saw those challenges. He had not attended a coding or programming school, but he began to recognize that many everyday trading difficulties could be translated into organized digital processes. He documented his ideas and envisioned one connected environment bringing together customers, businesses, suppliers and transporters. What began as practical observations became a plan for a technology platform."
+        },
+        {
+          "title": "Faith at the Heart of the Journey",
+          "text": "Victory sees this journey as a blessing from God. As a follower of Jesus Christ, he believes that God has given him creativity, insight and the determination to pursue a calling beyond his formal training. Prayer and faith have helped sustain him through uncertainty, financial limitations and the demanding process of turning an idea into reality. For him, M TAI is not merely a business achievement; it is an opportunity to put God-given abilities to work in service of others."
+        },
+        {
+          "title": "Turning the Vision into Reality",
+          "text": "Early conversations with developers confirmed the idea could be built, although the cost was a major obstacle. Victory continued refining the concept and joined forces with engineer Raphael Ngombale and investment partner Alfaxa Boniface. Under Big Brain Company Limited, the project evolved from TradeVK into M TAI — Merchant Trading App International."
+        },
+        {
+          "title": "Built to Make Trade Easier",
+          "text": "M TAI aims to reduce the friction that slows commerce: difficulty finding goods, fragmented purchasing, manual business processes and inefficient delivery arrangements. Its vision is to help businesses operate more effectively, customers shop more conveniently, and transporters connect with opportunities. The platform is still growing, but its purpose remains clear: to turn real-life challenges into practical solutions that can serve people across communities and, ultimately, across borders."
+        }
+      ],
+      "closing": "M TAI — More Than a Marketplace. Built for Your Success."
     },
     "contact": {
       "heroEyebrow": "Contact Us",
@@ -749,24 +798,26 @@
       "heroSubtitle": "A comprehensive suite of tools designed to help African businesses manage, grow, and thrive.",
       "list": [
         {
-          "name": "Inventory Management",
-          "desc": "Track stock levels, set reorder points, manage expiration dates, and get real-time alerts across all locations.",
+          "name": "Inventory & Stock Management",
+          "desc": "Stay in control of your stock across shops and storage locations. M TAI helps you organise product records, monitor available quantities, and manage stock movements to keep your business running smoothly.",
           "features": [
-            "Real-time stock tracking",
-            "Low-stock alerts",
-            "Expiration date management",
-            "Multi-location support"
-          ]
+            "Centralised product records",
+            "Separate shop and storage stock",
+            "Stock transfers from storage to shops",
+            "Stock visibility across multiple shops"
+          ],
+          "cta": "Manage Your Inventory"
         },
         {
-          "name": "Point of Sale",
-          "desc": "Process transactions quickly with integrated mobile money, card payments, and instant invoicing.",
+          "name": "Sales & Point of Sale",
+          "desc": "Keep your daily sales organised and your business records clear. M TAI brings sales records, receipts, and stock updates together, helping you follow business activity and serve customers with confidence.",
           "features": [
-            "Mobile money integration",
-            "Card payments",
-            "Instant invoicing",
-            "Receipt generation"
-          ]
+            "Digital sales records",
+            "Receipt generation",
+            "Stock updates linked to completed sales",
+            "Daily sales summaries"
+          ],
+          "cta": "Manage Your Sales"
         },
         {
           "name": "Customer Management",
@@ -789,24 +840,38 @@
           ]
         },
         {
-          "name": "Employee Management",
-          "desc": "Manage your team with role-based access, shift scheduling, and performance tracking.",
+          "name": "Employee & Access Management",
+          "desc": "Manage your team while staying in control of your business. Assign employees to shops, define their responsibilities, and control access to business information—all in one place.",
           "features": [
-            "Role-based access",
-            "Shift scheduling",
-            "Performance tracking",
-            "Payroll integration"
-          ]
+            "Individual employee accounts",
+            "Staff assignment to specific shops",
+            "Role-based access and permissions",
+            "Employee activity history",
+            "Update or revoke staff access"
+          ],
+          "cta": "Manage Your Team"
         },
         {
-          "name": "Delivery & Transport",
-          "desc": "Manage deliveries, track shipments, and coordinate your transport network efficiently.",
+          "name": "Delivery Services",
+          "desc": "Move your goods with a delivery option that suits your needs, timing, and budget. M TAI connects customers and businesses with transporters for deliveries and cargo transport.",
           "features": [
-            "Delivery tracking",
-            "Route optimization",
-            "Transporter management",
-            "Proof of delivery"
-          ]
+            "Get Fast, Normal Delivery & Don't Worry options",
+            "Pickup and destination details in one place",
+            "Multiple purchase receipts in one delivery request",
+            "Delivery confirmation"
+          ],
+          "cta": "Request a Delivery"
+        },
+        {
+          "name": "Transporters Platform",
+          "desc": "Connect your transport business with customers who need goods moved. M TAI helps transporters find cargo requests suited to their vehicles and routes, coordinate pickups, and manage delivery assignments.",
+          "features": [
+            "Find transport opportunities",
+            "View cargo, pickup, and destination details",
+            "Manage accepted assignments",
+            "Confirm completed deliveries"
+          ],
+          "cta": "Join as a Transporter"
         }
       ],
       "ctaTitle": "Ready to Get Started?",

@@ -11,6 +11,7 @@ import PublicNavbar from './mtai-public/components/Navbar';
 import PublicFooter from './mtai-public/components/Footer';
 import PublicHomePage from './mtai-public/pages/HomePage';
 import PublicAboutPage from './mtai-public/pages/AboutPage';
+import PublicOurStoryPage from './mtai-public/pages/OurStoryPage';
 import PublicProductsPage from './mtai-public/pages/ProductsPage';
 import PublicFAQPage from './mtai-public/pages/FAQPage';
 import PublicContactPage from './mtai-public/pages/ContactPage';
@@ -229,6 +230,7 @@ function AppRoutes() {
             {/* Public Phermex-style routes */}
             <Route path="/" element={<RootRoute />} />
             <Route path="/about" element={<PublicLayout><PublicAboutPage /></PublicLayout>} />
+            <Route path="/our-story" element={<PublicLayout><PublicOurStoryPage /></PublicLayout>} />
             <Route path="/products" element={<PublicLayout><PublicProductsPage /></PublicLayout>} />
             <Route path="/marketplace" element={<PublicLayout><PublicMarketplacePage /></PublicLayout>} />
             <Route path="/marketplace/:id" element={<PublicLayout><PublicMarketplaceShopPage /></PublicLayout>} />

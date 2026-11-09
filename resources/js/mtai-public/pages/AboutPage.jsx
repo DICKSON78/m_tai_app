@@ -1,11 +1,6 @@
 import { useTranslation } from 'react-i18next'
-
-const teamMeta = [
-  { name: 'James Mwangi', initials: 'JM', color: 'from-[#00D4AA] to-[#00B894]' },
-  { name: 'Sarah Kimani', initials: 'SK', color: 'from-[#18230F] to-[#1E3A1A]' },
-  { name: 'David Ochieng', initials: 'DO', color: 'from-[#2D5A3D] to-[#1E3A1A]' },
-  { name: 'Amina Hassan', initials: 'AH', color: 'from-[#D4A853] to-[#B8922E]' },
-]
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 const valueMeta = [
   { icon: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7' },
@@ -15,14 +10,30 @@ const valueMeta = [
 
 const statValues = ['500+', '15+', '50M+', '99.9%']
 
+const storyImages = [
+  '/img/forWeblogo.png',
+  '/img/inventory-stock.jpg',
+  '/img/employee-access.jpg',
+  '/img/sales-pos.jpg',
+  '/img/customer-management.jpg',
+]
+
 export default function AboutPage() {
   const { t } = useTranslation()
   const statLabels = t('site.about.statLabels', { returnObjects: true })
   const values = t('site.about.values', { returnObjects: true })
-  const teamRoles = t('site.about.teamRoles', { returnObjects: true })
+  const team = t('site.about.team', { returnObjects: true })
   const labelTexts = Array.isArray(statLabels) ? statLabels : []
   const valueTexts = Array.isArray(values) ? values : []
-  const roleTexts = Array.isArray(teamRoles) ? teamRoles : []
+  const teamMembers = Array.isArray(team) ? team : []
+  const [storyIndex, setStoryIndex] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setStoryIndex((i) => (i + 1) % storyImages.length)
+    }, 2500)
+    return () => clearInterval(timer)
+  }, [])
 
   return (
     <>
@@ -42,6 +53,9 @@ export default function AboutPage() {
           </h1>
           <p className="text-lg text-white/40 max-w-xl mx-auto leading-relaxed">
             {t('site.about.heroSubtitle')}
+          </p>
+          <p className="text-[#00D4AA] text-sm font-semibold mt-4">
+            {t('site.about.heroTagline')}
           </p>
         </div>
       </section>
@@ -65,12 +79,11 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="relative">
-              <div className="rounded-3xl overflow-hidden shadow-2xl">
+              <div className="rounded-3xl overflow-hidden shadow-2xl bg-[#F7FBFA] h-96 lg:h-[480px]">
                 <img
-                  src="https://images.pexels.com/photos/30019572/pexels-photo-30019572.jpeg?auto=compress&cs=tinysrgb&w=800"
+                  src="/img/forWeblogo.png"
                   alt={t('site.about.storyImageAlt')}
-                  className="w-full h-96 lg:h-[480px] object-cover"
-                  loading="lazy"
+                  className="w-full h-full object-contain [clip-path:inset(0_round_1.5rem)]"
                 />
               </div>
             </div>
@@ -82,10 +95,16 @@ export default function AboutPage() {
                 {t('site.about.storyTitle')}
               </h2>
               <div className="space-y-4 text-gray-500 text-base leading-relaxed">
-                {[t('site.about.para1'), t('site.about.para2'), t('site.about.para3')].filter(Boolean).map((p, i) => (
+                {[t('site.about.para1'), t('site.about.para2'), t('site.about.para3'), t('site.about.para4')].filter(Boolean).map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
               </div>
+              <Link
+                to="/our-story"
+                className="inline-block mt-8 px-8 py-3.5 bg-[#0A140C] text-white font-semibold text-sm rounded-full hover:bg-[#0F1A0B] transition-all duration-300"
+              >
+                {t('site.about.readFullStory')}
+              </Link>
             </div>
           </div>
         </div>
@@ -125,14 +144,15 @@ export default function AboutPage() {
             </span>
             <h2 className="text-4xl font-black text-[#0A140C] tracking-tight">{t('site.about.teamTitle')}</h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {teamMeta.map((member, i) => (
-              <div key={i} className="text-center group">
-                <div className={`w-28 h-28 mx-auto rounded-3xl bg-gradient-to-br ${member.color} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                  <span className="text-white text-2xl font-black">{member.initials}</span>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {teamMembers.map((member, i) => (
+              <div key={i} className="bg-gray-50 p-8 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#00D4AA] to-[#1E3A1A] flex items-center justify-center mb-6 shadow-lg">
+                  <span className="text-white text-2xl font-black tracking-tight">{member.initials || ''}</span>
                 </div>
-                <h3 className="text-[#0A140C] font-bold text-base">{member.name}</h3>
-                <p className="text-gray-400 text-sm mt-1">{roleTexts[i] || ''}</p>
+                <h3 className="text-[#0A140C] font-bold text-xl">{member.name || ''}</h3>
+                <p className="text-[#00D4AA] text-sm font-semibold mt-1 mb-4">{member.role || ''}</p>
+                <p className="text-gray-500 text-sm leading-relaxed">{member.bio || ''}</p>
               </div>
             ))}
           </div>

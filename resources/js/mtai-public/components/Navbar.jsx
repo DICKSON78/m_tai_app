@@ -12,6 +12,7 @@ export default function Navbar() {
   const navLinks = [
     { label: t('navbar.home'), to: '/' },
     { label: t('navbar.about'), to: '/about' },
+    { label: t('navbar.ourStory'), to: '/our-story' },
     { label: t('navbar.products'), to: '/products' },
     { label: t('navbar.marketplace'), to: '/marketplace' },
     { label: t('navbar.faq'), to: '/faq' },

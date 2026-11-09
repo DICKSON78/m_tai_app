@@ -5,32 +5,37 @@ const productMeta = [
   {
     icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
     color: 'from-[#00D4AA] to-[#00B894]',
-    img: 'https://images.pexels.com/photos/30019572/pexels-photo-30019572.jpeg?auto=compress&cs=tinysrgb&w=600',
+    img: '/img/inventory-stock.jpg',
   },
   {
     icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z',
     color: 'from-[#18230F] to-[#1E3A1A]',
-    img: 'https://images.pexels.com/photos/38879801/pexels-photo-38879801.jpeg?auto=compress&cs=tinysrgb&w=600',
+    img: '/img/sales-pos.jpg',
   },
   {
     icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
     color: 'from-[#2D5A3D] to-[#1E3A1A]',
-    img: 'https://images.pexels.com/photos/20068076/pexels-photo-20068076.jpeg?auto=compress&cs=tinysrgb&w=600',
+    img: '/img/customer-management.jpg',
   },
   {
     icon: 'M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
     color: 'from-[#D4A853] to-[#B8922E]',
-    img: 'https://images.pexels.com/photos/30677714/pexels-photo-30677714.jpeg?auto=compress&cs=tinysrgb&w=600',
+    img: '/img/analytics-dashboard.jpg',
   },
   {
     icon: 'M12 4.354a4 4 0 110 7.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z',
     color: 'from-[#4A7C3F] to-[#2D5A3D]',
-    img: 'https://images.pexels.com/photos/9301763/pexels-photo-9301763.jpeg?auto=compress&cs=tinysrgb&w=600',
+    img: '/img/employee-access.jpg',
   },
   {
     icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0',
     color: 'from-[#00D4AA] to-[#00B894]',
-    img: 'https://images.pexels.com/photos/6869064/pexels-photo-6869064.jpeg?auto=compress&cs=tinysrgb&w=600',
+    img: '/img/app-orders.jpg',
+  },
+  {
+    icon: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7',
+    color: 'from-[#18230F] to-[#1E3A1A]',
+    img: '/img/transporters.jpg',
   },
 ]
 
@@ -84,6 +89,14 @@ export default function ProductsPage() {
                     </li>
                   ))}
                 </ul>
+                {productTexts[i]?.cta && (
+                  <Link
+                    to={productTexts[i]?.ctaLink || '/register'}
+                    className="inline-block mt-8 px-8 py-3.5 bg-[#0A140C] text-white font-semibold text-sm rounded-full hover:bg-[#0F1A0B] transition-all duration-300"
+                  >
+                    {productTexts[i].cta}
+                  </Link>
+                )}
               </div>
               <div className={`${i % 2 === 1 ? 'lg:[direction:ltr]' : ''}`}>
                 <div className="rounded-3xl overflow-hidden shadow-2xl">

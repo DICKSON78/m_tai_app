@@ -31,7 +31,7 @@ export default function Story() {
               {t('site.story.eyebrow')}
             </span>
             <h2 className="text-4xl sm:text-5xl font-black text-[#0A140C] leading-tight tracking-tight">
-              {t('site.story.title1')}<br />{t('site.story.title2')}
+              {t('site.story.title1')}{t('site.story.title2') ? <><br />{t('site.story.title2')}</> : null}
             </h2>
             <div className="mt-8 space-y-4 text-gray-500 text-base leading-relaxed max-w-lg">
               <p>
@@ -39,6 +39,12 @@ export default function Story() {
               </p>
               <p>
                 {t('site.story.para2')}
+              </p>
+              <p>
+                {t('site.story.para3')}
+              </p>
+              <p className="text-[#00D4AA] font-semibold">
+                {t('site.story.tagline')}
               </p>
             </div>
             <div className="mt-10 flex gap-4">

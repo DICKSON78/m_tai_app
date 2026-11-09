@@ -110,6 +110,7 @@
   "navbar": {
     "home": "Nyumbani",
     "about": "Kuhusu",
+    "ourStory": "Hadithi Yetu",
     "contact": "Wasiliana",
     "welcome": "Karibu",
     "marketplace": "Soko",
@@ -434,10 +435,12 @@
     },
     "story": {
       "eyebrow": "Hadithi Yetu",
-      "title1": "Kudijitalisha Biashara",
-      "title2": "za Afrika.",
-      "para1": "M TAI ilianza na imani rahisi: biashara kote Afrika zinastahili zana bora za kidijitali zinazoelewa jinsi wanavyofanya kazi. Kwa kusukumwa na uzoefu wa mwanzilishi wetu kama mjasiriamali na mteja, tulianza kurahisisha biashara ya kila siku na kufungua fursa mpya za kukua.",
-      "para2": "Imebuniwa na Big Brain Company Limited, M TAI inaunganisha ununuzi, uuzaji, usimamizi wa biashara na huduma za usafirishaji katika jukwaa moja kamili — kusaidia biashara, wanunuzi na wasafirishaji kuunganisha, kufanya kazi kwa akili na kukua.",
+      "title1": "Kutoka Wazo hadi Matokeo",
+      "title2": "",
+      "para1": "M TAI ilichipuka kutokana na uzoefu halisi wa mwanzilishi wake, Victory Kilindo—kama mmiliki wa biashara, mteja, na fundi anayenunua vifaa kwa ajili ya kazi yake. Uzoefu huu ulidhihirisha changamoto za kila siku katika kununua, kuuza, na kusimamia shughuli za biashara.",
+      "para2": "Safari yake katika usanifu wa michoro na kompyuta ilimsaidia kuona jinsi changamoto hizo zinaweza kutatuliwa kwa zana za kidijitali. Alianza kuunda wazo: kuunganisha biashara, wateja, na wasafirishaji katika jukwaa moja lililounganishwa.",
+      "para3": "Mwaka 2025, Victory alianzisha M TAI. Ikibuniwa na Big Brain Company Limited, M TAI imejengwa kwa lengo wazi: kurahisisha biashara, kusaidia ukuaji wa biashara, na kuhudumia mahitaji ya kila siku ya biashara na wateja kote Tanzania na Afrika.",
+      "tagline": "Imejengwa kwa Mafanikio Yako.",
       "stat": "500+",
       "statLabel": "Biashara Zinazohudumiwa",
       "imageAlt": "Timu ya kibiashara",
@@ -588,6 +591,7 @@
       ],
       "companyLinks": [
         "Kutuhusu",
+        "Hadithi Yetu",
         "Ajira",
         "Habari",
         "Washirika",
@@ -622,9 +626,10 @@
     },
     "about": {
       "heroEyebrow": "Kutuhusu",
-      "heroTitle1": "Kudijitalisha",
-      "heroTitle2": "Biashara za Afrika",
-      "heroSubtitle": "M-TAI ilizaliwa kutokana na imani rahisi: biashara za Afrika zinastahili zana bora za kidijitali, zilizojengwa kwa namna zinavyofanya kazi.",
+      "heroTitle1": "Kuunganisha Biashara.",
+      "heroTitle2": "Kuwezesha Mafanikio Yako.",
+      "heroSubtitle": "M TAI ni programu ya miundombinu ya biashara na Big Brain Company Limited, iliyoundwa kuunganisha ununuzi, uuzaji, usimamizi wa biashara na huduma za usafirishaji katika jukwaa moja lililounganishwa. Ikiwa na mizizi Tanzania na maono kwa Afrika na zaidi, tunajenga zana za kidijitali zinazofaa kwa biashara, wateja na wasafirishaji.",
+      "heroTagline": "Imejengwa kwa Mafanikio Yako.",
       "statLabels": [
         "Biashara Zinazohudumiwa",
         "Nchi",
@@ -633,34 +638,78 @@
       ],
       "storyEyebrow": "Hadithi Yetu",
       "storyTitle": "Kutoka Wazo hadi Matokeo",
-      "storyImageAlt": "Timu yetu",
-      "para1": "M TAI ilianza na imani rahisi: biashara kote Afrika zinastahili zana bora za kidijitali zinazoelewa jinsi wanavyofanya kazi. Kwa kusukumwa na uzoefu wa mwanzilishi wetu kama mjasiriamali na mteja, tulianza kurahisisha biashara ya kila siku na kufungua fursa mpya za kukua.",
-      "para2": "Imebuniwa na Big Brain Company Limited, M TAI inaunganisha ununuzi, uuzaji, usimamizi wa biashara na huduma za usafirishaji katika jukwaa moja kamili — kusaidia biashara, wanunuzi na wasafirishaji kuunganisha, kufanya kazi kwa akili na kukua.",
-      "para3": "",
+      "storyImageAlt": "Nembo ya M TAI",
+      "para1": "M TAI ilichipuka kutokana na uzoefu halisi wa mwanzilishi wake, Victory Kilindo—kama mmiliki wa biashara, mteja, na fundi anayenunua vifaa kwa ajili ya kazi yake. Uzoefu huu ulidhihirisha changamoto za kila siku katika kununua, kuuza, na kusimamia shughuli za biashara.",
+      "para2": "Safari yake katika usanifu wa michoro na kompyuta ilimsaidia kuona jinsi changamoto hizo zinaweza kutatuliwa kwa zana za kidijitali. Alianza kuunda wazo: kuunganisha biashara, wateja, na wasafirishaji katika jukwaa moja lililounganishwa.",
+      "para3": "Mwaka 2025, Victory alianzisha M TAI. Ikibuniwa na Big Brain Company Limited, M TAI imejengwa kwa lengo wazi: kurahisisha biashara, kusaidia ukuaji wa biashara, na kuhudumia mahitaji ya kila siku ya biashara na wateja kote Tanzania na Afrika.",
+      "para4": "Imejengwa kwa Mafanikio Yako.",
+      "readFullStory": "Soma Hadithi Kamili",
       "valuesEyebrow": "Maadili Yetu",
       "valuesTitle": "Kinachotusukuma",
       "values": [
         {
-          "title": "Imejengwa kwa Ajili ya Afrika",
-          "desc": "Tunabuni kwa kuzingatia uhalisia wa biashara za Afrika — kuanzia pesa za simu hadi mifumo inayofanya kazi bila intaneti."
+          "title": "Ubunifu wa Kivitendo",
+          "desc": "Tunabadilisha changamoto za kila siku katika ununuzi, uuzaji, usimamizi wa biashara na usafirishaji kuwa suluhisho za kidijitali za kivitendo. Tukiwa na mizizi Tanzania, maono yetu yanaenea Afrika na zaidi."
         },
         {
-          "title": "Mteja Kwanza",
-          "desc": "Kila kipengele huanza na mazungumzo na wateja wetu. Mafanikio yao ni mafanikio yetu."
+          "title": "Watu Kwanza",
+          "desc": "Tunaweka mahitaji ya wanunuzi, wamiliki wa biashara na wasafirishaji katikati ya kazi yetu. Tunasikiliza, tunajifunza, na tunajenga zana zinazosaidia maendeleo yao ya kila siku."
         },
         {
-          "title": "Usalama na Imani",
-          "desc": "Usalama wa kiwango cha kibiashara unalinda data yako. Tunajipatia imani yako kila siku."
+          "title": "Uadilifu na Imani",
+          "desc": "Tunaamini imani hupatikana kwa uaminifu, uwajibikaji na utunzaji wa taarifa kwa uwajibikaji. Kanuni hizi huongoza jinsi tunavyojenga jukwaa letu na kuwahudumia watumiaji wetu."
         }
       ],
       "teamEyebrow": "Timu Yetu",
-      "teamTitle": "Kutana na Watu Nyuma ya M-TAI",
-      "teamRoles": [
-        "Mwanzilishi na Mkurugenzi",
-        "Mkuu wa Bidhaa",
-        "Mkurugenzi wa Teknolojia",
-        "Mkuu wa Uendeshaji"
+      "teamTitle": "Watu Nyuma ya M TAI",
+      "team": [
+        {
+          "name": "Victory Kilindo",
+          "role": "Mkurugenzi Mtendaji na Mwanzilishi",
+          "initials": "VK",
+          "bio": "Victory alianzisha M TAI, programu kamili ya miundombinu ya biashara, mwaka 2025. Pia alianzisha Big Brain Company Limited pamoja na wakurugenzi wenzake. Maono yake ni kujenga zana za kidijitali za kivitendo zinazohudumia biashara na wateja kote Tanzania na Afrika. Anaongoza mwelekeo wa kimkakati wa kampuni na kuongoza maendeleo ya M TAI."
+        },
+        {
+          "name": "CPA Alfaksa Boniface",
+          "role": "Mwanzilishi Mwenza, Mtaalam wa Fedha na Mjumbe wa Bodi",
+          "initials": "AB",
+          "bio": "Alfaksa ni Mhasibu wa Umma Aliyethibitishwa, CPA(T), mwenye shahada ya uzamili katika fedha na uzoefu wa miaka ishirini katika usimamizi wa fedha. Kama mwanzilishi mwenza na mjumbe wa Bodi ya Wakurugenzi, anatoa mwongozo wa kifedha na usimamizi, akisaidia kuunda mkakati wa kifedha wa kampuni, mipango ya muda mrefu, na ukuaji endelevu."
+        },
+        {
+          "name": "Raphael Ngombale",
+          "role": "Mkuu wa Idara ya Ufundi na Mjumbe wa Bodi",
+          "initials": "RN",
+          "bio": "Raphael ni mhandisi wa mawasiliano ya simu anayeongoza idara ya ufundi ya kampuni. Anasimamia uhandisi na maendeleo ya bidhaa za M TAI, pamoja na miundombinu ya kidijitali ya kampuni, na anachangia utaalamu wa kiufundi katika maamuzi ya kimkakati ya bodi."
+        }
       ]
+    },
+    "ourStory": {
+      "eyebrow": "Hadithi Yetu",
+      "title": "M TAI — Merchant Trading App International",
+      "subtitle": "Maono Yaliyoundwa na Uzoefu, Imani na Kusudi",
+      "sections": [
+        {
+          "title": "Kutoka Changamoto za Kila Siku hadi Maono Makubwa",
+          "text": "M TAI ilianza na uzoefu halisi wa mwanzilishi wake, Victory Kilindo. Alipokuwa akiendesha biashara ya vifaa vya shule, alikabiliana na shinikizo la kila siku la kununua bidhaa, kusimamia stoo, kurekodi mauzo na kuwahudumia wateja. Baadaye, alipofanya kazi kama fundi, alipata upande wa mnunuzi wa biashara: kutafuta vifaa, kusafiri kati ya wasambazaji na kupanga usafirishaji wa gharama kubwa. Uzoefu huu ulimwonyesha kuwa wanunuzi na wauzaji mara nyingi walikuwa wakikabiliana na sehemu tofauti za tatizo moja."
+        },
+        {
+          "title": "Njia Isiyotarajiwa Kuelekea Teknolojia",
+          "text": "Kuingia katika usanifu wa michoro na kompyuta kulibadilisha jinsi Victory alivyoona changamoto hizo. Hakuwa ameenda shule ya uandishi wa programu, lakini alianza kutambua kuwa changamoto nyingi za kila siku za biashara zinaweza kubadilishwa kuwa michakato ya kidijitali iliyopangwa. Aliandika mawazo yake na kuota mazingira moja yaliyounganishwa yakiwaleta pamoja wateja, biashara, wasambazaji na wasafirishaji. Kilichoanzia kama uchunguzi wa kivitendo kikageuka kuwa mpango wa jukwaa la teknolojia."
+        },
+        {
+          "title": "Imani Katikati ya Safari",
+          "text": "Victory anaona safari hii kama baraka kutoka kwa Mungu. Kama mfuasi wa Yesu Kristo, anaamini kwamba Mungu amempa ubunifu, maarifa na dhamira ya kufuata wito zaidi ya mafunzo yake rasmi. Maombi na imani vimemsaidia kustahimili hali ya kutokuwa na uhakika, ufinyu wa fedha na mchakato mgumu wa kubadilisha wazo kuwa ukweli. Kwake, M TAI si mafanikio ya kibiashara tu; ni fursa ya kutumia vipaji alivyopewa na Mungu kuwahudumia wengine."
+        },
+        {
+          "title": "Kubadilisha Maono Kuwa Ukweli",
+          "text": "Mazungumzo ya awali na watengenezaji yalithibitisha kuwa wazo linaweza kujengwa, ingawa gharama ilikuwa kikwazo kikubwa. Victory aliendelea kuboresha dhana na akaungana na mhandisi Raphael Ngombale na mshirika wa uwekezaji Alfaxa Boniface. Chini ya Big Brain Company Limited, mradi ulibadilika kutoka TradeVK kuwa M TAI — Merchant Trading App International."
+        },
+        {
+          "title": "Imejengwa Kurahisisha Biashara",
+          "text": "M TAI inalenga kupunguza vikwazo vinavyopunguza kasi ya biashara: ugumu wa kupata bidhaa, ununuzi uliogawanyika, michakato ya biashara ya mikono na mipango isiyofaa ya usafirishaji. Maono yake ni kusaidia biashara kufanya kazi kwa ufanisi zaidi, wateja kununua kwa urahisi zaidi, na wasafirishaji kuunganishwa na fursa. Jukwaa bado linakua, lakini kusudi lake linabaki wazi: kubadilisha changamoto za maisha halisi kuwa suluhisho za kivitendo zinazoweza kuwahudumia watu katika jamii na, hatimaye, kuvuka mipaka."
+        }
+      ],
+      "closing": "M TAI — Zaidi ya Soko. Imejengwa kwa Mafanikio Yako."
     },
     "contact": {
       "heroEyebrow": "Wasiliana Nasi",
@@ -749,24 +798,26 @@
       "heroSubtitle": "Mkusanyiko kamili wa zana zilizoundwa kusaidia biashara za Afrika kusimamia, kukua, na kustawi.",
       "list": [
         {
-          "name": "Usimamizi wa Stoo",
-          "desc": "Fuatilia viwango vya stoo, weka viwango vya kuagiza upya, simamia tarehe za kuharibika, na upate arifa moja kwa moja katika matawi yote.",
+          "name": "Usimamizi wa Stoo na Bidhaa",
+          "desc": "Dhibiti stoo yako kote madukani na kwenye maeneo ya kuhifadhi. M TAI inakusaidia kupanga rekodi za bidhaa, kufuatilia idadi iliyopo, na kusimamia mienendo ya stoo ili biashara yako iendelee vizuri.",
           "features": [
-            "Ufuatiliaji wa stoo moja kwa moja",
-            "Arifa za stoo kidogo",
-            "Usimamizi wa tarehe za kuharibika",
-            "Msaada wa matawi mengi"
-          ]
+            "Rekodi za bidhaa zilizosentralishwa",
+            "Stoo tofauti za duka na ghala",
+            "Uhamishaji wa stoo kutoka ghala kwenda madukani",
+            "Mwonekano wa stoo katika maduka mengi"
+          ],
+          "cta": "Simamia Stoo Yako"
         },
         {
-          "name": "Mauzo (POS)",
-          "desc": "Chakata miamala haraka kwa pesa za simu, kadi, na ankara za papo hapo.",
+          "name": "Mauzo na Pointi ya Mauzo",
+          "desc": "Weka mauzo yako ya kila siku kwa mpangilio na rekodi za biashara zako ziwe wazi. M TAI inaunganisha rekodi za mauzo, risiti, na masasisho ya stoo, kusaidia kufuatilia shughuli za biashara na kuwahudumia wateja kwa ujasiri.",
           "features": [
-            "Muunganiko wa pesa za simu",
-            "Malipo ya kadi",
-            "Ankara za papo hapo",
-            "Utoaji wa risiti"
-          ]
+            "Rekodi za mauzo za kidijitali",
+            "Utoaji wa risiti",
+            "Masasisho ya stoo yanayohusiana na mauzo yaliyokamilika",
+            "Muhtasari wa mauzo ya kila siku"
+          ],
+          "cta": "Simamia Mauzo Yako"
         },
         {
           "name": "Usimamizi wa Wateja",
@@ -789,24 +840,38 @@
           ]
         },
         {
-          "name": "Usimamizi wa Wafanyakazi",
-          "desc": "Simamia timu yako kwa ufikiaji wa majukumu, upangaji wa zamu, na ufuatiliaji wa utendaji.",
+          "name": "Usimamizi wa Wafanyakazi na Ufikiaji",
+          "desc": "Simamia timu yako huku ukidhibiti biashara yako. Wape wafanyakazi maduka, eleza majukumu yao, na dhibiti ufikiaji wa taarifa za biashara—yote mahali pamoja.",
           "features": [
-            "Ufikiaji kwa majukumu",
-            "Upangaji wa zamu",
-            "Ufuatiliaji wa utendaji",
-            "Muunganiko wa mishahara"
-          ]
+            "Akaunti binafsi za wafanyakazi",
+            "Ugawaji wa wafanyakazi kwa maduka maalum",
+            "Ufikiaji na ruhusa kulingana na majukumu",
+            "Historia ya shughuli za wafanyakazi",
+            "Kuboresha au kuondoa ufikiaji wa wafanyakazi"
+          ],
+          "cta": "Simamia Timu Yako"
         },
         {
-          "name": "Usafirishaji",
-          "desc": "Simamia usafirishaji, fuatilia mizigo, na ratibu mtandao wako wa usafiri kwa ufanisi.",
+          "name": "Huduma za Uwasilishaji",
+          "desc": "Hamisha bidhaa zako kwa chaguo la uwasilishaji linalofaa mahitaji, muda na bajeti yako. M TAI inaunganisha wateja na biashara na wasafirishaji kwa uwasilishaji na usafirishaji wa mizigo.",
           "features": [
-            "Ufuatiliaji wa usafirishaji",
-            "Uboreshaji wa njia",
-            "Usimamizi wa wasafirishaji",
+            "Chaguo za Uwasilishaji wa Haraka, wa Kawaida na Bila Wasiwasi",
+            "Maelezo ya kuchukua na marudio mahali pamoja",
+            "Risiti nyingi za manunuzi katika ombi moja la uwasilishaji",
             "Uthibitisho wa uwasilishaji"
-          ]
+          ],
+          "cta": "Omba Uwasilishaji"
+        },
+        {
+          "name": "Jukwaa la Wasafirishaji",
+          "desc": "Unganisha biashara yako ya usafirishaji na wateja wanaohitaji bidhaa kuhamishwa. M TAI inasaidia wasafirishaji kupata maombi ya mizigo yanayofaa magari na njia zao, kuratibu kuchukua, na kusimamia kazi za uwasilishaji.",
+          "features": [
+            "Pata fursa za usafirishaji",
+            "Tazama maelezo ya mizigo, kuchukua na marudio",
+            "Simamia kazi zilizokubaliwa",
+            "Thibitisha uwasilishaji uliokamilika"
+          ],
+          "cta": "Jiunge kama Msafirishaji"
         }
       ],
       "ctaTitle": "Uko Tayari Kuanza?",
