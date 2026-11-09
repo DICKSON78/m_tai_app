@@ -29,7 +29,7 @@ export default function ContactSupportScreen() {
       setAlert({ type: 'success', message: 'Your request has been sent. We will reply within 24 hours.' });
     } catch (err: any) {
       if (err?.response?.status === 404) {
-        setAlert({ type: 'error', message: 'Message sending is not available yet. Please email us at support@m-tai.app.' });
+        setAlert({ type: 'error', message: 'Message sending is not available yet. Please email us at info@bigbraintz.com.' });
       } else {
         setAlert({ type: 'error', message: 'Unable to send your request right now. Please try again.' });
       }
@@ -39,8 +39,8 @@ export default function ContactSupportScreen() {
   };
 
   const handleEmail = () => {
-    Linking.openURL('mailto:support@m-tai.app').catch(() =>
-      setAlert({ type: 'error', message: 'Open your email app and write to support@m-tai.app' }),
+    Linking.openURL('mailto:info@bigbraintz.com').catch(() =>
+      setAlert({ type: 'error', message: 'Open your email app and write to info@bigbraintz.com' }),
     );
   };
 
@@ -52,12 +52,12 @@ export default function ContactSupportScreen() {
           <TouchableOpacity activeOpacity={0.8} onPress={handleEmail} style={styles.quickCard}>
             <MaterialIcons name="email" size={22} color={COLORS.primaryDark} />
             <Text style={styles.quickLabel}>Email</Text>
-            <Text style={styles.quickValue}>support@m-tai.app</Text>
+            <Text style={styles.quickValue}>info@bigbraintz.com</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.8} onPress={handleEmail} style={styles.quickCard}>
             <MaterialIcons name="phone" size={22} color={COLORS.primaryDark} />
             <Text style={styles.quickLabel}>Call</Text>
-            <Text style={styles.quickValue}>+255 700 000 000</Text>
+            <Text style={styles.quickValue}>+255 713 646 300</Text>
           </TouchableOpacity>
         </View>
 

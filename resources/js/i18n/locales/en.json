@@ -729,16 +729,13 @@
       "subjectPh": "How can we help?",
       "messagePh": "Tell us more...",
       "infoLabels": [
+        "Mobile",
         "Email",
-        "Phone",
+        "Website",
         "Location"
       ],
-      "officeHours": "Office Hours",
-      "hoursLines": [
-        "Monday - Friday: 8:00 AM - 6:00 PM",
-        "Saturday: 9:00 AM - 1:00 PM",
-        "Sunday: Closed"
-      ]
+      "contactPersonLabel": "Contact Person",
+      "contactPersonName": "Victory Kilindo"
     },
     "faq": {
       "heroEyebrow": "FAQ",

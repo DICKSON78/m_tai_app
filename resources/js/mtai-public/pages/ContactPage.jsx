@@ -2,18 +2,17 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const contactMeta = [
-  { value: 'hello@m-tai.com', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
-  { value: '+255 700 000 000', icon: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z' },
-  { value: 'Nairobi, Kenya', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' },
+  { value: '+255 713 646 300', href: 'tel:+255713646300', icon: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z' },
+  { value: 'info@bigbraintz.com', href: 'mailto:info@bigbraintz.com', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+  { value: 'www.bigbraintz.com', href: 'https://www.bigbraintz.com', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9' },
+  { value: 'Dar es Salaam, Tanzania', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' },
 ]
 
 export default function ContactPage() {
   const { t } = useTranslation()
   const [submitted, setSubmitted] = useState(false)
   const infoLabels = t('site.contact.infoLabels', { returnObjects: true })
-  const hoursLines = t('site.contact.hoursLines', { returnObjects: true })
   const labelTexts = Array.isArray(infoLabels) ? infoLabels : []
-  const hourTexts = Array.isArray(hoursLines) ? hoursLines : []
 
   return (
     <>
@@ -93,18 +92,20 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-[#0A140C] mb-0.5">{labelTexts[i] || ''}</p>
-                    <p className="text-gray-500 text-sm">{info.value}</p>
+                    {info.href ? (
+                      <a href={info.href} className="text-gray-500 text-sm hover:text-[#00D4AA] transition-colors" target={info.href.startsWith('http') ? '_blank' : undefined} rel={info.href.startsWith('http') ? 'noreferrer' : undefined}>
+                        {info.value}
+                      </a>
+                    ) : (
+                      <p className="text-gray-500 text-sm">{info.value}</p>
+                    )}
                   </div>
                 </div>
               ))}
 
               <div className="bg-gray-50 p-6 rounded-2xl mt-8">
-                <h4 className="text-[#0A140C] font-bold text-sm mb-2">{t('site.contact.officeHours')}</h4>
-                <p className="text-gray-500 text-sm leading-relaxed">
-                  {hourTexts[0] || ''}<br />
-                  {hourTexts[1] || ''}<br />
-                  {hourTexts[2] || ''}
-                </p>
+                <h4 className="text-[#0A140C] font-bold text-sm mb-2">{t('site.contact.contactPersonLabel')}</h4>
+                <p className="text-gray-500 text-sm leading-relaxed">{t('site.contact.contactPersonName')}</p>
               </div>
             </div>
           </div>

@@ -30,7 +30,7 @@ export default function DeleteAccountScreen() {
       setTimeout(() => router.replace('/(auth)/login'), 800);
     } catch (err: any) {
       if (err?.response?.status === 404) {
-        setAlert({ type: 'error', message: 'Account deletion is not available online yet. Please contact support at support@m-tai.app to delete your account.' });
+        setAlert({ type: 'error', message: 'Account deletion is not available online yet. Please contact support at info@bigbraintz.com to delete your account.' });
       } else {
         setAlert({ type: 'error', message: err?.response?.data?.message || 'Unable to delete your account. Please contact support.' });
       }

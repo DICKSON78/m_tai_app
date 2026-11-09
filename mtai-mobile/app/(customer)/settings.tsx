@@ -100,7 +100,7 @@ export default function SettingsScreen() {
       icon: 'headset-mic',
       label: 'Contact Support',
       onPress: () => router.push('/contact-support'),
-      value: 'support@m-tai.app',
+      value: 'info@bigbraintz.com',
     },
     {
       icon: 'help-outline',

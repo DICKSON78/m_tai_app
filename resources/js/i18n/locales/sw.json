@@ -729,16 +729,13 @@
       "subjectPh": "Tunawezaje kukusaidia?",
       "messagePh": "Tuambie zaidi...",
       "infoLabels": [
-        "Barua Pepe",
         "Simu",
+        "Barua Pepe",
+        "Tovuti",
         "Mahali"
       ],
-      "officeHours": "Saa za Ofisi",
-      "hoursLines": [
-        "Jumatatu - Ijumaa: 8:00 Asubuhi - 6:00 Mchana",
-        "Jumamosi: 9:00 Asubuhi - 1:00 Mchana",
-        "Jumapili: Imefungwa"
-      ]
+      "contactPersonLabel": "Mtu wa Kuwasiliana Naye",
+      "contactPersonName": "Victory Kilindo"
     },
     "faq": {
       "heroEyebrow": "Maswali",
