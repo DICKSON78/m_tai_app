@@ -35,9 +35,9 @@ export default function Navbar() {
             : 'bg-[#0A140C] border-b border-white/5'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-[72px]">
-            <Link to="/" className="flex items-center gap-3 group">
+            <Link to="/" className="flex items-center gap-2 group">
               <div className="relative">
                 <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg shadow-black/20 overflow-hidden">
                   <img src="/icons/icon-96x96.png?v=2" alt="M-TAI" className="w-8 h-8 rounded-full object-cover" />
@@ -47,14 +47,14 @@ export default function Navbar() {
               <span className="text-white font-bold text-xl tracking-tight">M-TAI</span>
             </Link>
 
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-0">
               {navLinks.map((link) => {
                 const isActive = link.to === '/' ? pathname === '/' : pathname.startsWith(link.to)
                 return (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`relative px-4 py-2 text-sm font-medium transition-colors duration-300 ${
+                    className={`relative px-2 xl:px-3 py-2 text-[13px] xl:text-sm font-medium transition-colors duration-300 ${
                       isActive ? 'text-white' : 'text-white/60 hover:text-white'
                     }`}
                   >
@@ -65,21 +65,21 @@ export default function Navbar() {
               })}
               <Link
                 to="/register/seller"
-                className="relative px-4 py-2 text-sm font-semibold text-[#00D4AA] hover:text-white transition-colors duration-300"
+                className="relative hidden xl:block px-2 xl:px-3 py-2 text-[13px] xl:text-sm font-semibold text-[#00D4AA] hover:text-white transition-colors duration-300"
               >
                 {t('navbar.become_seller')}
               </Link>
             </div>
 
-            <div className="hidden lg:flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-2">
               <LanguageSwitcher variant="dropdown" className="text-white" />
               <Link
                 to="/register"
-                className="px-6 py-2.5 bg-gradient-to-r from-[#00D4AA] to-[#00B894] text-[#0A140C] text-sm font-bold rounded-full hover:shadow-lg hover:shadow-[#00D4AA]/25 transition-all duration-300 hover:scale-105"
+                className="px-4 xl:px-5 py-2.5 bg-gradient-to-r from-[#00D4AA] to-[#00B894] text-[#0A140C] text-sm font-bold rounded-full hover:shadow-lg hover:shadow-[#00D4AA]/25 transition-all duration-300 hover:scale-105"
               >
                 {t("common.register")}
               </Link>
-              <Link to="/login" className="px-6 py-2.5 text-sm font-semibold text-white border border-white/25 rounded-full hover:bg-white/10 hover:border-white/40 transition-all duration-300">
+              <Link to="/login" className="px-4 xl:px-5 py-2.5 text-sm font-semibold text-white border border-white/25 rounded-full hover:bg-white/10 hover:border-white/40 transition-all duration-300">
                 {t("common.login")}
               </Link>
             </div>
@@ -95,7 +95,7 @@ export default function Navbar() {
         </div>
 
         {open && (
-          <div className="lg:hidden bg-[#0A140C]/95 backdrop-blur-xl border-t border-white/5 px-6 py-6">
+          <div className="lg:hidden bg-[#0A140C]/95 backdrop-blur-xl border-t border-white/5 px-4 py-6">
             <ul className="flex flex-col gap-1 mb-6">
               {navLinks.map((link) => {
                 const isActive = link.to === '/' ? pathname === '/' : pathname.startsWith(link.to)

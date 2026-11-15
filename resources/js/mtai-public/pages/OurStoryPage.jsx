@@ -36,7 +36,7 @@ export default function OurStoryPage() {
                 <img
                   src="/img/logo-new.jpg"
                   alt={t('site.about.storyImageAlt')}
-                  className="w-full h-auto object-contain p-6"
+                  className="w-full h-auto object-contain p-4"
                 />
               </div>
               <p className="text-[#00D4AA] text-xs font-bold uppercase tracking-widest mt-6">

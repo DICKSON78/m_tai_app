@@ -16,7 +16,7 @@ export default function Story() {
               <img
                 src="/img/logo-new.jpg"
                 alt={t('site.story.imageAlt')}
-                className="w-full h-96 lg:h-[480px] object-contain p-10"
+                className="w-full h-96 lg:h-[480px] object-contain p-4"
                 loading="lazy"
               />
             </div>

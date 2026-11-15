@@ -83,7 +83,7 @@ export default function AboutPage() {
                 <img
                   src="/img/logo-new.jpg"
                   alt={t('site.about.storyImageAlt')}
-                  className="w-full h-full object-contain p-8 [clip-path:inset(0_round_1.5rem)]"
+                  className="w-full h-full object-contain p-4 [clip-path:inset(0_round_1.5rem)]"
                 />
               </div>
             </div>
