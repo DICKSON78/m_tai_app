@@ -12,14 +12,12 @@ export default function Story() {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="relative">
-            <div className="rounded-3xl overflow-hidden shadow-2xl bg-white">
-              <img
-                src="/img/logo-new.jpg"
-                alt={t('site.story.imageAlt')}
-                className="w-full h-96 lg:h-[480px] object-contain p-4"
-                loading="lazy"
-              />
-            </div>
+            <img
+              src="/img/logo-new.png"
+              alt={t('site.story.imageAlt')}
+              className="w-full h-auto object-contain rounded-3xl"
+              loading="lazy"
+            />
             <div className="absolute -bottom-6 -right-6 bg-[#0A140C] p-6 rounded-2xl shadow-2xl hidden sm:block">
               <p className="text-[#00D4AA] text-4xl font-black">{t('site.story.stat')}</p>
               <p className="text-white/60 text-xs font-medium mt-1">{t('site.story.statLabel')}</p>

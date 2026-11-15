@@ -79,13 +79,11 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="relative">
-              <div className="rounded-3xl overflow-hidden shadow-2xl bg-white h-96 lg:h-[480px]">
-                <img
-                  src="/img/logo-new.jpg"
-                  alt={t('site.about.storyImageAlt')}
-                  className="w-full h-full object-contain p-4 [clip-path:inset(0_round_1.5rem)]"
-                />
-              </div>
+              <img
+                src="/img/logo-new.png"
+                alt={t('site.about.storyImageAlt')}
+                className="w-full h-auto object-contain rounded-3xl"
+              />
             </div>
             <div>
               <span className="inline-block text-[#00D4AA] text-xs font-bold uppercase tracking-widest mb-4 border-b-2 border-[#00D4AA]/30 pb-1">
