@@ -11,7 +11,7 @@ const valueMeta = [
 const statValues = ['500+', '15+', '50M+', '99.9%']
 
 const storyImages = [
-  '/img/forWeblogo.png',
+  '/img/logo-new.jpg',
   '/img/inventory-stock.jpg',
   '/img/employee-access.jpg',
   '/img/sales-pos.jpg',
@@ -79,11 +79,11 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="relative">
-              <div className="rounded-3xl overflow-hidden shadow-2xl bg-[#F7FBFA] h-96 lg:h-[480px]">
+              <div className="rounded-3xl overflow-hidden shadow-2xl bg-white h-96 lg:h-[480px]">
                 <img
-                  src="/img/forWeblogo.png"
+                  src="/img/logo-new.jpg"
                   alt={t('site.about.storyImageAlt')}
-                  className="w-full h-full object-contain [clip-path:inset(0_round_1.5rem)]"
+                  className="w-full h-full object-contain p-8 [clip-path:inset(0_round_1.5rem)]"
                 />
               </div>
             </div>

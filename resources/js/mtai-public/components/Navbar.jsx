@@ -14,6 +14,7 @@ export default function Navbar() {
     { label: t('navbar.about'), to: '/about' },
     { label: t('navbar.ourStory'), to: '/our-story' },
     { label: t('navbar.products'), to: '/products' },
+    { label: t('navbar.transport'), to: '/transport' },
     { label: t('navbar.marketplace'), to: '/marketplace' },
     { label: t('navbar.faq'), to: '/faq' },
     { label: t('navbar.contact'), to: '/contact' },

@@ -5,6 +5,7 @@ import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
 import ProductsPage from './pages/ProductsPage'
+import TransportPage from './pages/TransportPage'
 import FAQPage from './pages/FAQPage'
 import ContactPage from './pages/ContactPage'
 import './App.css'
@@ -27,6 +28,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/products" element={<ProductsPage />} />
+          <Route path="/transport" element={<TransportPage />} />
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/contact" element={<ContactPage />} />
         </Routes>

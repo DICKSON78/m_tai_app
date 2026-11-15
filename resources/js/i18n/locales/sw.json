@@ -115,6 +115,7 @@
     "welcome": "Karibu",
     "marketplace": "Soko",
     "products": "Bidhaa",
+    "transport": "Usafirishaji",
     "faq": "Maswali",
     "sign_in": "Ingia",
     "get_started": "Anza",
@@ -443,7 +444,7 @@
       "tagline": "Imejengwa kwa Mafanikio Yako.",
       "stat": "500+",
       "statLabel": "Biashara Zinazohudumiwa",
-      "imageAlt": "Timu ya kibiashara",
+      "imageAlt": "Nembo ya M TAI",
       "cta1": "Soma Zaidi",
       "cta2": "Anza Sasa"
     },
@@ -616,11 +617,31 @@
         "heading": "Simamia Wateja Wako",
         "subheading": "Mawasiliano:",
         "items": [
-          { "icon": "phone", "label": "Simu", "value": "+255 713 646 300" },
-          { "icon": "mail", "label": "Barua pepe", "value": "info@bigbraintz.com" },
-          { "icon": "globe", "label": "Tovuti", "value": "www.bigbraintz.com" },
-          { "icon": "pin", "label": "Mahali", "value": "Dar es Salaam Tanzania" },
-          { "icon": "user", "label": "Mtu wa kuwasiliana", "value": "Victory Kilindo" }
+          {
+            "icon": "phone",
+            "label": "Simu",
+            "value": "+255 713 646 300"
+          },
+          {
+            "icon": "mail",
+            "label": "Barua pepe",
+            "value": "info@bigbraintz.com"
+          },
+          {
+            "icon": "globe",
+            "label": "Tovuti",
+            "value": "www.bigbraintz.com"
+          },
+          {
+            "icon": "pin",
+            "label": "Mahali",
+            "value": "Dar es Salaam Tanzania"
+          },
+          {
+            "icon": "user",
+            "label": "Mtu wa kuwasiliana",
+            "value": "Victory Kilindo"
+          }
         ]
       }
     },
@@ -676,7 +697,7 @@
           "bio": "Alfaksa ni Mhasibu wa Umma Aliyethibitishwa, CPA(T), mwenye shahada ya uzamili katika fedha na uzoefu wa miaka ishirini katika usimamizi wa fedha. Kama mwanzilishi mwenza na mjumbe wa Bodi ya Wakurugenzi, anatoa mwongozo wa kifedha na usimamizi, akisaidia kuunda mkakati wa kifedha wa kampuni, mipango ya muda mrefu, na ukuaji endelevu."
         },
         {
-          "name": "Raphael Ngombale",
+          "name": "Eng. Raphael Ngombale",
           "role": "Mkuu wa Idara ya Ufundi na Mjumbe wa Bodi",
           "initials": "RN",
           "bio": "Raphael ni mhandisi wa mawasiliano ya simu anayeongoza idara ya ufundi ya kampuni. Anasimamia uhandisi na maendeleo ya bidhaa za M TAI, pamoja na miundombinu ya kidijitali ya kampuni, na anachangia utaalamu wa kiufundi katika maamuzi ya kimkakati ya bodi."
@@ -709,7 +730,148 @@
           "text": "M TAI inalenga kupunguza vikwazo vinavyopunguza kasi ya biashara: ugumu wa kupata bidhaa, ununuzi uliogawanyika, michakato ya biashara ya mikono na mipango isiyofaa ya usafirishaji. Maono yake ni kusaidia biashara kufanya kazi kwa ufanisi zaidi, wateja kununua kwa urahisi zaidi, na wasafirishaji kuunganishwa na fursa. Jukwaa bado linakua, lakini kusudi lake linabaki wazi: kubadilisha changamoto za maisha halisi kuwa suluhisho za kivitendo zinazoweza kuwahudumia watu katika jamii na, hatimaye, kuvuka mipaka."
         }
       ],
-      "closing": "M TAI — Zaidi ya Soko. Imejengwa kwa Mafanikio Yako."
+      "closing": "M TAI — Imejengwa kwa Mafanikio Yako."
+    },
+    "transportPage": {
+      "heroEyebrow": "M TAI Transport",
+      "heroTitle": "Kila Mizigo. Kila Njia. Jukwaa Moja Lililounganishwa.",
+      "heroSubtitle": "Kuanzia usafirishaji wa ndani hadi mizigo ya kimataifa, M TAI inaunganisha mzigo wako na huduma sahihi ya usafirishaji.",
+      "heroText1": "Iwe bidhaa zako zinasafiri kwa pikipiki, gari dogo, lori, trela, treni, meli au ndege, M TAI inaunganisha wateja wanaohitaji usafirishaji na wasafirishaji tayari kuhamisha mizigo yao.",
+      "heroText2": "Kuanzia shambani hadi sokoni, dukani hadi mlangoni kwako, Tanzania hadi Zanzibar, au China hadi Tanzania — tangaza mzigo wako, ungana na msafirishaji anayefaa, na hamisha bidhaa zako kwa uhakika.",
+      "heroTagline": "Tuma Mzigo. Ungana. Safirisha. Wasilisha.",
+      "postCargo": "Tuma Mzigo Wako",
+      "registerTransporter": "Jisajili kama Msafirishaji",
+      "modesEyebrow": "Jukwaa Moja",
+      "modesTitle": "Kila Aina ya Usafirishaji.",
+      "modesIntro": "Kuanzia usafirishaji mmoja wa ndani hadi mizigo ya kimataifa, M TAI inaunganisha wamiliki wa mizigo na watoa huduma wa usafirishaji wanaofaa.",
+      "modes": [
+        {
+          "title": "Pikipiki na Tricycle",
+          "desc": "Usafirishaji wa haraka wa ndani, vifurushi vidogo na uwasilishaji wa jirani."
+        },
+        {
+          "title": "Magari Madogo na Van",
+          "desc": "Usafirishaji wa dukani, vifurushi na mizigo ya kila siku ya biashara."
+        },
+        {
+          "title": "Malori na Magari Makubwa",
+          "desc": "Bidhaa za kibiashara, usafirishaji wa jumla na usafirishaji wa kikanda."
+        },
+        {
+          "title": "Trela Kubwa (Semi-Trailers)",
+          "desc": "Mizigo mizito, shehena kubwa na mizigo ya masafa marefu."
+        },
+        {
+          "title": "Treni",
+          "desc": "Usafirishaji wa reli unaounganisha mizigo inayofaa na huduma za usafirishaji wa reli."
+        },
+        {
+          "title": "Meli na Usafirishaji wa Baharini",
+          "desc": "Mizigo ya baharini, usafirishaji wa pwani na mizigo inayopita bandarini."
+        },
+        {
+          "title": "Ndege",
+          "desc": "Miunganisho ya haraka ya mizigo kwa uwasilishaji wa dharura na shehena zinazofaa kwa usafirishaji wa anga."
+        }
+      ],
+      "modesClosing": "Iwe mzigo wako unasafiri ndani ya mji, kati ya mikoa au kuvuka mipaka ya kimataifa, M TAI inasaidia kuunganisha mahitaji yako ya usafirishaji na watoa huduma wanaofaa.",
+      "servicesEyebrow": "Huduma za Uwasilishaji",
+      "servicesTitle": "Chagua Huduma Yako ya Uwasilishaji",
+      "services": [
+        {
+          "title": "Get Fast",
+          "tagline": "Wakati muda ni muhimu.",
+          "desc": "Kwa mizigo ya dharura inayohitaji usafirishaji wa kipaumbele. M TAI inaunganisha ombi lako na chaguo za usafirishaji zinazofaa, ikiwemo usafirishaji wa anga inapofaa, ili bidhaa zako zifikie marudio haraka iwezekanavyo kadri huduma inavyoruhusu."
+        },
+        {
+          "title": "Normal Delivery",
+          "tagline": "Usafirishaji wa kivitendo kwa biashara ya kila siku.",
+          "desc": "Kwa wateja wanaotaka usafirishaji wa kuaminika wenye kubadilika zaidi. Mizigo inayofaa inaweza kuunganishwa na njia zinazolingana na uwezo wa usafirishaji uliopo ili kusaidia uwasilishaji wa ufanisi."
+        },
+        {
+          "title": "Don't Worry / Usihofu",
+          "tagline": "Chaguo rahisi kwa uwasilishaji wa gharama nafuu.",
+          "desc": "Kwa mizigo isiyohitaji kutumwa mara moja. Shehena zinazofaa zinaweza kufaidika na uunganishaji wa mizigo unaolingana na njia na fursa za usafirishaji zilizopo."
+        },
+        {
+          "title": "Uwasilishaji Mlango hadi Mlango",
+          "tagline": "Kuanzia kuchukua hadi marudio uliyochagua.",
+          "desc": "Panga usafirishaji kutoka eneo la mtumaji hadi mlango wa mpokeaji, kulingana na huduma iliyopo na ufikiaji wa marudio."
+        }
+      ],
+      "servicesClosing": "Kuanzia vifurushi vidogo hadi shehena za kibiashara, M TAI inasaidia kuunganisha safari nzima ya uwasilishaji.",
+      "howEyebrow": "Inavyofanya Kazi",
+      "howTitle": "Jinsi M TAI Transport Inavyofanya Kazi",
+      "steps": [
+        {
+          "title": "Tuma Mzigo Wako",
+          "desc": "Toa maelezo ya mzigo wako, kiasi, eneo la kuchukua, marudio na huduma ya uwasilishaji unayopendelea."
+        },
+        {
+          "title": "Ungana na Wasafirishaji",
+          "desc": "Ombi lako la mzigo linapatikana kwa watoa huduma wa usafirishaji wanaofaa kupitia Bodi ya Mizigo ya M TAI."
+        },
+        {
+          "title": "Msafirishaji Anakubali Kazi",
+          "desc": "Msafirishaji anayefaa hukagua maelezo ya mzigo na kukubali kazi inayofaa ya usafirishaji."
+        },
+        {
+          "title": "Mzigo Wako Unasafiri",
+          "desc": "Msafirishaji huchukua mzigo na kuupeleka marudio kulingana na makubaliano ya usafirishaji."
+        },
+        {
+          "title": "Kagua na Thibitisha Uwasilishaji",
+          "desc": "Mzigo unapofika, kagua kabla ya kuthibitisha kupokea."
+        },
+        {
+          "title": "Thibitisha Kukamilika",
+          "desc": "Weka nambari yako ya Kukamilisha Uwasilishaji salama hadi utakapopokea na kukagua mzigo wako. Ukiridhika na uwasilishaji, mpe msafirishaji nambari hiyo ili kuthibitisha kukamilika."
+        }
+      ],
+      "note": "Ikitambuliwa tatizo, mawasiliano na mchakato ufaao wa utatuzi unapaswa kufanyika kabla ya uwasilishaji kuthibitishwa mwishoni.",
+      "audienceEyebrow": "Imejengwa kwa Ajili Yako",
+      "audienceTitle": "Imejengwa kwa Wateja na Wasafirishaji",
+      "audiences": [
+        {
+          "title": "Kwa Wateja",
+          "items": [
+            "Ungana na watoa huduma wa usafirishaji wanaofaa.",
+            "Omba usafirishaji kwa aina mbalimbali za mizigo.",
+            "Chagua huduma ya uwasilishaji inayokufaa.",
+            "Toa maelezo ya mzigo na nyaraka zinazohitajika.",
+            "Thibitisha kupokea baada ya kukagua uwasilishaji wako."
+          ]
+        },
+        {
+          "title": "Kwa Wasafirishaji",
+          "items": [
+            "Gundua fursa za usafirishaji wa mizigo.",
+            "Kagua maombi ya mizigo yaliyopo na maelezo husika.",
+            "Kubali kazi zinazofaa.",
+            "Ungana na wateja zaidi ya mtandao wako wa kawaida.",
+            "Simamia kazi za usafirishaji kupitia M TAI."
+          ]
+        },
+        {
+          "title": "Kwa Biashara na Biashara ya Kimataifa",
+          "items": [
+            "Unganisha wamiliki wa mizigo na watoa huduma wa usafirishaji.",
+            "Saidia usafirishaji wa mizigo kati ya miji, mikoa na maeneo yanayofaa ya kimataifa.",
+            "Unganisha waagizaji na wafanyabiashara na chaguo za usafirishaji kwa shehena za kuvuka mipaka.",
+            "Saidia aina mbalimbali za mizigo na mahitaji ya usafirishaji kupitia jukwaa moja lililounganishwa."
+          ]
+        }
+      ],
+      "finalTitle": "Mzigo Wako. Muunganisho Sahihi.",
+      "finalText1": "Huhitaji kupanga kila hatua ya usafirishaji mwenyewe.",
+      "finalText2": "Iwe bidhaa zako zinahitaji pikipiki, lori, treni, meli au ndege, M TAI inaunganisha ombi lako la usafirishaji na watoa huduma wanaofaa.",
+      "finalText3": "M TAI Transport — Inaunganisha Mizigo na Watu Wanaoisafirisha.",
+      "postCargoCta": "Tuma Mzigo Wako",
+      "joinCta": "Jiunge kama Msafirishaji",
+      "footerCompany": "Big Brain Company Limited",
+      "footerCompanyText": "Tunajenga suluhisho za kidijitali kwa mustakabali uliounganishwa.",
+      "footerTagline": "M TAI — Nunua. Uza. Ungana. Simamia. Kua.",
+      "footerSuccess": "Imejengwa kwa Mafanikio Yako."
     },
     "contact": {
       "heroEyebrow": "Wasiliana Nasi",

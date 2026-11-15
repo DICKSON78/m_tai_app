@@ -32,11 +32,11 @@ export default function OurStoryPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-[320px_1fr] gap-16 items-start">
             <div className="lg:sticky lg:top-28">
-              <div className="rounded-3xl overflow-hidden shadow-2xl bg-[#F7FBFA]">
+              <div className="rounded-3xl overflow-hidden shadow-2xl bg-white">
                 <img
-                  src="/img/forWeblogo.png"
+                  src="/img/logo-new.jpg"
                   alt={t('site.about.storyImageAlt')}
-                  className="w-full h-auto object-contain"
+                  className="w-full h-auto object-contain p-6"
                 />
               </div>
               <p className="text-[#00D4AA] text-xs font-bold uppercase tracking-widest mt-6">

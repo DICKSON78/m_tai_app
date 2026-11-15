@@ -12,11 +12,11 @@ export default function Story() {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="relative">
-            <div className="rounded-3xl overflow-hidden shadow-2xl">
+            <div className="rounded-3xl overflow-hidden shadow-2xl bg-white">
               <img
-                src="https://images.pexels.com/photos/30689114/pexels-photo-30689114.jpeg?auto=compress&cs=tinysrgb&w=800"
+                src="/img/logo-new.jpg"
                 alt={t('site.story.imageAlt')}
-                className="w-full h-96 lg:h-[480px] object-cover"
+                className="w-full h-96 lg:h-[480px] object-contain p-10"
                 loading="lazy"
               />
             </div>

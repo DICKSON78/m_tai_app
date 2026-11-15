@@ -13,6 +13,7 @@ import PublicHomePage from './mtai-public/pages/HomePage';
 import PublicAboutPage from './mtai-public/pages/AboutPage';
 import PublicOurStoryPage from './mtai-public/pages/OurStoryPage';
 import PublicProductsPage from './mtai-public/pages/ProductsPage';
+import PublicTransportPage from './mtai-public/pages/TransportPage';
 import PublicFAQPage from './mtai-public/pages/FAQPage';
 import PublicContactPage from './mtai-public/pages/ContactPage';
 import PublicMarketplacePage from './mtai-public/pages/MarketplacePage';
@@ -232,6 +233,7 @@ function AppRoutes() {
             <Route path="/about" element={<PublicLayout><PublicAboutPage /></PublicLayout>} />
             <Route path="/our-story" element={<PublicLayout><PublicOurStoryPage /></PublicLayout>} />
             <Route path="/products" element={<PublicLayout><PublicProductsPage /></PublicLayout>} />
+            <Route path="/transport" element={<PublicLayout><PublicTransportPage /></PublicLayout>} />
             <Route path="/marketplace" element={<PublicLayout><PublicMarketplacePage /></PublicLayout>} />
             <Route path="/marketplace/:id" element={<PublicLayout><PublicMarketplaceShopPage /></PublicLayout>} />
             <Route path="/faq" element={<PublicLayout><PublicFAQPage /></PublicLayout>} />
