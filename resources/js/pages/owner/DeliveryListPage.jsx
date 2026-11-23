@@ -46,7 +46,9 @@ export default function DeliveryListPage() {
     const [statusDropdownId, setStatusDropdownId] = useState(null);
 
     const [createModalOpen, setCreateModalOpen] = useState(false);
-    const [createForm, setCreateForm] = useState({ customer_id: '', order_id: '', goods_category: '', item_description: '', quantity: '', pickup_location: '', destination: '', offered_price: '', is_negotiable: false });
+    const [createForm, setCreateForm] = useState({ customer_id: '', order_id: '', goods_category: '', item_description: '', quantity: '', pickup_location: '', destination: '', offered_price: '', is_negotiable: false, pickup_latitude: '', pickup_longitude: '' });
+    const [locating, setLocating] = useState(false);
+    const [dispatchMessage, setDispatchMessage] = useState('');
     const [createErrors, setCreateErrors] = useState({});
     const [createSubmitting, setCreateSubmitting] = useState(false);
     const [orders, setOrders] = useState([]);
@@ -120,13 +122,41 @@ export default function DeliveryListPage() {
         if (createErrors[name]) setCreateErrors(prev => ({ ...prev, [name]: null }));
     };
 
+    const useCurrentPickupLocation = () => {
+        if (!navigator.geolocation) { alert('Ramani haipatikani kwenye kivinjari hiki.'); return; }
+        setLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setCreateForm(prev => ({ ...prev, pickup_latitude: position.coords.latitude.toFixed(7), pickup_longitude: position.coords.longitude.toFixed(7) }));
+                setLocating(false);
+            },
+            () => { setLocating(false); alert('Haikuweza kupata eneo lako. Tafadhali weka viwianzo kwa mkono.'); },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    };
+
     const handleCreateDelivery = async (e) => {
         e.preventDefault();
-        setCreateSubmitting(true); setCreateErrors({});
+        setCreateSubmitting(true); setCreateErrors({}); setDispatchMessage('');
         try {
-            await api.post(`/owner/businesses/${selectedBusiness}/deliveries`, { customer_id: createForm.customer_id, order_id: createForm.order_id || null, goods_category: createForm.goods_category, item_description: createForm.item_description, quantity: Number(createForm.quantity) || 1, pickup_location: createForm.pickup_location, destination: createForm.destination, offered_price: Number(createForm.offered_price) || 0, is_negotiable: createForm.is_negotiable });
+            const response = await api.post(`/owner/businesses/${selectedBusiness}/deliveries`, {
+                customer_id: createForm.customer_id,
+                order_id: createForm.order_id || null,
+                goods_category: createForm.goods_category,
+                item_description: createForm.item_description,
+                quantity: Number(createForm.quantity) || 1,
+                pickup_location: createForm.pickup_location,
+                destination: createForm.destination,
+                offered_price: Number(createForm.offered_price) || 0,
+                is_negotiable: createForm.is_negotiable,
+                pickup_latitude: createForm.pickup_latitude || null,
+                pickup_longitude: createForm.pickup_longitude || null,
+            });
             setCreateModalOpen(false);
-            setCreateForm({ customer_id: '', order_id: '', goods_category: '', item_description: '', quantity: '', pickup_location: '', destination: '', offered_price: '', is_negotiable: false });
+            setCreateForm({ customer_id: '', order_id: '', goods_category: '', item_description: '', quantity: '', pickup_location: '', destination: '', offered_price: '', is_negotiable: false, pickup_latitude: '', pickup_longitude: '' });
+            setDispatchMessage(response.data?.offered
+                ? 'Ofa imetumwa kwa dereva aliye karibu na mahali pa kuchukulia mzigo. Anasubiri kukubali.'
+                : 'Mzigo umeandaliwa. Hakuna dereva mtandaoni kwa sasa; ofa itatumwa dereva anapoingia mtandaoni.');
             fetchDeliveries();
         } catch (err) { console.error('Failed to create delivery:', err); if (err.response?.status === 422) setCreateErrors(err.response.data?.errors || {}); } finally { setCreateSubmitting(false); }
     };
@@ -145,7 +175,7 @@ export default function DeliveryListPage() {
     const handleStatusChange = async () => {
         if (!statusDelivery || !statusAction) return;
         setStatusUpdating(true);
-        try { await api.put(`/owner/businesses/${selectedBusiness}/deliveries/${statusDelivery.id}`, { status: statusAction }); setStatusModalOpen(false); setStatusDelivery(null); setStatusAction(''); fetchDeliveries(); } catch (error) { console.error('Failed to update delivery status:', error); alert(error?.response?.data?.message || 'Failed to update delivery status. Please try again.'); } finally { setStatusUpdating(false); }
+        try { await api.post(`/owner/businesses/${selectedBusiness}/deliveries/${statusDelivery.id}/status`, { status: statusAction }); setStatusModalOpen(false); setStatusDelivery(null); setStatusAction(''); fetchDeliveries(); } catch (error) { console.error('Failed to update delivery status:', error); alert(error?.response?.data?.message || 'Failed to update delivery status. Please try again.'); } finally { setStatusUpdating(false); }
     };
 
     const handleReset = () => { setSearch(''); setStatusFilter(''); };
@@ -210,6 +240,13 @@ export default function DeliveryListPage() {
                 </div>
             </div>
 
+            {dispatchMessage && (
+                <div className="mb-6 px-4 py-3 bg-[#00D4AA]/10 border border-[#00D4AA]/30 text-[#007d66] rounded-lg text-sm flex items-start justify-between gap-3">
+                    <span>{dispatchMessage}</span>
+                    <button type="button" onClick={() => setDispatchMessage('')} className="font-bold text-[#007d66]">×</button>
+                </div>
+            )}
+
             {!selectedBusiness ? (
                 <div className="card overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
                     <div className="px-6 py-12 text-center"><Truck size={40} className="mx-auto text-gray-300 mb-3" /><p className="text-sm text-gray-500">Select a business to view deliveries</p></div>
@@ -252,7 +289,7 @@ export default function DeliveryListPage() {
                                             <td className="px-6 py-3 text-gray-600 text-sm">{row.destination || '-'}</td>
                                             <td className="px-6 py-3 text-right font-semibold text-gray-800">{formatCurrency(row.offered_price)}{row.is_negotiable && <span className="text-xs text-gray-400 ml-1">(Neg.)</span>}</td>
                                             <td className="px-6 py-3 text-gray-700 text-sm">{row.transporter?.name || row.transporter_name || <span className="text-gray-400 italic">Unassigned</span>}</td>
-                                            <td className="px-6 py-3 text-center"><span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.badge}`}>{cfg.label}</span></td>
+                                            <td className="px-6 py-3 text-center"><span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.badge}`}>{row.status === 'pending' && row.transporter_id ? 'Offer Sent' : cfg.label}</span></td>
                                             <td className="px-6 py-3">
                                                 <div className="flex items-center gap-2">
                                                     {row.status === 'pending' && !row.transporter_id && (
@@ -292,6 +329,16 @@ export default function DeliveryListPage() {
                         <div><label className="block text-sm font-semibold text-gray-900 mb-2">Item Description <span className="text-red-500">*</span></label><input type="text" name="item_description" value={createForm.item_description} onChange={handleCreateChange} required placeholder="Describe the item" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" /></div>
                         <div><label className="block text-sm font-semibold text-gray-900 mb-2">Quantity</label><input type="number" name="quantity" value={createForm.quantity} onChange={handleCreateChange} min="1" placeholder="1" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" /></div>
                         <div><label className="block text-sm font-semibold text-gray-900 mb-2">Pickup Location <span className="text-red-500">*</span></label><input type="text" name="pickup_location" value={createForm.pickup_location} onChange={handleCreateChange} required placeholder="Pickup location" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" /></div>
+                        <div className="md:col-span-2 bg-[#00D4AA]/5 border border-[#00D4AA]/20 rounded-lg p-3">
+                            <div className="flex items-center justify-between gap-3 mb-2">
+                                <p className="text-xs text-gray-600">Weka eneo la kuchukulia mzigo kwenye ramani ili mfumo umchague dereva aliye karibu.</p>
+                                <button type="button" onClick={useCurrentPickupLocation} disabled={locating} className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white rounded-lg bg-[#00A886] hover:bg-[#008f75] disabled:opacity-50"><MapPin size={13} /> {locating ? 'Kusaka...' : 'Tumia eneo langu'}</button>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <input type="number" step="any" name="pickup_latitude" value={createForm.pickup_latitude} onChange={handleCreateChange} placeholder="Pickup latitude (optional)" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" />
+                                <input type="number" step="any" name="pickup_longitude" value={createForm.pickup_longitude} onChange={handleCreateChange} placeholder="Pickup longitude (optional)" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" />
+                            </div>
+                        </div>
                         <div><label className="block text-sm font-semibold text-gray-900 mb-2">Destination <span className="text-red-500">*</span></label><input type="text" name="destination" value={createForm.destination} onChange={handleCreateChange} required placeholder="Destination" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" /></div>
                         <div><label className="block text-sm font-semibold text-gray-900 mb-2">Offered Price (TZS) <span className="text-red-500">*</span></label><input type="number" name="offered_price" value={createForm.offered_price} onChange={handleCreateChange} min="0" required placeholder="0" className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/30 focus:border-[#00D4AA]" /></div>
                         <div className="flex items-end pb-1"><label className="flex items-center space-x-2 cursor-pointer"><input type="checkbox" name="is_negotiable" checked={createForm.is_negotiable} onChange={handleCreateChange} className="w-4 h-4 text-[#00D4AA] border-gray-300 rounded focus:ring-[#00D4AA]" /><span className="text-sm text-gray-700">Price is negotiable</span></label></div>

@@ -7,10 +7,28 @@ use App\Models\Business;
 use App\Models\Customer;
 use App\Models\Delivery;
 use App\Models\Transporter;
+use App\Services\DeliveryDispatchService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DeliveryController extends Controller
 {
+    private function dispatch(): DeliveryDispatchService
+    {
+        return app(DeliveryDispatchService::class);
+    }
+
+    private function loadRelations(Delivery $delivery): Delivery
+    {
+        return $delivery->load([
+            'order:id,transaction_code,total',
+            'business:id,business_name',
+            'customer:id,full_name,phone',
+            'transporter:id,full_name,phone,vehicle_type,plate_number',
+        ]);
+    }
+
     public function index(Request $request, Business $business)
     {
         if ($business->user_id !== $request->user()->id) {
@@ -56,6 +74,8 @@ class DeliveryController extends Controller
             'destination' => 'required|string|max:500',
             'offered_price' => 'required|numeric|min:0',
             'is_negotiable' => 'sometimes|boolean',
+            'pickup_latitude' => 'nullable|numeric|between:-90,90',
+            'pickup_longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         if (! empty($validated['order_id'])) {
@@ -75,15 +95,18 @@ class DeliveryController extends Controller
             'destination' => $validated['destination'],
             'offered_price' => $validated['offered_price'],
             'is_negotiable' => $validated['is_negotiable'] ?? true,
+            'pickup_latitude' => $validated['pickup_latitude'] ?? null,
+            'pickup_longitude' => $validated['pickup_longitude'] ?? null,
             'status' => 'pending',
         ]);
 
+        // Uber/Bolt style: alert the nearest online transporter immediately.
+        $offered = $this->dispatch()->offer($delivery);
+
         return response()->json([
             'message' => 'Ofa ya usafirishaji imetolewa.',
-            'delivery' => $delivery->load([
-                'order:id,transaction_code,total',
-                'customer:id,full_name,phone',
-            ]),
+            'offered' => $offered,
+            'delivery' => $this->loadRelations($delivery),
         ], 201);
     }
 
@@ -140,6 +163,8 @@ class DeliveryController extends Controller
             'is_negotiable' => 'sometimes|boolean',
             'goods_category' => 'sometimes|string|max:255',
             'item_description' => 'sometimes|string|max:1000',
+            'pickup_latitude' => 'nullable|numeric|between:-90,90',
+            'pickup_longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         $delivery->update($validated);
@@ -262,46 +287,73 @@ class DeliveryController extends Controller
             return response()->json(['message' => 'Msafirishaji si hai.'], 422);
         }
 
-        $delivery->update([
-            'transporter_id' => $transporter->id,
-            'status' => 'accepted',
-        ]);
+        // Reassigning replaces any offer that was still waiting for a response.
+        if ($delivery->transporter_id !== null) {
+            $delivery->update([
+                'transporter_id' => null,
+                'offered_at' => null,
+                'offer_expires_at' => null,
+            ]);
+        }
 
-        if ($transporter->user) {
-            PushNotificationController::sendNotification(
-                $transporter->user,
-                'Delivery assigned',
-                "Umepewa usafirishaji mpya kutoka {$delivery->pickup_location} kwenda {$delivery->destination}.",
-                [
-                    'type' => 'delivery_status',
-                    'delivery_id' => $delivery->id,
-                    'status' => 'accepted',
-                ]
-            );
+        $offered = $this->dispatch()->offer($delivery->fresh(), [], $transporter);
+
+        if (! $offered) {
+            return response()->json([
+                'message' => 'Ofa haiwezi kutolewa kwa msafirishaji huyu kwa sasa. Tafadhali jaribu tena.',
+            ], 422);
         }
 
         return response()->json([
-            'message' => 'Msafirishaji ameajiriwa.',
-            'delivery' => $delivery->fresh()->load([
-                'order:id,transaction_code,total',
-                'customer:id,full_name,phone',
-                'transporter:id,full_name,phone,vehicle_type,plate_number',
-            ]),
+            'message' => 'Ofa imetumwa kwa msafirishaji. Inasubiri kukubaliwa.',
+            'offered' => true,
+            'delivery' => $this->loadRelations($delivery->fresh()),
         ]);
     }
 
     public function available(Request $request)
     {
+        $this->dispatch()->expireStaleOffers(true);
+
         $deliveries = Delivery::where('status', 'pending')
             ->whereNull('transporter_id')
             ->with([
                 'business:id,business_name',
                 'customer:id,full_name,phone',
+                'order:id,transaction_code,total',
             ])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
         return response()->json($deliveries);
+    }
+
+    /** Offers currently reserved for the signed-in transporter (the Uber/Bolt request screen). */
+    public function offers(Request $request)
+    {
+        $transporter = $request->user()->transporter;
+
+        if (! $transporter) {
+            return response()->json(['message' => 'Msafirishaji hajapatikana.'], 404);
+        }
+
+        $this->dispatch()->expireStaleOffers(true);
+
+        $offers = Delivery::where('transporter_id', $transporter->id)
+            ->where('status', 'pending')
+            ->where(function ($query) {
+                $query->whereNull('offer_expires_at')
+                    ->orWhere('offer_expires_at', '>', now());
+            })
+            ->with([
+                'order:id,transaction_code,total',
+                'business:id,business_name',
+                'customer:id,full_name,phone',
+            ])
+            ->orderBy('offered_at', 'desc')
+            ->get();
+
+        return response()->json(['data' => $offers]);
     }
 
     public function customerDeliveries(Request $request)
@@ -360,22 +412,69 @@ class DeliveryController extends Controller
             return response()->json(['message' => 'Msafirishaji hajapatikana.'], 404);
         }
 
-        if ($delivery->status !== 'pending' || !is_null($delivery->transporter_id)) {
-            return response()->json(['message' => 'Usafirishaji huu haupatikani tena.'], 422);
+        $result = DB::transaction(function () use ($delivery, $transporter) {
+            $locked = Delivery::whereKey($delivery->id)->lockForUpdate()->first();
+
+            if (! $locked) {
+                return 'missing';
+            }
+
+            if ($locked->status !== 'pending') {
+                return 'unavailable';
+            }
+
+            $isOfferedToMe = $locked->transporter_id === $transporter->id;
+            $isOpenPoolClaim = $locked->transporter_id === null;
+
+            if (! $isOfferedToMe && ! $isOpenPoolClaim) {
+                return 'unavailable';
+            }
+
+            if ($isOfferedToMe && $locked->offer_expires_at && $locked->offer_expires_at->isPast()) {
+                return 'expired';
+            }
+
+            $locked->update([
+                'transporter_id' => $transporter->id,
+                'status' => 'accepted',
+                'accepted_at' => now(),
+                'offered_at' => null,
+                'offer_expires_at' => null,
+                'auto_dispatched' => true,
+            ]);
+
+            return $locked;
+        });
+
+        if ($result === 'missing') {
+            abort(404);
         }
 
-        $delivery->update([
-            'transporter_id' => $transporter->id,
-            'status' => 'accepted',
-        ]);
+        if (is_string($result)) {
+            return response()->json([
+                'message' => $result === 'expired'
+                    ? 'Muda wa ofa umekwisha. Mzigo umetolewa kwa dereva mwingine.'
+                    : 'Usafirishaji huu haupatikani tena.',
+            ], 422);
+        }
+
+        if ($result->business && $result->business->user) {
+            PushNotificationController::sendNotification(
+                $result->business->user,
+                'Dereva amekubali',
+                "{$transporter->full_name} amekubali kusafirisha mzigo kutoka {$result->pickup_location} kwenda {$result->destination}.",
+                [
+                    'type' => 'delivery_update',
+                    'status' => 'accepted',
+                    'delivery_id' => $result->id,
+                    'link' => "/owner/deliveries?id={$result->id}",
+                ]
+            );
+        }
 
         return response()->json([
             'message' => 'Umekubali usafirishaji.',
-            'delivery' => $delivery->fresh()->load([
-                'order:id,transaction_code,total',
-                'business:id,business_name',
-                'customer:id,full_name,phone',
-            ]),
+            'delivery' => $this->loadRelations($result),
         ]);
     }
 
@@ -387,40 +486,79 @@ class DeliveryController extends Controller
             return response()->json(['message' => 'Msafirishaji hajapatikana.'], 404);
         }
 
-        if (in_array($delivery->status, ['delivered', 'cancelled'])) {
-            return response()->json(['message' => 'Usafirishaji huu hauwezi kukataliwa.'], 422);
-        }
-
         $validated = $request->validate([
             'reason' => 'nullable|string|max:1000',
         ]);
 
-        $delivery->update([
-            'rejected' => true,
-            'rejected_reason' => $validated['reason'] ?? null,
-            'rejected_by' => $transporter->id,
-        ]);
+        $result = DB::transaction(function () use ($delivery, $transporter, $validated) {
+            $locked = Delivery::whereKey($delivery->id)->lockForUpdate()->first();
 
-        if ($delivery->business && $delivery->business->user) {
+            if (! $locked) {
+                return 'missing';
+            }
+
+            if (in_array($locked->status, ['delivered', 'cancelled'])) {
+                return 'final';
+            }
+
+            if ($locked->transporter_id !== $transporter->id) {
+                return 'not_offered';
+            }
+
+            $locked->update([
+                'transporter_id' => null,
+                'offered_at' => null,
+                'offer_expires_at' => null,
+                'auto_dispatched' => false,
+                'rejected' => true,
+                'rejected_reason' => $validated['reason'] ?? null,
+                'rejected_by' => $transporter->id,
+            ]);
+
+            return $locked;
+        });
+
+        if ($result === 'missing') {
+            abort(404);
+        }
+
+        if (is_string($result)) {
+            return response()->json([
+                'message' => $result === 'final'
+                    ? 'Usafirishaji huu hauwezi kukataliwa.'
+                    : 'Ofa hii haisubiri majibu yako.',
+            ], 422);
+        }
+
+        // Immediately pass the load to the next closest available transporter.
+        $reoffered = false;
+        try {
+            $reoffered = $this->dispatch()->offer($result->fresh(), [$transporter->id]);
+        } catch (\Throwable $exception) {
+            Log::warning('Delivery re-offer failed', ['delivery' => $result->id, 'error' => $exception->getMessage()]);
+        }
+
+        if ($result->business && $result->business->user) {
             PushNotificationController::sendNotification(
-                $delivery->business->user,
-                'Delivery rejected',
-                'Msafirishaji amekataa ofa ya usafirishaji. Tafadhali tafuta msafirishaji mwingine.',
+                $result->business->user,
+                $reoffered ? 'Ofa ilikataliwa - dereva mwingine amepewa' : 'Ofa ilikataliwa',
+                $reoffered
+                    ? 'Dereva amekataa ofa. Mzigo umetolewa kwa dereva mwingine aliye karibu.'
+                    : 'Dereva amekataa ofa ya usafirishaji. Hakuna dereva mwingine aliye karibu kwa sasa.',
                 [
                     'type' => 'delivery_status',
-                    'delivery_id' => $delivery->id,
+                    'delivery_id' => $result->id,
                     'status' => 'rejected',
                 ]
             );
         }
 
         return response()->json([
-            'message' => 'Umekataa usafirishaji.',
-            'delivery' => $delivery->fresh()->load([
-                'order:id,transaction_code,total',
-                'business:id,business_name',
-                'customer:id,full_name,phone',
-            ]),
+            'message' => $reoffered
+                ? 'Umekataa usafirishaji. Mzigo umetolewa kwa dereva mwingine.'
+                : 'Umekataa usafirishaji.',
+            'reoffered' => $reoffered,
+            'delivery' => $this->loadRelations($result->fresh()),
         ]);
     }
 
@@ -432,7 +570,8 @@ class DeliveryController extends Controller
             return response()->json(['message' => 'Msafirishaji hajapatikana.'], 404);
         }
 
-        if ($delivery->status !== 'pending' || !is_null($delivery->transporter_id)) {
+        if ($delivery->status !== 'pending'
+            || ($delivery->transporter_id !== null && $delivery->transporter_id !== $transporter->id)) {
             return response()->json(['message' => 'Usafirishaji huu hauko katika hatua ya mazungumzo.'], 422);
         }
 
@@ -558,15 +697,14 @@ class DeliveryController extends Controller
             ], 422);
         }
 
-        $delivery->update(['status' => $newStatus]);
+        $delivery->update(array_filter([
+            'status' => $newStatus,
+            'accepted_at' => $newStatus === 'accepted' ? now() : null,
+        ]));
 
         return response()->json([
             'message' => 'Hali ya usafirishaji imesasishwa.',
-            'delivery' => $delivery->fresh()->load([
-                'order:id,transaction_code,total',
-                'business:id,business_name',
-                'customer:id,full_name,phone',
-            ]),
+            'delivery' => $this->loadRelations($delivery->fresh()),
         ]);
     }
 }

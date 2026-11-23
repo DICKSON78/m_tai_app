@@ -336,7 +336,9 @@ class AuthApiController extends Controller
             'phone' => $validated['phone'],
             'vehicle_type' => $validated['vehicle_type'],
             'plate_number' => $validated['plate_number'] ?? null,
+            'region' => $validated['region'] ?? null,
             'is_active' => true,
+            'is_online' => true,
         ]);
 
         $token = $user->createToken('auth-token')->plainTextToken;

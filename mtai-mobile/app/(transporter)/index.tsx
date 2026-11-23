@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -34,17 +34,18 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'mine', label: 'My Deliveries' },
 ];
 
-const ACTIVE_STATUSES = new Set(['assigned', 'picked_up', 'in_transit']);
+const ACTIVE_STATUSES = new Set(['accepted', 'in_transit']);
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
-  pending: { label: 'Pending', color: COLORS.gray[500] },
-  available: { label: 'Available', color: COLORS.primary },
-  assigned: { label: 'Assigned', color: COLORS.info },
-  picked_up: { label: 'Picked Up', color: COLORS.primaryDark },
+  pending: { label: 'Offer Pending', color: COLORS.warning },
+  accepted: { label: 'Accepted', color: COLORS.info },
   in_transit: { label: 'In Transit', color: COLORS.warning },
   delivered: { label: 'Delivered', color: COLORS.success },
   cancelled: { label: 'Cancelled', color: COLORS.red[500] },
 };
+
+const OFFER_POLL_MS = 5000;
+const LOCATION_REPORT_MS = 15000;
 
 function normalizeList(payload: unknown): Delivery[] {
   if (Array.isArray(payload)) return payload as Delivery[];
@@ -104,16 +105,32 @@ function haversineKm(a: Coordinates, b: Coordinates): number {
 function getDistanceLabel(delivery: Delivery, userLocation: Coordinates | null): string {
   if (
     userLocation &&
-    delivery.latitude != null &&
-    delivery.longitude != null
+    delivery.pickup_latitude != null &&
+    delivery.pickup_longitude != null
   ) {
     const km = haversineKm(userLocation, {
-      latitude: delivery.latitude,
-      longitude: delivery.longitude,
+      latitude: delivery.pickup_latitude,
+      longitude: delivery.pickup_longitude,
     });
     return `${km.toFixed(1)} km away`;
   }
-  return `${(delivery.id % 12) + 3} km (est.)`;
+  return 'Pickup nearby';
+}
+
+function pickupAddress(delivery: Delivery): string {
+  return delivery.pickup_location ?? delivery.pickup_address ?? 'Pickup point';
+}
+
+function dropoffAddress(delivery: Delivery): string {
+  return delivery.destination ?? delivery.delivery_address ?? 'Destination';
+}
+
+function fare(delivery: Delivery): number {
+  return Number(delivery.offered_price ?? 0);
+}
+
+function formatMoney(value: number): string {
+  return `TZS ${value.toLocaleString('en-TZ')}`;
 }
 
 function sortNewestFirst(list: Delivery[]): Delivery[] {
@@ -149,36 +166,52 @@ export default function DeliveriesScreen() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [acceptingId, setAcceptingId] = useState<number | null>(null);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
+  const [offers, setOffers] = useState<Delivery[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const seenOffersRef = useRef<Set<number>>(new Set());
+  const offersInitializedRef = useRef(false);
 
+  // Share live location so dispatch can pick the driver closest to a new load.
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    const report = async () => {
       try {
-        const permission = await Location.requestForegroundPermissionsAsync();
-        if (!permission.granted || cancelled) return;
+        const permission = await Location.getForegroundPermissionsAsync();
+        const granted = permission.granted || (await Location.requestForegroundPermissionsAsync()).granted;
+        if (!granted || cancelled) return;
         const position = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced,
         });
-        if (!cancelled) {
-          setUserLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        }
+        const coords = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        };
+        if (cancelled) return;
+        setUserLocation(coords);
+        await api.post('/transporter/location', coords);
       } catch {
-        setUserLocation(null);
+        // Location reporting is best effort; dispatch will use the last known point.
       }
-    })();
+    };
+
+    void report();
+    interval = setInterval(() => void report(), LOCATION_REPORT_MS);
+
     return () => {
       cancelled = true;
+      if (interval) clearInterval(interval);
     };
   }, []);
 
   const loadDeliveries = useCallback(async () => {
     setLoadError(null);
-    const [availableRes, mineRes] = await Promise.allSettled([
+    const [availableRes, mineRes, offersRes, unreadRes] = await Promise.allSettled([
       api.get('/transporter/deliveries/available'),
       api.get('/transporter/deliveries'),
+      api.get('/transporter/deliveries/offers'),
+      api.get('/notifications/unread-count'),
     ]);
     if (availableRes.status === 'fulfilled') {
       setAvailable(sortNewestFirst(normalizeList(availableRes.value.data)));
@@ -190,6 +223,41 @@ export default function DeliveriesScreen() {
     } else {
       setMine([]);
     }
+    if (offersRes.status === 'fulfilled') {
+      const incoming = normalizeList(offersRes.value.data);
+      setOffers(incoming);
+      const unseen = incoming.filter((offer) => !seenOffersRef.current.has(offer.id));
+      incoming.forEach((offer) => seenOffersRef.current.add(offer.id));
+      if (unseen.length > 0 && offersInitializedRef.current) {
+        const offer = unseen[0];
+        Alert.alert(
+          'New delivery request',
+          `${pickupAddress(offer)} → ${dropoffAddress(offer)}\nFare ${formatMoney(fare(offer))}`,
+          [
+            {
+              text: 'View Request',
+              onPress: () =>
+                router.push({
+                  pathname: '/delivery-request',
+                  params: { id: String(offer.id) },
+                }),
+            },
+            { text: 'Later', style: 'cancel' },
+          ]
+        );
+      }
+      offersInitializedRef.current = true;
+    } else {
+      setOffers([]);
+    }
+    if (unreadRes.status === 'fulfilled') {
+      const body = unreadRes.value.data as { unread_count?: number; count?: number } | number;
+      const count =
+        typeof body === 'number'
+          ? body
+          : (body?.unread_count ?? body?.count ?? 0);
+      setUnreadCount(count);
+    }
     if (availableRes.status === 'rejected' && mineRes.status === 'rejected') {
       setLoadError(extractErrorMessage(availableRes.reason, 'Could not load deliveries.'));
     }
@@ -197,6 +265,12 @@ export default function DeliveriesScreen() {
 
   useEffect(() => {
     loadDeliveries().finally(() => setInitialLoading(false));
+  }, [loadDeliveries]);
+
+  // Poll for new Uber/Bolt style load requests while the app is open.
+  useEffect(() => {
+    const interval = setInterval(() => void loadDeliveries(), OFFER_POLL_MS);
+    return () => clearInterval(interval);
   }, [loadDeliveries]);
 
   const handleRefresh = useCallback(async () => {
@@ -238,27 +312,27 @@ export default function DeliveriesScreen() {
 
   const renderCard = ({ item }: { item: Delivery }) => {
     const meta = statusMeta(item.status);
-    const eta = formatDateTime(item.estimated_delivery);
+    const posted = formatDateTime(item.created_at ?? item.offered_at);
     return (
       <Card style={styles.card}>
         <TouchableOpacity activeOpacity={0.85} onPress={() => openDetail(item)}>
           <View style={styles.cardTopRow}>
             <Badge label={meta.label} color={meta.color} size="sm" />
-            {item.order ? <PriceTag price={item.order.total} size="sm" /> : null}
+            <PriceTag price={fare(item)} size="sm" />
           </View>
           <Text style={styles.orderNumber}>{orderLabel(item)}</Text>
           {item.order?.business?.name ? (
             <Text style={styles.businessName}>{item.order.business.name}</Text>
           ) : null}
           <View style={styles.addressBlock}>
-            <AddressRow dotColor={COLORS.green[500]} address={item.pickup_address} />
-            <AddressRow dotColor={COLORS.red[500]} address={item.delivery_address} />
+            <AddressRow dotColor={COLORS.green[500]} address={pickupAddress(item)} />
+            <AddressRow dotColor={COLORS.red[500]} address={dropoffAddress(item)} />
           </View>
           <View style={styles.metaRow}>
             <View style={styles.distanceChip}>
               <Text style={styles.distanceText}>{getDistanceLabel(item, userLocation)}</Text>
             </View>
-            {eta ? <Text style={styles.metaText}>ETA {eta}</Text> : null}
+            {posted ? <Text style={styles.metaText}>Posted {posted}</Text> : null}
           </View>
         </TouchableOpacity>
         {tab === 'available' ? (
@@ -310,13 +384,27 @@ export default function DeliveriesScreen() {
         title="Deliveries"
         subtitle={`${mine.filter((d) => ACTIVE_STATUSES.has(d.status)).length} active · ${available.length} available`}
         rightAction={
-          <TouchableOpacity
-            onPress={() => router.push({ pathname: '/map' })}
-            activeOpacity={0.7}
-            style={styles.mapLink}
-          >
-            <Text style={styles.mapLinkText}>Map</Text>
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              onPress={() => router.push({ pathname: '/notifications' })}
+              activeOpacity={0.7}
+              style={styles.notificationLink}
+            >
+              <Text style={styles.mapLinkText}>Alerts</Text>
+              {unreadCount > 0 ? (
+                <View style={styles.unreadBadge}>
+                  <Text style={styles.unreadBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+                </View>
+              ) : null}
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push({ pathname: '/map' })}
+              activeOpacity={0.7}
+              style={styles.mapLink}
+            >
+              <Text style={styles.mapLinkText}>Map</Text>
+            </TouchableOpacity>
+          </View>
         }
       />
       {loadError ? (
@@ -326,6 +414,32 @@ export default function DeliveriesScreen() {
             <Text style={styles.retryText}>Retry</Text>
           </TouchableOpacity>
         </View>
+      ) : null}
+      {offers.length > 0 ? (
+        <TouchableOpacity
+          style={styles.offerBanner}
+          activeOpacity={0.85}
+          onPress={() =>
+            router.push({
+              pathname: '/delivery-request',
+              params: { id: String(offers[0].id) },
+            })
+          }
+        >
+          <View style={styles.offerIconRing}>
+            <Text style={styles.offerIcon}>!</Text>
+          </View>
+          <View style={styles.offerText}>
+            <Text style={styles.offerTitle}>
+              {offers.length === 1 ? 'New load request' : `${offers.length} load requests`}
+            </Text>
+            <Text style={styles.offerSubtitle} numberOfLines={1}>
+              {pickupAddress(offers[0])} → {dropoffAddress(offers[0])}
+            </Text>
+            <Text style={styles.offerFare}>{formatMoney(fare(offers[0]))}</Text>
+          </View>
+          <Text style={styles.offerChevron}>{'>'}</Text>
+        </TouchableOpacity>
       ) : null}
       <FlatList
         data={listData}
@@ -369,11 +483,39 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
   mapLink: {
     backgroundColor: COLORS.primaryLight,
     borderRadius: RADIUS.full,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm - 2,
+  },
+  notificationLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    backgroundColor: COLORS.gray[100],
+    borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm - 2,
+  },
+  unreadBadge: {
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  unreadBadgeText: {
+    color: COLORS.white,
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.bold,
   },
   mapLinkText: {
     color: COLORS.primaryDark,
@@ -499,5 +641,52 @@ const styles = StyleSheet.create({
   },
   acceptButton: {
     marginTop: SPACING.md,
+  },
+  offerBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginHorizontal: SPACING.md,
+    marginTop: SPACING.md,
+    padding: SPACING.md,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.secondary,
+    ...SHADOWS.md,
+  },
+  offerIconRing: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  offerIcon: {
+    color: COLORS.white,
+    fontSize: FONTS.size.xl,
+    fontFamily: FONTS.bold,
+  },
+  offerText: {
+    flex: 1,
+  },
+  offerTitle: {
+    color: COLORS.white,
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.bold,
+  },
+  offerSubtitle: {
+    color: COLORS.gray[300],
+    fontSize: FONTS.size.sm,
+    marginTop: 2,
+  },
+  offerFare: {
+    color: COLORS.primary,
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.semibold,
+    marginTop: 4,
+  },
+  offerChevron: {
+    color: COLORS.white,
+    fontSize: FONTS.size.xl,
   },
 });

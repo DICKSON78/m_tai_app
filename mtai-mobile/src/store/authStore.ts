@@ -16,6 +16,16 @@ interface AuthState {
     password: string;
     password_confirmation: string;
   }) => Promise<void>;
+  registerTransporter: (payload: {
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+    password_confirmation: string;
+    vehicle_type: string;
+    plate_number?: string;
+    region?: string;
+  }) => Promise<void>;
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -42,6 +52,32 @@ export const useAuthStore = create<AuthState>((set) => ({
       phone,
       password,
       password_confirmation,
+    });
+    const { token, user } = res.data;
+    await saveToken(token);
+    await saveUser(user);
+    set({ user, token, isAuthenticated: true });
+  },
+
+  registerTransporter: async ({
+    name,
+    email,
+    phone,
+    password,
+    password_confirmation,
+    vehicle_type,
+    plate_number,
+    region,
+  }) => {
+    const res = await api.post('/register/transporter', {
+      name,
+      email,
+      phone,
+      password,
+      password_confirmation,
+      vehicle_type,
+      plate_number: plate_number || undefined,
+      region: region || undefined,
     });
     const { token, user } = res.data;
     await saveToken(token);

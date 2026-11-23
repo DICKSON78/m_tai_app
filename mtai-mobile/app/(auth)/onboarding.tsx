@@ -111,6 +111,15 @@ export default function OnboardingScreen() {
             style={index === 0 ? styles.ctaSingle : styles.cta}
           />
         </View>
+
+        <TouchableOpacity
+          style={styles.driverLink}
+          activeOpacity={0.8}
+          onPress={() => router.push('/(auth)/register-transporter')}
+        >
+          <MaterialIcons name="local-shipping" size={18} color={COLORS.primaryDark} />
+          <Text style={styles.driverLinkText}>Jiunge kama dereva wa mzigo</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -222,6 +231,17 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
     paddingVertical: 12,
     paddingHorizontal: 8,
+  },
+  driverLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
+  },
+  driverLinkText: {
+    color: COLORS.primaryDark,
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.semibold,
   },
   prevText: {
     fontSize: FONTS.size.md,

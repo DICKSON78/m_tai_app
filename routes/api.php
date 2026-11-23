@@ -714,8 +714,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Transporter
     Route::middleware('role:transporter')->prefix('transporter')->group(function () {
         Route::get('/dashboard', [DashboardApiController::class, 'transporterDashboard']);
+        Route::post('/location', [TransporterController::class, 'updateLocation']);
+        Route::put('/availability', [TransporterController::class, 'setAvailability']);
         Route::get('/deliveries', [TransporterController::class, 'myDeliveries']);
         Route::get('/deliveries/available', [DeliveryController::class, 'available']);
+        Route::get('/deliveries/offers', [DeliveryController::class, 'offers']);
         Route::get('/deliveries/{delivery}', [DeliveryController::class, 'show']);
         Route::post('/deliveries/{delivery}/status', [TransporterController::class, 'updateDeliveryStatus']);
         Route::post('/deliveries/{delivery}/accept', [DeliveryController::class, 'acceptDelivery']);

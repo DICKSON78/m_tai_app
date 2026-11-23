@@ -36,6 +36,8 @@ interface TransporterProfileResponse {
 interface TransporterStatsResponse {
   total_deliveries?: number;
   active_deliveries?: number;
+  completed?: number;
+  in_transit?: number;
   completion_rate?: number;
 }
 
@@ -184,8 +186,9 @@ export default function TransporterProfileScreen() {
   const avatarUri = profile.avatar ?? user?.avatar;
 
   const totalDeliveries = stats.total_deliveries ?? 0;
-  const activeDeliveries = stats.active_deliveries ?? 0;
-  const rawRate = stats.completion_rate ?? 0;
+  const activeDeliveries = stats.active_deliveries ?? stats.in_transit ?? 0;
+  const completedDeliveries = stats.completed ?? 0;
+  const rawRate = stats.completion_rate ?? (totalDeliveries > 0 ? completedDeliveries / totalDeliveries : 0);
   const completionRate = Math.max(0, Math.min(100, rawRate <= 1 ? rawRate * 100 : rawRate));
 
   return (

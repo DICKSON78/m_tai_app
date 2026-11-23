@@ -25,26 +25,24 @@ import LoadingScreen from '../../src/components/LoadingScreen';
 import PriceTag from '../../src/components/PriceTag';
 import { COLORS, FONTS, RADIUS, SHADOWS, SPACING } from '../../src/constants/theme';
 
-const STATUS_FLOW = ['assigned', 'picked_up', 'in_transit', 'delivered'] as const;
+// Backend statuses are accepted -> in_transit -> delivered.
+const STATUS_FLOW = ['accepted', 'in_transit', 'delivered'] as const;
 
 type FlowStatus = (typeof STATUS_FLOW)[number];
 
-const STEP_LABELS = ['Assigned', 'Picked Up', 'In Transit', 'Delivered'];
+const STEP_LABELS = ['Accepted', 'In Transit', 'Delivered'];
 
 const NEXT_ACTION: Record<
   Exclude<FlowStatus, 'delivered'>,
   { next: FlowStatus; label: string }
 > = {
-  assigned: { next: 'picked_up', label: 'Start Pickup' },
-  picked_up: { next: 'in_transit', label: 'In Transit' },
-  in_transit: { next: 'delivered', label: 'Delivered' },
+  accepted: { next: 'in_transit', label: 'Start Trip' },
+  in_transit: { next: 'delivered', label: 'Mark Delivered' },
 };
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
-  pending: { label: 'Pending', color: COLORS.gray[500] },
-  available: { label: 'Available', color: COLORS.primary },
-  assigned: { label: 'Assigned', color: COLORS.info },
-  picked_up: { label: 'Picked Up', color: COLORS.primaryDark },
+  pending: { label: 'Offer Pending', color: COLORS.warning },
+  accepted: { label: 'Accepted', color: COLORS.info },
   in_transit: { label: 'In Transit', color: COLORS.warning },
   delivered: { label: 'Delivered', color: COLORS.success },
   cancelled: { label: 'Cancelled', color: COLORS.red[500] },
@@ -83,6 +81,14 @@ function orderLabel(delivery: Delivery): string {
   const number = delivery.order?.order_number;
   if (number) return number.startsWith('#') ? number : `#${number}`;
   return `#${delivery.id}`;
+}
+
+function pickupAddress(delivery: Delivery): string {
+  return delivery.pickup_location ?? delivery.pickup_address ?? 'Pickup point';
+}
+
+function dropoffAddress(delivery: Delivery): string {
+  return delivery.destination ?? delivery.delivery_address ?? 'Destination';
 }
 
 function formatDateTime(iso?: string | null): string | null {
@@ -243,7 +249,7 @@ export default function DeliveryDetailScreen() {
   }, []);
 
   const callCustomer = useCallback(() => {
-    const phone = delivery?.order?.customer?.phone;
+    const phone = delivery?.customer?.phone ?? delivery?.order?.customer?.phone;
     if (!phone) return;
     Linking.openURL(`tel:${phone}`).catch(() =>
       Alert.alert('Call failed', 'Could not place the call on this device.')
@@ -272,21 +278,23 @@ export default function DeliveryDetailScreen() {
   }
 
   const meta = statusMeta(delivery.status);
-  const eta = formatDateTime(delivery.estimated_delivery);
-  const customer = delivery.order?.customer;
+  const eta = formatDateTime(delivery.accepted_at ?? delivery.estimated_delivery);
+  const customer = delivery.customer ?? delivery.order?.customer;
   const order = delivery.order;
   const flowIndex = (STATUS_FLOW as readonly string[]).indexOf(delivery.status);
   const isCompleted = delivery.status === 'delivered';
   const isCancelled = delivery.status === 'cancelled';
-  const isPendingLike = delivery.status === 'pending' || delivery.status === 'available';
+  const isPendingLike = delivery.status === 'pending';
   const nextAction =
     flowIndex >= 0 && flowIndex < STATUS_FLOW.length - 1
       ? NEXT_ACTION[delivery.status as Exclude<FlowStatus, 'delivered'>]
       : null;
   const destinationCoords =
-    delivery.latitude != null && delivery.longitude != null
-      ? { latitude: delivery.latitude, longitude: delivery.longitude }
-      : null;
+    delivery.pickup_latitude != null && delivery.pickup_longitude != null
+      ? { latitude: delivery.pickup_latitude, longitude: delivery.pickup_longitude }
+      : delivery.latitude != null && delivery.longitude != null
+        ? { latitude: delivery.latitude, longitude: delivery.longitude }
+        : null;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -306,10 +314,13 @@ export default function DeliveryDetailScreen() {
         <Card style={styles.section}>
           <View style={styles.summaryRow}>
             <Badge label={meta.label} color={meta.color} />
-            {order ? <PriceTag price={order.total} /> : null}
+            <PriceTag price={Number(delivery.offered_price ?? order?.total ?? 0)} />
           </View>
           <Text style={styles.orderNumber}>{orderLabel(delivery)}</Text>
-          {eta ? <Text style={styles.etaText}>Estimated completion · {eta}</Text> : null}
+          {delivery.item_description ? (
+            <Text style={styles.etaText}>{delivery.item_description}</Text>
+          ) : null}
+          {eta ? <Text style={styles.etaText}>Accepted · {eta}</Text> : null}
         </Card>
 
         {flowIndex >= 0 ? (
@@ -342,19 +353,19 @@ export default function DeliveryDetailScreen() {
         ) : null}
 
         <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>Location</Text>
+          <Text style={styles.sectionTitle}>Pickup Location</Text>
           {destinationCoords ? (
             <>
               <DeliveryMap
                 coordinate={destinationCoords}
-                address={delivery.delivery_address}
+                address={pickupAddress(delivery)}
                 onNavigate={() =>
                   openDirections(destinationCoords.latitude, destinationCoords.longitude)
                 }
               />
               <View style={styles.mapAddressBlock}>
                 <Text style={styles.mapAddressText} numberOfLines={2}>
-                  {delivery.delivery_address}
+                  {pickupAddress(delivery)}
                 </Text>
                 <Text style={styles.mapAddressCoords}>
                   {destinationCoords.latitude.toFixed(5)}, {destinationCoords.longitude.toFixed(5)}
@@ -367,10 +378,10 @@ export default function DeliveryDetailScreen() {
                 <View style={styles.mapPinInner} />
               </View>
               <Text style={styles.mapPreviewAddress} numberOfLines={2}>
-                {delivery.delivery_address}
+                {pickupAddress(delivery)}
               </Text>
               <Text style={styles.mapPreviewHint}>
-                No location coordinates have been set for this delivery yet.
+                No coordinates were captured for this pickup point.
               </Text>
             </View>
           )}
@@ -378,8 +389,8 @@ export default function DeliveryDetailScreen() {
 
         <Card style={styles.section}>
           <Text style={styles.sectionTitle}>Addresses</Text>
-          <AddressBlock tag="PICKUP" tagColor={COLORS.green[500]} address={delivery.pickup_address} />
-          <AddressBlock tag="DROP-OFF" tagColor={COLORS.red[500]} address={delivery.delivery_address} />
+          <AddressBlock tag="PICKUP" tagColor={COLORS.green[500]} address={pickupAddress(delivery)} />
+          <AddressBlock tag="DROP-OFF" tagColor={COLORS.red[500]} address={dropoffAddress(delivery)} />
         </Card>
 
         {order ? (
@@ -400,10 +411,14 @@ export default function DeliveryDetailScreen() {
           <Card style={styles.section}>
             <Text style={styles.sectionTitle}>Customer</Text>
             <View style={styles.customerRow}>
-              <Avatar uri={customer.avatar} name={customer.name} size={48} />
+              <Avatar
+                uri={customer.avatar}
+                name={customer.name ?? customer.full_name ?? 'Customer'}
+                size={48}
+              />
               <View style={styles.customerInfo}>
                 <Text style={styles.customerName} numberOfLines={1}>
-                  {customer.name}
+                  {customer.name ?? customer.full_name ?? 'Customer'}
                 </Text>
                 {customer.phone ? (
                   <Text style={styles.customerPhone}>{customer.phone}</Text>

@@ -192,6 +192,15 @@ export default function RegisterScreen() {
                 <Text style={styles.loginText}>Sign In</Text>
               </TouchableOpacity>
             </View>
+
+            <TouchableOpacity
+              style={styles.driverRow}
+              activeOpacity={0.8}
+              onPress={() => router.push('/(auth)/register-transporter')}
+            >
+              <MaterialIcons name="local-shipping" size={18} color={COLORS.primaryDark} />
+              <Text style={styles.driverText}>Jiunge kama dereva wa mzigo</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -292,5 +301,17 @@ const styles = StyleSheet.create({
     fontSize: FONTS.size.md,
     fontFamily: FONTS.semibold,
     color: COLORS.primary,
+  },
+  driverRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
+  },
+  driverText: {
+    color: COLORS.primaryDark,
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.semibold,
   },
 });

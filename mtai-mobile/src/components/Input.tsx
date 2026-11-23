@@ -23,6 +23,7 @@ interface Props {
   multiline?: boolean;
   keyboardType?: KeyboardTypeOptions;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  editable?: boolean;
   style?: ViewStyle;
 }
 
@@ -37,6 +38,7 @@ export default function Input({
   multiline,
   keyboardType,
   autoCapitalize,
+  editable = true,
   style,
 }: Props) {
   const [focused, setFocused] = useState(false);
@@ -63,6 +65,7 @@ export default function Input({
           multiline={multiline}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
+          editable={editable}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           style={[styles.input, multiline && styles.inputMultiline]}

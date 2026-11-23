@@ -56,8 +56,12 @@ export function handleNotificationResponse(response: Notifications.NotificationR
     }
     case 'delivery_update': {
       if (data.delivery_id != null) {
+        // New Uber/Bolt style load request opens the Accept/Reject screen.
+        const isOffer = data.status === 'offered' || typeof data.link === 'string' && data.link.includes('delivery-request');
         router.push({
-          pathname: '/(transporter)/delivery-detail',
+          pathname: isOffer
+            ? '/(transporter)/delivery-request'
+            : '/(transporter)/delivery-detail',
           params: { id: String(data.delivery_id) },
         });
       }
