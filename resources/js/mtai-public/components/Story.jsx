@@ -13,7 +13,7 @@ export default function Story() {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="relative">
             <img
-              src="/img/logo-new.png"
+              src="/img/logo-mpya.png"
               alt={t('site.story.imageAlt')}
               className="w-full h-auto object-contain rounded-3xl"
               loading="lazy"

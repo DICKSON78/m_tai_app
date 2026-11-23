@@ -33,7 +33,7 @@ export default function OurStoryPage() {
           <div className="grid lg:grid-cols-[320px_1fr] gap-16 items-start">
             <div className="lg:sticky lg:top-28">
               <img
-                src="/img/logo-new.png"
+                src="/img/logo-mpya.png"
                 alt={t('site.about.storyImageAlt')}
                 className="w-full h-auto object-contain rounded-3xl"
               />
