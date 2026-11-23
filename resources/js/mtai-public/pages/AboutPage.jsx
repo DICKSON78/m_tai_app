@@ -11,7 +11,6 @@ const valueMeta = [
 const statValues = ['500+', '15+', '50M+', '99.9%']
 
 const storyImages = [
-  '/img/logo-new.jpg',
   '/img/inventory-stock.jpg',
   '/img/employee-access.jpg',
   '/img/sales-pos.jpg',
@@ -82,7 +81,7 @@ export default function AboutPage() {
               <img
                 src="/img/logo-mpya.png"
                 alt={t('site.about.storyImageAlt')}
-                className="w-full h-auto object-contain rounded-3xl"
+                className="w-full aspect-[800/561] object-cover object-center rounded-3xl mx-auto"
               />
             </div>
             <div>

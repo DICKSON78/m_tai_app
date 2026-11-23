@@ -35,7 +35,7 @@ export default function OurStoryPage() {
               <img
                 src="/img/logo-mpya.png"
                 alt={t('site.about.storyImageAlt')}
-                className="w-full h-auto object-contain rounded-3xl"
+                className="w-full aspect-[800/561] object-cover object-center rounded-3xl mx-auto"
               />
               <p className="text-[#00D4AA] text-xs font-bold uppercase tracking-widest mt-6">
                 Big Brain Company Limited

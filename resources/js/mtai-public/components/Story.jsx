@@ -15,7 +15,7 @@ export default function Story() {
             <img
               src="/img/logo-mpya.png"
               alt={t('site.story.imageAlt')}
-              className="w-full h-auto object-contain rounded-3xl"
+              className="w-full aspect-[800/561] object-cover object-center rounded-3xl mx-auto"
               loading="lazy"
             />
             <div className="absolute -bottom-6 -right-6 bg-[#0A140C] p-6 rounded-2xl shadow-2xl hidden sm:block">
